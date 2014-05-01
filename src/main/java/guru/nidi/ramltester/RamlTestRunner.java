@@ -36,6 +36,7 @@ class RamlTestRunner {
             Action action = testRequest(request);
             testResponse(action, response);
         } catch (RamlViolationException e) {
+            //ignore, results are in violations
         }
     }
 
@@ -51,29 +52,30 @@ class RamlTestRunner {
     private void testParameters(Action action, MockHttpServletRequest request) {
         Set<String> found = new HashSet<>();
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-            violations.addViolation(!action.getQueryParameters().containsKey(entry.getKey()),
-                    "Query parameter " + entry.getKey() + " not defined on action " + action);
-            violations.addViolation(!action.getQueryParameters().get(entry.getKey()).isRepeat() && entry.getValue().length > 1,
-                    "Query parameter " + entry.getKey() + " on action " + action + " is not repeat but found repeatedly in response");
+            final QueryParameter queryParameter = action.getQueryParameters().get(entry.getKey());
+            violations.addViolation(queryParameter == null,
+                    "Query parameter '" + entry.getKey() + "' not defined on action " + action);
+            violations.addViolation(queryParameter != null && !queryParameter.isRepeat() && entry.getValue().length > 1,
+                    "Query parameter '" + entry.getKey() + "' on action " + action + " is not repeat but found repeatedly in response");
             found.add(entry.getKey());
         }
         for (Map.Entry<String, QueryParameter> entry : action.getQueryParameters().entrySet()) {
             violations.addViolation(entry.getValue().isRequired() && !found.contains(entry.getKey()),
-                    "Query parameter " + entry.getKey() + " on action " + action + " is required but not found in response");
+                    "Query parameter '" + entry.getKey() + "' on action " + action + " is required but not found in response");
         }
     }
 
     public void testResponse(Action action, MockHttpServletResponse response) {
         Response res = action.getResponses().get("" + response.getStatus());
         violations.addViolationAndThrow(res == null, "Response code " + response.getStatus() + " not defined on action " + action);
-        violations.addViolationAndThrow(response.getContentType() == null, "Response has no content type header");
+        violations.addViolationAndThrow(response.getContentType() == null, "Response has no Content-Type header");
         MimeType mimeType = findMatchingMimeType(res, response.getContentType());
-        violations.addViolationAndThrow(mimeType == null, "Mime type " + response.getContentType() + " not defined on response " + res);
+        violations.addViolationAndThrow(mimeType == null, "Mime type '" + response.getContentType() + "' not defined on response " + res);
         String schema = mimeType.getSchema();
         if (schema != null) {
             if (!schema.trim().startsWith("{")) {
                 schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
-                violations.addViolationAndThrow(schema == null, "Schema " + mimeType.getSchema() + " referenced but not defined");
+                violations.addViolationAndThrow(schema == null, "Schema '" + mimeType.getSchema() + "' referenced but not defined");
             }
             try {
                 testResponseContent(response.getContentAsString(), schema);
