@@ -96,7 +96,7 @@ public class RamlTesterTest extends TestBase {
     }
 
     @Test
-    public void noMimeType() throws Exception {
+    public void noMediaType() throws Exception {
         final RamlViolations violations = new RamlTester().test(
                 raml("simple.raml"),
                 get("/data"),
@@ -107,18 +107,18 @@ public class RamlTesterTest extends TestBase {
     }
 
     @Test
-    public void undefinedMimeType() throws Exception {
+    public void undefinedMediaType() throws Exception {
         final RamlViolations violations = new RamlTester().test(
                 raml("simple.raml"),
                 get("/data"),
                 jsonResponse(200, "\"hula\"", "text/plain"));
 
         assertEquals(1, violations.getViolations().size());
-        assertThat(violations.getViolations().get(0), startsWith("Mime type 'text/plain' not defined"));
+        assertThat(violations.getViolations().get(0), startsWith("Media type 'text/plain' not defined"));
     }
 
     @Test
-    public void compatibleMimeType() throws Exception {
+    public void compatibleMediaType() throws Exception {
         final RamlViolations violations = new RamlTester().test(
                 raml("simple.raml"),
                 get("/data"),
@@ -169,6 +169,16 @@ public class RamlTesterTest extends TestBase {
 
         assertEquals(1, violations.getViolations().size());
         assertThat(violations.getViolations().get(0), contains("Schema 'undefined' referenced but not defined"));
+    }
+
+    @Test
+    public void defaultMediaType() throws Exception {
+        final RamlViolations violations = new RamlTester().test(
+                raml("simple.raml"),
+                get("/mediaType"),
+                jsonResponse(200, "\"hula\"","application/default"));
+
+        assertTrue(violations.getViolations().isEmpty());
     }
 
 }

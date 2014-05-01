@@ -3,6 +3,7 @@
 title: simple
 baseUri: http://guru.nidi/raml/simple/{version}
 version: v1
+mediaType: application/default
 schemas:
   - string: !include string.json
 
@@ -47,3 +48,10 @@ schemas:
         body:
           application/json:
             schema: undefined
+/mediaType:
+  get:
+    responses:
+      200:
+        body:
+          schema: string
+
