@@ -10,6 +10,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +22,7 @@ import java.util.regex.PatternSyntaxException;
  */
 class RamlTestRunner {
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
-    private static final Pattern NUMBER = Pattern.compile("0|\\.inf|-\\.inf|\\.nan|-?[1-9](\\.[0-9]*[1-9])?(e[-+][1-9][0-9]*)?");
+    private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?[1-9](\\.[0-9]*[1-9])?(e[-+][1-9][0-9]*)?");
     private static final Pattern DATE = Pattern.compile("[A-Z][a-z]{2}, \\d{2} [A-Z][a-z]{2} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT");
 
     private final Raml raml;
@@ -61,13 +62,16 @@ class RamlTestRunner {
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             final QueryParameter queryParameter = action.getQueryParameters().get(entry.getKey());
             final String description = "Query parameter '" + entry.getKey() + "' ";
-            violations.addViolation(queryParameter == null, description + "not defined on action " + action);
-            violations.addViolation(queryParameter != null && !queryParameter.isRepeat() && entry.getValue().length > 1,
-                    description + "on action " + action + " is not repeat but found repeatedly in response");
-            for (String value : entry.getValue()) {
-                testParameter(queryParameter, value, description);
+            if (queryParameter == null) {
+                violations.addViolation(description + "not defined on action " + action);
+            } else {
+                violations.addViolation(!queryParameter.isRepeat() && entry.getValue().length > 1,
+                        description + "on action " + action + " is not repeat but found repeatedly in response");
+                for (String value : entry.getValue()) {
+                    testParameter(queryParameter, value, description);
+                }
+                found.add(entry.getKey());
             }
-            found.add(entry.getKey());
         }
         for (Map.Entry<String, QueryParameter> entry : action.getQueryParameters().entrySet()) {
             final String description = "Query parameter '" + entry.getKey() + "' ";
@@ -80,18 +84,21 @@ class RamlTestRunner {
         Response res = action.getResponses().get("" + response.getStatus());
         violations.addViolationAndThrow(res == null, "Response code " + response.getStatus() + " not defined on action " + action);
         violations.addViolationAndThrow(response.getContentType() == null, "Response has no Content-Type header");
-        MimeType mimeType = findMatchingMimeType(res, response.getContentType());
-        violations.addViolationAndThrow(mimeType == null, "Media type '" + response.getContentType() + "' not defined on response " + res);
-        String schema = mimeType.getSchema();
-        if (schema != null) {
-            if (!schema.trim().startsWith("{")) {
-                schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
-                violations.addViolationAndThrow(schema == null, "Schema '" + mimeType.getSchema() + "' referenced but not defined");
-            }
-            try {
-                testResponseContent(response.getContentAsString(), schema);
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
+        final Map<String, MimeType> bodies = res.getBody();
+        if (bodies != null) {
+            MimeType mimeType = findMatchingMimeType(bodies, response.getContentType());
+            violations.addViolationAndThrow(mimeType == null, "Media type '" + response.getContentType() + "' not defined on response " + res);
+            String schema = mimeType.getSchema();
+            if (schema != null) {
+                if (!schema.trim().startsWith("{")) {
+                    schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
+                    violations.addViolationAndThrow(schema == null, "Schema '" + mimeType.getSchema() + "' referenced but not defined");
+                }
+                try {
+                    testResponseContent(response.getContentAsString(), schema);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -108,9 +115,9 @@ class RamlTestRunner {
         }
     }
 
-    private MimeType findMatchingMimeType(Response res, String toFind) {
+    private MimeType findMatchingMimeType(Map<String, MimeType> bodies, String toFind) {
         org.springframework.util.MimeType targetType = org.springframework.util.MimeType.valueOf(toFind);
-        for (Map.Entry<String, MimeType> entry : res.getBody().entrySet()) {
+        for (Map.Entry<String, MimeType> entry : bodies.entrySet()) {
             if (org.springframework.util.MimeType.valueOf(entry.getKey()).isCompatibleWith(targetType)) {
                 return entry.getValue();
             }
@@ -131,33 +138,46 @@ class RamlTestRunner {
                 //TODO
                 break;
             case INTEGER:
-                violations.addViolation(!INTEGER.matcher(value).matches(), d + "is not a valid integer");
+                if (INTEGER.matcher(value).matches()) {
+                    testNumericLimits(param, new BigDecimal(value), d);
+                } else {
+                    violations.addViolation(d + "is not a valid integer");
+                }
                 break;
             case NUMBER:
-                violations.addViolation(!NUMBER.matcher(value).matches(), d + "is not a valid number");
+                if (NUMBER.matcher(value).matches()) {
+                    if ((value.equals("inf") || value.equals("-inf") || value.equals("nan"))) {
+                        violations.addViolation(param.getMinimum() != null || param.getMaximum() != null, d + "is not inside any minimum/maximum");
+                    } else {
+                        testNumericLimits(param, new BigDecimal(value), d);
+                    }
+                } else {
+                    violations.addViolation(d + "is not a valid number");
+                }
                 break;
             case STRING:
-                if (param.getEnumeration() != null) {
-                    violations.addViolation(!param.getEnumeration().contains(value), d + "is not a member of enum '" + param.getEnumeration() + "'");
+                violations.addViolation(param.getEnumeration() != null && !param.getEnumeration().contains(value),
+                        d + "is not a member of enum '" + param.getEnumeration() + "'");
+                try {
+                    violations.addViolation(param.getPattern() != null && !javaRegexOf(param.getPattern()).matcher(value).matches(),
+                            d + "does not match pattern '" + param.getPattern() + "'");
+                } catch (PatternSyntaxException e) {
+                    //TODO log
                 }
-                if (param.getPattern() != null) {
-                    try {
-                        violations.addViolation(!javaRegexOf(param.getPattern()).matcher(value).matches(),
-                                d + "does not match pattern '" + param.getPattern() + "'");
-                    } catch (PatternSyntaxException e) {
-                        //TODO log
-                    }
-                }
+                violations.addViolation(param.getMinLength() != null && value.length() < param.getMinLength(),
+                        "is shorter than minimum length " + param.getMinLength());
+                violations.addViolation(param.getMaxLength() != null && value.length() > param.getMaxLength(),
+                        "is longer than maximum length " + param.getMaximum());
                 break;
         }
     }
 
-//                param.getMaximum();
-//                param.getMinimum();
-//                param.getMaxLength();
-//                param.getMinLength();
-//        param.getPattern();
-
+    private void testNumericLimits(AbstractParam param, BigDecimal value, String description) {
+        violations.addViolation(param.getMinimum() != null && param.getMinimum().compareTo(value) > 0,
+                description + "is less than minimum " + param.getMinimum());
+        violations.addViolation(param.getMaximum() != null && param.getMaximum().compareTo(value) < 0,
+                description + "is bigger than maximum " + param.getMaximum());
+    }
 //        param.isRepeat();
 //        param.isRequired()
 

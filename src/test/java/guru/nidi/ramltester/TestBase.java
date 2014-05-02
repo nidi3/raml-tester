@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
+import static org.junit.Assert.*;
+
 /**
  *
  */
@@ -58,5 +60,16 @@ public class TestBase {
 
     protected MockHttpServletResponse jsonResponse(int code, String json) throws UnsupportedEncodingException {
         return jsonResponse(code, json, "application/json");
+    }
+
+    protected void assertNoViolation(Raml raml, MockHttpServletRequest request, MockHttpServletResponse response) {
+        final RamlViolations violations = new RamlTester().test(raml, request, response);
+        assertTrue("Expected no violations, but found: " + violations, violations.getViolations().isEmpty());
+    }
+
+    protected void assertOneViolationThat(Raml raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
+        final RamlViolations violations = new RamlTester().test(raml, request, response);
+        assertEquals(1, violations.getViolations().size());
+        assertThat(violations.getViolations().get(0), matcher);
     }
 }
