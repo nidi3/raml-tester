@@ -1,17 +1,14 @@
 package guru.nidi.ramltester;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.StringDescription;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.QueryParameter;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -22,16 +19,16 @@ import java.util.regex.PatternSyntaxException;
  */
 class RamlTestRunner {
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
-    private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?[1-9](\\.[0-9]*[1-9])?(e[-+][1-9][0-9]*)?");
-    private static final Pattern DATE = Pattern.compile("[A-Z][a-z]{2}, \\d{2} [A-Z][a-z]{2} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT");
+    private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");
+    private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
 
     private final Raml raml;
-    private final MatcherProvider<String> schemaValidatorProvider;
+    private final SchemaValidator schemaValidator;
     private final RamlViolations violations;
 
-    public RamlTestRunner(Raml raml, MatcherProvider<String> schemaValidatorProvider) {
+    public RamlTestRunner(Raml raml, SchemaValidator schemaValidator) {
         this.raml = raml;
-        this.schemaValidatorProvider = schemaValidatorProvider;
+        this.schemaValidator = schemaValidator;
         violations = new RamlViolations();
     }
 
@@ -39,7 +36,7 @@ class RamlTestRunner {
         return violations;
     }
 
-    public void test(MockHttpServletRequest request, MockHttpServletResponse response) {
+    public void test(HttpRequest request, HttpResponse response) {
         try {
             Action action = testRequest(request);
             testResponse(action, response);
@@ -48,7 +45,7 @@ class RamlTestRunner {
         }
     }
 
-    public Action testRequest(MockHttpServletRequest request) {
+    public Action testRequest(HttpRequest request) {
         Resource resource = raml.getResource(request.getRequestURI());
         violations.addViolationAndThrow(resource == null, "Resource " + request.getRequestURI() + " not defined in raml" + raml);
         Action action = resource.getAction(request.getMethod());
@@ -57,7 +54,7 @@ class RamlTestRunner {
         return action;
     }
 
-    private void testParameters(Action action, MockHttpServletRequest request) {
+    private void testParameters(Action action, HttpRequest request) {
         Set<String> found = new HashSet<>();
         for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
             final QueryParameter queryParameter = action.getQueryParameters().get(entry.getKey());
@@ -80,7 +77,7 @@ class RamlTestRunner {
         }
     }
 
-    public void testResponse(Action action, MockHttpServletResponse response) {
+    public void testResponse(Action action, HttpResponse response) {
         Response res = action.getResponses().get("" + response.getStatus());
         violations.addViolationAndThrow(res == null, "Response code " + response.getStatus() + " not defined on action " + action);
         violations.addViolationAndThrow(response.getContentType() == null, "Response has no Content-Type header");
@@ -94,24 +91,8 @@ class RamlTestRunner {
                     schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
                     violations.addViolationAndThrow(schema == null, "Schema '" + mimeType.getSchema() + "' referenced but not defined");
                 }
-                try {
-                    testResponseContent(response.getContentAsString(), schema);
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
+                schemaValidator.validate(violations, response.getContentAsString(), schema);
             }
-        }
-    }
-
-    private void testResponseContent(String content, String schema) {
-        final Matcher<String> matcher = schemaValidatorProvider.getMatcher(schema);
-        if (!matcher.matches(content)) {
-            Description description = new StringDescription();
-            description.appendText("Response content ");
-            description.appendValue(content);
-            description.appendText(" does not match schema: ");
-            description.appendDescriptionOf(matcher);
-            violations.addViolation(description.toString());
         }
     }
 
@@ -132,7 +113,13 @@ class RamlTestRunner {
                 violations.addViolation(!value.equals("true") && !value.equals("false"), d + "is not a valid boolean");
                 break;
             case DATE:
-                violations.addViolation(!DATE.matcher(value).matches(), d + "is not a valid date");
+                try {
+                    final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
+                    dateFormat.setLenient(false);
+                    dateFormat.parse(value);
+                } catch (ParseException e) {
+                    violations.addViolation(d + "is not a valid date");
+                }
                 break;
             case FILE:
                 //TODO
@@ -165,9 +152,9 @@ class RamlTestRunner {
                     //TODO log
                 }
                 violations.addViolation(param.getMinLength() != null && value.length() < param.getMinLength(),
-                        "is shorter than minimum length " + param.getMinLength());
+                        d + "is shorter than minimum length " + param.getMinLength());
                 violations.addViolation(param.getMaxLength() != null && value.length() > param.getMaxLength(),
-                        "is longer than maximum length " + param.getMaximum());
+                        d + "is longer than maximum length " + param.getMaximum());
                 break;
         }
     }
@@ -178,24 +165,31 @@ class RamlTestRunner {
         violations.addViolation(param.getMaximum() != null && param.getMaximum().compareTo(value) < 0,
                 description + "is bigger than maximum " + param.getMaximum());
     }
-//        param.isRepeat();
-//        param.isRequired()
 
     private Pattern javaRegexOf(String regex) {
-        if (regex.startsWith("\"") && regex.endsWith("\"")) {
+        if (isDoubleQuoted(regex) || isSingleQuoted(regex)) {
             regex = regex.substring(1, regex.length() - 1);
         }
-        int pos = regex.lastIndexOf("/");
-        String flagString = pos == regex.length() - 1 ? "" : regex.substring(pos + 1);
-        regex = regex.substring(1, pos);
-        regex = regex.replace("\\/", "/").replace("\\", "\\\\");
         int flags = 0;
-        if (flagString.contains("i")) {
-            flags |= Pattern.CASE_INSENSITIVE;
-        }
-        if (flagString.contains("m")) {
-            flags |= Pattern.MULTILINE;
+        if (regex.startsWith("/")) {
+            int pos = regex.lastIndexOf("/");
+            if (pos >= regex.length() - 3) {
+                String flagString = pos == regex.length() - 1 ? "" : regex.substring(pos + 1);
+                regex = regex.substring(1, pos);
+                regex = regex.replace("\\/", "/");
+                if (flagString.contains("i")) {
+                    flags |= Pattern.CASE_INSENSITIVE;
+                }
+            }
         }
         return Pattern.compile(regex, flags);
+    }
+
+    private boolean isDoubleQuoted(String regex) {
+        return regex.startsWith("\"") && regex.endsWith("\"");
+    }
+
+    private boolean isSingleQuoted(String regex) {
+        return regex.startsWith("'") && regex.endsWith("'");
     }
 }

@@ -54,25 +54,3 @@ schemas:
       200:
         body:
           schema: string
-/type:
-  get:
-    queryParameters:
-      boolean:
-        type: 'boolean'
-      integer:
-        type: 'integer'
-      number:
-        type: 'number'
-      string: 
-        type: 'string'
-      date:
-        type: 'date'
-      enum:
-        enum: ['a','b']
-      format:
-        #format1: /\d{2}\/[a-y]/
-        #format2: "/\\d{2}\\/[a-y]/"
-        #format3: /\d{2}\/[a-y]/m
-        #format4: "/\d{2}\/[a-y]/i"
-    responses:
-      200:

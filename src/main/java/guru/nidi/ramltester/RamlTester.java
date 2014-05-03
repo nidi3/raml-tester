@@ -1,31 +1,25 @@
 package guru.nidi.ramltester;
 
 import org.raml.model.Raml;
-import org.raml.parser.visitor.RamlDocumentBuilder;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  *
  */
 public class RamlTester {
-    private final MatcherProvider<String> schemaValidatorProvider;
-
-    public RamlTester(MatcherProvider<String> schemaValidatorProvider) {
-        this.schemaValidatorProvider = schemaValidatorProvider;
-    }
+    private final SchemaValidator schemaValidator;
 
     public RamlTester() {
-        this(new RestassuredMatcherProvider());
+        this(new RestassuredSchemaValidator());
     }
 
-    public RamlViolations test(String raml, MockHttpServletRequest request, MockHttpServletResponse response) {
-        return test(new RamlDocumentBuilder().build(raml), request, response);
+    public RamlTester(SchemaValidator schemaValidator) {
+        this.schemaValidator = schemaValidator;
     }
 
-    public RamlViolations test(Raml raml, MockHttpServletRequest request, MockHttpServletResponse response) {
-        final RamlTestRunner runner = new RamlTestRunner(raml, schemaValidatorProvider);
+    public RamlViolations test(Raml raml, HttpRequest request, HttpResponse response) {
+        final RamlTestRunner runner = new RamlTestRunner(raml, schemaValidator);
         runner.test(request, response);
         return runner.getViolations();
     }
+
 }

@@ -1,16 +1,19 @@
 package guru.nidi.ramltester;
 
 import org.junit.Test;
+import org.raml.model.Raml;
 
 /**
  *
  */
 public class RamlTesterTest extends TestBase {
 
+    private Raml simple = RamlLoaders.fromClasspath(getClass(), "simple.raml");
+
     @Test
     public void simpleOk() throws Exception {
         assertNoViolation(
-                raml("simple.raml"),
+                simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\""));
     }
@@ -18,7 +21,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void undefinedResource() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/data2"),
                 jsonResponse(200, "\"hula\""),
                 startsWith("Resource /data2 not defined"));
@@ -27,7 +30,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void undefinedAction() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 post("/data"),
                 jsonResponse(200, "\"hula\""),
                 startsWith("Action POST not defined"));
@@ -36,7 +39,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void undefinedQueryParameter() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/data?a=b"),
                 jsonResponse(200, "\"hula\""),
                 startsWith("Query parameter 'a' not defined"));
@@ -45,7 +48,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void illegalyRepeatQueryParameter() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/query?req=1&req=2"),
                 jsonResponse(200, "\"hula\""),
                 allOf(startsWith("Query parameter 'req'"), endsWith("is not repeat but found repeatedly in response")));
@@ -54,7 +57,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void allowedRepeatQueryParameter() throws Exception {
         assertNoViolation(
-                raml("simple.raml"),
+                simple,
                 get("/query?rep=1&rep=2&req=3"),
                 jsonResponse(200, "\"hula\""));
     }
@@ -62,7 +65,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void missingRequiredQueryParameter() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/query?"),
                 jsonResponse(200, "\"hula\""),
                 allOf(startsWith("Query parameter 'req'"), endsWith("is required but not found in response")));
@@ -71,7 +74,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void undefinedResponseCode() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/data"),
                 jsonResponse(201, "\"hula\""),
                 startsWith("Response code 201 not defined"));
@@ -80,7 +83,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void noMediaType() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", null),
                 startsWith("Response has no Content-Type header"));
@@ -89,7 +92,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void undefinedMediaType() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", "text/plain"),
                 startsWith("Media type 'text/plain' not defined"));
@@ -98,7 +101,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void compatibleMediaType() throws Exception {
         assertNoViolation(
-                raml("simple.raml"),
+                simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", "application/json;charset=utf-8"));
     }
@@ -106,7 +109,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void notMatchingSchemaInline() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/schema"),
                 jsonResponse(200, "5"),
                 contains("does not match schema"));
@@ -115,7 +118,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void notMatchingSchemaInclude() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/schema"),
                 jsonResponse(201, "5"),
                 contains("does not match schema"));
@@ -124,7 +127,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void notMatchingSchemaReferenced() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/schema"),
                 jsonResponse(202, "5"),
                 contains("does not match schema"));
@@ -133,7 +136,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void undefinedSchema() throws Exception {
         assertOneViolationThat(
-                raml("simple.raml"),
+                simple,
                 get("/schema"),
                 jsonResponse(203, "5"),
                 contains("Schema 'undefined' referenced but not defined"));
@@ -142,7 +145,7 @@ public class RamlTesterTest extends TestBase {
     @Test
     public void defaultMediaType() throws Exception {
         assertNoViolation(
-                raml("simple.raml"),
+                simple,
                 get("/mediaType"),
                 jsonResponse(200, "\"hula\"", "application/default"));
     }

@@ -1,12 +1,10 @@
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.spring.SpringMockHttpRequest;
+import guru.nidi.ramltester.spring.SpringMockHttpResponse;
 import org.hamcrest.Matcher;
-import org.hamcrest.core.AllOf;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.core.StringEndsWith;
-import org.hamcrest.core.StringStartsWith;
+import org.hamcrest.core.*;
 import org.raml.model.Raml;
-import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -15,16 +13,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
  */
 public class TestBase {
-    protected Raml raml(String res) {
-        return new RamlDocumentBuilder().build(getClass().getResourceAsStream(res), getClass().getName().replace('.', '/'));
-    }
-
     protected MockHttpServletRequest get(String url) {
         return MockMvcRequestBuilders.get(url).buildRequest(new MockServletContext());
     }
@@ -63,13 +58,13 @@ public class TestBase {
     }
 
     protected void assertNoViolation(Raml raml, MockHttpServletRequest request, MockHttpServletResponse response) {
-        final RamlViolations violations = new RamlTester().test(raml, request, response);
+        final RamlViolations violations = new RamlTester(new RestassuredSchemaValidator()).test(raml, new SpringMockHttpRequest(request), new SpringMockHttpResponse(response));
         assertTrue("Expected no violations, but found: " + violations, violations.getViolations().isEmpty());
     }
 
     protected void assertOneViolationThat(Raml raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlViolations violations = new RamlTester().test(raml, request, response);
-        assertEquals(1, violations.getViolations().size());
+        final RamlViolations violations = new RamlTester(new RestassuredSchemaValidator()).test(raml, new SpringMockHttpRequest(request), new SpringMockHttpResponse(response));
+        assertThat("Expected one violation, but none found", 1, new IsEqual<>(violations.getViolations().size()));
         assertThat(violations.getViolations().get(0), matcher);
     }
 }

@@ -13,11 +13,11 @@ public class RamlViolations {
         this.violations = new ArrayList<>();
     }
 
-    void addViolation(String violation) {
+    public void addViolation(String violation) {
         violations.add(violation);
     }
 
-    void addViolation(boolean condition, String violation) {
+    public void addViolation(boolean condition, String violation) {
         if (condition) {
             violations.add(violation);
         }
