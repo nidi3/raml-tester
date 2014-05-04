@@ -3,6 +3,8 @@ package guru.nidi.ramltester;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.QueryParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -18,6 +20,8 @@ import java.util.regex.PatternSyntaxException;
  *
  */
 class RamlTestRunner {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
     private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
@@ -47,7 +51,7 @@ class RamlTestRunner {
 
     public Action testRequest(HttpRequest request) {
         Resource resource = raml.getResource(request.getRequestURI());
-        violations.addViolationAndThrow(resource == null, "Resource " + request.getRequestURI() + " not defined in raml" + raml);
+        violations.addViolationAndThrow(resource == null, "Resource " + request.getRequestURI() + " not defined in raml " + raml.getTitle());
         Action action = resource.getAction(request.getMethod());
         violations.addViolationAndThrow(action == null, "Action " + request.getMethod() + " not defined on resource " + resource);
         testParameters(action, request);
@@ -97,9 +101,9 @@ class RamlTestRunner {
     }
 
     private MimeType findMatchingMimeType(Map<String, MimeType> bodies, String toFind) {
-        org.springframework.util.MimeType targetType = org.springframework.util.MimeType.valueOf(toFind);
+        MediaType targetType = MediaType.valueOf(toFind);
         for (Map.Entry<String, MimeType> entry : bodies.entrySet()) {
-            if (org.springframework.util.MimeType.valueOf(entry.getKey()).isCompatibleWith(targetType)) {
+            if (MediaType.valueOf(entry.getKey()).isCompatibleWith(targetType)) {
                 return entry.getValue();
             }
         }
@@ -149,7 +153,7 @@ class RamlTestRunner {
                     violations.addViolation(param.getPattern() != null && !javaRegexOf(param.getPattern()).matcher(value).matches(),
                             d + "does not match pattern '" + param.getPattern() + "'");
                 } catch (PatternSyntaxException e) {
-                    //TODO log
+                    log.warn("Could not execute regex '" + param.getPattern(), e);
                 }
                 violations.addViolation(param.getMinLength() != null && value.length() < param.getMinLength(),
                         d + "is shorter than minimum length " + param.getMinLength());

@@ -11,17 +11,14 @@ import java.io.*;
  *
  */
 public class ServletHttpResponse extends HttpServletResponseWrapper implements HttpResponse {
-    private final HttpServletResponse delegate;
-
-    private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
     private String characterEncoding = "iso-8859-1";
+    private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
     private PrintWriter writer;
     private ServletOutputStream outputStream;
 
     public ServletHttpResponse(HttpServletResponse delegate) {
         super(delegate);
-        this.delegate = delegate;
     }
 
     @Override
@@ -46,16 +43,6 @@ public class ServletHttpResponse extends HttpServletResponseWrapper implements H
             outputStream = new DelegatingServletOutputStream(super.getOutputStream(), content);
         }
         return outputStream;
-    }
-
-    @Override
-    public int getStatus() {
-        return delegate.getStatus();
-    }
-
-    @Override
-    public String getContentType() {
-        return delegate.getContentType();
     }
 
     @Override
