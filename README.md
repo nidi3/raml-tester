@@ -46,8 +46,9 @@ public class RamlFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        final RamlViolations violations = RamlTesters.executeFilterChain(api, request, response, chain);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                         throws IOException, ServletException {
+        RamlViolations violations = RamlTesters.executeFilterChain(api, request, response, chain);
         System.out.log("Violations: " + violations);
     }
 
