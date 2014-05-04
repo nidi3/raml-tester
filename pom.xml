@@ -113,6 +113,25 @@
         </dependency>
     </dependencies>
 
+    <scm>
+        <connection>scm:git:https://github.com/nidi3/raml-tester</connection>
+        <developerConnection>scm:git:https://github.com/nidi3/raml-tester</developerConnection>
+        <url>https://github.com/nidi3/raml-tester</url>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>internal.repo</id>
+            <name>Internal Repository</name>
+            <url>${internal.repo.path}/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>internal.repo</id>
+            <name>Internal Repository</name>
+            <url>${internal.repo.path}/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>mulesoft-releases</id>
