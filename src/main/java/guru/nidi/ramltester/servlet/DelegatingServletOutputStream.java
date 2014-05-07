@@ -7,7 +7,7 @@ import java.io.OutputStream;
 /**
  *
  */
-public class DelegatingServletOutputStream extends ServletOutputStream {
+class DelegatingServletOutputStream extends ServletOutputStream {
     private final OutputStream delegate1;
     private final OutputStream delegate2;
 

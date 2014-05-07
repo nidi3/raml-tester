@@ -6,7 +6,7 @@ import java.util.Map;
  *
  */
 public interface HttpRequest {
-    String getRequestURI();
+    String getRequestUrl();
 
     String getMethod();
 

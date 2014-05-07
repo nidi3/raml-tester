@@ -6,7 +6,7 @@ import java.util.*;
 /**
  *
  */
-public class MediaType {
+class MediaType {
     private static final String WILDCARD_TYPE = "*";
 
     private String type;

@@ -15,18 +15,20 @@ public class SimpleTest {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
-    private Raml api;
+    private RamlDefinition api;
+    private RequestResponseMatchers requestResponse;
 
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        api = RamlLoaders.fromClasspath(getClass(), "api.yaml");
+        api = RamlDefinition.fromClasspath(getClass(), "api.yaml");
+        requestResponse = requestResponse().withServletUri("http://nidi.guru/raml/simple/v1");
     }
 
     @Test
     public void greeting() throws Exception {
         this.mockMvc.perform(get("/greeting").accept(MediaType.parseMediaType("application/json")))
-                .andExpect(RamlMatchers.matchesRaml(api));
+                .andExpect(requestResponse.matchesRaml(api));
     }
 
 }
@@ -38,11 +40,11 @@ Use in a pure servlet environment
 ---------------------------------
 ```
 public class RamlFilter implements Filter {
-    private Raml api;
+    private RamlDefinition api;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        api = RamlLoaders.fromClasspath(getClass(), "api.yaml");
+        api = RamlDefinition.fromClasspath(getClass(), "api.yaml");
     }
 
     @Override
@@ -53,9 +55,7 @@ public class RamlFilter implements Filter {
     }
 
     @Override
-    public void destroy() {
-
-    }
+    public void destroy() {}
 }
 
 ```

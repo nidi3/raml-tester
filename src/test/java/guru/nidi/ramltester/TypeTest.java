@@ -1,13 +1,12 @@
 package guru.nidi.ramltester;
 
 import org.junit.Test;
-import org.raml.model.Raml;
 
 /**
  *
  */
-public class RamlTypeTest extends TestBase {
-    private Raml type = RamlLoaders.fromClasspath(getClass(), "type.raml");
+public class TypeTest extends TestBase {
+    private RamlDefinition type = RamlDefinition.fromClasspath(getClass(), "type.raml");
 
     @Test
     public void booleanOk() throws Exception {
@@ -26,7 +25,7 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?boolean=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'boolean' : Value '" + value + "' is not a valid boolean"));
+                    endsWith("query parameter 'boolean': Value '" + value + "' is not a valid boolean"));
         }
     }
 
@@ -53,14 +52,14 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?integer=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'integer' : Value '" + value + "' is not a valid integer"));
+                    endsWith("query parameter 'integer': Value '" + value + "' is not a valid integer"));
         }
         for (String value : new String[]{"-6", "667"}) {
             assertOneViolationThat(
                     type,
                     get("/type?integerLimit=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'integerLimit' : Value '" + value + "' is "));
+                    contains("query parameter 'integerLimit': Value '" + value + "' is "));
         }
     }
 
@@ -87,14 +86,14 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'number' : Value '" + value + "' is not a valid number"));
+                    endsWith("query parameter 'number': Value '" + value + "' is not a valid number"));
         }
         for (String value : new String[]{"4.9e-2", "0.0049999", "666.60001", "inf", "-inf", "nan"}) {
             assertOneViolationThat(
                     type,
                     get("/type?numberLimit=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'numberLimit' : Value '" + value + "' is "));
+                    contains("query parameter 'numberLimit': Value '" + value + "' is "));
         }
     }
 
@@ -115,7 +114,7 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?date=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'date' : Value '" + value + "' is not a valid date"));
+                    endsWith("query parameter 'date': Value '" + value + "' is not a valid date"));
         }
     }
 
@@ -136,7 +135,7 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?string=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'string' : Value '" + value + "' is "));
+                    contains("query parameter 'string': Value '" + value + "' is "));
         }
     }
 
@@ -157,7 +156,7 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?enum=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'enum' : Value '" + value + "' is not a member of enum '[a, b]'"));
+                    endsWith("query parameter 'enum': Value '" + value + "' is not a member of enum '[a, b]'"));
         }
     }
 
@@ -195,7 +194,7 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?pattern1=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'pattern1' : Value '" + value + "' does not match pattern '\\d{2}/[a-y]'"));
+                    endsWith("query parameter 'pattern1': Value '" + value + "' does not match pattern '\\d{2}/[a-y]'"));
         }
     }
 
@@ -212,7 +211,7 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?pattern2=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter 'pattern2' : Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/'"));
+                    endsWith("query parameter 'pattern2': Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/'"));
         }
     }
 
@@ -235,7 +234,7 @@ public class RamlTypeTest extends TestBase {
                     type,
                     get("/type?" + param + "=" + value),
                     jsonResponse(200, "\"hula\""),
-                    startsWith("Query parameter '" + param + "' : Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/i'"));
+                    endsWith("query parameter '" + param + "': Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/i'"));
         }
     }
 

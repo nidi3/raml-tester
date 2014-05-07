@@ -12,4 +12,13 @@ public class ServletHttpRequest extends HttpServletRequestWrapper implements Htt
     public ServletHttpRequest(HttpServletRequest delegate) {
         super(delegate);
     }
+
+    private HttpServletRequest request() {
+        return (HttpServletRequest) getRequest();
+    }
+
+    @Override
+    public String getRequestUrl() {
+        return request().getRequestURL().toString();
+    }
 }

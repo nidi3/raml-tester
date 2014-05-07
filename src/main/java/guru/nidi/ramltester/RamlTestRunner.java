@@ -1,38 +1,20 @@
 package guru.nidi.ramltester;
 
 import org.raml.model.*;
-import org.raml.model.parameter.AbstractParam;
-import org.raml.model.parameter.QueryParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
  *
  */
 class RamlTestRunner {
-    private final Logger log = LoggerFactory.getLogger(getClass());
-
-    private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
-    private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");
-    private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
-
     private final Raml raml;
     private final SchemaValidator schemaValidator;
     private final RamlViolations violations;
 
-    public RamlTestRunner(Raml raml, SchemaValidator schemaValidator) {
-        this.raml = raml;
-        this.schemaValidator = schemaValidator;
+    public RamlTestRunner(RamlDefinition ramlDefinition) {
+        this.raml = ramlDefinition.getRaml();
+        this.schemaValidator = ramlDefinition.getSchemaValidator();
         violations = new RamlViolations();
     }
 
@@ -50,35 +32,48 @@ class RamlTestRunner {
     }
 
     public Action testRequest(HttpRequest request) {
-        Resource resource = raml.getResource(request.getRequestURI());
-        violations.addViolationAndThrow(resource == null, "Resource " + request.getRequestURI() + " not defined in raml " + raml.getTitle());
+        final String resourcePath = findResourcePath(request.getRequestUrl());
+        Resource resource = raml.getResource(resourcePath);
+        violations.addViolationAndThrow(resource == null, "Resource '" + resourcePath + "' not defined in raml " + raml.getTitle());
         Action action = resource.getAction(request.getMethod());
         violations.addViolationAndThrow(action == null, "Action " + request.getMethod() + " not defined on resource " + resource);
-        testParameters(action, request);
+        new ParameterTester(violations, false)
+                .testParameters(action.getQueryParameters(), request.getParameterMap(), "On action " + action + ", query parameter");
         return action;
     }
 
-    private void testParameters(Action action, HttpRequest request) {
-        Set<String> found = new HashSet<>();
-        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-            final QueryParameter queryParameter = action.getQueryParameters().get(entry.getKey());
-            final String description = "Query parameter '" + entry.getKey() + "' ";
-            if (queryParameter == null) {
-                violations.addViolation(description + "not defined on action " + action);
-            } else {
-                violations.addViolation(!queryParameter.isRepeat() && entry.getValue().length > 1,
-                        description + "on action " + action + " is not repeat but found repeatedly in response");
-                for (String value : entry.getValue()) {
-                    testParameter(queryParameter, value, description);
-                }
-                found.add(entry.getKey());
-            }
+    private String findResourcePath(String requestUrl) {
+        final UriComponents requestUri = UriComponents.fromHttpUrl(requestUrl);
+        final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
+        if (raml.getProtocols() != null && !raml.getProtocols().isEmpty()) {
+            violations.addViolation(!raml.getProtocols().contains(protocolOf(requestUri.getScheme())),
+                    "Protocol " + requestUri.getScheme() + " not defined in raml");
+        } else {
+            violations.addViolation(!ramlUri.getScheme().equalsIgnoreCase(requestUri.getScheme()),
+                    "Protocol " + requestUri.getScheme() + " not defined in raml");
         }
-        for (Map.Entry<String, QueryParameter> entry : action.getQueryParameters().entrySet()) {
-            final String description = "Query parameter '" + entry.getKey() + "' ";
-            violations.addViolation(entry.getValue().isRequired() && !found.contains(entry.getKey()),
-                    description + "on action " + action + " is required but not found in response");
+        final VariableMatcher hostMatch = VariableMatcher.match(ramlUri.getHost(), requestUri.getHost());
+        if (!hostMatch.isCompleteMatch()) {
+            violations.addViolationAndThrow("Request URL " + requestUrl + " does not match base URI " + raml.getBaseUri());
         }
+        final ParameterTester parameterTester = new ParameterTester(violations, true);
+        parameterTester.testParameters(raml.getBaseUriParameters(), hostMatch.getVariables(), "BaseUri Parameter");
+        final VariableMatcher pathMatch = VariableMatcher.match(ramlUri.getPath(), requestUri.getPath());
+        if (!pathMatch.isMatch()) {
+            violations.addViolationAndThrow("Request URL " + requestUrl + " does not match base URI " + raml.getBaseUri());
+        }
+        parameterTester.testParameters(raml.getBaseUriParameters(), pathMatch.getVariables(), "BaseUri Parameter");
+        return pathMatch.getSuffix();
+    }
+
+    private Protocol protocolOf(String s) {
+        if (s.equalsIgnoreCase("http")) {
+            return Protocol.HTTP;
+        }
+        if (s.equalsIgnoreCase("https")) {
+            return Protocol.HTTPS;
+        }
+        return null;
     }
 
     public void testResponse(Action action, HttpResponse response) {
@@ -101,99 +96,17 @@ class RamlTestRunner {
     }
 
     private MimeType findMatchingMimeType(Map<String, MimeType> bodies, String toFind) {
-        MediaType targetType = MediaType.valueOf(toFind);
-        for (Map.Entry<String, MimeType> entry : bodies.entrySet()) {
-            if (MediaType.valueOf(entry.getKey()).isCompatibleWith(targetType)) {
-                return entry.getValue();
+        try {
+            MediaType targetType = MediaType.valueOf(toFind);
+            for (Map.Entry<String, MimeType> entry : bodies.entrySet()) {
+                if (targetType.isCompatibleWith(MediaType.valueOf(entry.getKey()))) {
+                    return entry.getValue();
+                }
             }
+        } catch (InvalidMimeTypeException e) {
+            violations.addViolation("Illegal Media type '" + e.getMimeType() + "'");
         }
         return null;
     }
 
-    private void testParameter(AbstractParam param, String value, String description) {
-        String d = description + ": Value '" + value + "' ";
-        switch (param.getType()) {
-            case BOOLEAN:
-                violations.addViolation(!value.equals("true") && !value.equals("false"), d + "is not a valid boolean");
-                break;
-            case DATE:
-                try {
-                    final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
-                    dateFormat.setLenient(false);
-                    dateFormat.parse(value);
-                } catch (ParseException e) {
-                    violations.addViolation(d + "is not a valid date");
-                }
-                break;
-            case FILE:
-                //TODO
-                break;
-            case INTEGER:
-                if (INTEGER.matcher(value).matches()) {
-                    testNumericLimits(param, new BigDecimal(value), d);
-                } else {
-                    violations.addViolation(d + "is not a valid integer");
-                }
-                break;
-            case NUMBER:
-                if (NUMBER.matcher(value).matches()) {
-                    if ((value.equals("inf") || value.equals("-inf") || value.equals("nan"))) {
-                        violations.addViolation(param.getMinimum() != null || param.getMaximum() != null, d + "is not inside any minimum/maximum");
-                    } else {
-                        testNumericLimits(param, new BigDecimal(value), d);
-                    }
-                } else {
-                    violations.addViolation(d + "is not a valid number");
-                }
-                break;
-            case STRING:
-                violations.addViolation(param.getEnumeration() != null && !param.getEnumeration().contains(value),
-                        d + "is not a member of enum '" + param.getEnumeration() + "'");
-                try {
-                    violations.addViolation(param.getPattern() != null && !javaRegexOf(param.getPattern()).matcher(value).matches(),
-                            d + "does not match pattern '" + param.getPattern() + "'");
-                } catch (PatternSyntaxException e) {
-                    log.warn("Could not execute regex '" + param.getPattern(), e);
-                }
-                violations.addViolation(param.getMinLength() != null && value.length() < param.getMinLength(),
-                        d + "is shorter than minimum length " + param.getMinLength());
-                violations.addViolation(param.getMaxLength() != null && value.length() > param.getMaxLength(),
-                        d + "is longer than maximum length " + param.getMaximum());
-                break;
-        }
-    }
-
-    private void testNumericLimits(AbstractParam param, BigDecimal value, String description) {
-        violations.addViolation(param.getMinimum() != null && param.getMinimum().compareTo(value) > 0,
-                description + "is less than minimum " + param.getMinimum());
-        violations.addViolation(param.getMaximum() != null && param.getMaximum().compareTo(value) < 0,
-                description + "is bigger than maximum " + param.getMaximum());
-    }
-
-    private Pattern javaRegexOf(String regex) {
-        if (isDoubleQuoted(regex) || isSingleQuoted(regex)) {
-            regex = regex.substring(1, regex.length() - 1);
-        }
-        int flags = 0;
-        if (regex.startsWith("/")) {
-            int pos = regex.lastIndexOf("/");
-            if (pos >= regex.length() - 3) {
-                String flagString = pos == regex.length() - 1 ? "" : regex.substring(pos + 1);
-                regex = regex.substring(1, pos);
-                regex = regex.replace("\\/", "/");
-                if (flagString.contains("i")) {
-                    flags |= Pattern.CASE_INSENSITIVE;
-                }
-            }
-        }
-        return Pattern.compile(regex, flags);
-    }
-
-    private boolean isDoubleQuoted(String regex) {
-        return regex.startsWith("\"") && regex.endsWith("\"");
-    }
-
-    private boolean isSingleQuoted(String regex) {
-        return regex.startsWith("'") && regex.endsWith("'");
-    }
 }

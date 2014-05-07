@@ -6,7 +6,7 @@ import java.io.Writer;
 /**
  *
  */
-public class DelegatingWriter extends Writer {
+class DelegatingWriter extends Writer {
     private final Writer delegate1;
     private final Writer delegate2;
 

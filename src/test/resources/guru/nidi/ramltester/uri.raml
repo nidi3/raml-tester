@@ -1,0 +1,18 @@
+#%RAML 0.8
+---
+title: uri
+baseUri: http://nidi.guru/raml/{version}/{undefined}
+version: v1
+
+/type:
+  get:
+    responses:
+      200:
+  /sub:
+    get:
+      responses:
+        200:
+  /{undefined}:
+    get:
+      responses:
+        200:

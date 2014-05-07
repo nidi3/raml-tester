@@ -17,6 +17,11 @@ public class RamlViolations {
         violations.add(violation);
     }
 
+    public void addViolationAndThrow(String violation) {
+        violations.add(violation);
+        throw new RamlViolationException();
+    }
+
     public void addViolation(boolean condition, String violation) {
         if (condition) {
             violations.add(violation);

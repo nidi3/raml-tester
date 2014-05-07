@@ -1,14 +1,13 @@
 package guru.nidi.ramltester;
 
 import org.junit.Test;
-import org.raml.model.Raml;
 
 /**
  *
  */
-public class RamlTesterTest extends TestBase {
+public class SimpleTest extends TestBase {
 
-    private Raml simple = RamlLoaders.fromClasspath(getClass(), "simple.raml");
+    private RamlDefinition simple = RamlDefinition.fromClasspath(getClass(), "simple.raml");
 
     @Test
     public void simpleOk() throws Exception {
@@ -24,7 +23,7 @@ public class RamlTesterTest extends TestBase {
                 simple,
                 get("/data2"),
                 jsonResponse(200, "\"hula\""),
-                startsWith("Resource /data2 not defined"));
+                startsWith("Resource '/data2' not defined"));
     }
 
     @Test
@@ -42,16 +41,16 @@ public class RamlTesterTest extends TestBase {
                 simple,
                 get("/data?a=b"),
                 jsonResponse(200, "\"hula\""),
-                startsWith("Query parameter 'a' not defined"));
+                endsWith("query parameter 'a' is not defined"));
     }
 
     @Test
-    public void illegalyRepeatQueryParameter() throws Exception {
+    public void illegallyRepeatQueryParameter() throws Exception {
         assertOneViolationThat(
                 simple,
                 get("/query?req=1&req=2"),
                 jsonResponse(200, "\"hula\""),
-                allOf(startsWith("Query parameter 'req'"), endsWith("is not repeat but found repeatedly in response")));
+                endsWith("query parameter 'req' is not repeat but found repeatedly in response"));
     }
 
     @Test
@@ -68,7 +67,7 @@ public class RamlTesterTest extends TestBase {
                 simple,
                 get("/query?"),
                 jsonResponse(200, "\"hula\""),
-                allOf(startsWith("Query parameter 'req'"), endsWith("is required but not found in response")));
+                endsWith("query parameter 'req' is required but not found in response"));
     }
 
     @Test

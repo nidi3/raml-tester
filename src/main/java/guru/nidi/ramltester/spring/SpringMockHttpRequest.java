@@ -1,6 +1,7 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.HttpRequest;
+import guru.nidi.ramltester.UriComponents;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.Map;
@@ -11,13 +12,28 @@ import java.util.Map;
 public class SpringMockHttpRequest implements HttpRequest {
     private final MockHttpServletRequest delegate;
 
-    public SpringMockHttpRequest(MockHttpServletRequest delegate) {
+    public SpringMockHttpRequest(String servletUri, MockHttpServletRequest delegate) {
+        if (servletUri != null) {
+            final UriComponents uri = UriComponents.fromHttpUrl(servletUri);
+            final String scheme = uri.getScheme();
+            if (scheme == null || (!scheme.equals("http") && !scheme.equals("https"))) {
+                throw new IllegalArgumentException("Servlet URI must start with http(s)://");
+            }
+            delegate.setScheme(scheme);
+            delegate.setServerName(uri.getHost());
+            if (uri.getPort() != null) {
+                delegate.setServerPort(uri.getPort());
+            }
+            delegate.setContextPath(uri.getPath());
+        }
         this.delegate = delegate;
     }
 
     @Override
-    public String getRequestURI() {
-        return delegate.getRequestURI();
+    public String getRequestUrl() {
+        final StringBuffer requestURL = delegate.getRequestURL();
+        final int pathStart = requestURL.length() - delegate.getRequestURI().length();
+        return requestURL.substring(0, pathStart) + delegate.getContextPath() + requestURL.substring(pathStart);
     }
 
     @Override
