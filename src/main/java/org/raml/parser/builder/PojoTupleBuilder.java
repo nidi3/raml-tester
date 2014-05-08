@@ -93,12 +93,14 @@ public class PojoTupleBuilder extends DefaultTupleBuilder<ScalarNode, Node>
                     }
 
                 }
+    CodeSource src = pojoClass.getProtectionDomain().getCodeSource();
+    final URL url = pojoClass.getResource('/' + pojoClass.getName().replace('.', '/') + ".class");
+    final String message = declaredConstructor + " args: " + arguments + " (size " + arguments.size() + ")\n" + src + "," + url;
+    System.out.println(message);
 try {
     newValue = declaredConstructor.newInstance(arguments.toArray(new Object[arguments.size()]));
 }catch(IllegalArgumentException e){
-    CodeSource src = pojoClass.getProtectionDomain().getCodeSource();
-    final URL url = pojoClass.getResource('/' + pojoClass.getName().replace('.', '/') + ".class");
-    throw new RuntimeException(declaredConstructor+" args: "+arguments+" (size "+arguments.size()+")\n"+src+","+url,e);
+    throw new RuntimeException(message,e);
 }
             }
             else
