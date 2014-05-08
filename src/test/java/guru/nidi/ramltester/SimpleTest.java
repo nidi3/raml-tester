@@ -7,7 +7,7 @@ import org.junit.Test;
  */
 public class SimpleTest extends TestBase {
 
-    private RamlDefinition simple = RamlDefinition.fromClasspath(getClass(), "simple.raml");
+    private RamlDefinition simple = RamlLoaders.loadFromClasspath(getClass(), "simple.raml");
 
     @Test
     public void simpleOk() throws Exception {
