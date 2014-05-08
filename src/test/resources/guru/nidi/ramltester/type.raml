@@ -45,3 +45,14 @@ version: v1
 #        - enum: ['a','b']
     responses:
       200:
+        body:
+          '*/*':
+/empty:
+  post:
+    responses:
+      200:
+        body:
+          application/json:
+      201:
+        body:
+      202:

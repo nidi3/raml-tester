@@ -57,6 +57,10 @@ public class TestBase {
         return jsonResponse(code, json, "application/json");
     }
 
+    protected MockHttpServletResponse jsonResponse(int code) throws UnsupportedEncodingException {
+        return jsonResponse(code, "", "application/json");
+    }
+
     protected void assertNoViolation(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
         final RamlViolations violations = raml.testAgainst(
                 new SpringMockHttpRequest("http://nidi.guru/raml/v1", request),

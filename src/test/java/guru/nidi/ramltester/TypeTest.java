@@ -238,5 +238,33 @@ public class TypeTest extends TestBase {
         }
     }
 
+    @Test
+    public void emptyResponseMediaTypeNotAllowed() throws Exception {
+        assertOneViolationThat(
+                type,
+                post("/empty"),
+                jsonResponse(200, "", null),
+                startsWith("Response has no Content-Type header"));
+    }
 
+    @Test
+    public void emptyResponseMediaTypeAllowed() throws Exception {
+        assertNoViolation(
+                type,
+                post("/empty"),
+                jsonResponse(201, "", null));
+        assertNoViolation(
+                type,
+                post("/empty"),
+                jsonResponse(202, "", "a/b"));
+    }
+
+    @Test
+    public void responseBodyNotAllowed() throws Exception {
+        assertOneViolationThat(
+                type,
+                post("/empty"),
+                jsonResponse(201, "\"hula\""),
+                startsWith("Response body given but none defined on action"));
+    }
 }

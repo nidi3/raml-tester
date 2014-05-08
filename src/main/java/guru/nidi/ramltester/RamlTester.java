@@ -149,9 +149,12 @@ class RamlTester {
     public void testResponse(Action action, HttpResponse response) {
         Response res = action.getResponses().get("" + response.getStatus());
         violations.addViolationAndThrow(res == null, "Response code " + response.getStatus() + " not defined on action " + action);
-        violations.addViolationAndThrow(response.getContentType() == null, "Response has no Content-Type header");
         final Map<String, MimeType> bodies = res.getBody();
-        if (bodies != null) {
+        if (bodies == null || bodies.isEmpty()) {
+            violations.addViolation(response.getContentAsString() != null && response.getContentAsString().length() > 0,
+                    "Response body given but none defined on action " + action);
+        } else {
+            violations.addViolationAndThrow(response.getContentType() == null, "Response has no Content-Type header");
             MimeType mimeType = findMatchingMimeType(bodies, response.getContentType());
             violations.addViolationAndThrow(mimeType == null, "Media type '" + response.getContentType() + "' not defined on response " + res);
             String schema = mimeType.getSchema();
