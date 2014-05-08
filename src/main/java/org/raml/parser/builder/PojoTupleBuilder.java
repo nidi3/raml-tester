@@ -18,6 +18,8 @@ package org.raml.parser.builder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +96,9 @@ public class PojoTupleBuilder extends DefaultTupleBuilder<ScalarNode, Node>
 try {
     newValue = declaredConstructor.newInstance(arguments.toArray(new Object[arguments.size()]));
 }catch(IllegalArgumentException e){
-    throw new RuntimeException(declaredConstructor+" args: "+arguments+" (size "+arguments.size()+")",e);
+    CodeSource src = pojoClass.getProtectionDomain().getCodeSource();
+    final URL url = pojoClass.getResource('/' + pojoClass.getName().replace('.', '/') + ".class");
+    throw new RuntimeException(declaredConstructor+" args: "+arguments+" (size "+arguments.size()+")\n"+src+","+url,e);
 }
             }
             else
