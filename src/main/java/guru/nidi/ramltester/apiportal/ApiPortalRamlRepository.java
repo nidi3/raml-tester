@@ -52,6 +52,11 @@ class ApiPortalRamlRepository implements RamlRepository {
                     public String next() {
                         return fileIterator.next().getName();
                     }
+
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
                 };
             }
         };

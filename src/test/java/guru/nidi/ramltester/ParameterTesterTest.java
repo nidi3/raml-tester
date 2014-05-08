@@ -139,7 +139,7 @@ public class ParameterTesterTest extends TestBase {
         doPatternLimitedStringType("/\\d{2}\\/[a-y]/");
     }
 
-    private void doPatternLimitedStringType(String pattern) throws Exception {
+    private void doPatternLimitedStringType(String pattern) {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         p.setPattern(pattern);
@@ -195,25 +195,25 @@ public class ParameterTesterTest extends TestBase {
 
     private void assertNoViolation(AbstractParam param, String value) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations,false).testParameter(param, value, "desc");
+        new ParameterTester(violations, false).testParameter(param, value, "desc");
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(AbstractParam param, String value, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations,false).testParameter(param, value, "desc");
+        new ParameterTester(violations, false).testParameter(param, value, "desc");
         assertOneViolationThat(violations, matcher);
     }
 
     private void assertNoViolation(Map<String, ? extends AbstractParam> params, Map<String, String[]> values) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations,false).testParameters(params, values, "desc");
+        new ParameterTester(violations, false).testParameters(params, values, "desc");
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations,false).testParameters(params, values, "desc");
+        new ParameterTester(violations, false).testParameters(params, values, "desc");
         assertOneViolationThat(violations, matcher);
     }
 }
