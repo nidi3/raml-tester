@@ -1,28 +1,29 @@
 package guru.nidi.ramltester;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  *
  */
-public class RamlViolations {
+public class RamlViolations implements Iterable<String> {
     private final List<String> violations;
 
     RamlViolations() {
         this.violations = new ArrayList<>();
     }
 
-    public void addViolation(String violation) {
+    void addViolation(String violation) {
         violations.add(violation);
     }
 
-    public void addViolationAndThrow(String violation) {
+    void addViolationAndThrow(String violation) {
         violations.add(violation);
         throw new RamlViolationException();
     }
 
-    public void addViolation(boolean condition, String violation) {
+    void addViolation(boolean condition, String violation) {
         if (condition) {
             violations.add(violation);
         }
@@ -35,8 +36,17 @@ public class RamlViolations {
         }
     }
 
-    public List<String> getViolations() {
-        return violations;
+    public int size() {
+        return violations.size();
+    }
+
+    public boolean isEmpty() {
+        return violations.isEmpty();
+    }
+
+    @Override
+    public Iterator<String> iterator() {
+        return violations.iterator();
     }
 
     @Override

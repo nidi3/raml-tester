@@ -19,7 +19,7 @@ import static guru.nidi.ramltester.spring.RamlResultMatchers.requestResponse;
  */
 @Controller
 public class UriTest extends TestBase {
-    private RamlDefinition uri = RamlLoaders.loadFromClasspath(getClass(), "uri.raml");
+    private RamlDefinition uri = TestRaml.load("uri.raml").fromClasspath(getClass());
     private MockMvc mockMvc;
 
     @Before

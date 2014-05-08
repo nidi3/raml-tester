@@ -1,18 +1,25 @@
 package guru.nidi.ramltester;
 
-import org.junit.Assert;
+import guru.nidi.ramltester.apiportal.ApiPortalLoader;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  *
  */
 public class RamlLoaderTest {
     @Test
-    public void fromApiPortal() throws IOException {
-        final RamlRepository repository = RamlLoaders.loadFromApiPortal(System.getenv("API_PORTAL_USER"), System.getenv("API_PORTAL_PASS"));
-        final RamlDefinition definition = repository.getRaml("test.raml");
-        Assert.assertNotNull(definition);
+    public void fromApiPortalOk() throws IOException {
+        final RamlDefinition ramlDefinition = TestRaml.load("test.raml").fromApiPortal(System.getenv("API_PORTAL_USER"), System.getenv("API_PORTAL_PASS"));
+        assertNotNull(ramlDefinition);
+    }
+
+    @Test(expected = IOException.class)
+    public void fromApiPortalUnknownUser() throws IOException {
+        final ApiPortalLoader loader = new ApiPortalLoader("wwwwww", "blalbulbi");
+        TestRaml.load("test.raml").fromApiPortal(loader);
     }
 }

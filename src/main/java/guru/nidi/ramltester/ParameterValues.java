@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  *
  */
-public class ParameterValues {
+class ParameterValues {
     private final Map<String, String[]> values = new HashMap<>();
 
     public Map<String, String[]> getValues() {

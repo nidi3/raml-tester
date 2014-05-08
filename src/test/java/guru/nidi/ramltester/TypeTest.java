@@ -6,7 +6,7 @@ import org.junit.Test;
  *
  */
 public class TypeTest extends TestBase {
-    private RamlDefinition type = RamlLoaders.loadFromClasspath(getClass(), "type.raml");
+    private RamlDefinition type = TestRaml.load("type.raml").fromClasspath(getClass());
 
     @Test
     public void booleanOk() throws Exception {

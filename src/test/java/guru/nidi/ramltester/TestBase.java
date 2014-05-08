@@ -58,24 +58,26 @@ public class TestBase {
     }
 
     protected void assertNoViolation(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
-        final RamlViolations violations = new RamlTester()
-                .test(raml, new SpringMockHttpRequest("http://nidi.guru/raml/v1", request), new SpringMockHttpResponse(response));
+        final RamlViolations violations = raml.testAgainst(
+                new SpringMockHttpRequest("http://nidi.guru/raml/v1", request),
+                new SpringMockHttpResponse(response));
         assertNoViolations(violations);
     }
 
     protected void assertNoViolations(RamlViolations violations) {
-        assertTrue("Expected no violations, but found: " + violations, violations.getViolations().isEmpty());
+        assertTrue("Expected no violations, but found: " + violations, violations.isEmpty());
     }
 
     protected void assertOneViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlViolations violations = new RamlTester()
-                .test(raml, new SpringMockHttpRequest("http://nidi.guru/raml/v1", request), new SpringMockHttpResponse(response));
+        final RamlViolations violations = raml.testAgainst(
+                new SpringMockHttpRequest("http://nidi.guru/raml/v1", request),
+                new SpringMockHttpResponse(response));
         assertOneViolationThat(violations, matcher);
     }
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
-        assertThat("Expected exactly one violation", 1, new IsEqual<>(violations.getViolations().size()));
-        assertThat(violations.getViolations().get(0), matcher);
+        assertThat("Expected exactly one violation", 1, new IsEqual<>(violations.size()));
+        assertThat(violations.iterator().next(), matcher);
     }
 
     protected void assertStringArrayMapEquals(Object[] expected, Map<String, String[]> actual) {

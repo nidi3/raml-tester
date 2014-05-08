@@ -17,8 +17,22 @@ public class ServletHttpResponse extends HttpServletResponseWrapper implements H
     private PrintWriter writer;
     private ServletOutputStream outputStream;
 
+    private int status = HttpServletResponse.SC_OK;
+
     public ServletHttpResponse(HttpServletResponse delegate) {
         super(delegate);
+    }
+
+    @Override
+    public void setStatus(int sc) {
+        status = sc;
+        super.setStatus(sc);
+    }
+
+    @Override
+    public void setStatus(int sc, String sm) {
+        status = sc;
+        super.setStatus(sc, sm);
     }
 
     @Override
@@ -53,5 +67,10 @@ public class ServletHttpResponse extends HttpServletResponseWrapper implements H
         } catch (IOException e) {
             throw new RuntimeException("Problem getting content", e);
         }
+    }
+
+    @Override
+    public int getStatus() {
+        return status;
     }
 }
