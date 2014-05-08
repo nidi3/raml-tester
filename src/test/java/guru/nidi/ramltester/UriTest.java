@@ -64,11 +64,11 @@ public class UriTest extends TestBase {
         assertNoViolation(
                 uri,
                 get("/undefined/type/sub"),
-                jsonResponse(201, "\"hula\""));
+                jsonResponse(201));
         assertNoViolation(
                 uri,
                 get("/undefined/type/1"),
-                jsonResponse(202, "\"hula\""));
+                jsonResponse(202));
     }
 
     @Test
@@ -76,11 +76,11 @@ public class UriTest extends TestBase {
         assertOneViolationThat(
                 uri,
                 get("/undefined/type/other"),
-                jsonResponse(202, "\"hula\""),
+                jsonResponse(202),
                 allOf(startsWith("URI parameter 'undefined'"), endsWith("Value 'other' is not a valid integer")));
         assertNoViolation(
                 uri,
                 get("/undefined/type/other/sub"),
-                jsonResponse(203, "\"hula\""));
+                jsonResponse(203));
     }
 }
