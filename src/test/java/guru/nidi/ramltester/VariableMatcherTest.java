@@ -44,7 +44,7 @@ public class VariableMatcherTest extends TestBase {
         assertEquals(matches, vm.isMatch());
         assertEquals(completeMatch, vm.isCompleteMatch());
         assertEquals(suffix, vm.getSuffix());
-        assertStringArrayMapEquals(variables, vm.getVariables());
+        assertStringArrayMapEquals(variables, vm.getVariables().getValues());
     }
 
 

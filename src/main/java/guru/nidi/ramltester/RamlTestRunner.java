@@ -1,7 +1,12 @@
 package guru.nidi.ramltester;
 
 import org.raml.model.*;
+import org.raml.model.parameter.AbstractParam;
+import org.raml.model.parameter.UriParameter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +38,7 @@ class RamlTestRunner {
 
     public Action testRequest(HttpRequest request) {
         final String resourcePath = findResourcePath(request.getRequestUrl());
-        Resource resource = raml.getResource(resourcePath);
+        Resource resource = findResource(resourcePath);
         violations.addViolationAndThrow(resource == null, "Resource '" + resourcePath + "' not defined in raml " + raml.getTitle());
         Action action = resource.getAction(request.getMethod());
         violations.addViolationAndThrow(action == null, "Action " + request.getMethod() + " not defined on resource " + resource);
@@ -57,12 +62,12 @@ class RamlTestRunner {
             violations.addViolationAndThrow("Request URL " + requestUrl + " does not match base URI " + raml.getBaseUri());
         }
         final ParameterTester parameterTester = new ParameterTester(violations, true);
-        parameterTester.testParameters(raml.getBaseUriParameters(), hostMatch.getVariables(), "BaseUri Parameter");
+        parameterTester.testParameters(raml.getBaseUriParameters(), hostMatch.getVariables().getValues(), "BaseUri Parameter");
         final VariableMatcher pathMatch = VariableMatcher.match(ramlUri.getPath(), requestUri.getPath());
         if (!pathMatch.isMatch()) {
             violations.addViolationAndThrow("Request URL " + requestUrl + " does not match base URI " + raml.getBaseUri());
         }
-        parameterTester.testParameters(raml.getBaseUriParameters(), pathMatch.getVariables(), "BaseUri Parameter");
+        parameterTester.testParameters(raml.getBaseUriParameters(), pathMatch.getVariables().getValues(), "BaseUri Parameter");
         return pathMatch.getSuffix();
     }
 
@@ -74,6 +79,71 @@ class RamlTestRunner {
             return Protocol.HTTPS;
         }
         return null;
+    }
+
+    private Resource findResource(String resourcePath) {
+        final ParameterValues parameterValues = new ParameterValues();
+        final Resource resource = findResource(resourcePath, raml.getResources(), parameterValues);
+        if (resource == null) {
+            return null;
+        }
+        final ParameterTester parameterTester = new ParameterTester(violations, true);
+        for (Map.Entry<String, String[]> entry : parameterValues.getValues().entrySet()) {
+            final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
+            if (uriParam != null) {
+                parameterTester.testParameter(uriParam, entry.getValue()[0], "URI parameter '" + entry.getKey() + "' on resource " + resource);
+            }
+        }
+        return resource;
+    }
+
+    private AbstractParam findUriParam(String uriParam, Resource resource) {
+        final UriParameter param = resource.getUriParameters().get(uriParam);
+        if (param != null) {
+            return param;
+        }
+        if (resource.getParentResource() != null) {
+            return findUriParam(uriParam, resource.getParentResource());
+        }
+        return null;
+    }
+
+    private Resource findResource(String resourcePath, Map<String, Resource> resources, ParameterValues parameterValues) {
+        List<ResourceMatch> matches = new ArrayList<>();
+        for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+            final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
+            if (pathMatch.isMatch()) {
+                matches.add(new ResourceMatch(pathMatch, entry.getValue()));
+            }
+        }
+        Collections.sort(matches);
+        for (ResourceMatch match : matches) {
+            if (match.match.isCompleteMatch()) {
+                parameterValues.addValues(match.match.getVariables());
+                return match.resource;
+            }
+            if (match.match.isMatch()) {
+                parameterValues.addValues(match.match.getVariables());
+                return findResource(match.match.getSuffix(), match.resource.getResources(), parameterValues);
+            }
+
+        }
+        return null;
+    }
+
+    private static class ResourceMatch implements Comparable<ResourceMatch> {
+        private final VariableMatcher match;
+        private final Resource resource;
+
+        private ResourceMatch(VariableMatcher match, Resource resource) {
+            this.match = match;
+            this.resource = resource;
+        }
+
+        @Override
+        public int compareTo(ResourceMatch o) {
+            return match.getVariables().size() - o.match.getVariables().size();
+        }
     }
 
     public void testResponse(Action action, HttpResponse response) {

@@ -11,8 +11,18 @@ version: v1
   /sub:
     get:
       responses:
-        200:
+        201:
   /{undefined}:
+    uriParameters:
+      undefined:
+        type: integer
     get:
       responses:
-        200:
+        202:
+    /sub:
+      uriParameters:
+        undefined:
+          type: string
+      get:
+        responses:
+          203:

@@ -58,4 +58,29 @@ public class UriTest extends TestBase {
         mockMvc.perform(MockMvcRequestBuilders.get("/undefd/type"))
                 .andExpect(requestResponse().withServletUri("http://nidi.guru/raml/v1").matchesRaml(uri));
     }
+
+    @Test
+    public void preferSubResourceWithLessVariables() throws Exception {
+        assertNoViolation(
+                uri,
+                get("/undefined/type/sub"),
+                jsonResponse(201, "\"hula\""));
+        assertNoViolation(
+                uri,
+                get("/undefined/type/1"),
+                jsonResponse(202, "\"hula\""));
+    }
+
+    @Test
+    public void checkUriParameters() throws Exception {
+        assertOneViolationThat(
+                uri,
+                get("/undefined/type/other"),
+                jsonResponse(202, "\"hula\""),
+                allOf(startsWith("URI parameter 'undefined'"), endsWith("Value 'other' is not a valid integer")));
+        assertNoViolation(
+                uri,
+                get("/undefined/type/other/sub"),
+                jsonResponse(203, "\"hula\""));
+    }
 }

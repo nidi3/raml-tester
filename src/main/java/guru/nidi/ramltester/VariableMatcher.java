@@ -1,9 +1,5 @@
 package guru.nidi.ramltester;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  *
  */
@@ -11,9 +7,9 @@ class VariableMatcher {
     private final boolean matches;
     private final boolean completeMatch;
     private final String suffix;
-    private final Map<String, String[]> variables;
+    private final ParameterValues variables;
 
-    private VariableMatcher(boolean matches, boolean completeMatch, String suffix, Map<String, String[]> variables) {
+    private VariableMatcher(boolean matches, boolean completeMatch, String suffix, ParameterValues variables) {
         this.matches = matches;
         this.completeMatch = completeMatch;
         this.suffix = suffix;
@@ -21,7 +17,7 @@ class VariableMatcher {
     }
 
     public static VariableMatcher match(String pattern, String value) {
-        Map<String, String[]> variables = new HashMap<>();
+        final ParameterValues variables = new ParameterValues();
         int patternPos = 0, valuePos = 0;
         while (patternPos < pattern.length() && valuePos < value.length()) {
             if (pattern.charAt(patternPos) == '{') {
@@ -41,11 +37,10 @@ class VariableMatcher {
                     varValue.append(value.charAt(valuePos));
                     valuePos++;
                 }
-                final String[] newValues = appendValue(variables.get(varName.toString()), varValue.toString());
-                variables.put(varName.toString(), newValues);
+                variables.addValue(varName.toString(), varValue.toString());
             } else {
                 if (pattern.charAt(patternPos) != value.charAt(valuePos)) {
-                    return new VariableMatcher(false, false, "", Collections.<String, String[]>emptyMap());
+                    return new VariableMatcher(false, false, "", new ParameterValues());
                 }
                 patternPos++;
                 valuePos++;
@@ -55,17 +50,6 @@ class VariableMatcher {
         return new VariableMatcher(match, match && valuePos == value.length(), value.substring(valuePos), variables);
     }
 
-    private static String[] appendValue(String[] values, String value) {
-        final String[] newValues;
-        if (values == null) {
-            newValues = new String[]{value};
-        } else {
-            newValues = new String[values.length + 1];
-            System.arraycopy(values, 0, newValues, 0, values.length);
-            newValues[values.length] = value;
-        }
-        return newValues;
-    }
 
     public boolean isMatch() {
         return matches;
@@ -79,7 +63,7 @@ class VariableMatcher {
         return suffix;
     }
 
-    public Map<String, String[]> getVariables() {
+    public ParameterValues getVariables() {
         return variables;
     }
 }
