@@ -15,12 +15,14 @@
  */
 package org.raml.parser.builder;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -94,8 +96,9 @@ public class PojoTupleBuilder extends DefaultTupleBuilder<ScalarNode, Node>
 
                 }
     CodeSource src = pojoClass.getProtectionDomain().getCodeSource();
-    final URL url = pojoClass.getResource('/' + pojoClass.getName().replace('.', '/') + ".class");
-    final String message = declaredConstructor + " args: " + arguments + " (size " + arguments.size() + ")\n" + src + "," + url;
+                final long length = new File(src.getLocation().getFile()).length();
+                final URL url = pojoClass.getResource('/' + pojoClass.getName().replace('.', '/') + ".class");
+    final String message = declaredConstructor + " args: " + arguments + " (size " + arguments.size() + ")\n" + src + ":"+length+"bytes ," + url+"\n"+ Arrays.toString(pojoClass.getDeclaredConstructors());
     System.out.println(message);
 try {
     newValue = declaredConstructor.newInstance(arguments.toArray(new Object[arguments.size()]));
