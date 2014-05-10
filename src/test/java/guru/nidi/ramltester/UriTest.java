@@ -12,14 +12,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static guru.nidi.ramltester.spring.RamlResultMatchers.requestResponse;
 
 /**
  *
  */
 @Controller
 public class UriTest extends TestBase {
-    private RamlDefinition uri = TestRaml.load("uri.raml").fromClasspath(getClass());
+    private RamlDefinition api = TestRaml.load("uri.raml").fromClasspath(getClass());
     private MockMvc mockMvc;
 
     @Before
@@ -38,35 +37,35 @@ public class UriTest extends TestBase {
     @Test(expected = AssertionError.class)
     public void standardServletUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd"))
-                .andExpect(requestResponse().matchesRaml(uri));
+                .andExpect(api.matches());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void invalidServletUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd"))
-                .andExpect(requestResponse().withServletUri("invalid").matchesRaml(uri));
+                .andExpect(api.matches().assumingServletUri("invalid"));
     }
 
     @Test
     public void correctServletUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd/type"))
-                .andExpect(requestResponse().withServletUri("http://nidi.guru").matchesRaml(uri));
+                .andExpect(api.matches().assumingServletUri("http://nidi.guru"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/v1/undefd/type"))
-                .andExpect(requestResponse().withServletUri("http://nidi.guru/raml").matchesRaml(uri));
+                .andExpect(api.matches().assumingServletUri("http://nidi.guru/raml"));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/undefd/type"))
-                .andExpect(requestResponse().withServletUri("http://nidi.guru/raml/v1").matchesRaml(uri));
+                .andExpect(api.matches().assumingServletUri("http://nidi.guru/raml/v1"));
     }
 
     @Test
     public void preferSubResourceWithLessVariables() throws Exception {
         assertNoViolations(
-                uri,
+                api,
                 get("/undefined/type/sub"),
                 jsonResponse(201));
         assertNoViolations(
-                uri,
+                api,
                 get("/undefined/type/1"),
                 jsonResponse(202));
     }
@@ -74,12 +73,12 @@ public class UriTest extends TestBase {
     @Test
     public void checkUriParameters() throws Exception {
         assertOneRequestViolationThat(
-                uri,
+                api,
                 get("/undefined/type/other"),
                 jsonResponse(202),
                 allOf(startsWith("URI parameter 'undefined'"), endsWith("Value 'other' is not a valid integer")));
         assertNoViolations(
-                uri,
+                api,
                 get("/undefined/type/other/sub"),
                 jsonResponse(203));
     }

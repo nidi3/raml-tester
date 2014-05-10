@@ -2,6 +2,7 @@ package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.servlet.ServletRamlResponse;
+import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
@@ -42,6 +43,10 @@ public class RamlDefinition {
         return testAgainst(
                 new SpringMockRamlRequest(servletUri, mvcResult.getRequest()),
                 new SpringMockRamlResponse(mvcResult.getResponse()));
+    }
+
+    public RamlMatcher matches() {
+        return new RamlMatcher(this, null);
     }
 
     public RamlRestTemplate createRestTemplate(ClientHttpRequestFactory requestFactory) {

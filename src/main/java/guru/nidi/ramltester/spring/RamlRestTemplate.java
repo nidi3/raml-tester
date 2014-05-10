@@ -38,7 +38,7 @@ public class RamlRestTemplate extends RestTemplate {
         setMessageConverters(restTemplate.getMessageConverters());
     }
 
-    public RamlRestTemplate withBaseUri(String baseUri) {
+    public RamlRestTemplate assumingBaseUri(String baseUri) {
         return new RamlRestTemplate(interceptor.getRamlDefinition(), baseUri, this);
     }
 
