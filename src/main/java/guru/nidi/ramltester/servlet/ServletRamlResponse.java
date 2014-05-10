@@ -1,6 +1,6 @@
 package guru.nidi.ramltester.servlet;
 
-import guru.nidi.ramltester.HttpResponse;
+import guru.nidi.ramltester.RamlResponse;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -10,7 +10,7 @@ import java.io.*;
 /**
  *
  */
-public class ServletHttpResponse extends HttpServletResponseWrapper implements HttpResponse {
+public class ServletRamlResponse extends HttpServletResponseWrapper implements RamlResponse {
     private String characterEncoding = "iso-8859-1";
     private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
@@ -19,7 +19,7 @@ public class ServletHttpResponse extends HttpServletResponseWrapper implements H
 
     private int status = HttpServletResponse.SC_OK;
 
-    public ServletHttpResponse(HttpServletResponse delegate) {
+    public ServletRamlResponse(HttpServletResponse delegate) {
         super(delegate);
     }
 

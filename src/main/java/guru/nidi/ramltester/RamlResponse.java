@@ -3,7 +3,7 @@ package guru.nidi.ramltester;
 /**
  *
  */
-public interface HttpResponse {
+public interface RamlResponse {
     int getStatus();
 
     String getContentType();

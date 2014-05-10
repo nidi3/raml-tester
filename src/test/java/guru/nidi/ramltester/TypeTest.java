@@ -11,7 +11,7 @@ public class TypeTest extends TestBase {
     @Test
     public void booleanOk() throws Exception {
         for (String value : new String[]{"true", "false"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?boolean=" + value),
                     jsonResponse(200, "\"hula\""));
@@ -21,7 +21,7 @@ public class TypeTest extends TestBase {
     @Test
     public void booleanNok() throws Exception {
         for (String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?boolean=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -32,13 +32,13 @@ public class TypeTest extends TestBase {
     @Test
     public void integerOk() throws Exception {
         for (String value : new String[]{"0", "-1", "123456789"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?integer=" + value),
                     jsonResponse(200, "\"hula\""));
         }
         for (String value : new String[]{"-5", "0", "666"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?integerLimit=" + value),
                     jsonResponse(200, "\"hula\""));
@@ -48,14 +48,14 @@ public class TypeTest extends TestBase {
     @Test
     public void integerNok() throws Exception {
         for (String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?integer=" + value),
                     jsonResponse(200, "\"hula\""),
                     endsWith("query parameter 'integer': Value '" + value + "' is not a valid integer"));
         }
         for (String value : new String[]{"-6", "667"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?integerLimit=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -66,13 +66,13 @@ public class TypeTest extends TestBase {
     @Test
     public void numberOk() throws Exception {
         for (String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""));
         }
         for (String value : new String[]{"5e-2", "0.05", "666.6"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?numberLimit=" + value),
                     jsonResponse(200, "\"hula\""));
@@ -82,14 +82,14 @@ public class TypeTest extends TestBase {
     @Test
     public void numberNok() throws Exception {
         for (String value : new String[]{"", "-0", "1.", "1.123w"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""),
                     endsWith("query parameter 'number': Value '" + value + "' is not a valid number"));
         }
         for (String value : new String[]{"4.9e-2", "0.0049999", "666.60001", "inf", "-inf", "nan"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?numberLimit=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -100,7 +100,7 @@ public class TypeTest extends TestBase {
     @Test
     public void dateOk() throws Exception {
         for (String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?date=" + value),
                     jsonResponse(200, "\"hula\""));
@@ -110,7 +110,7 @@ public class TypeTest extends TestBase {
     @Test
     public void dateNok() throws Exception {
         for (String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?date=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -121,7 +121,7 @@ public class TypeTest extends TestBase {
     @Test
     public void stringOk() throws Exception {
         for (String value : new String[]{"aa", "12345"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?string=" + value),
                     jsonResponse(200, "\"hula\""));
@@ -131,7 +131,7 @@ public class TypeTest extends TestBase {
     @Test
     public void stringNok() throws Exception {
         for (String value : new String[]{"", "a", "123456"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?string=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -142,7 +142,7 @@ public class TypeTest extends TestBase {
     @Test
     public void enumOk() throws Exception {
         for (String value : new String[]{"a", "b"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?enum=" + value),
                     jsonResponse(200, "\"hula\""));
@@ -152,7 +152,7 @@ public class TypeTest extends TestBase {
     @Test
     public void enumNok() throws Exception {
         for (String value : new String[]{"", "ab", "c"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?enum=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -173,7 +173,7 @@ public class TypeTest extends TestBase {
 //    @Test
 //    public void multiTypeNok() throws Exception {
 //        for (String value : new String[]{"4", "4.5", "c"}) {
-//            assertOneViolationThat(
+//            assertOneRequestViolationThat(
 //                    type,
 //                    get("/type?multi=" + value),
 //                    jsonResponse(200, "\"hula\""),
@@ -184,13 +184,13 @@ public class TypeTest extends TestBase {
     @Test
     public void simplePattern() throws Exception {
         for (String value : new String[]{"12/a", "00/y"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?pattern1=" + value),
                     jsonResponse(200, "\"hula\""));
         }
         for (String value : new String[]{"", "12/z", "1/a", "99/A"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?pattern1=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -201,13 +201,13 @@ public class TypeTest extends TestBase {
     @Test
     public void slashedPattern() throws Exception {
         for (String value : new String[]{"12/a", "00/y"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?pattern2=" + value),
                     jsonResponse(200, "\"hula\""));
         }
         for (String value : new String[]{"", "12/z", "1/a", "99/A"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?pattern2=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -224,13 +224,13 @@ public class TypeTest extends TestBase {
 
     private void assertModifiedPattern(String param) throws Exception {
         for (String value : new String[]{"12/a", "00/y", "99/A"}) {
-            assertNoViolation(
+            assertNoViolations(
                     type,
                     get("/type?" + param + "=" + value),
                     jsonResponse(200, "\"hula\""));
         }
         for (String value : new String[]{"", "12/z", "1/a"}) {
-            assertOneViolationThat(
+            assertOneRequestViolationThat(
                     type,
                     get("/type?" + param + "=" + value),
                     jsonResponse(200, "\"hula\""),
@@ -240,7 +240,7 @@ public class TypeTest extends TestBase {
 
     @Test
     public void emptyResponseMediaTypeNotAllowed() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 type,
                 post("/empty"),
                 jsonResponse(200, "", null),
@@ -249,11 +249,11 @@ public class TypeTest extends TestBase {
 
     @Test
     public void emptyResponseMediaTypeAllowed() throws Exception {
-        assertNoViolation(
+        assertNoViolations(
                 type,
                 post("/empty"),
                 jsonResponse(201, "", null));
-        assertNoViolation(
+        assertNoViolations(
                 type,
                 post("/empty"),
                 jsonResponse(202, "", "a/b"));
@@ -261,7 +261,7 @@ public class TypeTest extends TestBase {
 
     @Test
     public void responseBodyNotAllowed() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 type,
                 post("/empty"),
                 jsonResponse(201, "\"hula\""),

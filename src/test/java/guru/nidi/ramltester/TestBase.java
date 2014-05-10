@@ -1,7 +1,7 @@
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.spring.SpringMockHttpRequest;
-import guru.nidi.ramltester.spring.SpringMockHttpResponse;
+import guru.nidi.ramltester.spring.SpringMockRamlRequest;
+import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.*;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -61,22 +61,35 @@ public class TestBase {
         return jsonResponse(code, "", "application/json");
     }
 
-    protected void assertNoViolation(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
-        final RamlViolations violations = raml.testAgainst(
-                new SpringMockHttpRequest("http://nidi.guru/raml/v1", request),
-                new SpringMockHttpResponse(response));
-        assertNoViolations(violations);
+    protected void assertNoViolations(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
+        final RamlViolationReport report = test(raml, request, response);
+        assertNoViolations(report);
+    }
+
+    protected void assertNoViolations(RamlViolationReport report) {
+        assertTrue("Expected no violations, but found: " + report, report.isEmpty());
     }
 
     protected void assertNoViolations(RamlViolations violations) {
         assertTrue("Expected no violations, but found: " + violations, violations.isEmpty());
     }
 
-    protected void assertOneViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlViolations violations = raml.testAgainst(
-                new SpringMockHttpRequest("http://nidi.guru/raml/v1", request),
-                new SpringMockHttpResponse(response));
-        assertOneViolationThat(violations, matcher);
+    protected void assertOneRequestViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
+        final RamlViolationReport report = test(raml, request, response);
+        assertNoViolations(report.getResponseViolations());
+        assertOneViolationThat(report.getRequestViolations(), matcher);
+    }
+
+    protected void assertOneResponseViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
+        final RamlViolationReport report = test(raml, request, response);
+        assertNoViolations(report.getRequestViolations());
+        assertOneViolationThat(report.getResponseViolations(), matcher);
+    }
+
+    private RamlViolationReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
+        return raml.testAgainst(
+                new SpringMockRamlRequest("http://nidi.guru/raml/v1", request),
+                new SpringMockRamlResponse(response));
     }
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {

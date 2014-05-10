@@ -11,7 +11,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void simpleOk() throws Exception {
-        assertNoViolation(
+        assertNoViolations(
                 simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\""));
@@ -19,7 +19,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void undefinedResource() throws Exception {
-        assertOneViolationThat(
+        assertOneRequestViolationThat(
                 simple,
                 get("/data2"),
                 jsonResponse(200, "\"hula\""),
@@ -28,7 +28,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void undefinedAction() throws Exception {
-        assertOneViolationThat(
+        assertOneRequestViolationThat(
                 simple,
                 post("/data"),
                 jsonResponse(200, "\"hula\""),
@@ -37,7 +37,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void undefinedQueryParameter() throws Exception {
-        assertOneViolationThat(
+        assertOneRequestViolationThat(
                 simple,
                 get("/data?a=b"),
                 jsonResponse(200, "\"hula\""),
@@ -46,7 +46,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void illegallyRepeatQueryParameter() throws Exception {
-        assertOneViolationThat(
+        assertOneRequestViolationThat(
                 simple,
                 get("/query?req=1&req=2"),
                 jsonResponse(200, "\"hula\""),
@@ -55,7 +55,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void allowedRepeatQueryParameter() throws Exception {
-        assertNoViolation(
+        assertNoViolations(
                 simple,
                 get("/query?rep=1&rep=2&req=3"),
                 jsonResponse(200, "\"hula\""));
@@ -63,7 +63,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void missingRequiredQueryParameter() throws Exception {
-        assertOneViolationThat(
+        assertOneRequestViolationThat(
                 simple,
                 get("/query?"),
                 jsonResponse(200, "\"hula\""),
@@ -72,7 +72,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void undefinedResponseCode() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 simple,
                 get("/data"),
                 jsonResponse(201, "\"hula\""),
@@ -81,7 +81,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void noMediaType() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", null),
@@ -90,7 +90,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void undefinedMediaType() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", "text/plain"),
@@ -99,7 +99,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void compatibleMediaType() throws Exception {
-        assertNoViolation(
+        assertNoViolations(
                 simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", "application/json;charset=utf-8"));
@@ -107,7 +107,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void notMatchingSchemaInline() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
                 jsonResponse(200, "5"),
@@ -116,7 +116,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void notMatchingSchemaInclude() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
                 jsonResponse(201, "5"),
@@ -125,7 +125,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void notMatchingSchemaReferenced() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
                 jsonResponse(202, "5"),
@@ -134,7 +134,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void undefinedSchema() throws Exception {
-        assertOneViolationThat(
+        assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
                 jsonResponse(203, "5"),
@@ -143,7 +143,7 @@ public class SimpleTest extends TestBase {
 
     @Test
     public void defaultMediaType() throws Exception {
-        assertNoViolation(
+        assertNoViolations(
                 simple,
                 get("/mediaType"),
                 jsonResponse(200, "\"hula\"", "application/default"));

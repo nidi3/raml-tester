@@ -61,11 +61,11 @@ public class UriTest extends TestBase {
 
     @Test
     public void preferSubResourceWithLessVariables() throws Exception {
-        assertNoViolation(
+        assertNoViolations(
                 uri,
                 get("/undefined/type/sub"),
                 jsonResponse(201));
-        assertNoViolation(
+        assertNoViolations(
                 uri,
                 get("/undefined/type/1"),
                 jsonResponse(202));
@@ -73,12 +73,12 @@ public class UriTest extends TestBase {
 
     @Test
     public void checkUriParameters() throws Exception {
-        assertOneViolationThat(
+        assertOneRequestViolationThat(
                 uri,
                 get("/undefined/type/other"),
                 jsonResponse(202),
                 allOf(startsWith("URI parameter 'undefined'"), endsWith("Value 'other' is not a valid integer")));
-        assertNoViolation(
+        assertNoViolations(
                 uri,
                 get("/undefined/type/other/sub"),
                 jsonResponse(203));

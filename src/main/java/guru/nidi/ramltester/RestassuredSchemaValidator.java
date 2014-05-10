@@ -52,7 +52,7 @@ public class RestassuredSchemaValidator implements SchemaValidator {
             description.appendValue(content);
             description.appendText(" does not match schema: ");
             description.appendDescriptionOf(matcher);
-            violations.addViolation(description.toString());
+            violations.add(description.toString());
         }
     }
 }

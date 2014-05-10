@@ -1,9 +1,9 @@
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.servlet.ServletHttpRequest;
-import guru.nidi.ramltester.servlet.ServletHttpResponse;
-import guru.nidi.ramltester.spring.SpringMockHttpRequest;
-import guru.nidi.ramltester.spring.SpringMockHttpResponse;
+import guru.nidi.ramltester.servlet.ServletRamlRequest;
+import guru.nidi.ramltester.servlet.ServletRamlResponse;
+import guru.nidi.ramltester.spring.SpringMockRamlRequest;
+import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.raml.model.Raml;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -31,24 +31,24 @@ public class RamlDefinition {
         return new RamlDefinition(raml, schemaValidator);
     }
 
-    public RamlViolations testAgainst(HttpRequest request, HttpResponse response) {
+    public RamlViolationReport testAgainst(RamlRequest request, RamlResponse response) {
         final RamlTester runner = new RamlTester(raml, schemaValidator);
         runner.test(request, response);
-        return runner.getViolations();
+        return runner.getReport();
     }
 
-    public RamlViolations testAgainst(MvcResult mvcResult, String servletUri) {
+    public RamlViolationReport testAgainst(MvcResult mvcResult, String servletUri) {
         return testAgainst(
-                new SpringMockHttpRequest(servletUri, mvcResult.getRequest()),
-                new SpringMockHttpResponse(mvcResult.getResponse()));
+                new SpringMockRamlRequest(servletUri, mvcResult.getRequest()),
+                new SpringMockRamlResponse(mvcResult.getResponse()));
     }
 
-    public RamlViolations testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public RamlViolationReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!(request instanceof HttpServletRequest)) {
             return null;
         }
-        final ServletHttpRequest httpRequest = new ServletHttpRequest((HttpServletRequest) request);
-        final ServletHttpResponse httpResponse = new ServletHttpResponse((HttpServletResponse) response);
+        final ServletRamlRequest httpRequest = new ServletRamlRequest((HttpServletRequest) request);
+        final ServletRamlResponse httpResponse = new ServletRamlResponse((HttpServletResponse) response);
         chain.doFilter(httpRequest, httpResponse);
         return testAgainst(httpRequest, httpResponse);
     }

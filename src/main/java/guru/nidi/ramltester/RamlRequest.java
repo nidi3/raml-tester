@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  *
  */
-public interface HttpRequest {
+public interface RamlRequest {
     String getRequestUrl();
 
     String getMethod();

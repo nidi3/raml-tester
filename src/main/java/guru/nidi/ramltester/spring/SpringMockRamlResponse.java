@@ -1,6 +1,6 @@
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.HttpResponse;
+import guru.nidi.ramltester.RamlResponse;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.UnsupportedEncodingException;
@@ -8,10 +8,10 @@ import java.io.UnsupportedEncodingException;
 /**
  *
  */
-public class SpringMockHttpResponse implements HttpResponse {
+public class SpringMockRamlResponse implements RamlResponse {
     private final MockHttpServletResponse delegate;
 
-    public SpringMockHttpResponse(MockHttpServletResponse delegate) {
+    public SpringMockRamlResponse(MockHttpServletResponse delegate) {
         this.delegate = delegate;
     }
 

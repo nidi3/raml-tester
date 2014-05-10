@@ -1,4 +1,4 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  *
  */
-class ParameterValues {
+public class ParameterValues {
     private final Map<String, String[]> values = new HashMap<>();
 
     public Map<String, String[]> getValues() {

@@ -1,7 +1,7 @@
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.HttpRequest;
-import guru.nidi.ramltester.UriComponents;
+import guru.nidi.ramltester.RamlRequest;
+import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.Map;
@@ -9,10 +9,10 @@ import java.util.Map;
 /**
  *
  */
-public class SpringMockHttpRequest implements HttpRequest {
+public class SpringMockRamlRequest implements RamlRequest {
     private final MockHttpServletRequest delegate;
 
-    public SpringMockHttpRequest(String servletUri, MockHttpServletRequest delegate) {
+    public SpringMockRamlRequest(String servletUri, MockHttpServletRequest delegate) {
         if (servletUri != null) {
             final UriComponents uri = UriComponents.fromHttpUrl(servletUri);
             final String scheme = uri.getScheme();

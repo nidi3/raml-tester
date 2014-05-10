@@ -38,9 +38,9 @@ class ParameterTester {
             final AbstractParam parameter = params.get(entry.getKey());
             final String d = description + " '" + entry.getKey() + "'";
             if (parameter == null) {
-                violations.addViolation(!acceptUndefined, d + " is not defined");
+                violations.addIf(!acceptUndefined, d + " is not defined");
             } else {
-                violations.addViolation(!parameter.isRepeat() && entry.getValue().length > 1,
+                violations.addIf(!parameter.isRepeat() && entry.getValue().length > 1,
                         d + " is not repeat but found repeatedly in response");
                 for (String value : entry.getValue()) {
                     testParameter(parameter, value, d);
@@ -50,7 +50,7 @@ class ParameterTester {
         }
         for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             final String d = description + " '" + entry.getKey() + "'";
-            violations.addViolation(entry.getValue().isRequired() && !found.contains(entry.getKey()),
+            violations.addIf(entry.getValue().isRequired() && !found.contains(entry.getKey()),
                     d + " is required but not found in response");
         }
     }
@@ -59,7 +59,7 @@ class ParameterTester {
         String d = description + ": Value '" + value + "' ";
         switch (param.getType()) {
             case BOOLEAN:
-                violations.addViolation(!value.equals("true") && !value.equals("false"), d + "is not a valid boolean");
+                violations.addIf(!value.equals("true") && !value.equals("false"), d + "is not a valid boolean");
                 break;
             case DATE:
                 try {
@@ -67,7 +67,7 @@ class ParameterTester {
                     dateFormat.setLenient(false);
                     dateFormat.parse(value);
                 } catch (ParseException e) {
-                    violations.addViolation(d + "is not a valid date");
+                    violations.add(d + "is not a valid date");
                 }
                 break;
             case FILE:
@@ -77,41 +77,41 @@ class ParameterTester {
                 if (INTEGER.matcher(value).matches()) {
                     testNumericLimits(param, new BigDecimal(value), d);
                 } else {
-                    violations.addViolation(d + "is not a valid integer");
+                    violations.add(d + "is not a valid integer");
                 }
                 break;
             case NUMBER:
                 if (NUMBER.matcher(value).matches()) {
                     if ((value.equals("inf") || value.equals("-inf") || value.equals("nan"))) {
-                        violations.addViolation(param.getMinimum() != null || param.getMaximum() != null, d + "is not inside any minimum/maximum");
+                        violations.addIf(param.getMinimum() != null || param.getMaximum() != null, d + "is not inside any minimum/maximum");
                     } else {
                         testNumericLimits(param, new BigDecimal(value), d);
                     }
                 } else {
-                    violations.addViolation(d + "is not a valid number");
+                    violations.add(d + "is not a valid number");
                 }
                 break;
             case STRING:
-                violations.addViolation(param.getEnumeration() != null && !param.getEnumeration().contains(value),
+                violations.addIf(param.getEnumeration() != null && !param.getEnumeration().contains(value),
                         d + "is not a member of enum '" + param.getEnumeration() + "'");
                 try {
-                    violations.addViolation(param.getPattern() != null && !javaRegexOf(param.getPattern()).matcher(value).matches(),
+                    violations.addIf(param.getPattern() != null && !javaRegexOf(param.getPattern()).matcher(value).matches(),
                             d + "does not match pattern '" + param.getPattern() + "'");
                 } catch (PatternSyntaxException e) {
                     log.warn("Could not execute regex '" + param.getPattern(), e);
                 }
-                violations.addViolation(param.getMinLength() != null && value.length() < param.getMinLength(),
+                violations.addIf(param.getMinLength() != null && value.length() < param.getMinLength(),
                         d + "is shorter than minimum length " + param.getMinLength());
-                violations.addViolation(param.getMaxLength() != null && value.length() > param.getMaxLength(),
+                violations.addIf(param.getMaxLength() != null && value.length() > param.getMaxLength(),
                         d + "is longer than maximum length " + param.getMaximum());
                 break;
         }
     }
 
     private void testNumericLimits(AbstractParam param, BigDecimal value, String description) {
-        violations.addViolation(param.getMinimum() != null && param.getMinimum().compareTo(value) > 0,
+        violations.addIf(param.getMinimum() != null && param.getMinimum().compareTo(value) > 0,
                 description + "is less than minimum " + param.getMinimum());
-        violations.addViolation(param.getMaximum() != null && param.getMaximum().compareTo(value) < 0,
+        violations.addIf(param.getMaximum() != null && param.getMaximum().compareTo(value) < 0,
                 description + "is bigger than maximum " + param.getMaximum());
     }
 
