@@ -1,6 +1,6 @@
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.RamlRequest;
+import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.mock.web.MockHttpServletRequest;
 

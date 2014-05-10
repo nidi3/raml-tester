@@ -1,4 +1,4 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 import org.raml.model.parameter.AbstractParam;
 import org.slf4j.Logger;

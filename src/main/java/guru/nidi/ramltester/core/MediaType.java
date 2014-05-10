@@ -1,4 +1,4 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
@@ -21,7 +21,7 @@ class MediaType {
 
     public static MediaType valueOf(String mimeType) {
         if (mimeType == null || mimeType.length() == 0) {
-            throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
+            throw new InvalidMediaTypeException(mimeType, "'mimeType' must not be empty");
         }
         String[] parts = tokenizeToStringArray(mimeType, ";");
 
@@ -32,15 +32,15 @@ class MediaType {
         }
         int subIndex = fullType.indexOf('/');
         if (subIndex == -1) {
-            throw new InvalidMimeTypeException(mimeType, "does not contain '/'");
+            throw new InvalidMediaTypeException(mimeType, "does not contain '/'");
         }
         if (subIndex == fullType.length() - 1) {
-            throw new InvalidMimeTypeException(mimeType, "does not contain subtype after '/'");
+            throw new InvalidMediaTypeException(mimeType, "does not contain subtype after '/'");
         }
         String type = fullType.substring(0, subIndex);
         String subtype = fullType.substring(subIndex + 1, fullType.length());
         if (WILDCARD_TYPE.equals(type) && !WILDCARD_TYPE.equals(subtype)) {
-            throw new InvalidMimeTypeException(mimeType, "wildcard type is legal only in '*/*' (all mime types)");
+            throw new InvalidMediaTypeException(mimeType, "wildcard type is legal only in '*/*' (all mime types)");
         }
 
         Map<String, String> parameters = null;
@@ -60,9 +60,9 @@ class MediaType {
         try {
             return new MediaType(type, subtype, parameters);
         } catch (UnsupportedCharsetException ex) {
-            throw new InvalidMimeTypeException(mimeType, "unsupported charset '" + ex.getCharsetName() + "'");
+            throw new InvalidMediaTypeException(mimeType, "unsupported charset '" + ex.getCharsetName() + "'");
         } catch (IllegalArgumentException ex) {
-            throw new InvalidMimeTypeException(mimeType, ex.getMessage());
+            throw new InvalidMediaTypeException(mimeType, ex.getMessage());
         }
     }
 

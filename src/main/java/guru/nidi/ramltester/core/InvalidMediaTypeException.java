@@ -1,12 +1,12 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 /**
  *
  */
-class InvalidMimeTypeException extends RuntimeException {
+class InvalidMediaTypeException extends RuntimeException {
     private final String mimeType;
 
-    public InvalidMimeTypeException(String mimeType, String message) {
+    public InvalidMediaTypeException(String mimeType, String message) {
         super(message);
         this.mimeType = mimeType;
     }

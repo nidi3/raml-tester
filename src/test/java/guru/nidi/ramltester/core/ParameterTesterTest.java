@@ -1,4 +1,4 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 import org.hamcrest.Matcher;
 import org.junit.Test;
@@ -10,10 +10,13 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 
+import static guru.nidi.ramltester.util.TestUtils.stringArrayMapOf;
+import static org.hamcrest.core.StringStartsWith.startsWith;
+
 /**
  *
  */
-public class ParameterTesterTest extends TestBase {
+public class ParameterTesterTest extends CoreTestBase {
     @Test
     public void booleanType() throws Exception {
         final QueryParameter p = new QueryParameter();
@@ -168,13 +171,13 @@ public class ParameterTesterTest extends TestBase {
 
     @Test
     public void undefinedParameter() throws Exception {
-        assertOneViolationThat(this.<AbstractParam>mapOf(), stringArrayMapOf("a", "b"),
+        assertOneViolationThat(queryParameterMapOf(), stringArrayMapOf("a", "b"),
                 startsWith("desc 'a' is not defined"));
     }
 
     @Test
     public void illegallyRepeatedParameter() throws Exception {
-        assertOneViolationThat(this.<QueryParameter>mapOf("req", new QueryParameter()), stringArrayMapOf("req", new String[]{"a", "b"}),
+        assertOneViolationThat(queryParameterMapOf("req", new QueryParameter()), stringArrayMapOf("req", new String[]{"a", "b"}),
                 startsWith("desc 'req' is not repeat but found repeatedly in response"));
     }
 
@@ -182,14 +185,14 @@ public class ParameterTesterTest extends TestBase {
     public void allowedRepeatParameter() throws Exception {
         final QueryParameter p = new QueryParameter();
         p.setRepeat(true);
-        assertNoViolation(this.<QueryParameter>mapOf("rep", p), stringArrayMapOf("rep", new String[]{"a", "b"}));
+        assertNoViolation(queryParameterMapOf("rep", p), stringArrayMapOf("rep", new String[]{"a", "b"}));
     }
 
     @Test
     public void missingRequiredParameter() throws Exception {
         final QueryParameter p = new QueryParameter();
         p.setRequired(true);
-        assertOneViolationThat(this.<QueryParameter>mapOf("req", p), stringArrayMapOf(),
+        assertOneViolationThat(queryParameterMapOf("req", p), stringArrayMapOf(),
                 startsWith("desc 'req' is required but not found in response"));
     }
 

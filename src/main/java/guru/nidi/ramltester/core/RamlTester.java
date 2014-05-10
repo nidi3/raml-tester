@@ -1,4 +1,4 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.util.ParameterValues;
 import guru.nidi.ramltester.util.UriComponents;
@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  *
  */
-class RamlTester {
+public class RamlTester {
     private final Raml raml;
     private final SchemaValidator schemaValidator;
     private RamlReport report;
@@ -178,7 +178,7 @@ class RamlTester {
                     return entry.getValue();
                 }
             }
-        } catch (InvalidMimeTypeException e) {
+        } catch (InvalidMediaTypeException e) {
             responseViolations.add("Illegal Media type '" + e.getMimeType() + "'");
         }
         return null;

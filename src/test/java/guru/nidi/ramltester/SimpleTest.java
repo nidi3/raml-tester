@@ -2,10 +2,12 @@ package guru.nidi.ramltester;
 
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.*;
+
 /**
  *
  */
-public class SimpleTest extends TestBase {
+public class SimpleTest extends HighlevelTestBase {
 
     private RamlDefinition simple = TestRaml.load("simple.raml").fromClasspath(getClass());
 
@@ -111,7 +113,7 @@ public class SimpleTest extends TestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(200, "5"),
-                contains("does not match schema"));
+                containsString("does not match schema"));
     }
 
     @Test
@@ -120,7 +122,7 @@ public class SimpleTest extends TestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(201, "5"),
-                contains("does not match schema"));
+                containsString("does not match schema"));
     }
 
     @Test
@@ -129,7 +131,7 @@ public class SimpleTest extends TestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(202, "5"),
-                contains("does not match schema"));
+                containsString("does not match schema"));
     }
 
     @Test
@@ -138,7 +140,7 @@ public class SimpleTest extends TestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(203, "5"),
-                contains("Schema 'undefined' referenced but not defined"));
+                containsString("Schema 'undefined' referenced but not defined"));
     }
 
     @Test

@@ -1,13 +1,14 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 import org.junit.Test;
 
+import static guru.nidi.ramltester.util.TestUtils.assertStringArrayMapEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
  *
  */
-public class VariableMatcherTest extends TestBase {
+public class VariableMatcherTest extends CoreTestBase {
     @Test
     public void noVariables() {
         assertMatch(VariableMatcher.match("abc", "abc"), true, true, "");

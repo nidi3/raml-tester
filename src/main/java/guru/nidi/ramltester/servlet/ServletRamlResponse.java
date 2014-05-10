@@ -1,6 +1,6 @@
 package guru.nidi.ramltester.servlet;
 
-import guru.nidi.ramltester.RamlResponse;
+import guru.nidi.ramltester.core.RamlResponse;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;

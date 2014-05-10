@@ -1,4 +1,4 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.util.ParameterValues;
 

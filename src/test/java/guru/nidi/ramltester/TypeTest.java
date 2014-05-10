@@ -2,10 +2,12 @@ package guru.nidi.ramltester;
 
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.*;
+
 /**
  *
  */
-public class TypeTest extends TestBase {
+public class TypeTest extends HighlevelTestBase {
     private RamlDefinition type = TestRaml.load("type.raml").fromClasspath(getClass());
 
     @Test
@@ -59,7 +61,7 @@ public class TypeTest extends TestBase {
                     type,
                     get("/type?integerLimit=" + value),
                     jsonResponse(200, "\"hula\""),
-                    contains("query parameter 'integerLimit': Value '" + value + "' is "));
+                    containsString("query parameter 'integerLimit': Value '" + value + "' is "));
         }
     }
 
@@ -93,7 +95,7 @@ public class TypeTest extends TestBase {
                     type,
                     get("/type?numberLimit=" + value),
                     jsonResponse(200, "\"hula\""),
-                    contains("query parameter 'numberLimit': Value '" + value + "' is "));
+                    containsString("query parameter 'numberLimit': Value '" + value + "' is "));
         }
     }
 
@@ -135,7 +137,7 @@ public class TypeTest extends TestBase {
                     type,
                     get("/type?string=" + value),
                     jsonResponse(200, "\"hula\""),
-                    contains("query parameter 'string': Value '" + value + "' is "));
+                    containsString("query parameter 'string': Value '" + value + "' is "));
         }
     }
 

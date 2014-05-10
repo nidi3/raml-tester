@@ -1,7 +1,7 @@
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlReport;
+import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlTester;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
@@ -12,24 +12,24 @@ import java.util.Collections;
 /**
  *
  */
-public class RamlRestTemplate extends RestTemplate {
+public class RamlRestTemplate extends RestTemplate implements RamlTestRequestInterceptor.ReportStore {
     private final ClientHttpRequestFactory originalRequestFactory;
     private final RamlTestRequestInterceptor interceptor;
     private RamlReport lastReport;
 
-    public RamlRestTemplate(RamlDefinition ramlDefinition, String baseUri, ClientHttpRequestFactory requestFactory) {
+    public RamlRestTemplate(RamlTester tester, String baseUri, ClientHttpRequestFactory requestFactory) {
         originalRequestFactory = requestFactory;
-        interceptor = new RamlTestRequestInterceptor(this, ramlDefinition, baseUri);
+        interceptor = new RamlTestRequestInterceptor(this, tester, baseUri);
         setRequestFactory(new InterceptingClientHttpRequestFactory(requestFactory, Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
-    public RamlRestTemplate(RamlDefinition ramlDefinition, String baseUri, RestTemplate restTemplate) {
-        this(ramlDefinition, baseUri, restTemplate.getRequestFactory());
+    public RamlRestTemplate(RamlTester tester, String baseUri, RestTemplate restTemplate) {
+        this(tester, baseUri, restTemplate.getRequestFactory());
         init(restTemplate);
     }
 
-    public RamlRestTemplate(RamlDefinition ramlDefinition, String baseUri, RamlRestTemplate restTemplate) {
-        this(ramlDefinition, baseUri, restTemplate.originalRequestFactory);
+    public RamlRestTemplate(RamlTester tester, String baseUri, RamlRestTemplate restTemplate) {
+        this(tester, baseUri, restTemplate.originalRequestFactory);
         init(restTemplate);
     }
 
@@ -39,14 +39,15 @@ public class RamlRestTemplate extends RestTemplate {
     }
 
     public RamlRestTemplate assumingBaseUri(String baseUri) {
-        return new RamlRestTemplate(interceptor.getRamlDefinition(), baseUri, this);
-    }
-
-    void setRamlReport(RamlReport ramlReport) {
-        this.lastReport = ramlReport;
+        return new RamlRestTemplate(interceptor.getTester(), baseUri, this);
     }
 
     public RamlReport getLastReport() {
         return lastReport;
+    }
+
+    @Override
+    public void storeReport(RamlReport report) {
+        this.lastReport = report;
     }
 }

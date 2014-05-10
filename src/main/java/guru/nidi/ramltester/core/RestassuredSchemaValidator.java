@@ -1,4 +1,4 @@
-package guru.nidi.ramltester;
+package guru.nidi.ramltester.core;
 
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;

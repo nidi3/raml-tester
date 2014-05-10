@@ -1,11 +1,10 @@
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.core.*;
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.servlet.ServletRamlResponse;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
-import guru.nidi.ramltester.spring.SpringMockRamlRequest;
-import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.raml.model.Raml;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MvcResult;
@@ -35,26 +34,28 @@ public class RamlDefinition {
         return new RamlDefinition(raml, schemaValidator);
     }
 
+    public RamlTester createTester() {
+        return new RamlTester(raml, schemaValidator);
+    }
+
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
-        return new RamlTester(raml, schemaValidator).test(request, response);
+        return createTester().test(request, response);
     }
 
     public RamlReport testAgainst(MvcResult mvcResult, String servletUri) {
-        return testAgainst(
-                new SpringMockRamlRequest(servletUri, mvcResult.getRequest()),
-                new SpringMockRamlResponse(mvcResult.getResponse()));
+        return matches().assumingServletUri(servletUri).testAgainst(mvcResult);
     }
 
     public RamlMatcher matches() {
-        return new RamlMatcher(this, null);
+        return new RamlMatcher(createTester(), null);
     }
 
     public RamlRestTemplate createRestTemplate(ClientHttpRequestFactory requestFactory) {
-        return new RamlRestTemplate(this, null, requestFactory);
+        return new RamlRestTemplate(createTester(), null, requestFactory);
     }
 
     public RamlRestTemplate createRestTemplate(RestTemplate restTemplate) {
-        return new RamlRestTemplate(this, null, restTemplate);
+        return new RamlRestTemplate(createTester(), null, restTemplate);
     }
 
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

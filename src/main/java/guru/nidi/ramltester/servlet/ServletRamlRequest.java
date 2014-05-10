@@ -1,6 +1,6 @@
 package guru.nidi.ramltester.servlet;
 
-import guru.nidi.ramltester.RamlRequest;
+import guru.nidi.ramltester.core.RamlRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;

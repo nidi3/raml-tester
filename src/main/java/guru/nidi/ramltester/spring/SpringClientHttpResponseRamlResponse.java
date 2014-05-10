@@ -1,6 +1,6 @@
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.RamlResponse;
+import guru.nidi.ramltester.core.RamlResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

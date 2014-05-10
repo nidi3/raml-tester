@@ -12,12 +12,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import static org.hamcrest.CoreMatchers.*;
+
 
 /**
  *
  */
 @Controller
-public class UriTest extends TestBase {
+public class UriTest extends HighlevelTestBase {
     private RamlDefinition api = TestRaml.load("uri.raml").fromClasspath(getClass());
     private MockMvc mockMvc;
 
