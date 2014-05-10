@@ -62,11 +62,11 @@ public class TestBase {
     }
 
     protected void assertNoViolations(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
-        final RamlViolationReport report = test(raml, request, response);
+        final RamlReport report = test(raml, request, response);
         assertNoViolations(report);
     }
 
-    protected void assertNoViolations(RamlViolationReport report) {
+    protected void assertNoViolations(RamlReport report) {
         assertTrue("Expected no violations, but found: " + report, report.isEmpty());
     }
 
@@ -75,18 +75,18 @@ public class TestBase {
     }
 
     protected void assertOneRequestViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlViolationReport report = test(raml, request, response);
+        final RamlReport report = test(raml, request, response);
         assertNoViolations(report.getResponseViolations());
         assertOneViolationThat(report.getRequestViolations(), matcher);
     }
 
     protected void assertOneResponseViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlViolationReport report = test(raml, request, response);
+        final RamlReport report = test(raml, request, response);
         assertNoViolations(report.getRequestViolations());
         assertOneViolationThat(report.getResponseViolations(), matcher);
     }
 
-    private RamlViolationReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
+    private RamlReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
         return raml.testAgainst(
                 new SpringMockRamlRequest("http://nidi.guru/raml/v1", request),
                 new SpringMockRamlResponse(response));

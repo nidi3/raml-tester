@@ -17,28 +17,25 @@ import java.util.Map;
 class RamlTester {
     private final Raml raml;
     private final SchemaValidator schemaValidator;
-    private final RamlViolationReport report;
-    private final RamlViolations requestViolations, responseViolations;
+    private RamlReport report;
+    private RamlViolations requestViolations, responseViolations;
 
     public RamlTester(Raml raml, SchemaValidator schemaValidator) {
         this.raml = raml;
         this.schemaValidator = schemaValidator;
-        report = new RamlViolationReport();
+    }
+
+    public RamlReport test(RamlRequest request, RamlResponse response) {
+        report = new RamlReport();
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
-    }
-
-    public RamlViolationReport getReport() {
-        return report;
-    }
-
-    public void test(RamlRequest request, RamlResponse response) {
         try {
             Action action = testRequest(request);
             testResponse(action, response);
         } catch (RamlViolationException e) {
             //ignore, results are in report
         }
+        return report;
     }
 
     public Action testRequest(RamlRequest request) {

@@ -3,11 +3,11 @@ package guru.nidi.ramltester;
 /**
  *
  */
-public class RamlViolationReport {
+public class RamlReport {
     private final RamlViolations requestViolations = new RamlViolations();
     private final RamlViolations responseViolations = new RamlViolations();
 
-    public RamlViolationReport() {
+    public RamlReport() {
     }
 
     public boolean isEmpty() {
@@ -16,7 +16,7 @@ public class RamlViolationReport {
 
     @Override
     public String toString() {
-        return "RamlViolationReport{" +
+        return "RamlReport{" +
                 "requestViolations=" + requestViolations +
                 ", responseViolations=" + responseViolations +
                 '}';

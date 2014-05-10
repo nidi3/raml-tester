@@ -79,12 +79,11 @@ public class UriComponents {
         return q;
     }
 
-    public String getWithoutQuery() {
+    public String getServer() {
         return (scheme == null ? "" : (scheme + "://")) +
                 (userInfo == null ? "" : (userInfo + "@")) +
                 (host == null ? "" : host) +
-                (port == null ? "" : (":" + port)) +
-                (path == null ? "" : path);
+                (port == null ? "" : (":" + port));
     }
 
     public String getScheme() {

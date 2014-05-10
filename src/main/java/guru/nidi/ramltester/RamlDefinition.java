@@ -2,10 +2,13 @@ package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.servlet.ServletRamlResponse;
+import guru.nidi.ramltester.spring.RamlRestTemplate;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.raml.model.Raml;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,19 +34,25 @@ public class RamlDefinition {
         return new RamlDefinition(raml, schemaValidator);
     }
 
-    public RamlViolationReport testAgainst(RamlRequest request, RamlResponse response) {
-        final RamlTester runner = new RamlTester(raml, schemaValidator);
-        runner.test(request, response);
-        return runner.getReport();
+    public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
+        return new RamlTester(raml, schemaValidator).test(request, response);
     }
 
-    public RamlViolationReport testAgainst(MvcResult mvcResult, String servletUri) {
+    public RamlReport testAgainst(MvcResult mvcResult, String servletUri) {
         return testAgainst(
                 new SpringMockRamlRequest(servletUri, mvcResult.getRequest()),
                 new SpringMockRamlResponse(mvcResult.getResponse()));
     }
 
-    public RamlViolationReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public RamlRestTemplate createRestTemplate(ClientHttpRequestFactory requestFactory) {
+        return new RamlRestTemplate(this, null, requestFactory);
+    }
+
+    public RamlRestTemplate createRestTemplate(RestTemplate restTemplate) {
+        return new RamlRestTemplate(this, null, restTemplate);
+    }
+
+    public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!(request instanceof HttpServletRequest)) {
             return null;
         }
