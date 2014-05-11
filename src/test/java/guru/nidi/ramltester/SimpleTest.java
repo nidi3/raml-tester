@@ -29,7 +29,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
  */
 public class SimpleTest extends HighlevelTestBase {
 
-    private RamlDefinition simple = TestRaml.load("simple.raml").fromClasspath(getClass());
+    private RamlDefinition simple = RamlDefinition.load("simple.raml").fromClasspath(getClass());
 
     @Test
     public void simpleOk() throws Exception {
@@ -176,7 +176,7 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void apiPortalReferenced() throws IOException {
-        final RamlDefinition ramlDefinition = TestRaml.load("test.raml").fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
+        final RamlDefinition ramlDefinition = RamlDefinition.load("test.raml").fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
         assertNoViolations(ramlDefinition, get("/test"), jsonResponse(200, "\"hula\""));
     }
 

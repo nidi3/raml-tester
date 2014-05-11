@@ -20,7 +20,7 @@ public class SimpleTest {
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        RamlDefinition api = TestRaml.load("api.yaml").fromClasspath(getClass());
+        RamlDefinition api = RamlDefinition.load("api.yaml").fromClasspath(getClass());
         apiMatches = api.matches().assumingServletUri("http://nidi.guru/raml/simple/v1");
     }
 
@@ -44,7 +44,7 @@ public class RamlFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        api = TestRaml.load("api.yaml").fromClasspath(getClass());
+        api = RamlDefinition.load("api.yaml").fromClasspath(getClass());
     }
 
     @Override

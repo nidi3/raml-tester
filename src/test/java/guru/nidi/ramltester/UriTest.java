@@ -35,7 +35,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
  */
 @Controller
 public class UriTest extends HighlevelTestBase {
-    private RamlDefinition api = TestRaml.load("uri.raml").fromClasspath(getClass());
+    private RamlDefinition api = RamlDefinition.load("uri.raml").fromClasspath(getClass());
     private MockMvc mockMvc;
 
     @Before

@@ -45,6 +45,10 @@ public class RamlDefinition {
         this.schemaValidator = schemaValidator != null ? schemaValidator : new RestassuredSchemaValidator();
     }
 
+    public static RamlLoaders load(String name) {
+        return new RamlLoaders(name, null, null);
+    }
+
     public RamlTester createTester() {
         return new RamlTester(raml, schemaValidator);
     }
