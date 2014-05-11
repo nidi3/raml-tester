@@ -1,7 +1,12 @@
 package guru.nidi.ramltester.core;
 
+import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
+import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBuilder;
+import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
+import guru.nidi.ramltester.loader.RamlResourceLoader;
+import guru.nidi.ramltester.loader.UriDownloaderResourceLoader;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
@@ -30,6 +35,20 @@ public class RestassuredSchemaValidator implements SchemaValidator {
 
     public RestassuredSchemaValidator using(JsonSchemaValidatorSettings jsonSchemaValidatorSettings) {
         return new RestassuredSchemaValidator(null, jsonSchemaValidatorSettings);
+    }
+
+    @Override
+    public SchemaValidator withResourceLoader(String base, RamlResourceLoader resourceLoader) {
+        final LoadingConfigurationBuilder loadingConfig = LoadingConfiguration.newBuilder();
+        final String namespace;
+        if (resourceLoader != null) {
+            namespace = base + ":///";
+            loadingConfig.addScheme(base, new UriDownloaderResourceLoader(resourceLoader));
+        } else {
+            namespace = base.endsWith("/") ? base : (base + "/");
+        }
+        loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(namespace).freeze());
+        return using(JsonSchemaFactory.newBuilder().setLoadingConfiguration(loadingConfig.freeze()).freeze());
     }
 
     @SuppressWarnings("unchecked")

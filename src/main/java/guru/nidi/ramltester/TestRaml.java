@@ -8,6 +8,6 @@ public class TestRaml {
     }
 
     public static RamlLoaders load(String name) {
-        return new RamlLoaders(name, null);
+        return new RamlLoaders(name, null, null);
     }
 }

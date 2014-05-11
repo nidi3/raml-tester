@@ -1,5 +1,6 @@
 package guru.nidi.ramltester.apiportal;
 
+import guru.nidi.ramltester.loader.RamlParserResourceLoader;
 import org.junit.Before;
 import org.junit.Test;
 import org.raml.parser.visitor.RamlDocumentBuilder;
@@ -22,16 +23,16 @@ public class ApiPortalLoaderTest {
 
     @Test
     public void fromApiPortalOk() throws IOException {
-        assertNotNull(new RamlDocumentBuilder(loader).build("test.raml"));
+        assertNotNull(new RamlDocumentBuilder(new RamlParserResourceLoader(loader)).build("test.raml"));
     }
 
     @Test(expected = NullPointerException.class)
     public void fromApiPortalUnknownFile() throws IOException {
-        new RamlDocumentBuilder(loader).build("huhuhuhuhu.raml");
+        new RamlDocumentBuilder(new RamlParserResourceLoader(loader)).build("huhuhuhuhu.raml");
     }
 
     @Test(expected = IOException.class)
     public void fromApiPortalUnknownUser() throws IOException {
-        new RamlDocumentBuilder(new ApiPortalLoader("wwwwww", "blalbulbi")).build("test.raml");
+        new RamlDocumentBuilder(new RamlParserResourceLoader(new ApiPortalLoader("wwwwww", "blalbulbi"))).build("test.raml");
     }
 }

@@ -2,6 +2,10 @@ package guru.nidi.ramltester;
 
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import static guru.nidi.ramltester.util.TestUtils.getEnv;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 
@@ -109,6 +113,17 @@ public class SimpleTest extends HighlevelTestBase {
     }
 
     @Test
+    public void matchingSchema() throws UnsupportedEncodingException {
+        assertNoViolations(simple, get("/schema"), jsonResponse(200, "\"str\""));
+    }
+
+    @Test
+    public void matchingReferencedSchema() throws UnsupportedEncodingException {
+        assertNoViolations(simple, get("/schema"), jsonResponse(204, "\"str\""));
+        assertNoViolations(simple, get("/schema"), jsonResponse(205, "\"str\""));
+    }
+
+    @Test
     public void notMatchingSchemaInline() throws Exception {
         assertOneResponseViolationThat(
                 simple,
@@ -143,6 +158,13 @@ public class SimpleTest extends HighlevelTestBase {
                         "Message: ")
         );
     }
+
+    @Test
+    public void apiPortalReferenced() throws IOException {
+        final RamlDefinition ramlDefinition = TestRaml.load("test.raml").fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
+        assertNoViolations(ramlDefinition, get("/test"), jsonResponse(200, "\"hula\""));
+    }
+
 
     @Test
     public void undefinedSchema() throws Exception {

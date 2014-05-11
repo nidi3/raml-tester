@@ -2,6 +2,7 @@ package guru.nidi.ramltester.apiportal;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.nidi.ramltester.loader.RamlResourceLoader;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -11,7 +12,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.raml.parser.loader.ResourceLoader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  *
  */
-public class ApiPortalLoader implements ResourceLoader {
+public class ApiPortalLoader implements RamlResourceLoader {
     private final String user;
     private final String password;
     private final ApiPortalFilesResponse response;
@@ -73,7 +73,7 @@ public class ApiPortalLoader implements ResourceLoader {
 
     private ApiPortalFile findFile(String name) {
         for (ApiPortalFile file : response.getFiles().values()) {
-            if (file.getName().equals(name)) {
+            if (name.equals(file.getName()) || name.equals(file.getPath())) {
                 return file;
             }
         }
