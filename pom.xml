@@ -10,6 +10,7 @@
     <name>${project.artifactId}</name>
     <description>Test if a request/response matches a given raml definition.</description>
     <url>https://github.com/nidi3/raml-tester</url>
+    <inceptionYear>2014</inceptionYear>
 
     <build>
         <plugins>
@@ -22,23 +23,27 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.mycila.maven-license-plugin</groupId>
-                <artifactId>maven-license-plugin</artifactId>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
                 <version>2.6</version>
                 <configuration>
-                    <header>LICENSE_HEADER</header>
+                    <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
                     <excludes>
-                        <exclude>./*</exclude>
+                        <exclude>*</exclude>
                         <exclude>target/**</exclude>
                         <exclude>.idea/**</exclude>
                         <exclude>.idea/**</exclude>
                         <exclude>src/main/resources/**</exclude>
-                        <exclude>src/test/resources</exclude>
+                        <exclude>src/test/resources/**</exclude>
                     </excludes>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <strictCheck>true</strictCheck>
+                    <properties>
+                        <owner>Stefan Niederhauser</owner>
+                        <email>nidin@gmx.ch</email>
+                    </properties>
                 </configuration>
                 <executions>
                     <execution>
@@ -95,8 +100,8 @@
 
     <licenses>
         <license>
-            <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
 
