@@ -6,6 +6,7 @@ import org.raml.parser.visitor.RamlDocumentBuilder;
 
 import java.io.IOException;
 
+import static guru.nidi.ramltester.util.TestUtils.getEnv;
 import static org.junit.Assert.assertNotNull;
 
 /**
@@ -16,7 +17,7 @@ public class ApiPortalLoaderTest {
 
     @Before
     public void setUp() throws Exception {
-        loader = new ApiPortalLoader(System.getenv("API_PORTAL_USER"), System.getenv("API_PORTAL_PASS"));
+        loader = new ApiPortalLoader(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
     }
 
     @Test
