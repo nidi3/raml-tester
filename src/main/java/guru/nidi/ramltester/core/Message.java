@@ -57,11 +57,11 @@ class Message {
     private Object transformParam(Object param) {
         if (param instanceof Resource) {
             final Resource resource = (Resource) param;
-            return new Message("resource", resource.getRelativeUri()).toString();
+            return new Message("resource", resource.getUri()).toString();
         }
         if (param instanceof Action) {
             final Action action = (Action) param;
-            return new Message("action", action.getType(), action.getResource().getRelativeUri()).toString();
+            return new Message("action", action.getType(), action.getResource().getUri()).toString();
         }
         if (param instanceof MimeType) {
             final MimeType mimeType = (MimeType) param;

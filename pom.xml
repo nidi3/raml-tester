@@ -21,6 +21,33 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <header>LICENSE_HEADER</header>
+                    <excludes>
+                        <exclude>./*</exclude>
+                        <exclude>target/**</exclude>
+                        <exclude>.idea/**</exclude>
+                        <exclude>.idea/**</exclude>
+                        <exclude>src/main/resources/**</exclude>
+                        <exclude>src/test/resources</exclude>
+                    </excludes>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                    <strictCheck>true</strictCheck>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -100,6 +127,19 @@
             <url>https://repository-master.mulesoft.org/snapshots/</url>
         </repository>
     </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>internal.repo</id>
+            <name>Internal Repository</name>
+            <url>${internal.repo.path}/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>internal.repo</id>
+            <name>Internal Repository</name>
+            <url>${internal.repo.path}/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>

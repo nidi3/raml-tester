@@ -153,21 +153,36 @@ public class RamlTester {
         responseViolations.addAndThrowIf(res == null, "responseCode.undefined", response.getStatus(), action);
         final Map<String, MimeType> bodies = res.getBody();
         if (bodies == null || bodies.isEmpty()) {
-            responseViolations.addIf(response.getContentAsString() != null && response.getContentAsString().length() > 0,
-                    "responseBody.superfluous", action, response.getStatus());
+            responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
         } else {
-            responseViolations.addAndThrowIf(response.getContentType() == null, "contentType.missing");
-            MimeType mimeType = findMatchingMimeType(bodies, response.getContentType());
-            responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
-            String schema = mimeType.getSchema();
-            if (schema != null) {
-                if (!schema.trim().startsWith("{")) {
-                    schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
-                    responseViolations.addAndThrowIf(schema == null, "schema.missing", mimeType.getSchema(), action, response.getStatus(), mimeType);
+            if (response.getContentType() == null) {
+                responseViolations.addAndThrowIf(hasContent(response) || !existSchemalessBody(bodies), "contentType.missing");
+            } else {
+                MimeType mimeType = findMatchingMimeType(bodies, response.getContentType());
+                responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
+                String schema = mimeType.getSchema();
+                if (schema != null) {
+                    if (!schema.trim().startsWith("{")) {
+                        schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
+                        responseViolations.addAndThrowIf(schema == null, "schema.missing", mimeType.getSchema(), action, response.getStatus(), mimeType);
+                    }
+                    schemaValidator.validate(response.getContentAsString(), schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType));
                 }
-                schemaValidator.validate(response.getContentAsString(), schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType));
             }
         }
+    }
+
+    private boolean hasContent(RamlResponse response) {
+        return response.getContentAsString() != null && response.getContentAsString().length() > 0;
+    }
+
+    private boolean existSchemalessBody(Map<String, MimeType> bodies) {
+        for (MimeType mimeType : bodies.values()) {
+            if (mimeType.getSchema() == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private MimeType findMatchingMimeType(Map<String, MimeType> bodies, String toFind) {

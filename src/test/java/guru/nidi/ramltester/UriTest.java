@@ -78,7 +78,7 @@ public class UriTest extends HighlevelTestBase {
                 api,
                 get("/undefined/type/other"),
                 jsonResponse(202),
-                equalTo("URI parameter 'undefined' on resource(/{undefined}) : Value 'other' is not a valid integer"));
+                equalTo("URI parameter 'undefined' on resource(/type/{undefined}) : Value 'other' is not a valid integer"));
         assertNoViolations(
                 api,
                 get("/undefined/type/other/sub"),
