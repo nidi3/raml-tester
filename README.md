@@ -15,13 +15,12 @@ public class SimpleTest {
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
-    private RamlDefinition api;
     private RamlMatcher apiMatches;
 
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        api = TestRaml.load("api.yaml").fromClasspath(getClass());
+        RamlDefinition api = TestRaml.load("api.yaml").fromClasspath(getClass());
         apiMatches = api.matches().assumingServletUri("http://nidi.guru/raml/simple/v1");
     }
 
