@@ -2,7 +2,7 @@ package guru.nidi.ramltester;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 /**
  *
@@ -27,7 +27,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?boolean=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter 'boolean': Value '" + value + "' is not a valid boolean"));
+                    equalTo("Query parameter 'boolean' on action(GET /type) : Value '" + value + "' is not a valid boolean"));
         }
     }
 
@@ -54,15 +54,18 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?integer=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter 'integer': Value '" + value + "' is not a valid integer"));
+                    equalTo("Query parameter 'integer' on action(GET /type) : Value '" + value + "' is not a valid integer"));
         }
-        for (String value : new String[]{"-6", "667"}) {
-            assertOneRequestViolationThat(
-                    type,
-                    get("/type?integerLimit=" + value),
-                    jsonResponse(200, "\"hula\""),
-                    containsString("query parameter 'integerLimit': Value '" + value + "' is "));
-        }
+        assertOneRequestViolationThat(
+                type,
+                get("/type?integerLimit=-6"),
+                jsonResponse(200, "\"hula\""),
+                equalTo("Query parameter 'integerLimit' on action(GET /type) : Value '-6' is smaller than minimum -5"));
+        assertOneRequestViolationThat(
+                type,
+                get("/type?integerLimit=667"),
+                jsonResponse(200, "\"hula\""),
+                equalTo("Query parameter 'integerLimit' on action(GET /type) : Value '667' is bigger than maximum 666"));
     }
 
     @Test
@@ -88,14 +91,28 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter 'number': Value '" + value + "' is not a valid number"));
+                    equalTo("Query parameter 'number' on action(GET /type) : Value '" + value + "' is not a valid number"));
         }
-        for (String value : new String[]{"4.9e-2", "0.0049999", "666.60001", "inf", "-inf", "nan"}) {
+        for (String value : new String[]{"4.9e-2", "0.0049999"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?numberLimit=" + value),
                     jsonResponse(200, "\"hula\""),
-                    containsString("query parameter 'numberLimit': Value '" + value + "' is "));
+                    equalTo("Query parameter 'numberLimit' on action(GET /type) : Value '" + value + "' is smaller than minimum 0.05"));
+        }
+        for (String value : new String[]{"666.60001"}) {
+            assertOneRequestViolationThat(
+                    type,
+                    get("/type?numberLimit=" + value),
+                    jsonResponse(200, "\"hula\""),
+                    equalTo("Query parameter 'numberLimit' on action(GET /type) : Value '" + value + "' is bigger than maximum 666.6"));
+        }
+        for (String value : new String[]{"inf", "-inf", "nan"}) {
+            assertOneRequestViolationThat(
+                    type,
+                    get("/type?numberLimit=" + value),
+                    jsonResponse(200, "\"hula\""),
+                    equalTo("Query parameter 'numberLimit' on action(GET /type) : Value '" + value + "' is not inside any minimum/maximum"));
         }
     }
 
@@ -116,7 +133,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?date=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter 'date': Value '" + value + "' is not a valid date"));
+                    equalTo("Query parameter 'date' on action(GET /type) : Value '" + value + "' is not a valid date"));
         }
     }
 
@@ -132,13 +149,16 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void stringNok() throws Exception {
-        for (String value : new String[]{"", "a", "123456"}) {
-            assertOneRequestViolationThat(
-                    type,
-                    get("/type?string=" + value),
-                    jsonResponse(200, "\"hula\""),
-                    containsString("query parameter 'string': Value '" + value + "' is "));
-        }
+        assertOneRequestViolationThat(
+                type,
+                get("/type?string=a"),
+                jsonResponse(200, "\"hula\""),
+                equalTo("Query parameter 'string' on action(GET /type) : Value 'a' is shorter than minimum length 2"));
+        assertOneRequestViolationThat(
+                type,
+                get("/type?string=123456"),
+                jsonResponse(200, "\"hula\""),
+                equalTo("Query parameter 'string' on action(GET /type) : Value '123456' is longer than maximum length 5"));
     }
 
     @Test
@@ -158,7 +178,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?enum=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter 'enum': Value '" + value + "' is not a member of enum '[a, b]'"));
+                    equalTo("Query parameter 'enum' on action(GET /type) : Value '" + value + "' is not a member of enum '[a, b]'"));
         }
     }
 
@@ -196,7 +216,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?pattern1=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter 'pattern1': Value '" + value + "' does not match pattern '\\d{2}/[a-y]'"));
+                    equalTo("Query parameter 'pattern1' on action(GET /type) : Value '" + value + "' does not match pattern '\\d{2}/[a-y]'"));
         }
     }
 
@@ -213,7 +233,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?pattern2=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter 'pattern2': Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/'"));
+                    equalTo("Query parameter 'pattern2' on action(GET /type) : Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/'"));
         }
     }
 
@@ -236,7 +256,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?" + param + "=" + value),
                     jsonResponse(200, "\"hula\""),
-                    endsWith("query parameter '" + param + "': Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/i'"));
+                    equalTo("Query parameter '" + param + "' on action(GET /type) : Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/i'"));
         }
     }
 
@@ -246,7 +266,7 @@ public class TypeTest extends HighlevelTestBase {
                 type,
                 post("/empty"),
                 jsonResponse(200, "", null),
-                startsWith("Response has no Content-Type header"));
+                equalTo("Response has no Content-Type header"));
     }
 
     @Test
@@ -267,6 +287,6 @@ public class TypeTest extends HighlevelTestBase {
                 type,
                 post("/empty"),
                 jsonResponse(201, "\"hula\""),
-                startsWith("Response body given but none defined on action"));
+                equalTo("Response body given but none defined on action(POST /empty) response(201)"));
     }
 }

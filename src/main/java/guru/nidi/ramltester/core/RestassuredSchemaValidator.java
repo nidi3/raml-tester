@@ -44,15 +44,11 @@ public class RestassuredSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public void validate(RamlViolations violations, String content, String schema) {
+    public void validate(String content, String schema, RamlViolations violations, Message message) {
         final Matcher<String> matcher = getMatcher(schema);
         if (!matcher.matches(content)) {
-            Description description = new StringDescription();
-            description.appendText("HttpResponse content ");
-            description.appendValue(content);
-            description.appendText(" does not match schema: ");
-            description.appendDescriptionOf(matcher);
-            violations.add(description.toString());
+            Description description = new StringDescription().appendDescriptionOf(matcher);
+            violations.add(message.withParam(content).withParam(description.toString()));
         }
     }
 }

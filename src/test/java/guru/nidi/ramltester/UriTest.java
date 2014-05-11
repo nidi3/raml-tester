@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 
 /**
@@ -78,7 +78,7 @@ public class UriTest extends HighlevelTestBase {
                 api,
                 get("/undefined/type/other"),
                 jsonResponse(202),
-                allOf(startsWith("URI parameter 'undefined'"), endsWith("Value 'other' is not a valid integer")));
+                equalTo("URI parameter 'undefined' on resource(/{undefined}) : Value 'other' is not a valid integer"));
         assertNoViolations(
                 api,
                 get("/undefined/type/other/sub"),

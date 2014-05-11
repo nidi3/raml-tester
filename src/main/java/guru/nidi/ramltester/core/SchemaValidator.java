@@ -4,5 +4,5 @@ package guru.nidi.ramltester.core;
  *
  */
 public interface SchemaValidator {
-    void validate(RamlViolations violations,String content,String schema);
+    void validate(String content, String schema, RamlViolations violations, Message message);
 }

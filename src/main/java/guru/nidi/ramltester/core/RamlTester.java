@@ -41,11 +41,11 @@ public class RamlTester {
     public Action testRequest(RamlRequest request) {
         final String resourcePath = findResourcePath(request.getRequestUrl());
         Resource resource = findResource(resourcePath);
-        requestViolations.addAndThrowIf(resource == null, "Resource '" + resourcePath + "' not defined in raml " + raml.getTitle());
+        requestViolations.addAndThrowIf(resource == null, "resource.undefined", resourcePath);
         Action action = resource.getAction(request.getMethod());
-        requestViolations.addAndThrowIf(action == null, "Action " + request.getMethod() + " not defined on resource " + resource);
+        requestViolations.addAndThrowIf(action == null, "action.undefined", request.getMethod(), resource);
         new ParameterTester(requestViolations, false)
-                .testParameters(action.getQueryParameters(), request.getParameterMap(), "On action " + action + ", query parameter");
+                .testParameters(action.getQueryParameters(), request.getParameterMap(), new Message("queryParam", action));
         return action;
     }
 
@@ -54,22 +54,22 @@ public class RamlTester {
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
         if (raml.getProtocols() != null && !raml.getProtocols().isEmpty()) {
             requestViolations.addIf(!raml.getProtocols().contains(protocolOf(requestUri.getScheme())),
-                    "Protocol " + requestUri.getScheme() + " not defined in raml");
+                    "protocol.undefined", requestUri.getScheme());
         } else {
             requestViolations.addIf(!ramlUri.getScheme().equalsIgnoreCase(requestUri.getScheme()),
-                    "Protocol " + requestUri.getScheme() + " not defined in raml");
+                    "protocol.undefined", requestUri.getScheme());
         }
         final VariableMatcher hostMatch = VariableMatcher.match(ramlUri.getHost(), requestUri.getHost());
         if (!hostMatch.isCompleteMatch()) {
-            requestViolations.addAndThrow("Request URL " + requestUrl + " does not match base URI " + raml.getBaseUri());
+            requestViolations.addAndThrow("baseUri.unmatched", requestUrl, raml.getBaseUri());
         }
         final ParameterTester parameterTester = new ParameterTester(requestViolations, true);
-        parameterTester.testParameters(raml.getBaseUriParameters(), hostMatch.getVariables().getValues(), "BaseUri Parameter");
+        parameterTester.testParameters(raml.getBaseUriParameters(), hostMatch.getVariables().getValues(), new Message("baseUriParam"));
         final VariableMatcher pathMatch = VariableMatcher.match(ramlUri.getPath(), requestUri.getPath());
         if (!pathMatch.isMatch()) {
-            requestViolations.addAndThrow("Request URL " + requestUrl + " does not match base URI " + raml.getBaseUri());
+            requestViolations.addAndThrow("baseUri.unmatched", requestUrl, raml.getBaseUri());
         }
-        parameterTester.testParameters(raml.getBaseUriParameters(), pathMatch.getVariables().getValues(), "BaseUri Parameter");
+        parameterTester.testParameters(raml.getBaseUriParameters(), pathMatch.getVariables().getValues(), new Message("baseUriParam"));
         return pathMatch.getSuffix();
     }
 
@@ -93,7 +93,7 @@ public class RamlTester {
         for (Map.Entry<String, String[]> entry : parameterValues.getValues().entrySet()) {
             final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
             if (uriParam != null) {
-                parameterTester.testParameter(uriParam, entry.getValue()[0], "URI parameter '" + entry.getKey() + "' on resource " + resource);
+                parameterTester.testParameter(uriParam, entry.getValue()[0], new Message("uriParam", entry.getKey(), resource));
             }
         }
         return resource;
@@ -150,22 +150,22 @@ public class RamlTester {
 
     public void testResponse(Action action, RamlResponse response) {
         Response res = action.getResponses().get("" + response.getStatus());
-        responseViolations.addAndThrowIf(res == null, "Response code " + response.getStatus() + " not defined on action " + action);
+        responseViolations.addAndThrowIf(res == null, "responseCode.undefined", response.getStatus(), action);
         final Map<String, MimeType> bodies = res.getBody();
         if (bodies == null || bodies.isEmpty()) {
             responseViolations.addIf(response.getContentAsString() != null && response.getContentAsString().length() > 0,
-                    "Response body given but none defined on action " + action);
+                    "responseBody.superfluous", action, response.getStatus());
         } else {
-            responseViolations.addAndThrowIf(response.getContentType() == null, "Response has no Content-Type header");
+            responseViolations.addAndThrowIf(response.getContentType() == null, "contentType.missing");
             MimeType mimeType = findMatchingMimeType(bodies, response.getContentType());
-            responseViolations.addAndThrowIf(mimeType == null, "Media type '" + response.getContentType() + "' not defined on response " + res);
+            responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
             String schema = mimeType.getSchema();
             if (schema != null) {
                 if (!schema.trim().startsWith("{")) {
                     schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
-                    responseViolations.addAndThrowIf(schema == null, "Schema '" + mimeType.getSchema() + "' referenced but not defined");
+                    responseViolations.addAndThrowIf(schema == null, "schema.missing", mimeType.getSchema(), action, response.getStatus(), mimeType);
                 }
-                schemaValidator.validate(responseViolations, response.getContentAsString(), schema);
+                schemaValidator.validate(response.getContentAsString(), schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType));
             }
         }
     }
@@ -179,7 +179,7 @@ public class RamlTester {
                 }
             }
         } catch (InvalidMediaTypeException e) {
-            responseViolations.add("Illegal Media type '" + e.getMimeType() + "'");
+            responseViolations.add("mediaType.illegal", e.getMimeType());
         }
         return null;
     }

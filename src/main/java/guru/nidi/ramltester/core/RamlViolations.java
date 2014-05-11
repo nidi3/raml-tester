@@ -14,25 +14,32 @@ public class RamlViolations implements Iterable<String> {
         this.violations = new ArrayList<>();
     }
 
-    void add(String violation) {
-        violations.add(violation);
+    void add(Message message) {
+        violations.add(message.toString());
     }
 
-    void addAndThrow(String violation) {
-        violations.add(violation);
+    void add(String key, Object... params) {
+        add(new Message(key, params));
+    }
+
+    void addAndThrow(String key, Object... params) {
+        add(key, params);
         throw new RamlViolationException();
     }
 
-    void addIf(boolean condition, String violation) {
+    void addIf(boolean condition, Message message) {
         if (condition) {
-            violations.add(violation);
+            add(message);
         }
     }
 
-    void addAndThrowIf(boolean condition, String violation) {
-        addIf(condition, violation);
+    void addIf(boolean condition, String key, Object... params) {
+        addIf(condition, new Message(key, params));
+    }
+
+    void addAndThrowIf(boolean condition, String key, Object... params) {
         if (condition) {
-            throw new RamlViolationException();
+            addAndThrow(key, params);
         }
     }
 

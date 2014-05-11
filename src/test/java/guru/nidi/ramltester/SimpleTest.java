@@ -2,7 +2,8 @@ package guru.nidi.ramltester;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
 
 /**
  *
@@ -25,7 +26,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/data2"),
                 jsonResponse(200, "\"hula\""),
-                startsWith("Resource '/data2' not defined"));
+                equalTo("Resource '/data2' is not defined"));
     }
 
     @Test
@@ -34,7 +35,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 post("/data"),
                 jsonResponse(200, "\"hula\""),
-                startsWith("Action POST not defined"));
+                equalTo("Action POST is not defined on resource(/data)"));
     }
 
     @Test
@@ -43,7 +44,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/data?a=b"),
                 jsonResponse(200, "\"hula\""),
-                endsWith("query parameter 'a' is not defined"));
+                equalTo("Query parameter 'a' on action(GET /data) is not defined"));
     }
 
     @Test
@@ -52,7 +53,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/query?req=1&req=2"),
                 jsonResponse(200, "\"hula\""),
-                endsWith("query parameter 'req' is not repeat but found repeatedly in response"));
+                equalTo("Query parameter 'req' on action(GET /query) is not repeat but found repeatedly"));
     }
 
     @Test
@@ -69,7 +70,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/query?"),
                 jsonResponse(200, "\"hula\""),
-                endsWith("query parameter 'req' is required but not found in response"));
+                equalTo("Query parameter 'req' on action(GET /query) is required but not found"));
     }
 
     @Test
@@ -78,7 +79,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/data"),
                 jsonResponse(201, "\"hula\""),
-                startsWith("Response code 201 not defined"));
+                equalTo("Response(201) is not defined on action(GET /data)"));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", null),
-                startsWith("Response has no Content-Type header"));
+                equalTo("Response has no Content-Type header"));
     }
 
     @Test
@@ -96,7 +97,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", "text/plain"),
-                startsWith("Media type 'text/plain' not defined"));
+                equalTo("Media type 'text/plain' is not defined on action(GET /data) response(200)"));
     }
 
     @Test
@@ -113,7 +114,10 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(200, "5"),
-                containsString("does not match schema"));
+                startsWith("Response content does not match schema for action(GET /schema) response(200) mime-type('application/json')\n" +
+                        "Content: 5\n" +
+                        "Message: ")
+        );
     }
 
     @Test
@@ -122,7 +126,10 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(201, "5"),
-                containsString("does not match schema"));
+                startsWith("Response content does not match schema for action(GET /schema) response(201) mime-type('application/json')\n" +
+                        "Content: 5\n" +
+                        "Message: ")
+        );
     }
 
     @Test
@@ -131,7 +138,10 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(202, "5"),
-                containsString("does not match schema"));
+                startsWith("Response content does not match schema for action(GET /schema) response(202) mime-type('application/json')\n" +
+                        "Content: 5\n" +
+                        "Message: ")
+        );
     }
 
     @Test
@@ -140,7 +150,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(203, "5"),
-                containsString("Schema 'undefined' referenced but not defined"));
+                equalTo("Schema 'undefined' is referenced but not defined on action(GET /schema) response(203) mime-type('application/json')"));
     }
 
     @Test
