@@ -7,6 +7,10 @@
     <artifactId>raml-tester</artifactId>
     <version>0.0.2-SNAPSHOT</version>
 
+    <name>${project.artifactId}</name>
+    <description>Test if a request/response matches a given raml definition.</description>
+    <url>https://github.com/nidi3/raml-tester</url>
+
     <build>
         <plugins>
             <plugin>
@@ -18,7 +22,84 @@
                 </configuration>
             </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.1</version>
+                    <configuration>
+                        <mavenExecutorId>forked-path</mavenExecutorId>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <arguments>${arguments} -Psonatype-oss-release</arguments>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.4</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Stefan Niederhauser</name>
+            <email>ich@nidi.guru</email>
+            <organization>github</organization>
+            <organizationUrl>https://github.com/nidi3</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:nidi3/raml-tester.git</connection>
+        <developerConnection>scm:git:git@github.com:nidi3/raml-tester.git</developerConnection>
+        <url>git@github.com:nidi3/raml-tester.git</url>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>https://repository-master.mulesoft.org/releases/</url>
+        </repository>
+        <repository>
+            <id>mulesoft-snapshots</id>
+            <name>MuleSoft Snapshots Repository</name>
+            <url>https://repository-master.mulesoft.org/snapshots/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -124,37 +205,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <scm>
-        <connection>scm:git:https://github.com/nidi3/raml-tester</connection>
-        <developerConnection>scm:git:https://github.com/nidi3/raml-tester</developerConnection>
-        <url>https://github.com/nidi3/raml-tester</url>
-    </scm>
-
-    <distributionManagement>
-        <repository>
-            <id>internal.repo</id>
-            <name>Internal Repository</name>
-            <url>${internal.repo.path}/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>internal.repo</id>
-            <name>Internal Repository</name>
-            <url>${internal.repo.path}/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>mulesoft-releases</id>
-            <name>MuleSoft Releases Repository</name>
-            <url>https://repository-master.mulesoft.org/releases/</url>
-        </repository>
-        <repository>
-            <id>mulesoft-snapshots</id>
-            <name>MuleSoft Snapshots Repository</name>
-            <url>https://repository-master.mulesoft.org/snapshots/</url>
-        </repository>
-    </repositories>
 
 </project>
