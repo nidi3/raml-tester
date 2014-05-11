@@ -16,19 +16,19 @@ public class SimpleTest {
 
     private MockMvc mockMvc;
     private RamlDefinition api;
-    private RequestResponseMatchers requestResponse;
+    private RamlMatcher apiMatches;
 
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        api = RamlDefinition.fromClasspath(getClass(), "api.yaml");
-        requestResponse = requestResponse().withServletUri("http://nidi.guru/raml/simple/v1");
+        api = TestRaml.load("api.yaml").fromClasspath(getClass());
+        apiMatches = api.matches().assumingServletUri("http://nidi.guru/raml/simple/v1");
     }
 
     @Test
     public void greeting() throws Exception {
-        this.mockMvc.perform(get("/greeting").accept(MediaType.parseMediaType("application/json")))
-                .andExpect(requestResponse.matchesRaml(api));
+        mockMvc.perform(get("/greeting").accept(MediaType.parseMediaType("application/json")))
+                .andExpect(apiMatches);
     }
 
 }
@@ -40,18 +40,19 @@ Use in a pure servlet environment
 ---------------------------------
 ```
 public class RamlFilter implements Filter {
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private RamlDefinition api;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        api = RamlDefinition.fromClasspath(getClass(), "api.yaml");
+        api = TestRaml.load("api.yaml").fromClasspath(getClass());
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
                          throws IOException, ServletException {
-        RamlViolations violations = RamlTesters.executeFilterChain(api, request, response, chain);
-        System.out.log("Violations: " + violations);
+        final RamlReport report = api.testAgainst(request, response, chain);
+        log.info("Raml report: " + report);
     }
 
     @Override
