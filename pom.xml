@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>guru.nidi.raml</groupId>
     <artifactId>raml-tester</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <name>${project.artifactId}</name>
     <description>Test if a request/response matches a given raml definition.</description>
@@ -144,11 +145,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:nidi3/raml-tester.git</connection>
-        <developerConnection>scm:git:git@github.com:nidi3/raml-tester.git</developerConnection>
-        <url>git@github.com:nidi3/raml-tester.git</url>
-      <tag>raml-tester-0.0.3</tag>
-  </scm>
+        <connection>scm:git:https://github.com/nidi3/raml-tester</connection>
+        <developerConnection>scm:git:https://github.com/nidi3/raml-tester</developerConnection>
+        <url>https://github.com/nidi3/raml-tester</url>
+    </scm>
 
     <distributionManagement>
         <snapshotRepository>
