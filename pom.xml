@@ -145,9 +145,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:nidi3/raml-tester.git</connection>
-        <developerConnection>scm:git:git@github.com:nidi3/raml-tester.git</developerConnection>
-        <url>git@github.com:nidi3/raml-tester.git</url>
+        <connection>scm:git:https://github.com/nidi3/raml-tester</connection>
+        <developerConnection>scm:git:https://github.com/nidi3/raml-tester</developerConnection>
+        <url>https://github.com/nidi3/raml-tester</url>
     </scm>
 
     <distributionManagement>
