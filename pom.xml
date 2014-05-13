@@ -4,7 +4,7 @@
 
     <groupId>guru.nidi.raml</groupId>
     <artifactId>raml-tester</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.3</version>
 
     <name>${project.artifactId}</name>
     <description>Test if a request/response matches a given raml definition.</description>
@@ -147,7 +147,7 @@
         <connection>scm:git:git@github.com:nidi3/raml-tester.git</connection>
         <developerConnection>scm:git:git@github.com:nidi3/raml-tester.git</developerConnection>
         <url>git@github.com:nidi3/raml-tester.git</url>
-      <tag>raml-tester-0.0.2</tag>
+      <tag>raml-tester-0.0.3</tag>
   </scm>
 
     <distributionManagement>
