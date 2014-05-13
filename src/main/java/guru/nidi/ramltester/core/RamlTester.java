@@ -167,7 +167,7 @@ public class RamlTester {
         Response res = action.getResponses().get("" + response.getStatus());
         responseViolations.addAndThrowIf(res == null, "responseCode.undefined", response.getStatus(), action);
         final Map<String, MimeType> bodies = res.getBody();
-        if (bodies == null || bodies.isEmpty()) {
+        if (isNoOrEmptyBodies(bodies)) {
             responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
         } else {
             if (response.getContentType() == null) {
@@ -185,6 +185,10 @@ public class RamlTester {
                 }
             }
         }
+    }
+
+    private boolean isNoOrEmptyBodies(Map<String, MimeType> bodies) {
+        return bodies == null || bodies.isEmpty() || (bodies.size() == 1 && bodies.containsKey(null));
     }
 
     private boolean hasContent(RamlResponse response) {
