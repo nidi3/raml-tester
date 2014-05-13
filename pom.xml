@@ -4,7 +4,7 @@
 
     <groupId>guru.nidi.raml</groupId>
     <artifactId>raml-tester</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <name>${project.artifactId}</name>
     <description>Test if a request/response matches a given raml definition.</description>
