@@ -21,10 +21,7 @@ import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.UriParameter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -54,38 +51,62 @@ public class RamlTester {
     }
 
     public Action testRequest(RamlRequest request) {
-        final String resourcePath = findResourcePath(request.getRequestUrl());
-        Resource resource = findResource(resourcePath);
-        requestViolations.addAndThrowIf(resource == null, "resource.undefined", resourcePath);
-        Action action = resource.getAction(request.getMethod());
-        requestViolations.addAndThrowIf(action == null, "action.undefined", request.getMethod(), resource);
-        new ParameterTester(requestViolations, false)
-                .testParameters(action.getQueryParameters(), request.getParameterMap(), new Message("queryParam", action));
+        final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl());
+        final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
+
+        testProtocol(requestUri, ramlUri);
+
+        final VariableMatcher hostMatch = getHostMatch(requestUri, ramlUri);
+        final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
+
+        Resource resource = findResource(pathMatch.getSuffix());
+        Action action = findAction(resource, request.getMethod());
+
+        testBaseUriParameters(hostMatch, pathMatch, action);
+        testQueryParameters(request.getParameterMap(), action);
         return action;
     }
 
-    private String findResourcePath(String requestUrl) {
-        final UriComponents requestUri = UriComponents.fromHttpUrl(requestUrl);
-        final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
-        if (raml.getProtocols() != null && !raml.getProtocols().isEmpty()) {
-            requestViolations.addIf(!raml.getProtocols().contains(protocolOf(requestUri.getScheme())),
-                    "protocol.undefined", requestUri.getScheme());
-        } else {
-            requestViolations.addIf(!ramlUri.getScheme().equalsIgnoreCase(requestUri.getScheme()),
-                    "protocol.undefined", requestUri.getScheme());
-        }
-        final VariableMatcher hostMatch = VariableMatcher.match(ramlUri.getHost(), requestUri.getHost());
-        if (!hostMatch.isCompleteMatch()) {
-            requestViolations.addAndThrow("baseUri.unmatched", requestUrl, raml.getBaseUri());
-        }
+    private void testQueryParameters(Map<String, String[]> values, Action action) {
+        new ParameterTester(requestViolations, false)
+                .testParameters(action.getQueryParameters(), values, new Message("queryParam", action));
+    }
+
+    private void testBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
         final ParameterTester parameterTester = new ParameterTester(requestViolations, true);
-        parameterTester.testParameters(raml.getBaseUriParameters(), hostMatch.getVariables().getValues(), new Message("baseUriParam"));
+        final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(action);
+        parameterTester.testListParameters(baseUriParams, hostMatch.getVariables().getValues(), new Message("baseUriParam",action));
+        parameterTester.testListParameters(baseUriParams, pathMatch.getVariables().getValues(), new Message("baseUriParam",action));
+    }
+
+    private Action findAction(Resource resource, String method) {
+        Action action = resource.getAction(method);
+        requestViolations.addAndThrowIf(action == null, "action.undefined", method, resource);
+        return action;
+    }
+
+    private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
         final VariableMatcher pathMatch = VariableMatcher.match(ramlUri.getPath(), requestUri.getPath());
         if (!pathMatch.isMatch()) {
-            requestViolations.addAndThrow("baseUri.unmatched", requestUrl, raml.getBaseUri());
+            requestViolations.addAndThrow("baseUri.unmatched", requestUri.getUri(), raml.getBaseUri());
         }
-        parameterTester.testParameters(raml.getBaseUriParameters(), pathMatch.getVariables().getValues(), new Message("baseUriParam"));
-        return pathMatch.getSuffix();
+        return pathMatch;
+    }
+
+    private VariableMatcher getHostMatch(UriComponents requestUri, UriComponents ramlUri) {
+        final VariableMatcher hostMatch = VariableMatcher.match(ramlUri.getHost(), requestUri.getHost());
+        if (!hostMatch.isCompleteMatch()) {
+            requestViolations.addAndThrow("baseUri.unmatched", requestUri.getUri(), raml.getBaseUri());
+        }
+        return hostMatch;
+    }
+
+    private void testProtocol(UriComponents requestUri, UriComponents ramlUri) {
+        if (raml.getProtocols() != null && !raml.getProtocols().isEmpty()) {
+            requestViolations.addIf(!raml.getProtocols().contains(protocolOf(requestUri.getScheme())), "protocol.undefined", requestUri.getScheme());
+        } else {
+            requestViolations.addIf(!ramlUri.getScheme().equalsIgnoreCase(requestUri.getScheme()), "protocol.undefined", requestUri.getScheme());
+        }
     }
 
     private Protocol protocolOf(String s) {
@@ -102,8 +123,13 @@ public class RamlTester {
         final ParameterValues parameterValues = new ParameterValues();
         final Resource resource = findResource(resourcePath, raml.getResources(), parameterValues);
         if (resource == null) {
-            return null;
+            requestViolations.addAndThrow("resource.undefined", resourcePath);
         }
+        testUriParams(parameterValues, resource);
+        return resource;
+    }
+
+    private void testUriParams(ParameterValues parameterValues, Resource resource) {
         final ParameterTester parameterTester = new ParameterTester(requestViolations, true);
         for (Map.Entry<String, String[]> entry : parameterValues.getValues().entrySet()) {
             final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
@@ -111,7 +137,6 @@ public class RamlTester {
                 parameterTester.testParameter(uriParam, entry.getValue()[0], new Message("uriParam", entry.getKey(), resource));
             }
         }
-        return resource;
     }
 
     private AbstractParam findUriParam(String uriParam, Resource resource) {
@@ -123,6 +148,34 @@ public class RamlTester {
             return findUriParam(uriParam, resource.getParentResource());
         }
         return null;
+    }
+
+    private Map<String, List<? extends AbstractParam>> getEffectiveBaseUriParams(Action action) {
+        Map<String, List<? extends AbstractParam>> params = new HashMap<>();
+        if (action.getBaseUriParameters() != null) {
+            params.putAll(action.getBaseUriParameters());
+        }
+        addNotSetBaseUriParams(action.getResource(), params);
+        return params;
+    }
+
+    private void addNotSetBaseUriParams(Resource resource, Map<String, List<? extends AbstractParam>> params) {
+        if (resource.getBaseUriParameters() != null) {
+            for (Map.Entry<String, List<UriParameter>> entry : resource.getBaseUriParameters().entrySet()) {
+                if (!params.containsKey(entry.getKey())) {
+                    params.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        if (resource.getParentResource() != null) {
+            addNotSetBaseUriParams(resource.getParentResource(), params);
+        } else if (raml.getBaseUriParameters() != null) {
+            for (Map.Entry<String, UriParameter> entry : raml.getBaseUriParameters().entrySet()) {
+                if (!params.containsKey(entry.getKey())) {
+                    params.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+                }
+            }
+        }
     }
 
     private Resource findResource(String resourcePath, Map<String, Resource> resources, ParameterValues parameterValues) {

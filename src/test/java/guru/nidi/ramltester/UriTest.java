@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +44,7 @@ public class UriTest extends HighlevelTestBase {
         mockMvc = MockMvcBuilders.standaloneSetup(this).build();
     }
 
-    @RequestMapping(value = {"/raml/v1/{def}/{type}", "/v1/{def}/{type}", "/{def}/{type}"})
+    @RequestMapping(value = {"/raml/v1/{def}/{type}", "/v1/{def}/{type}", "/{def}/{type}", "/sub-raml/{a}/{b}/{c}/{d}"})
     @ResponseBody
     public HttpEntity<String> test() {
         final HttpHeaders headers = new HttpHeaders();
@@ -98,5 +99,31 @@ public class UriTest extends HighlevelTestBase {
                 api,
                 get("/undefined/type/other/sub"),
                 jsonResponse(203));
+    }
+
+    @Test
+    public void overwrittenBaseUriParametersNok() throws Exception {
+        final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd/bu")).andReturn();
+        assertOneViolationThat(
+                api.testAgainst(mvcResult, "http://nidi.guru").getRequestViolations(),
+                equalTo("BaseUri parameter 'host' on action(GET /bu) : Value 'nidi.guru' is not a member of enum '[bu-host]'"));
+    }
+
+    @Test
+    public void overwrittenBaseUriParametersNok2() throws Exception {
+        final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/sub-raml/v1/undefd/bu/sub")).andReturn();
+        assertOneViolationThat(
+                api.testAgainst(result, "http://sub-host").getRequestViolations(),
+                equalTo("BaseUri parameter 'host' on action(GET /bu/sub) : Value 'sub-host' is not a member of enum '[sub-host-get]'"));
+    }
+
+    @Test
+    public void overwrittenBaseUriParameters() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd/bu"))
+                .andExpect(api.matches().assumingServletUri("http://bu-host"));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/sub-raml/v1/undefd/bu/sub"))
+                .andExpect(api.matches().assumingServletUri("http://sub-host-get"));
+
     }
 }

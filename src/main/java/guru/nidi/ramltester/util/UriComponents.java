@@ -101,6 +101,10 @@ public class UriComponents {
                 (port == null ? "" : (":" + port));
     }
 
+    public String getUri() {
+        return getServer() + (path == null ? "" : path);
+    }
+
     public String getScheme() {
         return scheme;
     }

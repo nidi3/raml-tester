@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.apiportal;
 
+import guru.nidi.ramltester.loader.RamlResourceLoader;
 import guru.nidi.ramltester.loader.RamlResourceLoaderRamlParserResourceLoader;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class ApiPortalLoaderTest {
         assertNotNull(new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(loader)).build("test.raml"));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = RamlResourceLoader.ResourceNotFoundException.class)
     public void fromApiPortalUnknownFile() throws IOException {
         new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(loader)).build("huhuhuhuhu.raml");
     }

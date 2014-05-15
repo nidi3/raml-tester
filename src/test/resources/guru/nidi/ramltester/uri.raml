@@ -1,8 +1,13 @@
 #%RAML 0.8
 ---
 title: uri
-baseUri: http://nidi.guru/raml/{version}/{undefined}
+baseUri: http://{host}/{root}/{version}/{undefined}
 version: v1
+baseUriParameters:
+  host:
+    enum: ['nidi.guru']
+  root:
+    enum: ['raml']
 
 /type:
   get:
@@ -26,3 +31,22 @@ version: v1
       get:
         responses:
           203:
+/bu:
+  baseUriParameters:
+    host:
+      enum: ['bu-host']
+  get:
+    responses:
+      200:
+  /sub:
+    baseUriParameters:
+      host:
+        enum: ['sub-host']
+      root:
+        enum: ['sub-raml']
+    get:
+      baseUriParameters:
+        host:
+          enum: ['sub-host-get']
+      responses:
+        200:

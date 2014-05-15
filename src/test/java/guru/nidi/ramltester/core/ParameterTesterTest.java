@@ -41,7 +41,7 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is not a valid boolean"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid boolean"));
         }
     }
 
@@ -54,7 +54,7 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is not a valid integer"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid integer"));
         }
     }
 
@@ -67,8 +67,8 @@ public class ParameterTesterTest extends CoreTestBase {
         for (String value : new String[]{"-5", "0", "666"}) {
             assertNoViolation(p, value);
         }
-        assertOneViolationThat(p, "-6", equalTo("BaseUri parameter 'xxx' : Value '-6' is smaller than minimum -5"));
-        assertOneViolationThat(p, "667", equalTo("BaseUri parameter 'xxx' : Value '667' is bigger than maximum 666"));
+        assertOneViolationThat(p, "-6", equalTo("BaseUri parameter 'xxx' on action : Value '-6' is smaller than minimum -5"));
+        assertOneViolationThat(p, "667", equalTo("BaseUri parameter 'xxx' on action : Value '667' is bigger than maximum 666"));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "-0", "1.", "1.123w"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is not a valid number"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid number"));
         }
     }
 
@@ -95,15 +95,15 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"4.9e-2", "0.0049999"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is smaller than minimum 0.05"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is smaller than minimum 0.05"));
         }
         for (String value : new String[]{"666.60001"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is bigger than maximum 666.6"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is bigger than maximum 666.6"));
         }
-        for (String value : new String[]{ "inf", "-inf", "nan"}) {
+        for (String value : new String[]{"inf", "-inf", "nan"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is not inside any minimum/maximum"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not inside any minimum/maximum"));
         }
     }
 
@@ -116,7 +116,7 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is not a valid date"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid date"));
         }
     }
 
@@ -135,8 +135,8 @@ public class ParameterTesterTest extends CoreTestBase {
         p.setType(ParamType.STRING);
         p.setMinLength(2);
         p.setMaxLength(5);
-        assertOneViolationThat(p, "a", equalTo("BaseUri parameter 'xxx' : Value 'a' is shorter than minimum length 2"));
-        assertOneViolationThat(p, "123456", equalTo("BaseUri parameter 'xxx' : Value '123456' is longer than maximum length 5"));
+        assertOneViolationThat(p, "a", equalTo("BaseUri parameter 'xxx' on action : Value 'a' is shorter than minimum length 2"));
+        assertOneViolationThat(p, "123456", equalTo("BaseUri parameter 'xxx' on action : Value '123456' is longer than maximum length 5"));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "ab", "c"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' is not a member of enum '[a, b]'"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a member of enum '[a, b]'"));
         }
     }
 
@@ -170,7 +170,7 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "12/z", "1/a", "99/A"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' does not match pattern '" + pattern + "'"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' does not match pattern '" + pattern + "'"));
         }
     }
 
@@ -184,20 +184,20 @@ public class ParameterTesterTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "12/z", "1/a"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' : Value '" + value + "' does not match pattern '/\\d{2}/[a-y]/i'"));
+                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' does not match pattern '/\\d{2}/[a-y]/i'"));
         }
     }
 
     @Test
     public void undefinedParameter() throws Exception {
         assertOneViolationThat(queryParameterMapOf(), stringArrayMapOf("a", "b"),
-                equalTo("BaseUri parameter 'a' is not defined"));
+                equalTo("BaseUri parameter 'a' on action is not defined"));
     }
 
     @Test
     public void illegallyRepeatedParameter() throws Exception {
         assertOneViolationThat(queryParameterMapOf("req", new QueryParameter()), stringArrayMapOf("req", new String[]{"a", "b"}),
-                equalTo("BaseUri parameter 'req' is not repeat but found repeatedly"));
+                equalTo("BaseUri parameter 'req' on action is not repeat but found repeatedly"));
     }
 
     @Test
@@ -212,30 +212,30 @@ public class ParameterTesterTest extends CoreTestBase {
         final QueryParameter p = new QueryParameter();
         p.setRequired(true);
         assertOneViolationThat(queryParameterMapOf("req", p), stringArrayMapOf(),
-                equalTo("BaseUri parameter 'req' is required but not found"));
+                equalTo("BaseUri parameter 'req' on action is required but not found"));
     }
 
     private void assertNoViolation(AbstractParam param, String value) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameter(param, value, new Message("baseUriParam", "xxx"));
+        new ParameterTester(violations, false).testParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(AbstractParam param, String value, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameter(param, value, new Message("baseUriParam", "xxx"));
+        new ParameterTester(violations, false).testParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertOneViolationThat(violations, matcher);
     }
 
     private void assertNoViolation(Map<String, ? extends AbstractParam> params, Map<String, String[]> values) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameters(params, values, new Message("baseUriParam"));
+        new ParameterTester(violations, false).testParameters(params, values, new Message("baseUriParam", "action"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameters(params, values, new Message("baseUriParam"));
+        new ParameterTester(violations, false).testParameters(params, values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);
     }
 }

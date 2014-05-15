@@ -22,10 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -48,23 +45,35 @@ class ParameterTester {
     }
 
     public void testParameters(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Message message) {
+        Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
+        for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
+            listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+        }
+        testListParameters(listParams, values, message);
+    }
+
+    public void testListParameters(Map<String, List<? extends AbstractParam>> params, Map<String, String[]> values, Message message) {
         Set<String> found = new HashSet<>();
         for (Map.Entry<String, String[]> entry : values.entrySet()) {
-            final AbstractParam parameter = params.get(entry.getKey());
             final Message namedMsg = message.withParam(entry.getKey());
-            if (parameter == null) {
+            final List<? extends AbstractParam> parameters = params.get(entry.getKey());
+            if (parameters == null || parameters.isEmpty()) {
                 violations.addIf(!acceptUndefined, namedMsg.withMessageParam("undefined"));
             } else {
-                violations.addIf(!parameter.isRepeat() && entry.getValue().length > 1, namedMsg.withMessageParam("repeat.superfluous"));
-                for (String value : entry.getValue()) {
-                    testParameter(parameter, value, namedMsg);
+                for (AbstractParam parameter : parameters) {
+                    violations.addIf(!parameter.isRepeat() && entry.getValue().length > 1, namedMsg.withMessageParam("repeat.superfluous"));
+                    for (String value : entry.getValue()) {
+                        testParameter(parameter, value, namedMsg);
+                    }
                 }
                 found.add(entry.getKey());
             }
         }
-        for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
+        for (Map.Entry<String, List<? extends AbstractParam>> entry : params.entrySet()) {
             final Message namedMsg = message.withParam(entry.getKey());
-            violations.addIf(entry.getValue().isRequired() && !found.contains(entry.getKey()), namedMsg.withMessageParam("required.missing"));
+            for (AbstractParam parameter : entry.getValue()) {
+                violations.addIf(parameter.isRequired() && !found.contains(entry.getKey()), namedMsg.withMessageParam("required.missing"));
+            }
         }
     }
 
