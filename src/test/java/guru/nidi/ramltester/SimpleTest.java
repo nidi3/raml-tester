@@ -258,7 +258,7 @@ public class SimpleTest extends HighlevelTestBase {
     @Test
     public void defaultMediaType() throws Exception {
         assertOneResponseViolationThat(
-                RamlDefinition.load("simple.raml").withSchemaValidator(new DummySchemaValidator()).fromClasspath(getClass()),
+                RamlDefinition.load("simple.raml").addSchemaValidator(new DummySchemaValidator()).fromClasspath(getClass()),
                 get("/mediaType"),
                 jsonResponse(200, "\"hula\"", "application/default"),
                 equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +

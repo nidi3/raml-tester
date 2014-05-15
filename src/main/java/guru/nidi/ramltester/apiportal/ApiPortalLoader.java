@@ -52,9 +52,10 @@ public class ApiPortalLoader implements RamlResourceLoader {
     @Override
     public InputStream fetchResource(String resourceName) {
         final ApiPortalFile file = findFile(resourceName);
-        return file != null
-                ? new ByteArrayInputStream(file.getContent().getBytes(Charset.forName("utf-8")))
-                : null;
+        if (file == null) {
+            throw new ResourceNotFoundException(resourceName);
+        }
+        return new ByteArrayInputStream(file.getContent().getBytes(Charset.forName("utf-8")));
     }
 
     private ApiPortalFilesResponse load() throws IOException {

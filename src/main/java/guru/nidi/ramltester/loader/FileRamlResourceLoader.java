@@ -15,24 +15,27 @@
  */
 package guru.nidi.ramltester.loader;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 /**
  *
  */
-public class ClassPathRamlResourceLoader implements RamlResourceLoader {
-    private final String base;
+public class FileRamlResourceLoader implements RamlResourceLoader {
+    private final File base;
 
-    public ClassPathRamlResourceLoader(String base) {
+    public FileRamlResourceLoader(File base) {
         this.base = base;
     }
 
     @Override
     public InputStream fetchResource(String name) {
-        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(base + "/" + name);
-        if (resource == null) {
-            throw new ResourceNotFoundException(name);
+        try {
+            return new FileInputStream(new File(base, name));
+        } catch (FileNotFoundException e) {
+            throw new ResourceNotFoundException(name, e);
         }
-        return resource;
     }
 }

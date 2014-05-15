@@ -43,7 +43,7 @@ class SchemaValidators {
         return new SchemaValidators(Arrays.asList(new RestassuredSchemaValidator(), new JavaXmlSchemaValidator()));
     }
 
-    public SchemaValidators withSchemaValidator(SchemaValidator schemaValidator) {
+    public SchemaValidators addSchemaValidator(SchemaValidator schemaValidator) {
         final ArrayList<SchemaValidator> newValidators = new ArrayList<>(validators);
         newValidators.add(schemaValidator);
         return new SchemaValidators(newValidators);

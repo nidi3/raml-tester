@@ -18,10 +18,12 @@ package guru.nidi.ramltester;
 import guru.nidi.ramltester.apiportal.ApiPortalLoader;
 import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.loader.ClassPathRamlResourceLoader;
+import guru.nidi.ramltester.loader.FileRamlResourceLoader;
 import guru.nidi.ramltester.loader.RamlResourceLoader;
 import guru.nidi.ramltester.loader.RamlResourceLoaderRamlParserResourceLoader;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -36,8 +38,8 @@ public class RamlLoaders {
         this.schemaValidators = schemaValidators != null ? schemaValidators : SchemaValidators.standard();
     }
 
-    public RamlLoaders withSchemaValidator(SchemaValidator schemaValidator) {
-        return new RamlLoaders(name, schemaValidators.withSchemaValidator(schemaValidator));
+    public RamlLoaders addSchemaValidator(SchemaValidator schemaValidator) {
+        return new RamlLoaders(name, schemaValidators.addSchemaValidator(schemaValidator));
     }
 
     public RamlDefinition fromClasspath(Class<?> basePackage) {
@@ -45,7 +47,11 @@ public class RamlLoaders {
     }
 
     public RamlDefinition fromClasspath(String basePackage) {
-        return fromLoader(new ClassPathRamlResourceLoader(basePackage));
+        return usingLoader(new ClassPathRamlResourceLoader(basePackage));
+    }
+
+    public RamlDefinition fromFile(File baseDirectory) {
+        return usingLoader(new FileRamlResourceLoader(baseDirectory));
     }
 
     public RamlDefinition fromApiPortal(String user, String password) throws IOException {
@@ -53,10 +59,10 @@ public class RamlLoaders {
     }
 
     public RamlDefinition fromApiPortal(ApiPortalLoader loader) throws IOException {
-        return fromLoader(loader);
+        return usingLoader(loader);
     }
 
-    public RamlDefinition fromLoader(RamlResourceLoader loader) {
+    public RamlDefinition usingLoader(RamlResourceLoader loader) {
         final SchemaValidators validators = schemaValidators.withResourceLoader(loader);
         return new RamlDefinition(new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(loader)).build(name), validators);
     }

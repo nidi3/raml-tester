@@ -21,5 +21,22 @@ import java.io.InputStream;
  *
  */
 public interface RamlResourceLoader {
-    InputStream fetchResource(String name);
+    class ResourceNotFoundException extends RuntimeException {
+        private final String resourceName;
+
+        public ResourceNotFoundException(String resourceName, Throwable cause) {
+            super(cause);
+            this.resourceName = resourceName;
+        }
+
+        public ResourceNotFoundException(String resourceName) {
+            this.resourceName = resourceName;
+        }
+
+        public String getResourceName() {
+            return resourceName;
+        }
+    }
+
+    InputStream fetchResource(String name) throws ResourceNotFoundException;
 }
