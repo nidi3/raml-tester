@@ -26,7 +26,7 @@ import java.util.Properties;
 /**
  *
  */
-class Message {
+public class Message {
     private static final Properties MESSAGES;
 
     static {

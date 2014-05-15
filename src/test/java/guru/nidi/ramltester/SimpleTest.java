@@ -15,6 +15,11 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.core.MediaType;
+import guru.nidi.ramltester.core.Message;
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.core.SchemaValidator;
+import guru.nidi.ramltester.loader.RamlResourceLoader;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -128,18 +133,29 @@ public class SimpleTest extends HighlevelTestBase {
     }
 
     @Test
-    public void matchingSchema() throws UnsupportedEncodingException {
+    public void matchingJsonSchema() throws UnsupportedEncodingException {
         assertNoViolations(simple, get("/schema"), jsonResponse(200, "\"str\""));
     }
 
     @Test
-    public void matchingReferencedSchema() throws UnsupportedEncodingException {
+    public void matchingXmlSchema() throws UnsupportedEncodingException {
+        assertNoViolations(simple, get("/schema"), jsonResponse(208, "<api-request><input>str</input></api-request>", "text/xml"));
+    }
+
+    @Test
+    public void matchingReferencedJsonSchema() throws UnsupportedEncodingException {
         assertNoViolations(simple, get("/schema"), jsonResponse(204, "\"str\""));
         assertNoViolations(simple, get("/schema"), jsonResponse(205, "\"str\""));
     }
 
     @Test
-    public void notMatchingSchemaInline() throws Exception {
+    public void matchingReferencedXmlSchema() throws UnsupportedEncodingException {
+        assertNoViolations(simple, get("/schema"), jsonResponse(206, "<api-request><input>str</input></api-request>", "application/xml"));
+        assertNoViolations(simple, get("/schema"), jsonResponse(207, "<api-request><input>str</input></api-request>", "application/xml"));
+    }
+
+    @Test
+    public void notMatchingJsonSchemaInline() throws Exception {
         assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
@@ -151,7 +167,7 @@ public class SimpleTest extends HighlevelTestBase {
     }
 
     @Test
-    public void notMatchingSchemaInclude() throws Exception {
+    public void notMatchingJsonSchemaInclude() throws Exception {
         assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
@@ -163,7 +179,7 @@ public class SimpleTest extends HighlevelTestBase {
     }
 
     @Test
-    public void notMatchingSchemaReferenced() throws Exception {
+    public void notMatchingJsonSchemaReferenced() throws Exception {
         assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
@@ -171,6 +187,52 @@ public class SimpleTest extends HighlevelTestBase {
                 startsWith("Response content does not match schema for action(GET /schema) response(202) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: ")
+        );
+    }
+
+    @Test
+    public void notMatchingXmlSchemaInline() throws Exception {
+        assertResponseViolationsThat(
+                simple,
+                get("/schema"),
+                jsonResponse(208, "<api-request>str</api-request>", "text/xml"),
+                startsWith("Response content does not match schema for action(GET /schema) response(208) mime-type('text/xml')\n" +
+                        "Content: <api-request>str</api-request>\n" +
+                        "Message: ")
+        );
+    }
+
+    @Test
+    public void notMatchingXmlSchemaInclude() throws Exception {
+        assertResponseViolationsThat(
+                simple,
+                get("/schema"),
+                jsonResponse(206, "5", "application/xml"),
+                startsWith("Response content does not match schema for action(GET /schema) response(206) mime-type('application/xml')\n" +
+                        "Content: 5\n" +
+                        "Message: ")
+        );
+    }
+
+    @Test
+    public void notMatchingXmlSchemaReferenced() throws Exception {
+        assertResponseViolationsThat(
+                simple,
+                get("/schema"),
+                jsonResponse(207, "5", "application/xml"),
+                startsWith("Response content does not match schema for action(GET /schema) response(207) mime-type('application/xml')\n" +
+                        "Content: 5\n" +
+                        "Message: ")
+        );
+    }
+
+    @Test
+    public void noSchemaValidatorForMediaType() throws Exception {
+        assertOneResponseViolationThat(
+                simple,
+                get("/schema"),
+                jsonResponse(209, "5", "text/bla"),
+                equalTo("No SchemaValidator found for media type 'text/bla' on action(GET /schema) response(209)")
         );
     }
 
@@ -187,15 +249,38 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(203, "5"),
-                equalTo("Schema 'undefined' is referenced but not defined on action(GET /schema) response(203) mime-type('application/json')"));
+                startsWith("Response content does not match schema for action(GET /schema) response(203) mime-type('application/json')\n" +
+                        "Content: 5\n" +
+                        "Message: Schema invalid:")
+        );
     }
 
     @Test
     public void defaultMediaType() throws Exception {
-        assertNoViolations(
-                simple,
+        assertOneResponseViolationThat(
+                RamlDefinition.load("simple.raml").withSchemaValidator(new DummySchemaValidator()).fromClasspath(getClass()),
                 get("/mediaType"),
-                jsonResponse(200, "\"hula\"", "application/default"));
+                jsonResponse(200, "\"hula\"", "application/default"),
+                equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
+                        "Content: \"hula\"\n" +
+                        "Message: ok")
+        );
     }
 
+    private static class DummySchemaValidator implements SchemaValidator {
+        @Override
+        public boolean supports(MediaType mediaType) {
+            return mediaType.isCompatibleWith(MediaType.valueOf("application/default"));
+        }
+
+        @Override
+        public SchemaValidator withResourceLoader(RamlResourceLoader resourceLoader) {
+            return this;
+        }
+
+        @Override
+        public void validate(String content, String schema, RamlViolations violations, Message message) {
+            violations.add(message.withParam("ok"));
+        }
+    }
 }

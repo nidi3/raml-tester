@@ -21,7 +21,7 @@ import java.util.*;
 /**
  *
  */
-class MediaType {
+public class MediaType {
     private static final String WILDCARD_TYPE = "*";
 
     private String type;
@@ -58,9 +58,8 @@ class MediaType {
             throw new InvalidMediaTypeException(mimeType, "wildcard type is legal only in '*/*' (all mime types)");
         }
 
-        Map<String, String> parameters = null;
+        Map<String, String> parameters = new LinkedHashMap<>(parts.length);
         if (parts.length > 1) {
-            parameters = new LinkedHashMap<>(parts.length - 1);
             for (int i = 1; i < parts.length; i++) {
                 String parameter = parts[i];
                 int eqIndex = parameter.indexOf('=');
@@ -154,5 +153,14 @@ class MediaType {
 
     private static String[] toStringArray(Collection<String> collection) {
         return collection == null ? null : collection.toArray(new String[collection.size()]);
+    }
+
+    @Override
+    public String toString() {
+        String res = type + "/" + subtype;
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            res += ";" + entry.getKey() + "=" + entry.getValue();
+        }
+        return res;
     }
 }

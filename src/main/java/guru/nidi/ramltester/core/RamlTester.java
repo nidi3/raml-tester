@@ -31,13 +31,13 @@ import java.util.Map;
  */
 public class RamlTester {
     private final Raml raml;
-    private final SchemaValidator schemaValidator;
+    private final List<SchemaValidator> schemaValidators;
     private RamlReport report;
     private RamlViolations requestViolations, responseViolations;
 
-    public RamlTester(Raml raml, SchemaValidator schemaValidator) {
+    public RamlTester(Raml raml, List<SchemaValidator> schemaValidators) {
         this.raml = raml;
-        this.schemaValidator = schemaValidator;
+        this.schemaValidators = schemaValidators;
     }
 
     public RamlReport test(RamlRequest request, RamlResponse response) {
@@ -173,18 +173,29 @@ public class RamlTester {
             if (response.getContentType() == null) {
                 responseViolations.addAndThrowIf(hasContent(response) || !existSchemalessBody(bodies), "contentType.missing");
             } else {
-                MimeType mimeType = findMatchingMimeType(bodies, response.getContentType());
+                MediaType targetType = MediaType.valueOf(response.getContentType());
+                MimeType mimeType = findMatchingMimeType(bodies, targetType);
                 responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
                 String schema = mimeType.getSchema();
                 if (schema != null) {
-                    if (!schema.trim().startsWith("{")) {
-                        schema = raml.getConsolidatedSchemas().get(mimeType.getSchema());
-                        responseViolations.addAndThrowIf(schema == null, "schema.missing", mimeType.getSchema(), action, response.getStatus(), mimeType);
-                    }
-                    schemaValidator.validate(response.getContentAsString(), schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType));
+                    final SchemaValidator validator = findSchemaValidator(targetType);
+                    responseViolations.addAndThrowIf(validator == null, "schemaValidator.missing", targetType, action, response.getStatus());
+                    final String content = response.getContentAsString();
+                    String refSchema = raml.getConsolidatedSchemas().get(schema);
+                    schema = refSchema != null ? refSchema : schema;
+                    validator.validate(content, schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType, content));
                 }
             }
         }
+    }
+
+    private SchemaValidator findSchemaValidator(MediaType mediaType) {
+        for (SchemaValidator validator : schemaValidators) {
+            if (validator.supports(mediaType)) {
+                return validator;
+            }
+        }
+        return null;
     }
 
     private boolean isNoOrEmptyBodies(Map<String, MimeType> bodies) {
@@ -204,9 +215,8 @@ public class RamlTester {
         return false;
     }
 
-    private MimeType findMatchingMimeType(Map<String, MimeType> bodies, String toFind) {
+    private MimeType findMatchingMimeType(Map<String, MimeType> bodies, MediaType targetType) {
         try {
-            MediaType targetType = MediaType.valueOf(toFind);
             for (Map.Entry<String, MimeType> entry : bodies.entrySet()) {
                 if (targetType.isCompatibleWith(MediaType.valueOf(entry.getKey()))) {
                     return entry.getValue();

@@ -29,7 +29,7 @@ public class RamlViolations implements Iterable<String> {
         this.violations = new ArrayList<>();
     }
 
-    void add(Message message) {
+    public void add(Message message) {
         violations.add(message.toString());
     }
 
@@ -42,7 +42,7 @@ public class RamlViolations implements Iterable<String> {
         throw new RamlViolationException();
     }
 
-    void addIf(boolean condition, Message message) {
+    public void addIf(boolean condition, Message message) {
         if (condition) {
             add(message);
         }

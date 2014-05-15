@@ -24,10 +24,10 @@ import java.net.URI;
 /**
  *
  */
-public class UriDownloaderResourceLoader implements URIDownloader {
+public class RamlResourceLoaderUriDownloader implements URIDownloader {
     private final RamlResourceLoader delegate;
 
-    public UriDownloaderResourceLoader(RamlResourceLoader delegate) {
+    public RamlResourceLoaderUriDownloader(RamlResourceLoader delegate) {
         this.delegate = delegate;
     }
 

@@ -85,6 +85,12 @@ public class HighlevelTestBase {
         assertOneViolationThat(report.getResponseViolations(), matcher);
     }
 
+    protected void assertResponseViolationsThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
+        final RamlReport report = test(raml, request, response);
+        assertNoViolations(report.getRequestViolations());
+        assertViolationsThat(report.getResponseViolations(), matcher);
+    }
+
     private RamlReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
         return raml.testAgainst(
                 new SpringMockRamlRequest("http://nidi.guru/raml/v1", request),
@@ -94,6 +100,12 @@ public class HighlevelTestBase {
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
         assertThat("Expected exactly one violation", 1, equalTo(violations.size()));
         assertThat(violations.iterator().next(), matcher);
+    }
+
+    protected void assertViolationsThat(RamlViolations violations, Matcher<String> matcher) {
+        for (String violation : violations) {
+            assertThat(violation, matcher);
+        }
     }
 
 

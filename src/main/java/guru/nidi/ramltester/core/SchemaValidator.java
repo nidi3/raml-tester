@@ -21,7 +21,9 @@ import guru.nidi.ramltester.loader.RamlResourceLoader;
  *
  */
 public interface SchemaValidator {
-    SchemaValidator withResourceLoader(String base, RamlResourceLoader resourceLoader);
+    boolean supports(MediaType mediaType);
+
+    SchemaValidator withResourceLoader(RamlResourceLoader resourceLoader);
 
     void validate(String content, String schema, RamlViolations violations, Message message);
 }

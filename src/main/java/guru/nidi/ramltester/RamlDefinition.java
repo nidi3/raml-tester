@@ -15,7 +15,10 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.*;
+import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.core.RamlResponse;
+import guru.nidi.ramltester.core.RamlTester;
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.servlet.ServletRamlResponse;
 import guru.nidi.ramltester.spring.RamlMatcher;
@@ -38,19 +41,19 @@ import java.io.IOException;
  */
 public class RamlDefinition {
     private final Raml raml;
-    private final SchemaValidator schemaValidator;
+    private final SchemaValidators schemaValidators;
 
-    public RamlDefinition(Raml raml, SchemaValidator schemaValidator) {
+    public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
         this.raml = raml;
-        this.schemaValidator = schemaValidator != null ? schemaValidator : new RestassuredSchemaValidator();
+        this.schemaValidators = schemaValidators;
     }
 
     public static RamlLoaders load(String name) {
-        return new RamlLoaders(name, null, null);
+        return new RamlLoaders(name, null);
     }
 
     public RamlTester createTester() {
-        return new RamlTester(raml, schemaValidator);
+        return new RamlTester(raml, schemaValidators.getValidators());
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {

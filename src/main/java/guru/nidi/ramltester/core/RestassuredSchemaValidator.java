@@ -19,9 +19,10 @@ import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBuilder;
 import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.jayway.restassured.module.jsv.JsonSchemaValidationException;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
 import guru.nidi.ramltester.loader.RamlResourceLoader;
-import guru.nidi.ramltester.loader.UriDownloaderResourceLoader;
+import guru.nidi.ramltester.loader.RamlResourceLoaderUriDownloader;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
@@ -32,6 +33,8 @@ import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonS
  *
  */
 public class RestassuredSchemaValidator implements SchemaValidator {
+    private static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
+
     private final JsonSchemaFactory schemaFactory;
     private final JsonSchemaValidatorSettings schemaValidatorSettings;
 
@@ -53,21 +56,21 @@ public class RestassuredSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public SchemaValidator withResourceLoader(String base, RamlResourceLoader resourceLoader) {
+    public boolean supports(MediaType mediaType) {
+        return mediaType.isCompatibleWith(APPLICATION_JSON);
+    }
+
+    @Override
+    public SchemaValidator withResourceLoader(RamlResourceLoader resourceLoader) {
         final LoadingConfigurationBuilder loadingConfig = LoadingConfiguration.newBuilder();
-        final String namespace;
-        if (resourceLoader != null) {
-            namespace = base + ":///";
-            loadingConfig.addScheme(base, new UriDownloaderResourceLoader(resourceLoader));
-        } else {
-            namespace = base.endsWith("/") ? base : (base + "/");
-        }
-        loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(namespace).freeze());
+        final String simpleName = resourceLoader.getClass().getSimpleName();
+        loadingConfig.addScheme(simpleName, new RamlResourceLoaderUriDownloader(resourceLoader));
+        loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(simpleName + ":///").freeze());
         return using(JsonSchemaFactory.newBuilder().setLoadingConfiguration(loadingConfig.freeze()).freeze());
     }
 
     @SuppressWarnings("unchecked")
-    public Matcher<String> getMatcher(String data) {
+    private Matcher<String> getMatcher(String data) {
         if (schemaFactory != null) {
             return (Matcher<String>) matchesJsonSchema(data).using(schemaFactory);
         }
@@ -79,10 +82,14 @@ public class RestassuredSchemaValidator implements SchemaValidator {
 
     @Override
     public void validate(String content, String schema, RamlViolations violations, Message message) {
-        final Matcher<String> matcher = getMatcher(schema);
-        if (!matcher.matches(content)) {
-            Description description = new StringDescription().appendDescriptionOf(matcher);
-            violations.add(message.withParam(content).withParam(description.toString()));
+        try {
+            final Matcher<String> matcher = getMatcher(schema);
+            if (!matcher.matches(content)) {
+                Description description = new StringDescription().appendDescriptionOf(matcher);
+                violations.add(message.withParam(description.toString()));
+            }
+        } catch (JsonSchemaValidationException e) {
+            violations.add(message.withMessageParam("restassuredSchemaValidator.schema.invalid", e.getMessage()));
         }
     }
 }

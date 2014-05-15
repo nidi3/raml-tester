@@ -57,6 +57,32 @@ schemas:
         body:
           application/json:
             schema: !include ref.json
+      206:
+        body:
+          application/xml:
+            schema: !include string.xsd
+      207:
+        body:
+          application/xml:
+            schema: !include ref.xsd
+      208:
+        body:
+          text/xml:
+            schema: |
+              <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+                         xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                  <xs:element name="api-request">
+                      <xs:complexType>
+                          <xs:sequence>
+                              <xs:element type="xs:string" name="input"/>
+                          </xs:sequence>
+                      </xs:complexType>
+                  </xs:element>
+              </xs:schema>
+      209:
+        body:
+          text/bla:
+            schema: text/bla
 /mediaType:
   get:
     responses:

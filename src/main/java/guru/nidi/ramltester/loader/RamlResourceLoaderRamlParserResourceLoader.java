@@ -22,10 +22,10 @@ import java.io.InputStream;
 /**
  *
  */
-public class RamlParserResourceLoader implements ResourceLoader {
+public class RamlResourceLoaderRamlParserResourceLoader implements ResourceLoader {
     private final RamlResourceLoader delegate;
 
-    public RamlParserResourceLoader(RamlResourceLoader delegate) {
+    public RamlResourceLoaderRamlParserResourceLoader(RamlResourceLoader delegate) {
         this.delegate = delegate;
     }
 
