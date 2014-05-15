@@ -171,8 +171,7 @@
         <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser</artifactId>
-            <!-- TODO remove patched PojoTupleBulder as soon as a new release is available -->
-            <version>0.8.3</version>
+            <version>0.8.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
