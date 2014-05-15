@@ -25,5 +25,7 @@ public interface RamlRequest {
 
     String getMethod();
 
-    Map<String,String[]> getParameterMap();
+    Map<String, String[]> getParameterMap();
+
+    Map<String, String[]> getHeaderMap();
 }

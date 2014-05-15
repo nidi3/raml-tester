@@ -27,6 +27,12 @@ import java.util.*;
  *
  */
 public class RamlTester {
+    private final static class DefaultHeaders {
+        private static final Set<String>
+                REQUEST = new HashSet<>(Arrays.asList("Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Accept-Datetime", "Authorization", "Cache-Control", "Connection", "Cookie", "Content-Length", "Content-MD5", "Content-Type", "Date", "Expect", "From", "Host", "If-Match", "If-Modified-Since", "If-None-Match", "If-Range", "If-Unmodified-Since", "Max-Forwards", "Origin", "Pragma", "Proxy-Authorization", "Range", "Referer", "TE", "User-Agent", "Upgrade", "Via", "Warning")),
+                RESPONSE = new HashSet<>(Arrays.asList("Access-Control-Allow-Origin", "Accept-Ranges", "Age", "Allow", "Cache-Control", "Connection", "Content-Encoding", "Content-Language", "Content-Length", "Content-Location", "Content-MD5", "Content-Disposition", "Content-Range", "Content-Type", "Date", "ETag", "Expires", "Last-Modified", "Link", "Location", "P3P", "Pragma", "Proxy-Authenticate", "Refresh", "Retry-After", "Server", "Set-Cookie", "Status", "Strict-Transport-Security", "Trailer", "Transfer-Encoding", "Upgrade", "Vary", "Via", "Warning", "WWW-Authenticate", "X-Frame-Options"));
+    }
+
     private final Raml raml;
     private final List<SchemaValidator> schemaValidators;
     private RamlReport report;
@@ -64,6 +70,7 @@ public class RamlTester {
 
         testBaseUriParameters(hostMatch, pathMatch, action);
         testQueryParameters(request.getParameterMap(), action);
+        testRequestHeaderParameters(request.getHeaderMap(), action);
         return action;
     }
 
@@ -72,11 +79,16 @@ public class RamlTester {
                 .testParameters(action.getQueryParameters(), values, new Message("queryParam", action));
     }
 
+    private void testRequestHeaderParameters(Map<String, String[]> values, Action action) {
+        new ParameterTester(requestViolations, false, DefaultHeaders.REQUEST)
+                .testParameters(action.getHeaders(), values, new Message("headerParam", action));
+    }
+
     private void testBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
         final ParameterTester parameterTester = new ParameterTester(requestViolations, true);
         final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(action);
-        parameterTester.testListParameters(baseUriParams, hostMatch.getVariables().getValues(), new Message("baseUriParam",action));
-        parameterTester.testListParameters(baseUriParams, pathMatch.getVariables().getValues(), new Message("baseUriParam",action));
+        parameterTester.testListParameters(baseUriParams, hostMatch.getVariables().getValues(), new Message("baseUriParam", action));
+        parameterTester.testListParameters(baseUriParams, pathMatch.getVariables().getValues(), new Message("baseUriParam", action));
     }
 
     private Action findAction(Resource resource, String method) {
@@ -217,8 +229,8 @@ public class RamlTester {
     }
 
     public void testResponse(Action action, RamlResponse response) {
-        Response res = action.getResponses().get("" + response.getStatus());
-        responseViolations.addAndThrowIf(res == null, "responseCode.undefined", response.getStatus(), action);
+        Response res = findResponse(action, response.getStatus());
+        testResponseHeaderParameters(response.getHeaderMap(), res);
         final Map<String, MimeType> bodies = res.getBody();
         if (isNoOrEmptyBodies(bodies)) {
             responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
@@ -240,6 +252,17 @@ public class RamlTester {
                 }
             }
         }
+    }
+
+    private void testResponseHeaderParameters(Map<String, String[]> values, Response response) {
+        new ParameterTester(requestViolations, false, DefaultHeaders.RESPONSE)
+                .testParameters(response.getHeaders(), values, new Message("headerParam", response));
+    }
+
+    private Response findResponse(Action action, int status) {
+        Response res = action.getResponses().get("" + status);
+        responseViolations.addAndThrowIf(res == null, "responseCode.undefined", status, action);
+        return res;
     }
 
     private SchemaValidator findSchemaValidator(MediaType mediaType) {

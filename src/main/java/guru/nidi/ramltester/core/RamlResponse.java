@@ -15,6 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
+import java.util.Map;
+
 /**
  *
  */
@@ -24,4 +26,7 @@ public interface RamlResponse {
     String getContentType();
 
     String getContentAsString();
+
+    Map<String, String[]> getHeaderMap();
+
 }

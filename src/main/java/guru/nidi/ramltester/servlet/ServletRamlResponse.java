@@ -16,11 +16,17 @@
 package guru.nidi.ramltester.servlet;
 
 import guru.nidi.ramltester.core.RamlResponse;
+import guru.nidi.ramltester.util.ParameterValues;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  *
@@ -33,9 +39,14 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     private ServletOutputStream outputStream;
 
     private int status = HttpServletResponse.SC_OK;
+    private final ParameterValues headers = new ParameterValues();
 
     public ServletRamlResponse(HttpServletResponse delegate) {
         super(delegate);
+    }
+
+    private HttpServletResponse response() {
+        return (HttpServletResponse) getResponse();
     }
 
     @Override
@@ -48,6 +59,48 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     public void setStatus(int sc, String sm) {
         status = sc;
         super.setStatus(sc, sm);
+    }
+
+    @Override
+    public void setHeader(String name, String value) {
+        headers.setValue(name, value);
+        super.setHeader(name, value);
+    }
+
+    @Override
+    public void addHeader(String name, String value) {
+        headers.addValue(name, value);
+        super.addHeader(name, value);
+    }
+
+    @Override
+    public void setIntHeader(String name, int value) {
+        headers.setValue(name, "" + value);
+        super.setIntHeader(name, value);
+    }
+
+    @Override
+    public void addIntHeader(String name, int value) {
+        headers.addValue(name, "" + value);
+        super.addIntHeader(name, value);
+    }
+
+    @Override
+    public void setDateHeader(String name, long date) {
+        headers.setValue(name, dateToString(date));
+        super.setDateHeader(name, date);
+    }
+
+    @Override
+    public void addDateHeader(String name, long date) {
+        headers.addValue(name, dateToString(date));
+        super.addDateHeader(name, date);
+    }
+
+    private String dateToString(long date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return dateFormat.format(new Date(date));
     }
 
     @Override
@@ -87,5 +140,10 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     @Override
     public int getStatus() {
         return status;
+    }
+
+    @Override
+    public Map<String, String[]> getHeaderMap() {
+        return headers.getValues();
     }
 }

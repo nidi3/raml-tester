@@ -38,10 +38,16 @@ class ParameterTester {
 
     private final RamlViolations violations;
     private final boolean acceptUndefined;
+    private final Set<String> predefined;
 
-    ParameterTester(RamlViolations violations, boolean acceptUndefined) {
+    ParameterTester(RamlViolations violations, boolean acceptUndefined, Set<String> predefined) {
         this.violations = violations;
         this.acceptUndefined = acceptUndefined;
+        this.predefined = predefined;
+    }
+
+    ParameterTester(RamlViolations violations, boolean acceptUndefined) {
+        this(violations, acceptUndefined, Collections.<String>emptySet());
     }
 
     public void testParameters(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Message message) {
@@ -58,7 +64,7 @@ class ParameterTester {
             final Message namedMsg = message.withParam(entry.getKey());
             final List<? extends AbstractParam> parameters = params.get(entry.getKey());
             if (parameters == null || parameters.isEmpty()) {
-                violations.addIf(!acceptUndefined, namedMsg.withMessageParam("undefined"));
+                violations.addIf(!acceptUndefined && !predefined.contains(entry.getKey()), namedMsg.withMessageParam("undefined"));
             } else {
                 for (AbstractParam parameter : parameters) {
                     violations.addIf(!parameter.isRepeat() && entry.getValue().length > 1, namedMsg.withMessageParam("repeat.superfluous"));

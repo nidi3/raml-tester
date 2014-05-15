@@ -19,6 +19,9 @@ import guru.nidi.ramltester.core.RamlResponse;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -47,5 +50,15 @@ public class SpringMockRamlResponse implements RamlResponse {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Problem extracting response content", e);
         }
+    }
+
+    @Override
+    public Map<String, String[]> getHeaderMap() {
+        final HashMap<String, String[]> headers = new HashMap<>();
+        for (String name : delegate.getHeaderNames()) {
+            final List<Object> values = delegate.getHeaderValues(name);
+            headers.put(name, values.toArray(new String[values.size()]));
+        }
+        return headers;
     }
 }

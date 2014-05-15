@@ -19,7 +19,7 @@ import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -59,5 +59,21 @@ public class SpringMockRamlRequest implements RamlRequest {
     @Override
     public Map<String, String[]> getParameterMap() {
         return delegate.getParameterMap();
+    }
+
+    @Override
+    public Map<String, String[]> getHeaderMap() {
+        final HashMap<String, String[]> headers = new HashMap<>();
+        final Enumeration<String> names = delegate.getHeaderNames();
+        while (names.hasMoreElements()) {
+            final String name = names.nextElement();
+            final Enumeration<String> values = delegate.getHeaders(name);
+            final List<String> valueList = new ArrayList<>();
+            while (values.hasMoreElements()) {
+                valueList.add(values.nextElement());
+            }
+            headers.put(name, valueList.toArray(new String[valueList.size()]));
+        }
+        return headers;
     }
 }

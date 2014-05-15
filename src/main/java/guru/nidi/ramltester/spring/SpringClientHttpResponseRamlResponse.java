@@ -22,6 +22,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -92,7 +95,7 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
         if (body == null) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             copy(response.getBody(), out);
-            body= out.toByteArray();
+            body = out.toByteArray();
         }
         return new ByteArrayInputStream(body);
     }
@@ -100,6 +103,15 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
     @Override
     public HttpHeaders getHeaders() {
         return response.getHeaders();
+    }
+
+    @Override
+    public Map<String, String[]> getHeaderMap() {
+        final HashMap<String, String[]> headers = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
+            headers.put(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]));
+        }
+        return headers;
     }
 
     private void copy(InputStream in, OutputStream out) throws IOException {

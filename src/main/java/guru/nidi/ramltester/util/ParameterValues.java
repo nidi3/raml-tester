@@ -37,6 +37,10 @@ public class ParameterValues {
         values.put(name, newValues);
     }
 
+    public void setValue(String name, String value) {
+        values.put(name, new String[]{value});
+    }
+
     public void addValues(String name, String[] values) {
         for (String value : values) {
             addValue(name, value);
