@@ -16,12 +16,9 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.apiportal.ApiPortalLoader;
-import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.loader.ClassPathRamlResourceLoader;
 import guru.nidi.ramltester.loader.FileRamlResourceLoader;
 import guru.nidi.ramltester.loader.RamlResourceLoader;
-import guru.nidi.ramltester.loader.RamlResourceLoaderRamlParserResourceLoader;
-import org.raml.parser.visitor.RamlDocumentBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,41 +26,31 @@ import java.io.IOException;
 /**
  *
  */
-public class RamlLoaders {
-    private final String name;
-    private final SchemaValidators schemaValidators;
-
-    RamlLoaders(String name, SchemaValidators schemaValidators) {
-        this.name = name;
-        this.schemaValidators = schemaValidators != null ? schemaValidators : SchemaValidators.standard();
+public class TestRaml {
+    private TestRaml() {
     }
 
-    public RamlLoaders addSchemaValidator(SchemaValidator schemaValidator) {
-        return new RamlLoaders(name, schemaValidators.addSchemaValidator(schemaValidator));
-    }
-
-    public RamlDefinition fromClasspath(Class<?> basePackage) {
+    public static RamlLoader fromClasspath(Class<?> basePackage) {
         return fromClasspath(basePackage.getPackage().getName().replace('.', '/'));
     }
 
-    public RamlDefinition fromClasspath(String basePackage) {
+    public static RamlLoader fromClasspath(String basePackage) {
         return usingLoader(new ClassPathRamlResourceLoader(basePackage));
     }
 
-    public RamlDefinition fromFile(File baseDirectory) {
+    public static RamlLoader fromFile(File baseDirectory) {
         return usingLoader(new FileRamlResourceLoader(baseDirectory));
     }
 
-    public RamlDefinition fromApiPortal(String user, String password) throws IOException {
+    public static RamlLoader fromApiPortal(String user, String password) throws IOException {
         return fromApiPortal(new ApiPortalLoader(user, password));
     }
 
-    public RamlDefinition fromApiPortal(ApiPortalLoader loader) throws IOException {
+    public static RamlLoader fromApiPortal(ApiPortalLoader loader) throws IOException {
         return usingLoader(loader);
     }
 
-    public RamlDefinition usingLoader(RamlResourceLoader loader) {
-        final SchemaValidators validators = schemaValidators.withResourceLoader(loader);
-        return new RamlDefinition(new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(loader)).build(name), validators);
+    public static RamlLoader usingLoader(RamlResourceLoader loader) {
+        return new RamlLoader(loader);
     }
 }

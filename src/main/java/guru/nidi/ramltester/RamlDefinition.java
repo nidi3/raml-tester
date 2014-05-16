@@ -19,8 +19,7 @@ import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.core.RamlResponse;
 import guru.nidi.ramltester.core.RamlTester;
-import guru.nidi.ramltester.servlet.ServletRamlRequest;
-import guru.nidi.ramltester.servlet.ServletRamlResponse;
+import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import org.raml.model.Raml;
@@ -32,8 +31,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -48,20 +45,16 @@ public class RamlDefinition {
         this.schemaValidators = schemaValidators;
     }
 
-    public static RamlLoaders load(String name) {
-        return new RamlLoaders(name, null);
-    }
-
-    public RamlTester createTester() {
-        return new RamlTester(raml, schemaValidators.getValidators());
-    }
-
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
         return createTester().test(request, response);
     }
 
     public RamlReport testAgainst(MvcResult mvcResult, String servletUri) {
         return matches().assumingServletUri(servletUri).testAgainst(mvcResult);
+    }
+
+    public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        return new ServletTester(createTester()).testAgainst(request, response, chain);
     }
 
     public RamlMatcher matches() {
@@ -76,14 +69,8 @@ public class RamlDefinition {
         return new RamlRestTemplate(createTester(), null, restTemplate);
     }
 
-    public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (!(request instanceof HttpServletRequest)) {
-            return null;
-        }
-        final ServletRamlRequest httpRequest = new ServletRamlRequest((HttpServletRequest) request);
-        final ServletRamlResponse httpResponse = new ServletRamlResponse((HttpServletResponse) response);
-        chain.doFilter(httpRequest, httpResponse);
-        return testAgainst(httpRequest, httpResponse);
+    public RamlTester createTester() {
+        return new RamlTester(raml, schemaValidators.getValidators());
     }
 
 }

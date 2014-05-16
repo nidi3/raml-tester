@@ -34,7 +34,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
  */
 public class SimpleTest extends HighlevelTestBase {
 
-    private RamlDefinition simple = RamlDefinition.load("simple.raml").fromClasspath(getClass());
+    private RamlDefinition simple = TestRaml.fromClasspath(getClass()).load("simple.raml");
 
     @Test
     public void simpleOk() throws Exception {
@@ -238,7 +238,8 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void apiPortalReferenced() throws IOException {
-        final RamlDefinition ramlDefinition = RamlDefinition.load("test.raml").fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
+        final RamlLoader ramlLoader = TestRaml.fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
+        final RamlDefinition ramlDefinition = ramlLoader.load("test.raml");
         assertNoViolations(ramlDefinition, get("/test"), jsonResponse(200, "\"hula\""));
     }
 
@@ -258,7 +259,7 @@ public class SimpleTest extends HighlevelTestBase {
     @Test
     public void defaultMediaType() throws Exception {
         assertOneResponseViolationThat(
-                RamlDefinition.load("simple.raml").addSchemaValidator(new DummySchemaValidator()).fromClasspath(getClass()),
+                TestRaml.fromClasspath(getClass()).addSchemaValidator(new DummySchemaValidator()).load("simple.raml"),
                 get("/mediaType"),
                 jsonResponse(200, "\"hula\"", "application/default"),
                 equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
