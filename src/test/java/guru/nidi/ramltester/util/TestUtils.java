@@ -15,6 +15,10 @@
  */
 package guru.nidi.ramltester.util;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +57,20 @@ public class TestUtils {
             v.put((String) keysAndValues[i], value);
         }
         return v;
+    }
+
+    public static Matcher<Number> biggerThan(final Number value) {
+        return new TypeSafeMatcher<Number>() {
+            @Override
+            protected boolean matchesSafely(Number item) {
+                return item.doubleValue() > value.doubleValue();
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("A number bigger than ").appendValue(value);
+            }
+        };
     }
 
 }

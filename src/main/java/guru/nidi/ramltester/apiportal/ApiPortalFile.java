@@ -73,4 +73,13 @@ class ApiPortalFile {
     public void setRef_rfids(String ref_rfids) {
         this.ref_rfids = ref_rfids;
     }
+
+    @Override
+    public String toString() {
+        return "ApiPortalFile{" +
+                "path='" + path + '\'' +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

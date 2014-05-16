@@ -57,4 +57,13 @@ class ApiPortalDirectory {
     public void setChildren(List<ApiPortalFile> children) {
         this.children = children;
     }
+
+    @Override
+    public String toString() {
+        return "ApiPortalDirectory{" +
+                "path='" + path + '\'' +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

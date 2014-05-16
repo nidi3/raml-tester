@@ -17,35 +17,26 @@ package guru.nidi.ramltester.apiportal;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.nidi.ramltester.loader.FormLoginUrlRamlResourceLoader;
 import guru.nidi.ramltester.loader.RamlResourceLoader;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  *
  */
-public class ApiPortalLoader implements RamlResourceLoader {
-    private final String user;
-    private final String password;
+public class ApiPortalLoader extends FormLoginUrlRamlResourceLoader implements RamlResourceLoader {
     private final ApiPortalFilesResponse response;
 
     public ApiPortalLoader(String user, String password) throws IOException {
-        this.user = user;
-        this.password = password;
+        super("http://api-portal.anypoint.mulesoft.com", "rest/raml/v1", "ajax/apihub/login-register/form?section=login",
+                user, password, "name", "pass");
         this.response = load();
     }
 
@@ -58,27 +49,15 @@ public class ApiPortalLoader implements RamlResourceLoader {
         return new ByteArrayInputStream(file.getContent().getBytes(Charset.forName("utf-8")));
     }
 
+    @Override
+    protected void postProcessLoginParameters(List<NameValuePair> parameters) {
+        parameters.add(new BasicNameValuePair("form_id", "user_login"));
+    }
+
     private ApiPortalFilesResponse load() throws IOException {
         final ObjectMapper mapper = createMapper();
-        try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            final HttpPost login = new HttpPost("http://api-portal.anypoint.mulesoft.com/ajax/apihub/login-register/form?section=login");
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("name", user));
-            params.add(new BasicNameValuePair("pass", password));
-            params.add(new BasicNameValuePair("form_id", "user_login"));
-            login.setEntity(new UrlEncodedFormEntity(params));
-            final CloseableHttpResponse loginResponse = client.execute(login);
-            if (loginResponse.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
-                throw new IOException("Login into api portal not successful: " + loginResponse.getStatusLine().getReasonPhrase());
-            }
-            final HttpGet files = new HttpGet("http://api-portal.anypoint.mulesoft.com/rest/raml/v1/files");
-            final CloseableHttpResponse filesResponse = client.execute(files);
-            if (filesResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                throw new IOException("Could not get list of files: " + filesResponse.getStatusLine().getReasonPhrase());
-            }
-            //final Map map = createMapper.readValue(filesResponse.getEntity().getContent(), Map.class);
-            return mapper.readValue(filesResponse.getEntity().getContent(), ApiPortalFilesResponse.class);
-        }
+        final InputStream files = super.fetchResource("files");
+        return mapper.readValue(files, ApiPortalFilesResponse.class);
     }
 
     private ObjectMapper createMapper() {

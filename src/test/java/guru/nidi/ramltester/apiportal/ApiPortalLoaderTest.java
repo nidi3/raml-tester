@@ -47,7 +47,7 @@ public class ApiPortalLoaderTest {
         new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(loader)).build("huhuhuhuhu.raml");
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = RamlResourceLoader.ResourceNotFoundException.class)
     public void fromApiPortalUnknownUser() throws IOException {
         new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(new ApiPortalLoader("wwwwww", "blalbulbi"))).build("test.raml");
     }

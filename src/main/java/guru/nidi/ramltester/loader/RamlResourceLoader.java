@@ -29,6 +29,11 @@ public interface RamlResourceLoader {
             this.resourceName = resourceName;
         }
 
+        public ResourceNotFoundException(String resourceName, String message) {
+            super(message);
+            this.resourceName = resourceName;
+        }
+
         public ResourceNotFoundException(String resourceName) {
             this.resourceName = resourceName;
         }
