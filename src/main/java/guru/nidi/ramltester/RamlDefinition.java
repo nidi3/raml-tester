@@ -36,42 +36,47 @@ import java.io.IOException;
 /**
  *
  */
-//TODO generalize servletUri
 public class RamlDefinition {
     private final Raml raml;
     private final SchemaValidators schemaValidators;
+    private final String servletUri;
 
-    public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
+    public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String servletUri) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
+        this.servletUri = servletUri;
+    }
+
+    public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
+        this(raml, schemaValidators, null);
+    }
+
+    public RamlDefinition assumingServletUri(String servletUri) {
+        return new RamlDefinition(raml, schemaValidators, servletUri);
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
         return createTester().test(request, response);
     }
 
-    public RamlReport testAgainst(MvcResult mvcResult, String servletUri) {
-        return matches().assumingServletUri(servletUri).testAgainst(mvcResult);
+    public RamlReport testAgainst(MvcResult mvcResult) {
+        return matches().testAgainst(mvcResult);
     }
 
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        return new ServletTester(createTester()).testAgainst(request, response, chain);
-    }
-
-    public RamlReport testAgainst(String servletUri, ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         return new ServletTester(createTester(), servletUri).testAgainst(request, response, chain);
     }
 
     public RamlMatcher matches() {
-        return new RamlMatcher(createTester(), null);
+        return new RamlMatcher(createTester(), servletUri);
     }
 
     public RamlRestTemplate createRestTemplate(ClientHttpRequestFactory requestFactory) {
-        return new RamlRestTemplate(createTester(), null, requestFactory);
+        return new RamlRestTemplate(createTester(), servletUri, requestFactory);
     }
 
     public RamlRestTemplate createRestTemplate(RestTemplate restTemplate) {
-        return new RamlRestTemplate(createTester(), null, restTemplate);
+        return new RamlRestTemplate(createTester(), servletUri, restTemplate);
     }
 
     public RamlTester createTester() {

@@ -54,8 +54,10 @@ public class RestTemplateTest extends ServerTest {
 
     @Before
     public void setup() {
-        restTemplate = RamlTester.fromClasspath(SimpleTest.class).load("simple.raml")
-                .createRestTemplate(new HttpComponentsClientHttpRequestFactory()).assumingBaseUri("http://nidi.guru/raml/v1");
+        restTemplate = RamlTester
+                .fromClasspath(SimpleTest.class).load("simple.raml")
+                .assumingServletUri("http://nidi.guru/raml/v1")
+                .createRestTemplate(new HttpComponentsClientHttpRequestFactory());
     }
 
     @RequestMapping(value = "/data")

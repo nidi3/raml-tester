@@ -104,7 +104,7 @@ public class ServletTest extends ServerTest {
 
         @Override
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-            report = definition.testAgainst("http://nidi.guru/raml/v1", request, response, chain);
+            report = definition.assumingServletUri("http://nidi.guru/raml/v1").testAgainst(request, response, chain);
         }
 
         @Override

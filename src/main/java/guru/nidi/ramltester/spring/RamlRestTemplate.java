@@ -53,10 +53,6 @@ public class RamlRestTemplate extends RestTemplate implements RamlTestRequestInt
         setMessageConverters(restTemplate.getMessageConverters());
     }
 
-    public RamlRestTemplate assumingBaseUri(String baseUri) {
-        return new RamlRestTemplate(interceptor.getTester(), baseUri, this);
-    }
-
     public RamlReport getLastReport() {
         return lastReport.get();
     }

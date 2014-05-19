@@ -32,10 +32,6 @@ public class RamlMatcher implements ResultMatcher {
         this.servletUri = servletUri;
     }
 
-    public RamlMatcher assumingServletUri(String servletUri) {
-        return new RamlMatcher(tester, servletUri);
-    }
-
     @Override
     public void match(MvcResult result) throws Exception {
         final RamlReport report = testAgainst(result);
