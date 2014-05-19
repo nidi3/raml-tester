@@ -67,6 +67,11 @@ public class RestTemplateTest extends ServerTest {
     }
 
     @Override
+    protected int port() {
+        return 8081;
+    }
+
+    @Override
     protected void init(Context ctx) {
         AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
         appCtx.register(getClass());
@@ -77,14 +82,14 @@ public class RestTemplateTest extends ServerTest {
 
     @Test
     public void testRestTemplateOk() {
-        final String res = restTemplate.getForObject("http://localhost:8080/data", String.class);
+        final String res = restTemplate.getForObject("http://localhost:8081/data", String.class);
         assertEquals("\"json string\"", res);
         assertTrue(restTemplate.getLastReport().isEmpty());
     }
 
     @Test
     public void testRestTemplateNok() {
-        final String res = restTemplate.getForObject("http://localhost:8080/data?param=bu", String.class);
+        final String res = restTemplate.getForObject("http://localhost:8081/data?param=bu", String.class);
         assertEquals("illegal json", res);
 
         final RamlViolations requestViolations = restTemplate.getLastReport().getRequestViolations();

@@ -22,25 +22,27 @@ import org.junit.Before;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import javax.servlet.ServletException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  */
-public class ServerTest {
+public abstract class ServerTest {
     private static Tomcat tomcat;
     private static Server server;
     private static Context ctx;
-    private static boolean inited;
+    private static Set<Class<?>> inited = new HashSet<>();
 
     @Before
     public void initImpl() throws LifecycleException, ServletException {
-        if (!inited) {
-            inited = true;
+        if (!inited.contains(getClass())) {
+            inited.add(getClass());
             SLF4JBridgeHandler.removeHandlersForRootLogger();
             SLF4JBridgeHandler.install();
 
             tomcat = new Tomcat();
-            tomcat.setPort(8080);
+            tomcat.setPort(port());
             tomcat.setBaseDir(".");
             ctx = tomcat.addWebapp("/", "src/test");
             ((Host) ctx.getParent()).setAppBase("");
@@ -52,6 +54,8 @@ public class ServerTest {
             server.start();
         }
     }
+
+    protected abstract int port();
 
     protected void init(Context ctx) {
     }
