@@ -30,7 +30,7 @@ import java.util.Collections;
 public class RamlRestTemplate extends RestTemplate implements RamlTestRequestInterceptor.ReportStore {
     private final ClientHttpRequestFactory originalRequestFactory;
     private final RamlTestRequestInterceptor interceptor;
-    private RamlReport lastReport;
+    private static final ThreadLocal<RamlReport> lastReport = new ThreadLocal<>();
 
     public RamlRestTemplate(RamlTester tester, String baseUri, ClientHttpRequestFactory requestFactory) {
         originalRequestFactory = requestFactory;
@@ -58,11 +58,11 @@ public class RamlRestTemplate extends RestTemplate implements RamlTestRequestInt
     }
 
     public RamlReport getLastReport() {
-        return lastReport;
+        return lastReport.get();
     }
 
     @Override
     public void storeReport(RamlReport report) {
-        this.lastReport = report;
+        this.lastReport.set(report);
     }
 }
