@@ -234,23 +234,25 @@ public class RamlTester {
         final Map<String, MimeType> bodies = res.getBody();
         if (isNoOrEmptyBodies(bodies)) {
             responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
+        } else if (response.getContentType() == null) {
+            responseViolations.addAndThrowIf(hasContent(response) || !existSchemalessBody(bodies), "contentType.missing");
         } else {
-            if (response.getContentType() == null) {
-                responseViolations.addAndThrowIf(hasContent(response) || !existSchemalessBody(bodies), "contentType.missing");
-            } else {
-                MediaType targetType = MediaType.valueOf(response.getContentType());
-                MimeType mimeType = findMatchingMimeType(bodies, targetType);
-                responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
-                String schema = mimeType.getSchema();
-                if (schema != null) {
-                    final SchemaValidator validator = findSchemaValidator(targetType);
-                    responseViolations.addAndThrowIf(validator == null, "schemaValidator.missing", targetType, action, response.getStatus());
-                    final String content = response.getContentAsString();
-                    String refSchema = raml.getConsolidatedSchemas().get(schema);
-                    schema = refSchema != null ? refSchema : schema;
-                    validator.validate(content, schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType, content));
-                }
-            }
+            testResponseBody(action, response, bodies);
+        }
+    }
+
+    private void testResponseBody(Action action, RamlResponse response, Map<String, MimeType> bodies) {
+        MediaType targetType = MediaType.valueOf(response.getContentType());
+        MimeType mimeType = findMatchingMimeType(bodies, targetType);
+        responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
+        String schema = mimeType.getSchema();
+        if (schema != null) {
+            final SchemaValidator validator = findSchemaValidator(targetType);
+            responseViolations.addAndThrowIf(validator == null, "schemaValidator.missing", targetType, action, response.getStatus());
+            final String content = response.getContentAsString();
+            String refSchema = raml.getConsolidatedSchemas().get(schema);
+            schema = refSchema != null ? refSchema : schema;
+            validator.validate(content, schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType, content));
         }
     }
 
