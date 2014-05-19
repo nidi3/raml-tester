@@ -20,7 +20,7 @@ import java.io.InputStream;
 /**
  *
  */
-public interface RamlResourceLoader {
+public interface RamlLoader {
     class ResourceNotFoundException extends RuntimeException {
         private final String resourceName;
 

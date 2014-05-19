@@ -24,8 +24,8 @@ import java.nio.charset.Charset;
 /**
  *
  */
-public class BasicAuthUrlRamlResourceLoader extends UrlRamlResourceLoader {
-    public BasicAuthUrlRamlResourceLoader(String baseUrl, final String username, final String password, CloseableHttpClient httpClient) {
+public class BasicAuthUrlRamlLoader extends UrlRamlLoader {
+    public BasicAuthUrlRamlLoader(String baseUrl, final String username, final String password, CloseableHttpClient httpClient) {
         super(baseUrl, new SimpleUrlFetcher() {
             @Override
             protected HttpGet postProcessGet(HttpGet get) {
@@ -39,7 +39,7 @@ public class BasicAuthUrlRamlResourceLoader extends UrlRamlResourceLoader {
         }, httpClient);
     }
 
-    public BasicAuthUrlRamlResourceLoader(String baseUrl, String username, String password) {
+    public BasicAuthUrlRamlLoader(String baseUrl, String username, String password) {
         this(baseUrl, username, password, null);
     }
 }

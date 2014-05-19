@@ -60,12 +60,12 @@ public class FormLoginUrlFetcher extends SimpleUrlFetcher {
             login.setEntity(new UrlEncodedFormEntity(params));
             final CloseableHttpResponse getResult = client.execute(postProcessLogin(login));
             if (getResult.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
-                throw new RamlResourceLoader.ResourceNotFoundException(name, "Could not login: " + getResult.getStatusLine().toString());
+                throw new RamlLoader.ResourceNotFoundException(name, "Could not login: " + getResult.getStatusLine().toString());
             }
             EntityUtils.consume(getResult.getEntity());
             return super.fetchFromUrl(client, base + "/" + loadPath, name);
         } catch (IOException e) {
-            throw new RamlResourceLoader.ResourceNotFoundException(name, e);
+            throw new RamlLoader.ResourceNotFoundException(name, e);
         }
     }
 

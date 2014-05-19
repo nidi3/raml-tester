@@ -21,8 +21,8 @@ import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.jayway.restassured.module.jsv.JsonSchemaValidationException;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
-import guru.nidi.ramltester.loader.RamlResourceLoader;
-import guru.nidi.ramltester.loader.RamlResourceLoaderUriDownloader;
+import guru.nidi.ramltester.loader.RamlLoader;
+import guru.nidi.ramltester.loader.RamlLoaderUriDownloader;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
@@ -61,10 +61,10 @@ public class RestassuredSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public SchemaValidator withResourceLoader(RamlResourceLoader resourceLoader) {
+    public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
         final LoadingConfigurationBuilder loadingConfig = LoadingConfiguration.newBuilder();
         final String simpleName = resourceLoader.getClass().getSimpleName();
-        loadingConfig.addScheme(simpleName, new RamlResourceLoaderUriDownloader(resourceLoader));
+        loadingConfig.addScheme(simpleName, new RamlLoaderUriDownloader(resourceLoader));
         loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(simpleName + ":///").freeze());
         return using(JsonSchemaFactory.newBuilder().setLoadingConfiguration(loadingConfig.freeze()).freeze());
     }

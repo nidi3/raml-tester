@@ -23,10 +23,10 @@ import java.io.InputStream;
 /**
  *
  */
-public class FileRamlResourceLoader implements RamlResourceLoader {
+public class FileRamlLoader implements RamlLoader {
     private final File base;
 
-    public FileRamlResourceLoader(File base) {
+    public FileRamlLoader(File base) {
         this.base = base;
     }
 

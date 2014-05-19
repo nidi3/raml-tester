@@ -23,7 +23,7 @@ import org.w3c.dom.ls.LSResourceResolver;
 /**
 *
 */
-public class RamlResourceLoaderLSResourceResolver implements LSResourceResolver {
+public class RamlLoaderLSResourceResolver implements LSResourceResolver {
     private static final DOMImplementationLS DOM_IMPLEMENTATION_LS;
 
     static {
@@ -34,9 +34,9 @@ public class RamlResourceLoaderLSResourceResolver implements LSResourceResolver 
         }
     }
 
-    private final RamlResourceLoader resourceLoader;
+    private final RamlLoader resourceLoader;
 
-    public RamlResourceLoaderLSResourceResolver(RamlResourceLoader resourceLoader) {
+    public RamlLoaderLSResourceResolver(RamlLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 

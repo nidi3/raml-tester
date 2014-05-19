@@ -23,7 +23,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
  *
  */
 public class TypeTest extends HighlevelTestBase {
-    private RamlDefinition type = TestRaml.fromClasspath(getClass()).load("type.raml");
+    private RamlDefinition type = RamlTester.fromClasspath(getClass()).load("type.raml");
 
     @Test
     public void booleanOk() throws Exception {

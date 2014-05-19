@@ -13,17 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
-
-import guru.nidi.ramltester.loader.RamlLoader;
+package guru.nidi.ramltester.loader;
 
 /**
  *
  */
-public interface SchemaValidator {
-    boolean supports(MediaType mediaType);
-
-    SchemaValidator withResourceLoader(RamlLoader resourceLoader);
-
-    void validate(String content, String schema, RamlViolations violations, Message message);
+public interface RepositoryResponse {
+    Iterable<? extends RepositoryEntry> getFiles();
 }

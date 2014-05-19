@@ -18,7 +18,7 @@ package guru.nidi.ramltester;
 import guru.nidi.ramltester.core.JavaXmlSchemaValidator;
 import guru.nidi.ramltester.core.RestassuredSchemaValidator;
 import guru.nidi.ramltester.core.SchemaValidator;
-import guru.nidi.ramltester.loader.RamlResourceLoader;
+import guru.nidi.ramltester.loader.RamlLoader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +49,7 @@ class SchemaValidators {
         return new SchemaValidators(newValidators);
     }
 
-    public SchemaValidators withResourceLoader(RamlResourceLoader resourceLoader) {
+    public SchemaValidators withResourceLoader(RamlLoader resourceLoader) {
         final ArrayList<SchemaValidator> newValidators = new ArrayList<>();
         for (SchemaValidator validator : validators) {
             newValidators.add(validator.withResourceLoader(resourceLoader));

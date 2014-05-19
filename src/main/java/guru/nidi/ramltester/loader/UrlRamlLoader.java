@@ -24,12 +24,12 @@ import java.io.InputStream;
 /**
  *
  */
-public class UrlRamlResourceLoader implements RamlResourceLoader {
+public class UrlRamlLoader implements RamlLoader {
     private final String base;
     private final CloseableHttpClient client;
     private final UrlFetcher fetcher;
 
-    public UrlRamlResourceLoader(String base, UrlFetcher fetcher, CloseableHttpClient httpClient) {
+    public UrlRamlLoader(String base, UrlFetcher fetcher, CloseableHttpClient httpClient) {
         this.base = base;
         this.fetcher = fetcher;
         this.client = httpClient == null
@@ -37,11 +37,11 @@ public class UrlRamlResourceLoader implements RamlResourceLoader {
                 : httpClient;
     }
 
-    public UrlRamlResourceLoader(String base, UrlFetcher fetcher) {
+    public UrlRamlLoader(String base, UrlFetcher fetcher) {
         this(base, fetcher, null);
     }
 
-    public UrlRamlResourceLoader(String baseUrl) {
+    public UrlRamlLoader(String baseUrl) {
         this(baseUrl, new SimpleUrlFetcher(), null);
     }
 

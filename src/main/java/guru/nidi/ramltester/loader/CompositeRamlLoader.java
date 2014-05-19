@@ -15,14 +15,30 @@
  */
 package guru.nidi.ramltester.loader;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
  *
  */
-public interface UrlFetcher {
-    InputStream fetchFromUrl(CloseableHttpClient client, String base, String name) throws IOException;
+public class CompositeRamlLoader implements RamlLoader {
+    private final RamlLoader[] loaders;
+
+    public CompositeRamlLoader(RamlLoader... loaders) {
+        this.loaders = loaders;
+    }
+
+    @Override
+    public InputStream fetchResource(String name) throws ResourceNotFoundException {
+        for (RamlLoader loader : loaders) {
+            try {
+                final InputStream resource = loader.fetchResource(name);
+                if (resource != null) {
+                    return resource;
+                }
+            } catch (ResourceNotFoundException e) {
+                //ignore
+            }
+        }
+        throw new ResourceNotFoundException(name);
+    }
 }

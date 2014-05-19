@@ -15,24 +15,22 @@
  */
 package guru.nidi.ramltester.loader;
 
+import org.raml.parser.loader.ResourceLoader;
+
 import java.io.InputStream;
 
 /**
  *
  */
-public class ClassPathRamlResourceLoader implements RamlResourceLoader {
-    private final String base;
+public class RamlLoaderRamlParserResourceLoader implements ResourceLoader {
+    private final RamlLoader delegate;
 
-    public ClassPathRamlResourceLoader(String base) {
-        this.base = base;
+    public RamlLoaderRamlParserResourceLoader(RamlLoader delegate) {
+        this.delegate = delegate;
     }
 
     @Override
-    public InputStream fetchResource(String name) {
-        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(base + "/" + name);
-        if (resource == null) {
-            throw new ResourceNotFoundException(name);
-        }
-        return resource;
+    public InputStream fetchResource(String resourceName) {
+        return delegate.fetchResource(resourceName);
     }
 }

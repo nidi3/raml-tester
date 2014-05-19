@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.loader;
 
+import guru.nidi.ramltester.RamlTester;
 import org.junit.Test;
 
 import java.io.File;
@@ -33,39 +34,56 @@ import static org.junit.Assert.assertThat;
 public class LoaderTest {
     @Test
     public void classPathOk() throws IOException {
-        final InputStream stream = new ClassPathRamlResourceLoader("guru/nidi/ramltester").fetchResource("simple.raml");
+        final InputStream stream = new ClassPathRamlLoader("guru/nidi/ramltester").fetchResource("simple.raml");
         assertThat(stream.read(), not(equalTo(-1)));
     }
 
-    @Test(expected = RamlResourceLoader.ResourceNotFoundException.class)
+    @Test(expected = RamlLoader.ResourceNotFoundException.class)
     public void classPathNok() {
-        new ClassPathRamlResourceLoader("guru/nidi/ramltester").fetchResource("bla");
+        new ClassPathRamlLoader("guru/nidi/ramltester").fetchResource("bla");
     }
 
     @Test
     public void fileOk() throws IOException {
         final URL resource = Thread.currentThread().getContextClassLoader().getResource("guru/nidi/ramltester");
         assertEquals("file", resource.getProtocol());
-        final InputStream stream = new FileRamlResourceLoader(new File(resource.getPath().toString())).fetchResource("simple.raml");
+        final InputStream stream = new FileRamlLoader(new File(resource.getPath().toString())).fetchResource("simple.raml");
         assertThat(stream.read(), not(equalTo(-1)));
     }
 
-    @Test(expected = RamlResourceLoader.ResourceNotFoundException.class)
+    @Test(expected = RamlLoader.ResourceNotFoundException.class)
     public void fileNok() {
         final URL resource = Thread.currentThread().getContextClassLoader().getResource("guru/nidi/ramltester");
         assertEquals("file", resource.getProtocol());
-        new FileRamlResourceLoader(new File(resource.getPath().toString())).fetchResource("bla");
+        new FileRamlLoader(new File(resource.getPath().toString())).fetchResource("bla");
     }
 
     @Test
     public void urlOk() throws IOException {
-        final InputStream stream = new UrlRamlResourceLoader("http://en.wikipedia.org/wiki").fetchResource("Short");
+        final InputStream stream = new UrlRamlLoader("http://en.wikipedia.org/wiki").fetchResource("Short");
         assertThat(stream.read(), not(equalTo(-1)));
     }
 
-    @Test(expected = RamlResourceLoader.ResourceNotFoundException.class)
+    @Test(expected = RamlLoader.ResourceNotFoundException.class)
     public void urlNok() {
-        new UrlRamlResourceLoader("http://en.wikipedia.org").fetchResource("dfkjsdfhfs");
+        new UrlRamlLoader("http://en.wikipedia.org").fetchResource("dfkjsdfhfs");
+    }
+
+    @Test
+    public void loadFile() {
+        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester")).load("simple.raml");
+    }
+
+    @Test(expected = RamlLoader.ResourceNotFoundException.class)
+    public void loadFileWithUnfindableReference() {
+        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub")).load("simple.raml");
+    }
+
+    @Test
+    public void loadFileWithSecondLoader() {
+        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub"))
+                .addLoader(new ClassPathRamlLoader("guru/nidi/ramltester"))
+                .load("simple.raml");
     }
 
 }

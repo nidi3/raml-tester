@@ -13,17 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
+package guru.nidi.ramltester.loader;
 
-import guru.nidi.ramltester.loader.RamlLoader;
+import com.github.fge.jsonschema.core.load.download.URIDownloader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 
 /**
  *
  */
-public interface SchemaValidator {
-    boolean supports(MediaType mediaType);
+public class RamlLoaderUriDownloader implements URIDownloader {
+    private final RamlLoader delegate;
 
-    SchemaValidator withResourceLoader(RamlLoader resourceLoader);
+    public RamlLoaderUriDownloader(RamlLoader delegate) {
+        this.delegate = delegate;
+    }
 
-    void validate(String content, String schema, RamlViolations violations, Message message);
+    @Override
+    public InputStream fetch(URI source) throws IOException {
+        return delegate.fetchResource(source.getPath());
+    }
 }

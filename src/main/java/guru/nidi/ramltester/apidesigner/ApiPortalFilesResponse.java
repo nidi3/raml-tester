@@ -15,12 +15,15 @@
  */
 package guru.nidi.ramltester.apidesigner;
 
+import guru.nidi.ramltester.loader.RepositoryEntry;
+import guru.nidi.ramltester.loader.RepositoryResponse;
+
 import java.util.Map;
 
 /**
  *
  */
-class ApiPortalFilesResponse implements ApiFilesResponse {
+class ApiPortalFilesResponse implements RepositoryResponse {
     private Map<String, ApiPortalFile> files;
     private ApiPortalDirectory directory;
 
@@ -41,7 +44,7 @@ class ApiPortalFilesResponse implements ApiFilesResponse {
     }
 
     @Override
-    public Iterable<? extends ApiFile> getFiles() {
+    public Iterable<? extends RepositoryEntry> getFiles() {
         return files.values();
     }
 }

@@ -15,10 +15,12 @@
  */
 package guru.nidi.ramltester.apidesigner;
 
+import guru.nidi.ramltester.loader.RepositoryEntry;
+
 /**
  *
  */
-class ApiPortalFile implements ApiFile {
+class ApiPortalFile implements RepositoryEntry {
     private String path;
     private String name;
     private String type;

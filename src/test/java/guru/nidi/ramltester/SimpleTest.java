@@ -19,7 +19,7 @@ import guru.nidi.ramltester.core.MediaType;
 import guru.nidi.ramltester.core.Message;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
-import guru.nidi.ramltester.loader.RamlResourceLoader;
+import guru.nidi.ramltester.loader.RamlLoader;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
  */
 public class SimpleTest extends HighlevelTestBase {
 
-    private RamlDefinition simple = TestRaml.fromClasspath(getClass()).load("simple.raml");
+    private RamlDefinition simple = RamlTester.fromClasspath(getClass()).load("simple.raml");
 
     @Test
     public void simpleOk() throws Exception {
@@ -238,7 +238,7 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void apiPortalReferenced() throws IOException {
-        final RamlLoader ramlLoader = TestRaml.fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
+        final RamlLoaders ramlLoader = RamlTester.fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
         final RamlDefinition ramlDefinition = ramlLoader.load("test.raml");
         assertNoViolations(ramlDefinition, get("/test"), jsonResponse(200, "\"hula\""));
     }
@@ -259,7 +259,7 @@ public class SimpleTest extends HighlevelTestBase {
     @Test
     public void defaultMediaType() throws Exception {
         assertOneResponseViolationThat(
-                TestRaml.fromClasspath(getClass()).addSchemaValidator(new DummySchemaValidator()).load("simple.raml"),
+                RamlTester.fromClasspath(getClass()).addSchemaValidator(new DummySchemaValidator()).load("simple.raml"),
                 get("/mediaType"),
                 jsonResponse(200, "\"hula\"", "application/default"),
                 equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
@@ -275,7 +275,7 @@ public class SimpleTest extends HighlevelTestBase {
         }
 
         @Override
-        public SchemaValidator withResourceLoader(RamlResourceLoader resourceLoader) {
+        public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
             return this;
         }
 

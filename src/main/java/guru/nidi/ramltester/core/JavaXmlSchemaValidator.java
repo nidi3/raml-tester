@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.loader.RamlResourceLoader;
-import guru.nidi.ramltester.loader.RamlResourceLoaderLSResourceResolver;
+import guru.nidi.ramltester.loader.RamlLoader;
+import guru.nidi.ramltester.loader.RamlLoaderLSResourceResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -36,9 +36,9 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
     private static final MediaType APPLICATION_XML = MediaType.valueOf("application/xml");
     private static final MediaType TEXT_XML = MediaType.valueOf("text/xml");
 
-    private final RamlResourceLoader resourceLoader;
+    private final RamlLoader resourceLoader;
 
-    private JavaXmlSchemaValidator(RamlResourceLoader resourceLoader) {
+    private JavaXmlSchemaValidator(RamlLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
@@ -47,7 +47,7 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public SchemaValidator withResourceLoader(RamlResourceLoader resourceLoader) {
+    public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
         return new JavaXmlSchemaValidator(resourceLoader);
     }
 
@@ -60,7 +60,7 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
     public void validate(String content, String schema, RamlViolations violations, Message message) {
         final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
-            schemaFactory.setResourceResolver(new RamlResourceLoaderLSResourceResolver(resourceLoader));
+            schemaFactory.setResourceResolver(new RamlLoaderLSResourceResolver(resourceLoader));
             final Schema s = schemaFactory.newSchema(new StreamSource(new StringReader(schema)));
             final Validator validator = s.newValidator();
             validator.setErrorHandler(new ViolationsWritingErrorHandler(violations, message));
