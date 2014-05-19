@@ -15,7 +15,6 @@
  */
 package guru.nidi.ramltester.loader;
 
-import guru.nidi.ramltester.RamlTester;
 import org.junit.Test;
 
 import java.io.File;
@@ -70,20 +69,11 @@ public class LoaderTest {
     }
 
     @Test
-    public void loadFile() {
-        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester")).load("simple.raml");
+    public void loadFile() throws IOException {
+        final InputStream inputStream = new FileRamlLoader(new File("src/test/resources/guru/nidi/ramltester")).fetchResource("simple.raml");
+        assertThat(inputStream.read(), not(equalTo(-1)));
     }
 
-    @Test(expected = RamlLoader.ResourceNotFoundException.class)
-    public void loadFileWithUnfindableReference() {
-        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub")).load("simple.raml");
-    }
 
-    @Test
-    public void loadFileWithSecondLoader() {
-        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub"))
-                .addLoader(new ClassPathRamlLoader("guru/nidi/ramltester"))
-                .load("simple.raml");
-    }
 
 }

@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.spring;
+package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.RamlTester;
-import guru.nidi.ramltester.SimpleTest;
 import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.spring.RamlRestTemplate;
 import guru.nidi.ramltester.util.ServerTest;
 import org.junit.Before;
 import org.junit.Test;

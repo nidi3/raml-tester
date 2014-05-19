@@ -19,9 +19,11 @@ import guru.nidi.ramltester.core.MediaType;
 import guru.nidi.ramltester.core.Message;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
+import guru.nidi.ramltester.loader.ClassPathRamlLoader;
 import guru.nidi.ramltester.loader.RamlLoader;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
@@ -243,6 +245,17 @@ public class SimpleTest extends HighlevelTestBase {
         assertNoViolations(ramlDefinition, get("/test"), jsonResponse(200, "\"hula\""));
     }
 
+    @Test(expected = RamlLoader.ResourceNotFoundException.class)
+    public void loadFileWithUnfindableReference() {
+        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub")).load("simple.raml");
+    }
+
+    @Test
+    public void loadFileWithSecondLoader() {
+        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub"))
+                .addLoader(new ClassPathRamlLoader("guru/nidi/ramltester"))
+                .load("simple.raml");
+    }
 
     @Test
     public void undefinedSchema() throws Exception {
