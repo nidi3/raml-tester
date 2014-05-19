@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.apiportal;
+package guru.nidi.ramltester.apidesigner;
 
 import guru.nidi.ramltester.loader.RamlResourceLoader;
 import guru.nidi.ramltester.loader.RamlResourceLoaderRamlParserResourceLoader;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.raml.parser.visitor.RamlDocumentBuilder;
@@ -39,6 +44,20 @@ public class ApiPortalLoaderTest {
 
     @Test
     public void fromApiPortalOk() throws IOException {
+        assertNotNull(new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(loader)).build("test.raml"));
+    }
+
+    @Test
+    public void fromApiPortal2Ok() throws IOException {
+//        final CloseableHttpClient client = HttpClientBuilder.create().build();
+//        final HttpPost post = new HttpPost("http://192.168.69.19:3000/files");
+//        post.setHeader("Content-Type","application/json;charset=UTF-8");
+//        post.setHeader("Origin","http://192.168.69.19:9013");
+//        post.setHeader("Referer","http://192.168.69.19:9013/");
+//        post.setEntity(new StringEntity("{\"name\":\"test\",\"path\":\"/\",\"contents\":\"test\"}"));
+//        final CloseableHttpResponse response = client.execute(post);
+//        System.out.println(response);
+//        ApiPortalLoader loader = new ApiPortalLoader("http://192.168.69.19:3000");
         assertNotNull(new RamlDocumentBuilder(new RamlResourceLoaderRamlParserResourceLoader(loader)).build("test.raml"));
     }
 

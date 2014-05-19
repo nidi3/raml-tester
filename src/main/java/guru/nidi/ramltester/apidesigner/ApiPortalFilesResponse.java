@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.apiportal;
+package guru.nidi.ramltester.apidesigner;
 
 import java.util.Map;
 
 /**
  *
  */
-class ApiPortalFilesResponse {
+class ApiPortalFilesResponse implements ApiFilesResponse {
     private Map<String, ApiPortalFile> files;
     private ApiPortalDirectory directory;
 
-    public Map<String, ApiPortalFile> getFiles() {
+    public Map<String, ApiPortalFile> getFilesMap() {
         return files;
     }
 
@@ -38,5 +38,10 @@ class ApiPortalFilesResponse {
 
     public void setDirectory(ApiPortalDirectory directory) {
         this.directory = directory;
+    }
+
+    @Override
+    public Iterable<? extends ApiFile> getFiles() {
+        return files.values();
     }
 }

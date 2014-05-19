@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.apiportal;
+package guru.nidi.ramltester.apidesigner;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.nidi.ramltester.loader.FormLoginUrlRamlResourceLoader;
-import guru.nidi.ramltester.loader.RamlResourceLoader;
+import guru.nidi.ramltester.loader.FormLoginUrlFetcher;
+import guru.nidi.ramltester.loader.SimpleUrlFetcher;
+import guru.nidi.ramltester.loader.UrlRamlResourceLoader;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -31,33 +32,43 @@ import java.util.List;
 /**
  *
  */
-public class ApiPortalLoader extends FormLoginUrlRamlResourceLoader implements RamlResourceLoader {
-    private final ApiPortalFilesResponse response;
+public class ApiPortalLoader extends UrlRamlResourceLoader {
+    private final ApiFilesResponse response;
+    private final Class<? extends ApiFilesResponse> responseClass;
 
     public ApiPortalLoader(String user, String password) throws IOException {
-        super("http://api-portal.anypoint.mulesoft.com", "rest/raml/v1", "ajax/apihub/login-register/form?section=login",
-                user, password, "name", "pass");
+        super("http://api-portal.anypoint.mulesoft.com",
+                new FormLoginUrlFetcher("rest/raml/v1", "ajax/apihub/login-register/form?section=login", user, password, "name", "pass") {
+                    @Override
+                    protected void postProcessLoginParameters(List<NameValuePair> parameters) {
+                        parameters.add(new BasicNameValuePair("form_id", "user_login"));
+                    }
+                }
+        );
+        this.responseClass = ApiPortalFilesResponse.class;
+        this.response = load();
+    }
+
+    public ApiPortalLoader(String baseUrl) throws IOException {
+        super(baseUrl, new SimpleUrlFetcher());
+        this.responseClass = ApiDesignerFilesResponse.class;
         this.response = load();
     }
 
     @Override
     public InputStream fetchResource(String resourceName) {
-        final ApiPortalFile file = findFile(resourceName);
+        final ApiFile file = findFile(resourceName);
         if (file == null) {
             throw new ResourceNotFoundException(resourceName);
         }
         return new ByteArrayInputStream(file.getContent().getBytes(Charset.forName("utf-8")));
     }
 
-    @Override
-    protected void postProcessLoginParameters(List<NameValuePair> parameters) {
-        parameters.add(new BasicNameValuePair("form_id", "user_login"));
-    }
-
-    private ApiPortalFilesResponse load() throws IOException {
+    protected ApiFilesResponse load() throws IOException {
         final ObjectMapper mapper = createMapper();
         final InputStream files = super.fetchResource("files");
-        return mapper.readValue(files, ApiPortalFilesResponse.class);
+        //TODO when empty, files is an empty array, not object!?
+        return mapper.readValue(files, responseClass);
     }
 
     private ObjectMapper createMapper() {
@@ -66,8 +77,8 @@ public class ApiPortalLoader extends FormLoginUrlRamlResourceLoader implements R
         return mapper;
     }
 
-    private ApiPortalFile findFile(String name) {
-        for (ApiPortalFile file : response.getFiles().values()) {
+    private ApiFile findFile(String name) {
+        for (ApiFile file : response.getFiles()) {
             if (name.equals(file.getName()) || name.equals(file.getPath())) {
                 return file;
             }

@@ -15,9 +15,6 @@
  */
 package guru.nidi.ramltester.loader;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -29,38 +26,31 @@ import java.io.InputStream;
  */
 public class UrlRamlResourceLoader implements RamlResourceLoader {
     private final String base;
-    protected final CloseableHttpClient client;
+    private final CloseableHttpClient client;
+    private final UrlFetcher fetcher;
 
-    public UrlRamlResourceLoader(String baseUrl, CloseableHttpClient httpClient) {
-        this.base = baseUrl;
+    public UrlRamlResourceLoader(String base, UrlFetcher fetcher, CloseableHttpClient httpClient) {
+        this.base = base;
+        this.fetcher = fetcher;
         this.client = httpClient == null
                 ? HttpClientBuilder.create().build()
                 : httpClient;
     }
 
+    public UrlRamlResourceLoader(String base, UrlFetcher fetcher) {
+        this(base, fetcher, null);
+    }
+
     public UrlRamlResourceLoader(String baseUrl) {
-        this(baseUrl, null);
+        this(baseUrl, new SimpleUrlFetcher(), null);
     }
 
     @Override
     public InputStream fetchResource(String name) {
         try {
-            final HttpGet get = postProcessGet(new HttpGet(base + "/" + encode(name)));
-            final CloseableHttpResponse getResult = client.execute(get);
-            if (getResult.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                throw new ResourceNotFoundException(name, "Http response status not ok: " + getResult.getStatusLine().toString());
-            }
-            return getResult.getEntity().getContent();
+            return fetcher.fetchFromUrl(client, base, name);
         } catch (IOException e) {
             throw new ResourceNotFoundException(name, e);
         }
-    }
-
-    private String encode(String name) {
-        return name.replace(" ", "%20");
-    }
-
-    protected HttpGet postProcessGet(HttpGet get) {
-        return get;
     }
 }

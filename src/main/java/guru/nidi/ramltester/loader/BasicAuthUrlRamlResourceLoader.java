@@ -25,24 +25,21 @@ import java.nio.charset.Charset;
  *
  */
 public class BasicAuthUrlRamlResourceLoader extends UrlRamlResourceLoader {
-    private final String auth;
+    public BasicAuthUrlRamlResourceLoader(String baseUrl, final String username, final String password, CloseableHttpClient httpClient) {
+        super(baseUrl, new SimpleUrlFetcher() {
+            @Override
+            protected HttpGet postProcessGet(HttpGet get) {
+                get.addHeader("Authorization", encode(username, password));
+                return get;
+            }
 
-    public BasicAuthUrlRamlResourceLoader(String baseUrl, String username, String password, CloseableHttpClient httpClient) {
-        super(baseUrl, httpClient);
-        auth = encode(username, password);
+            private String encode(String username, String password) {
+                return Base64.encodeBase64String(("Basic " + username + ":" + password).getBytes(Charset.forName("iso-8859-1")));
+            }
+        }, httpClient);
     }
 
     public BasicAuthUrlRamlResourceLoader(String baseUrl, String username, String password) {
         this(baseUrl, username, password, null);
-    }
-
-    private String encode(String username, String password) {
-        return Base64.encodeBase64String(("Basic " + username + ":" + password).getBytes(Charset.forName("iso-8859-1")));
-    }
-
-    @Override
-    protected HttpGet postProcessGet(HttpGet get) {
-        get.addHeader("Authorization", auth);
-        return get;
     }
 }

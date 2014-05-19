@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.apiportal.ApiPortalLoader;
+import guru.nidi.ramltester.apidesigner.ApiPortalLoader;
 import guru.nidi.ramltester.loader.ClassPathRamlResourceLoader;
 import guru.nidi.ramltester.loader.FileRamlResourceLoader;
 import guru.nidi.ramltester.loader.RamlResourceLoader;

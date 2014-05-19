@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.apiportal;
+package guru.nidi.ramltester.apidesigner;
 
 /**
  *
  */
-class ApiPortalFile {
+class ApiPortalFile implements ApiFile {
     private String path;
     private String name;
     private String type;

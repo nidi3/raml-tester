@@ -32,30 +32,27 @@ import java.util.List;
 /**
  *
  */
-public class FormLoginUrlRamlResourceLoader extends UrlRamlResourceLoader {
+public class FormLoginUrlFetcher extends SimpleUrlFetcher {
+    private final String loadPath;
     private final String loginUrl;
     private final String login;
     private final String password;
     private final String loginField;
     private final String passwordField;
 
-    public FormLoginUrlRamlResourceLoader(String baseUrl, String loadPath, String loginPath, String login, String password, String loginField, String passwordField, CloseableHttpClient httpClient) {
-        super(baseUrl + "/" + loadPath, httpClient);
+    public FormLoginUrlFetcher(String loadPath, String loginPath, String login, String password, String loginField, String passwordField) {
+        this.loadPath = loadPath;
         this.login = login;
         this.password = password;
-        this.loginUrl = baseUrl + "/" + loginPath;
+        this.loginUrl = loginPath;
         this.loginField = loginField;
         this.passwordField = passwordField;
     }
 
-    public FormLoginUrlRamlResourceLoader(String baseUrl, String loadPath, String loginPath, String login, String password, String loginField, String passwordField) {
-        this(baseUrl, loadPath, loginPath, login, password, loginField, passwordField, null);
-    }
-
     @Override
-    public InputStream fetchResource(String name) {
+    public InputStream fetchFromUrl(CloseableHttpClient client, String base, String name) {
         try {
-            final HttpPost login = new HttpPost(loginUrl);
+            final HttpPost login = new HttpPost(base + "/" + loginUrl);
             List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair(loginField, this.login));
             params.add(new BasicNameValuePair(passwordField, password));
@@ -63,12 +60,12 @@ public class FormLoginUrlRamlResourceLoader extends UrlRamlResourceLoader {
             login.setEntity(new UrlEncodedFormEntity(params));
             final CloseableHttpResponse getResult = client.execute(postProcessLogin(login));
             if (getResult.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
-                throw new ResourceNotFoundException(name, "Could not login: " + getResult.getStatusLine().toString());
+                throw new RamlResourceLoader.ResourceNotFoundException(name, "Could not login: " + getResult.getStatusLine().toString());
             }
             EntityUtils.consume(getResult.getEntity());
-            return super.fetchResource(name);
+            return super.fetchFromUrl(client, base + "/" + loadPath, name);
         } catch (IOException e) {
-            throw new ResourceNotFoundException(name, e);
+            throw new RamlResourceLoader.ResourceNotFoundException(name, e);
         }
     }
 
