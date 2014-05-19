@@ -64,7 +64,7 @@ class ParameterTester {
             final Message namedMsg = message.withParam(entry.getKey());
             final List<? extends AbstractParam> parameters = params.get(entry.getKey());
             if (parameters == null || parameters.isEmpty()) {
-                violations.addIf(!acceptUndefined && !predefined.contains(entry.getKey()), namedMsg.withMessageParam("undefined"));
+                violations.addIf(!acceptUndefined && !predefined.contains(entry.getKey().toLowerCase()), namedMsg.withMessageParam("undefined"));
             } else {
                 for (AbstractParam parameter : parameters) {
                     violations.addIf(!parameter.isRepeat() && entry.getValue().length > 1, namedMsg.withMessageParam("repeat.superfluous"));

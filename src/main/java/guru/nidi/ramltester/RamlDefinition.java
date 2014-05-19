@@ -36,6 +36,7 @@ import java.io.IOException;
 /**
  *
  */
+//TODO generalize servletUri
 public class RamlDefinition {
     private final Raml raml;
     private final SchemaValidators schemaValidators;
@@ -55,6 +56,10 @@ public class RamlDefinition {
 
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         return new ServletTester(createTester()).testAgainst(request, response, chain);
+    }
+
+    public RamlReport testAgainst(String servletUri, ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        return new ServletTester(createTester(), servletUri).testAgainst(request, response, chain);
     }
 
     public RamlMatcher matches() {

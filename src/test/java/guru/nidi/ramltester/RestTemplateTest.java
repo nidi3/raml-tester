@@ -18,6 +18,8 @@ package guru.nidi.ramltester;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import guru.nidi.ramltester.util.ServerTest;
+import org.apache.catalina.Context;
+import org.apache.catalina.startup.Tomcat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +34,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -62,15 +66,24 @@ public class RestTemplateTest extends ServerTest {
         return new HttpEntity<>(param == null ? "\"json string\"" : "illegal json", headers);
     }
 
+    @Override
+    protected void init(Context ctx) {
+        AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
+        appCtx.register(getClass());
+        DispatcherServlet dispatcher = new DispatcherServlet(appCtx);
+        Tomcat.addServlet(ctx, "SpringMVC", dispatcher);
+        ctx.addServletMapping("/*", "SpringMVC");
+    }
+
     @Test
-    public void testGreetingWithRestTemplateOk() {
+    public void testRestTemplateOk() {
         final String res = restTemplate.getForObject("http://localhost:8080/data", String.class);
         assertEquals("\"json string\"", res);
         assertTrue(restTemplate.getLastReport().isEmpty());
     }
 
     @Test
-    public void testGreetingWithRestTemplateNok() {
+    public void testRestTemplateNok() {
         final String res = restTemplate.getForObject("http://localhost:8080/data?param=bu", String.class);
         assertEquals("illegal json", res);
 
