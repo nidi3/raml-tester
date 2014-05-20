@@ -43,18 +43,16 @@ public class RamlHttpClient implements HttpClient, Closeable {
     private static final String RAML_TESTED = "raml.tested";
 
     private final RamlTester tester;
-    private final String baseUrl;
     private final CloseableHttpClient delegate;
     private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlHttpClient(RamlTester tester, String baseUrl, CloseableHttpClient delegate) {
+    public RamlHttpClient(RamlTester tester, CloseableHttpClient delegate) {
         this.tester = tester;
-        this.baseUrl = baseUrl;
         this.delegate = delegate;
     }
 
-    public RamlHttpClient(RamlTester tester, String baseUrl) {
-        this(tester, baseUrl, HttpClientBuilder.create().build());
+    public RamlHttpClient(RamlTester tester) {
+        this(tester, HttpClientBuilder.create().build());
     }
 
     public RamlReport getLastReport() {
@@ -68,7 +66,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         }
         reportStore.storeReport(null);
         final CloseableHttpResponse response = delegate.execute(target, request, context);
-        reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(target, request, baseUrl), new HttpComponentsRamlResponse(response)));
+        reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
         return response;
     }
 
@@ -80,7 +78,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         }
         reportStore.storeReport(null);
         final HttpResponse response = delegate.execute(request, context);
-        reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(request, baseUrl), new HttpComponentsRamlResponse(response)));
+        reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
         return response;
     }
 
@@ -89,7 +87,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         final BasicHttpContext context = new BasicHttpContext();
         final HttpResponse response = delegate.execute(request, context);
         if (!alreadyTested(context)) {
-            reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(request, baseUrl), new HttpComponentsRamlResponse(response)));
+            reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
         }
         return response;
     }
@@ -99,7 +97,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         final BasicHttpContext context = new BasicHttpContext();
         final HttpResponse response = delegate.execute(target, request, context);
         if (!alreadyTested(context)) {
-            reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(target, request, baseUrl), new HttpComponentsRamlResponse(response)));
+            reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
         }
         return response;
     }

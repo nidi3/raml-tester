@@ -25,15 +25,13 @@ import java.util.*;
  *
  */
 public class ServletRamlRequest extends HttpServletRequestWrapper implements RamlRequest {
-    private final String servletUri;
-
-    public ServletRamlRequest(HttpServletRequest delegate, String servletUri) {
-        super(delegate);
-        this.servletUri = servletUri;
-    }
+    private final String path;
+    private final String url;
 
     public ServletRamlRequest(HttpServletRequest delegate) {
-        this(delegate, null);
+        super(delegate);
+        path = delegate.getPathInfo();
+        url = delegate.getRequestURL().toString();
     }
 
     private HttpServletRequest request() {
@@ -41,8 +39,8 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
     }
 
     @Override
-    public String getRequestUrl() {
-        return servletUri != null ? servletUri + request().getPathInfo() : request().getRequestURL().toString();
+    public String getRequestUrl(String servletUri) {
+        return servletUri != null ? (servletUri + path) : url;
     }
 
     @Override

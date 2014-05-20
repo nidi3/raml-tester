@@ -31,22 +31,16 @@ import java.io.IOException;
  */
 public class ServletTester {
     private final RamlTester tester;
-    private final String servletUri;
-
-    public ServletTester(RamlTester tester, String servletUri) {
-        this.tester = tester;
-        this.servletUri = servletUri;
-    }
 
     public ServletTester(RamlTester tester) {
-        this(tester, null);
+        this.tester = tester;
     }
-
+   
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!(request instanceof HttpServletRequest)) {
             return null;
         }
-        final ServletRamlRequest httpRequest = new ServletRamlRequest((HttpServletRequest) request, servletUri);
+        final ServletRamlRequest httpRequest = new ServletRamlRequest((HttpServletRequest) request);
         final ServletRamlResponse httpResponse = new ServletRamlResponse((HttpServletResponse) response);
         chain.doFilter(httpRequest, httpResponse);
         return tester.test(httpRequest, httpResponse);

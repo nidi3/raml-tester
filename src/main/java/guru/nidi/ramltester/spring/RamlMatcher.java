@@ -25,11 +25,9 @@ import org.springframework.test.web.servlet.ResultMatcher;
  */
 public class RamlMatcher implements ResultMatcher {
     private final RamlTester tester;
-    private final String servletUri;
 
-    public RamlMatcher(RamlTester tester, String servletUri) {
+    public RamlMatcher(RamlTester tester) {
         this.tester = tester;
-        this.servletUri = servletUri;
     }
 
     @Override
@@ -42,7 +40,7 @@ public class RamlMatcher implements ResultMatcher {
 
     public RamlReport testAgainst(MvcResult result) {
         return tester.test(
-                new SpringMockRamlRequest(servletUri, result.getRequest()),
+                new SpringMockRamlRequest(result.getRequest()),
                 new SpringMockRamlResponse(result.getResponse()));
     }
 }

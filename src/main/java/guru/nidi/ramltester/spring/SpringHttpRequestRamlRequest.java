@@ -28,19 +28,17 @@ import java.util.Map;
  */
 public class SpringHttpRequestRamlRequest implements RamlRequest {
     private final HttpRequest request;
-    private final String baseUri;
     private final byte[] body;
     private final UriComponents uriComponents;
 
-    public SpringHttpRequestRamlRequest(HttpRequest request, String baseUri, byte[] body) {
+    public SpringHttpRequestRamlRequest(HttpRequest request, byte[] body) {
         this.request = request;
-        this.baseUri = baseUri;
         this.body = body;
         this.uriComponents = UriComponents.fromHttpUrl(request.getURI().toString());
     }
 
     @Override
-    public String getRequestUrl() {
+    public String getRequestUrl(String baseUri) {
         return (baseUri != null ? baseUri : uriComponents.getServer()) + uriComponents.getPath();
     }
 

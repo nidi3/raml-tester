@@ -21,7 +21,7 @@ import java.util.Map;
  *
  */
 public interface RamlRequest {
-    String getRequestUrl();
+    String getRequestUrl(String servletUri);
 
     String getMethod();
 

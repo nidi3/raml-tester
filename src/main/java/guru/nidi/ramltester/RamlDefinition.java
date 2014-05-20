@@ -66,31 +66,31 @@ public class RamlDefinition {
     }
 
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        return new ServletTester(createTester(), servletUri).testAgainst(request, response, chain);
+        return new ServletTester(createTester()).testAgainst(request, response, chain);
     }
 
     public RamlMatcher matches() {
-        return new RamlMatcher(createTester(), servletUri);
+        return new RamlMatcher(createTester());
     }
 
     public RamlRestTemplate createRestTemplate(ClientHttpRequestFactory requestFactory) {
-        return new RamlRestTemplate(createTester(), servletUri, requestFactory);
+        return new RamlRestTemplate(createTester(), requestFactory);
     }
 
     public RamlRestTemplate createRestTemplate(RestTemplate restTemplate) {
-        return new RamlRestTemplate(createTester(), servletUri, restTemplate);
+        return new RamlRestTemplate(createTester(), restTemplate);
     }
 
     public RamlHttpClient createHttpClient() {
-        return new RamlHttpClient(createTester(), servletUri);
+        return new RamlHttpClient(createTester());
     }
 
     public RamlHttpClient createHttpClient(CloseableHttpClient httpClient) {
-        return new RamlHttpClient(createTester(), servletUri, httpClient);
+        return new RamlHttpClient(createTester(), httpClient);
     }
 
     public RamlTester createTester() {
-        return new RamlTester(raml, schemaValidators.getValidators());
+        return new RamlTester(raml, schemaValidators.getValidators(), servletUri);
     }
 
 }

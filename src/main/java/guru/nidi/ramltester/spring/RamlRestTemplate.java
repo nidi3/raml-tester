@@ -29,24 +29,24 @@ import java.util.Collections;
 /**
  *
  */
-public class RamlRestTemplate extends RestTemplate  {
+public class RamlRestTemplate extends RestTemplate {
     private final ClientHttpRequestFactory originalRequestFactory;
     private final RamlTestRequestInterceptor interceptor;
     private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlRestTemplate(RamlTester tester, String baseUri, ClientHttpRequestFactory requestFactory) {
+    public RamlRestTemplate(RamlTester tester, ClientHttpRequestFactory requestFactory) {
         originalRequestFactory = requestFactory;
-        interceptor = new RamlTestRequestInterceptor(reportStore, tester, baseUri);
+        interceptor = new RamlTestRequestInterceptor(reportStore, tester);
         setRequestFactory(new InterceptingClientHttpRequestFactory(requestFactory, Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
-    public RamlRestTemplate(RamlTester tester, String baseUri, RestTemplate restTemplate) {
-        this(tester, baseUri, restTemplate.getRequestFactory());
+    public RamlRestTemplate(RamlTester tester, RestTemplate restTemplate) {
+        this(tester, restTemplate.getRequestFactory());
         init(restTemplate);
     }
 
-    public RamlRestTemplate(RamlTester tester, String baseUri, RamlRestTemplate restTemplate) {
-        this(tester, baseUri, restTemplate.originalRequestFactory);
+    public RamlRestTemplate(RamlTester tester, RamlRestTemplate restTemplate) {
+        this(tester, restTemplate.originalRequestFactory);
         init(restTemplate);
     }
 

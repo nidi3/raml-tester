@@ -29,26 +29,25 @@ import java.util.Map;
  *
  */
 public class HttpComponentsRamlRequest implements RamlRequest {
+    private final String path;
     private final String url;
     private final HttpRequest request;
 
-    public HttpComponentsRamlRequest(HttpHost host, HttpRequest request, String servletUri) {
+    public HttpComponentsRamlRequest(HttpHost host, HttpRequest request) {
         this.request = request;
-        url = servletUri != null
-                ? (servletUri + UriComponents.fromHttpUrl(request.getRequestLine().getUri()).getPath())
-                : host.toString() + request.getRequestLine().getUri();
+        path = UriComponents.fromHttpUrl(request.getRequestLine().getUri()).getPath();
+        url = host.toString() + request.getRequestLine().getUri();
     }
 
-    public HttpComponentsRamlRequest(HttpUriRequest request, String servletUri) {
+    public HttpComponentsRamlRequest(HttpUriRequest request) {
         this.request = request;
-        url = servletUri != null
-                ? (servletUri + request.getURI().getPath())
-                : request.getURI().toString();
+        path = request.getURI().getPath();
+        url = request.getURI().toString();
     }
 
     @Override
-    public String getRequestUrl() {
-        return url;
+    public String getRequestUrl(String servletUri) {
+        return servletUri != null ? (servletUri + path) : url;
     }
 
     @Override

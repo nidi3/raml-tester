@@ -30,12 +30,10 @@ import java.io.IOException;
 public class RamlTestRequestInterceptor implements ClientHttpRequestInterceptor {
     private final ReportStore reportStore;
     private final RamlTester tester;
-    private final String baseUri;
 
-    public RamlTestRequestInterceptor(ReportStore reportStore, RamlTester tester, String baseUri) {
+    public RamlTestRequestInterceptor(ReportStore reportStore, RamlTester tester) {
         this.reportStore = reportStore;
         this.tester = tester;
-        this.baseUri = baseUri;
     }
 
     public RamlTester getTester() {
@@ -47,7 +45,7 @@ public class RamlTestRequestInterceptor implements ClientHttpRequestInterceptor 
         reportStore.storeReport(null);
         final ClientHttpResponse response = execution.execute(request, body);
         final SpringClientHttpResponseRamlResponse ramlResponse = new SpringClientHttpResponseRamlResponse(response);
-        final SpringHttpRequestRamlRequest ramlRequest = new SpringHttpRequestRamlRequest(request, baseUri, body);
+        final SpringHttpRequestRamlRequest ramlRequest = new SpringHttpRequestRamlRequest(request, body);
         reportStore.storeReport(tester.test(ramlRequest, ramlResponse));
         return ramlResponse;
     }

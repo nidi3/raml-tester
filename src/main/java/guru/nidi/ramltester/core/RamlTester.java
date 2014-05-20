@@ -35,12 +35,14 @@ public class RamlTester {
 
     private final Raml raml;
     private final List<SchemaValidator> schemaValidators;
+    private final String servletUri;
     private RamlReport report;
     private RamlViolations requestViolations, responseViolations;
 
-    public RamlTester(Raml raml, List<SchemaValidator> schemaValidators) {
+    public RamlTester(Raml raml, List<SchemaValidator> schemaValidators, String servletUri) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
+        this.servletUri = servletUri;
     }
 
     public RamlReport test(RamlRequest request, RamlResponse response) {
@@ -57,7 +59,7 @@ public class RamlTester {
     }
 
     public Action testRequest(RamlRequest request) {
-        final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl());
+        final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(servletUri));
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
 
         testProtocol(requestUri, ramlUri);
