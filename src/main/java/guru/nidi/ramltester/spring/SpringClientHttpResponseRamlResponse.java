@@ -59,7 +59,7 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
     }
 
     @Override
-    public String getContentAsString() {
+    public String getContent() {
         try {
             char[] buf = new char[getBody().available()];
             final InputStreamReader reader = new InputStreamReader(getBody(), encoding);

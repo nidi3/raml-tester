@@ -19,6 +19,7 @@ import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.http.HttpRequest;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,5 +60,10 @@ public class SpringHttpRequestRamlRequest implements RamlRequest {
             headers.put(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]));
         }
         return headers;
+    }
+
+    @Override
+    public String getContent() {
+        return new String(body, Charset.forName("utf-8"));
     }
 }

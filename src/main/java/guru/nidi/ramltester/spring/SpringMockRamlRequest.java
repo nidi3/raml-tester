@@ -16,7 +16,6 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlRequest;
-import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.*;
@@ -77,5 +76,10 @@ public class SpringMockRamlRequest implements RamlRequest {
             headers.put(name, valueList.toArray(new String[valueList.size()]));
         }
         return headers;
+    }
+
+    @Override
+    public String getContent() {
+        return null;
     }
 }

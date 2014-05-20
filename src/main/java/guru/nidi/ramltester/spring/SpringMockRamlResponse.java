@@ -44,7 +44,7 @@ public class SpringMockRamlResponse implements RamlResponse {
     }
 
     @Override
-    public String getContentAsString() {
+    public String getContent() {
         try {
             return delegate.getContentAsString();
         } catch (UnsupportedEncodingException e) {

@@ -48,7 +48,7 @@ public class HttpComponentsRamlResponse implements RamlResponse {
     }
 
     @Override
-    public String getContentAsString() {
+    public String getContent() {
         try {
             final HttpEntity entity = response.getEntity();
             final Header encoding = entity.getContentEncoding();

@@ -69,4 +69,9 @@ public class HttpComponentsRamlRequest implements RamlRequest {
         }
         return headers.getValues();
     }
+
+    @Override
+    public String getContent() {
+        return null;
+    }
 }

@@ -29,7 +29,7 @@ import java.util.*;
 public class RamlTester {
     private final static class DefaultHeaders {
         private static final Set<String>
-                REQUEST = new HashSet<>(Arrays.asList("accept", "accept-charset", "accept-encoding", "accept-language", "accept-datetime", "authorization", "cache-control", "connection", "cookie", "content-length", "content-md5", "content-type", "date", "expect", "from", "host", "if-match", "if-modified-since", "if-none-match", "if-range", "if-unmodified-since", "max-forwards", "origin", "pragma", "proxy-authorization", "range", "referer", "te", "user-agent", "upgrade", "via", "warning")),
+                REQUEST = new HashSet<>(Arrays.asList("accept", "accept-charset", "accept-encoding", "accept-language", "accept-datetime", "authorization", "cache-control", "connection", "cookie", "content-length", "content-md5", "content-type", "date", "dnt", "expect", "from", "host", "if-match", "if-modified-since", "if-none-match", "if-range", "if-unmodified-since", "max-forwards", "origin", "pragma", "proxy-authorization", "range", "referer", "te", "user-agent", "upgrade", "via", "warning")),
                 RESPONSE = new HashSet<>(Arrays.asList("access-control-allow-origin", "accept-ranges", "age", "allow", "cache-control", "connection", "content-encoding", "content-language", "content-length", "content-location", "content-md5", "content-disposition", "content-range", "content-type", "date", "etag", "expires", "last-modified", "link", "location", "p3p", "pragma", "proxy-authenticate", "refresh", "retry-after", "server", "set-cookie", "status", "strict-transport-security", "trailer", "transfer-encoding", "upgrade", "vary", "via", "warning", "www-authenticate", "x-frame-options"));
     }
 
@@ -251,7 +251,7 @@ public class RamlTester {
         if (schema != null) {
             final SchemaValidator validator = findSchemaValidator(targetType);
             responseViolations.addAndThrowIf(validator == null, "schemaValidator.missing", targetType, action, response.getStatus());
-            final String content = response.getContentAsString();
+            final String content = response.getContent();
             String refSchema = raml.getConsolidatedSchemas().get(schema);
             schema = refSchema != null ? refSchema : schema;
             validator.validate(content, schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType, content));
@@ -283,7 +283,7 @@ public class RamlTester {
     }
 
     private boolean hasContent(RamlResponse response) {
-        return response.getContentAsString() != null && response.getContentAsString().length() > 0;
+        return response.getContent() != null && response.getContent().length() > 0;
     }
 
     private boolean existSchemalessBody(Map<String, MimeType> bodies) {

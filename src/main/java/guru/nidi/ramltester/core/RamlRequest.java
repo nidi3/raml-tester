@@ -28,4 +28,6 @@ public interface RamlRequest {
     Map<String, String[]> getParameterMap();
 
     Map<String, String[]> getHeaderMap();
+
+    String getContent();
 }

@@ -25,7 +25,7 @@ public interface RamlResponse {
 
     String getContentType();
 
-    String getContentAsString();
+    String getContent();
 
     Map<String, String[]> getHeaderMap();
 
