@@ -19,9 +19,11 @@ import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.core.RamlResponse;
 import guru.nidi.ramltester.core.RamlTester;
+import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.raml.model.Raml;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MvcResult;
@@ -77,6 +79,14 @@ public class RamlDefinition {
 
     public RamlRestTemplate createRestTemplate(RestTemplate restTemplate) {
         return new RamlRestTemplate(createTester(), servletUri, restTemplate);
+    }
+
+    public RamlHttpClient createHttpClient() {
+        return new RamlHttpClient(createTester(), servletUri);
+    }
+
+    public RamlHttpClient createHttpClient(CloseableHttpClient httpClient) {
+        return new RamlHttpClient(createTester(), servletUri, httpClient);
     }
 
     public RamlTester createTester() {

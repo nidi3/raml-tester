@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlTester;
+import guru.nidi.ramltester.core.ReportStore;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -28,10 +28,6 @@ import java.io.IOException;
  *
  */
 public class RamlTestRequestInterceptor implements ClientHttpRequestInterceptor {
-    public interface ReportStore {
-        void storeReport(RamlReport report);
-    }
-
     private final ReportStore reportStore;
     private final RamlTester tester;
     private final String baseUri;

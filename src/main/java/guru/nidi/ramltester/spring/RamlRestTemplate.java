@@ -17,6 +17,8 @@ package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlTester;
+import guru.nidi.ramltester.core.ReportStore;
+import guru.nidi.ramltester.core.ThreadLocalReportStore;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
@@ -27,14 +29,14 @@ import java.util.Collections;
 /**
  *
  */
-public class RamlRestTemplate extends RestTemplate implements RamlTestRequestInterceptor.ReportStore {
+public class RamlRestTemplate extends RestTemplate  {
     private final ClientHttpRequestFactory originalRequestFactory;
     private final RamlTestRequestInterceptor interceptor;
-    private static final ThreadLocal<RamlReport> lastReport = new ThreadLocal<>();
+    private final ReportStore reportStore = new ThreadLocalReportStore();
 
     public RamlRestTemplate(RamlTester tester, String baseUri, ClientHttpRequestFactory requestFactory) {
         originalRequestFactory = requestFactory;
-        interceptor = new RamlTestRequestInterceptor(this, tester, baseUri);
+        interceptor = new RamlTestRequestInterceptor(reportStore, tester, baseUri);
         setRequestFactory(new InterceptingClientHttpRequestFactory(requestFactory, Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
@@ -54,11 +56,6 @@ public class RamlRestTemplate extends RestTemplate implements RamlTestRequestInt
     }
 
     public RamlReport getLastReport() {
-        return lastReport.get();
-    }
-
-    @Override
-    public void storeReport(RamlReport report) {
-        this.lastReport.set(report);
+        return reportStore.getLastReport();
     }
 }

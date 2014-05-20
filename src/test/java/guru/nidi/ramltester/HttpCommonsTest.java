@@ -15,23 +15,18 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
-import org.apache.catalina.deploy.FilterDef;
-import org.apache.catalina.deploy.FilterMap;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.servlet.*;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,70 +40,47 @@ import static org.junit.Assert.*;
 /**
  *
  */
-public class ServletTest extends ServerTest {
-    private CloseableHttpClient client;
-    private static TestFilter testFilter;
-
-    @BeforeClass
-    public static void setupClass() {
-        testFilter = new TestFilter();
-    }
+public class HttpCommonsTest extends ServerTest {
+    private RamlHttpClient client;
 
     @Before
     public void setup() {
-        client = HttpClientBuilder.create().build();
+        client = RamlTester
+                .fromClasspath(SimpleTest.class).load("simple.raml")
+                .assumingServletUri("http://nidi.guru/raml/v1")
+                .createHttpClient();
     }
 
     @Override
     protected int port() {
-        return 8080;
+        return 8082;
     }
 
     @Test
     public void testServletOk() throws IOException {
-        final HttpGet get = new HttpGet("http://localhost:8080/data");
-        final CloseableHttpResponse response = client.execute(get);
+        final HttpGet get = new HttpGet("http://localhost:8082/data");
+        final HttpResponse response = client.execute(get);
         assertEquals("\"json string\"", EntityUtils.toString(response.getEntity()));
-        assertTrue(testFilter.report.isEmpty());
+        assertTrue(client.getLastReport().isEmpty());
     }
 
     @Test
     public void testServletNok() throws IOException {
-        final HttpGet get = new HttpGet("http://localhost:8080/data?param=bu");
-        final CloseableHttpResponse response = client.execute(get);
+        final HttpGet get = new HttpGet("http://localhost:8082/data?param=bu");
+        final HttpResponse response = client.execute(get);
         assertEquals("illegal json", EntityUtils.toString(response.getEntity()));
 
-        final RamlViolations requestViolations = testFilter.report.getRequestViolations();
+        final RamlViolations requestViolations = client.getLastReport().getRequestViolations();
         assertEquals(1, requestViolations.size());
         assertThat(requestViolations.iterator().next(), equalTo("Query parameter 'param' on action(GET /data) is not defined"));
 
-        final RamlViolations responseViolations = testFilter.report.getResponseViolations();
+        final RamlViolations responseViolations = client.getLastReport().getResponseViolations();
         assertEquals(1, responseViolations.size());
         assertThat(responseViolations.iterator().next(),
                 startsWith("Response content does not match schema for action(GET /data) response(200) mime-type('application/json')\n" +
                         "Content: illegal json\n" +
                         "Message: Schema invalid: ")
         );
-    }
-
-    private static class TestFilter implements Filter {
-        private RamlDefinition definition = RamlTester
-                .fromClasspath(SimpleTest.class).load("simple.raml")
-                .assumingServletUri("http://nidi.guru/raml/v1");
-        private RamlReport report;
-
-        @Override
-        public void init(FilterConfig filterConfig) throws ServletException {
-        }
-
-        @Override
-        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-            report = definition.testAgainst(request, response, chain);
-        }
-
-        @Override
-        public void destroy() {
-        }
     }
 
     private static class TestServlet extends HttpServlet {
@@ -123,17 +95,6 @@ public class ServletTest extends ServerTest {
 
     @Override
     protected void init(Context ctx) {
-        final FilterDef filterDef = new FilterDef();
-        filterDef.setFilter(testFilter);
-        filterDef.setFilterName("filter");
-        ctx.addFilterDef(filterDef);
-
-        final FilterMap filterMap = new FilterMap();
-        filterMap.addServletName("app");
-        filterMap.addURLPattern("/*");
-        filterMap.setFilterName("filter");
-        ctx.addFilterMap(filterMap);
-
         Tomcat.addServlet(ctx, "app", new TestServlet());
         ctx.addServletMapping("/*", "app");
     }
