@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.httpcomponents;
 
+import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlTester;
 import guru.nidi.ramltester.core.ReportStore;
 import guru.nidi.ramltester.core.ThreadLocalReportStore;
 import org.apache.http.HttpHost;
@@ -42,17 +42,17 @@ import java.io.IOException;
 public class RamlHttpClient implements HttpClient, Closeable {
     private static final String RAML_TESTED = "raml.tested";
 
-    private final RamlTester tester;
+    private final RamlChecker checker;
     private final CloseableHttpClient delegate;
     private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlHttpClient(RamlTester tester, CloseableHttpClient delegate) {
-        this.tester = tester;
+    public RamlHttpClient(RamlChecker checker, CloseableHttpClient delegate) {
+        this.checker = checker;
         this.delegate = delegate;
     }
 
-    public RamlHttpClient(RamlTester tester) {
-        this(tester, HttpClientBuilder.create().build());
+    public RamlHttpClient(RamlChecker checker) {
+        this(checker, HttpClientBuilder.create().build());
     }
 
     public RamlReport getLastReport() {
@@ -66,7 +66,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         }
         reportStore.storeReport(null);
         final CloseableHttpResponse response = delegate.execute(target, request, context);
-        reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
+        reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
         return response;
     }
 
@@ -78,7 +78,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         }
         reportStore.storeReport(null);
         final HttpResponse response = delegate.execute(request, context);
-        reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
+        reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
         return response;
     }
 
@@ -87,7 +87,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         final BasicHttpContext context = new BasicHttpContext();
         final HttpResponse response = delegate.execute(request, context);
         if (!alreadyTested(context)) {
-            reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
+            reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
         }
         return response;
     }
@@ -97,7 +97,7 @@ public class RamlHttpClient implements HttpClient, Closeable {
         final BasicHttpContext context = new BasicHttpContext();
         final HttpResponse response = delegate.execute(target, request, context);
         if (!alreadyTested(context)) {
-            reportStore.storeReport(tester.test(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
+            reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
         }
         return response;
     }

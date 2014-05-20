@@ -31,7 +31,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 /**
  *
  */
-public class ParameterTesterTest extends CoreTestBase {
+public class ParameterCheckerTest extends CoreTestBase {
     @Test
     public void booleanType() throws Exception {
         final QueryParameter p = new QueryParameter();
@@ -217,25 +217,25 @@ public class ParameterTesterTest extends CoreTestBase {
 
     private void assertNoViolation(AbstractParam param, String value) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new ParameterChecker(violations, false).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(AbstractParam param, String value, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new ParameterChecker(violations, false).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertOneViolationThat(violations, matcher);
     }
 
     private void assertNoViolation(Map<String, ? extends AbstractParam> params, Map<String, String[]> values) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameters(params, values, new Message("baseUriParam", "action"));
+        new ParameterChecker(violations, false).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterTester(violations, false).testParameters(params, values, new Message("baseUriParam", "action"));
+        new ParameterChecker(violations, false).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);
     }
 }

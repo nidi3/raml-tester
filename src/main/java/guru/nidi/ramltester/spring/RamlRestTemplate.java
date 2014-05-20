@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.spring;
 
+import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlTester;
 import guru.nidi.ramltester.core.ReportStore;
 import guru.nidi.ramltester.core.ThreadLocalReportStore;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -34,19 +34,19 @@ public class RamlRestTemplate extends RestTemplate {
     private final RamlTestRequestInterceptor interceptor;
     private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlRestTemplate(RamlTester tester, ClientHttpRequestFactory requestFactory) {
+    public RamlRestTemplate(RamlChecker checker, ClientHttpRequestFactory requestFactory) {
         originalRequestFactory = requestFactory;
-        interceptor = new RamlTestRequestInterceptor(reportStore, tester);
+        interceptor = new RamlTestRequestInterceptor(reportStore, checker);
         setRequestFactory(new InterceptingClientHttpRequestFactory(requestFactory, Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
-    public RamlRestTemplate(RamlTester tester, RestTemplate restTemplate) {
-        this(tester, restTemplate.getRequestFactory());
+    public RamlRestTemplate(RamlChecker checker, RestTemplate restTemplate) {
+        this(checker, restTemplate.getRequestFactory());
         init(restTemplate);
     }
 
-    public RamlRestTemplate(RamlTester tester, RamlRestTemplate restTemplate) {
-        this(tester, restTemplate.originalRequestFactory);
+    public RamlRestTemplate(RamlChecker checker, RamlRestTemplate restTemplate) {
+        this(checker, restTemplate.originalRequestFactory);
         init(restTemplate);
     }
 

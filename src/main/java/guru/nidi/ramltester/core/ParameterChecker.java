@@ -29,7 +29,7 @@ import java.util.regex.PatternSyntaxException;
 /**
  *
  */
-class ParameterTester {
+class ParameterChecker {
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
     private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
@@ -40,25 +40,25 @@ class ParameterTester {
     private final boolean acceptUndefined;
     private final Set<String> predefined;
 
-    ParameterTester(RamlViolations violations, boolean acceptUndefined, Set<String> predefined) {
+    ParameterChecker(RamlViolations violations, boolean acceptUndefined, Set<String> predefined) {
         this.violations = violations;
         this.acceptUndefined = acceptUndefined;
         this.predefined = predefined;
     }
 
-    ParameterTester(RamlViolations violations, boolean acceptUndefined) {
+    ParameterChecker(RamlViolations violations, boolean acceptUndefined) {
         this(violations, acceptUndefined, Collections.<String>emptySet());
     }
 
-    public void testParameters(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Message message) {
+    public void checkParameters(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Message message) {
         Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
         for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
-        testListParameters(listParams, values, message);
+        checkListParameters(listParams, values, message);
     }
 
-    public void testListParameters(Map<String, List<? extends AbstractParam>> params, Map<String, String[]> values, Message message) {
+    public void checkListParameters(Map<String, List<? extends AbstractParam>> params, Map<String, String[]> values, Message message) {
         Set<String> found = new HashSet<>();
         for (Map.Entry<String, String[]> entry : values.entrySet()) {
             final Message namedMsg = message.withParam(entry.getKey());
@@ -69,7 +69,7 @@ class ParameterTester {
                 for (AbstractParam parameter : parameters) {
                     violations.addIf(!parameter.isRepeat() && entry.getValue().length > 1, namedMsg.withMessageParam("repeat.superfluous"));
                     for (String value : entry.getValue()) {
-                        testParameter(parameter, value, namedMsg);
+                        checkParameter(parameter, value, namedMsg);
                     }
                 }
                 found.add(entry.getKey());
@@ -83,7 +83,7 @@ class ParameterTester {
         }
     }
 
-    public void testParameter(AbstractParam param, String value, Message message) {
+    public void checkParameter(AbstractParam param, String value, Message message) {
         Message detail = message.withInnerParam(new Message("value", value));
         switch (param.getType()) {
             case BOOLEAN:
@@ -103,7 +103,7 @@ class ParameterTester {
                 break;
             case INTEGER:
                 if (INTEGER.matcher(value).matches()) {
-                    testNumericLimits(param, new BigDecimal(value), detail);
+                    checkNumericLimits(param, new BigDecimal(value), detail);
                 } else {
                     violations.add(detail.withMessageParam("integer.invalid"));
                 }
@@ -113,7 +113,7 @@ class ParameterTester {
                     if ((value.equals("inf") || value.equals("-inf") || value.equals("nan"))) {
                         violations.addIf(param.getMinimum() != null || param.getMaximum() != null, detail.withMessageParam("unbound"));
                     } else {
-                        testNumericLimits(param, new BigDecimal(value), detail);
+                        checkNumericLimits(param, new BigDecimal(value), detail);
                     }
                 } else {
                     violations.add(detail.withMessageParam("number.invalid"));
@@ -136,7 +136,7 @@ class ParameterTester {
         }
     }
 
-    private void testNumericLimits(AbstractParam param, BigDecimal value, Message message) {
+    private void checkNumericLimits(AbstractParam param, BigDecimal value, Message message) {
         violations.addIf(param.getMinimum() != null && param.getMinimum().compareTo(value) > 0,
                 message.withMessageParam("value.tooSmall", param.getMinimum()));
         violations.addIf(param.getMaximum() != null && param.getMaximum().compareTo(value) < 0,

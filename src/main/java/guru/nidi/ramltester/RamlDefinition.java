@@ -15,10 +15,10 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.core.RamlResponse;
-import guru.nidi.ramltester.core.RamlTester;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
@@ -58,7 +58,7 @@ public class RamlDefinition {
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
-        return createTester().test(request, response);
+        return createTester().check(request, response);
     }
 
     public RamlReport testAgainst(MvcResult mvcResult) {
@@ -89,8 +89,8 @@ public class RamlDefinition {
         return new RamlHttpClient(createTester(), httpClient);
     }
 
-    public RamlTester createTester() {
-        return new RamlTester(raml, schemaValidators.getValidators(), servletUri);
+    public RamlChecker createTester() {
+        return new RamlChecker(raml, schemaValidators.getValidators(), servletUri);
     }
 
 }

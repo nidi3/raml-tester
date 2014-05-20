@@ -26,7 +26,7 @@ import java.util.*;
 /**
  *
  */
-public class RamlTester {
+public class RamlChecker {
     private final static class DefaultHeaders {
         private static final Set<String>
                 REQUEST = new HashSet<>(Arrays.asList("accept", "accept-charset", "accept-encoding", "accept-language", "accept-datetime", "authorization", "cache-control", "connection", "cookie", "content-length", "content-md5", "content-type", "date", "dnt", "expect", "from", "host", "if-match", "if-modified-since", "if-none-match", "if-range", "if-unmodified-since", "max-forwards", "origin", "pragma", "proxy-authorization", "range", "referer", "te", "user-agent", "upgrade", "via", "warning")),
@@ -39,30 +39,30 @@ public class RamlTester {
     private RamlReport report;
     private RamlViolations requestViolations, responseViolations;
 
-    public RamlTester(Raml raml, List<SchemaValidator> schemaValidators, String servletUri) {
+    public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String servletUri) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.servletUri = servletUri;
     }
 
-    public RamlReport test(RamlRequest request, RamlResponse response) {
+    public RamlReport check(RamlRequest request, RamlResponse response) {
         report = new RamlReport();
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
         try {
-            Action action = testRequest(request);
-            testResponse(action, response);
+            Action action = checkRequest(request);
+            checkResponse(action, response);
         } catch (RamlViolationException e) {
             //ignore, results are in report
         }
         return report;
     }
 
-    public Action testRequest(RamlRequest request) {
+    public Action checkRequest(RamlRequest request) {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(servletUri));
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
 
-        testProtocol(requestUri, ramlUri);
+        checkProtocol(requestUri, ramlUri);
 
         final VariableMatcher hostMatch = getHostMatch(requestUri, ramlUri);
         final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
@@ -70,27 +70,27 @@ public class RamlTester {
         Resource resource = findResource(pathMatch.getSuffix());
         Action action = findAction(resource, request.getMethod());
 
-        testBaseUriParameters(hostMatch, pathMatch, action);
-        testQueryParameters(request.getParameterMap(), action);
-        testRequestHeaderParameters(request.getHeaderMap(), action);
+        checkBaseUriParameters(hostMatch, pathMatch, action);
+        checkQueryParameters(request.getParameterMap(), action);
+        checkRequestHeaderParameters(request.getHeaderMap(), action);
         return action;
     }
 
-    private void testQueryParameters(Map<String, String[]> values, Action action) {
-        new ParameterTester(requestViolations, false)
-                .testParameters(action.getQueryParameters(), values, new Message("queryParam", action));
+    private void checkQueryParameters(Map<String, String[]> values, Action action) {
+        new ParameterChecker(requestViolations, false)
+                .checkParameters(action.getQueryParameters(), values, new Message("queryParam", action));
     }
 
-    private void testRequestHeaderParameters(Map<String, String[]> values, Action action) {
-        new ParameterTester(requestViolations, false, DefaultHeaders.REQUEST)
-                .testParameters(action.getHeaders(), values, new Message("headerParam", action));
+    private void checkRequestHeaderParameters(Map<String, String[]> values, Action action) {
+        new ParameterChecker(requestViolations, false, DefaultHeaders.REQUEST)
+                .checkParameters(action.getHeaders(), values, new Message("headerParam", action));
     }
 
-    private void testBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
-        final ParameterTester parameterTester = new ParameterTester(requestViolations, true);
+    private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
+        final ParameterChecker paramChecker = new ParameterChecker(requestViolations, true);
         final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(action);
-        parameterTester.testListParameters(baseUriParams, hostMatch.getVariables().getValues(), new Message("baseUriParam", action));
-        parameterTester.testListParameters(baseUriParams, pathMatch.getVariables().getValues(), new Message("baseUriParam", action));
+        paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables().getValues(), new Message("baseUriParam", action));
+        paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables().getValues(), new Message("baseUriParam", action));
     }
 
     private Action findAction(Resource resource, String method) {
@@ -115,7 +115,7 @@ public class RamlTester {
         return hostMatch;
     }
 
-    private void testProtocol(UriComponents requestUri, UriComponents ramlUri) {
+    private void checkProtocol(UriComponents requestUri, UriComponents ramlUri) {
         if (raml.getProtocols() != null && !raml.getProtocols().isEmpty()) {
             requestViolations.addIf(!raml.getProtocols().contains(protocolOf(requestUri.getScheme())), "protocol.undefined", requestUri.getScheme());
         } else {
@@ -139,16 +139,16 @@ public class RamlTester {
         if (resource == null) {
             requestViolations.addAndThrow("resource.undefined", resourcePath);
         }
-        testUriParams(parameterValues, resource);
+        checkUriParams(parameterValues, resource);
         return resource;
     }
 
-    private void testUriParams(ParameterValues parameterValues, Resource resource) {
-        final ParameterTester parameterTester = new ParameterTester(requestViolations, true);
+    private void checkUriParams(ParameterValues parameterValues, Resource resource) {
+        final ParameterChecker paramChecker = new ParameterChecker(requestViolations, true);
         for (Map.Entry<String, String[]> entry : parameterValues.getValues().entrySet()) {
             final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
             if (uriParam != null) {
-                parameterTester.testParameter(uriParam, entry.getValue()[0], new Message("uriParam", entry.getKey(), resource));
+                paramChecker.checkParameter(uriParam, entry.getValue()[0], new Message("uriParam", entry.getKey(), resource));
             }
         }
     }
@@ -230,20 +230,20 @@ public class RamlTester {
         }
     }
 
-    public void testResponse(Action action, RamlResponse response) {
+    public void checkResponse(Action action, RamlResponse response) {
         Response res = findResponse(action, response.getStatus());
-        testResponseHeaderParameters(response.getHeaderMap(), res);
+        checkResponseHeaderParameters(response.getHeaderMap(), res);
         final Map<String, MimeType> bodies = res.getBody();
         if (isNoOrEmptyBodies(bodies)) {
             responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
         } else if (response.getContentType() == null) {
             responseViolations.addAndThrowIf(hasContent(response) || !existSchemalessBody(bodies), "contentType.missing");
         } else {
-            testResponseBody(action, response, bodies);
+            checkResponseBody(action, response, bodies);
         }
     }
 
-    private void testResponseBody(Action action, RamlResponse response, Map<String, MimeType> bodies) {
+    private void checkResponseBody(Action action, RamlResponse response, Map<String, MimeType> bodies) {
         MediaType targetType = MediaType.valueOf(response.getContentType());
         MimeType mimeType = findMatchingMimeType(bodies, targetType);
         responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
@@ -258,9 +258,9 @@ public class RamlTester {
         }
     }
 
-    private void testResponseHeaderParameters(Map<String, String[]> values, Response response) {
-        new ParameterTester(requestViolations, false, DefaultHeaders.RESPONSE)
-                .testParameters(response.getHeaders(), values, new Message("headerParam", response));
+    private void checkResponseHeaderParameters(Map<String, String[]> values, Response response) {
+        new ParameterChecker(requestViolations, false, DefaultHeaders.RESPONSE)
+                .checkParameters(response.getHeaders(), values, new Message("headerParam", response));
     }
 
     private Response findResponse(Action action, int status) {

@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.servlet;
 
+import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlTester;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -30,10 +30,10 @@ import java.io.IOException;
  *
  */
 public class ServletTester {
-    private final RamlTester tester;
+    private final RamlChecker checker;
 
-    public ServletTester(RamlTester tester) {
-        this.tester = tester;
+    public ServletTester(RamlChecker checker) {
+        this.checker = checker;
     }
    
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -43,6 +43,6 @@ public class ServletTester {
         final ServletRamlRequest httpRequest = new ServletRamlRequest((HttpServletRequest) request);
         final ServletRamlResponse httpResponse = new ServletRamlResponse((HttpServletResponse) response);
         chain.doFilter(httpRequest, httpResponse);
-        return tester.test(httpRequest, httpResponse);
+        return checker.check(httpRequest, httpResponse);
     }
 }

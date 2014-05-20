@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.core.RamlTester;
+import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.ReportStore;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -29,15 +29,15 @@ import java.io.IOException;
  */
 public class RamlTestRequestInterceptor implements ClientHttpRequestInterceptor {
     private final ReportStore reportStore;
-    private final RamlTester tester;
+    private final RamlChecker checker;
 
-    public RamlTestRequestInterceptor(ReportStore reportStore, RamlTester tester) {
+    public RamlTestRequestInterceptor(ReportStore reportStore, RamlChecker checker) {
         this.reportStore = reportStore;
-        this.tester = tester;
+        this.checker = checker;
     }
 
-    public RamlTester getTester() {
-        return tester;
+    public RamlChecker getChecker() {
+        return checker;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RamlTestRequestInterceptor implements ClientHttpRequestInterceptor 
         final ClientHttpResponse response = execution.execute(request, body);
         final SpringClientHttpResponseRamlResponse ramlResponse = new SpringClientHttpResponseRamlResponse(response);
         final SpringHttpRequestRamlRequest ramlRequest = new SpringHttpRequestRamlRequest(request, body);
-        reportStore.storeReport(tester.test(ramlRequest, ramlResponse));
+        reportStore.storeReport(checker.check(ramlRequest, ramlResponse));
         return ramlResponse;
     }
 }
