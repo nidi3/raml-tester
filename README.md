@@ -60,3 +60,8 @@ public class RamlFilter implements Filter {
 
 ```
 Or see the demo project https://github.com/nidi3/raml-tester-uc-servlet
+
+Use as a standalone proxy
+-------------------------
+When used as a proxy, any service can be tested, regardless of the technology used to implement it.
+See raml-proxy project: https://github.com/nidi3/raml-tester-proxy
