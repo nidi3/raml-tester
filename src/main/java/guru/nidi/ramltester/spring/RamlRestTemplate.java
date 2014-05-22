@@ -30,24 +30,32 @@ import java.util.Collections;
  *
  */
 public class RamlRestTemplate extends RestTemplate {
+    private final RamlChecker ramlChecker;
+    private final boolean notSending;
     private final ClientHttpRequestFactory originalRequestFactory;
-    private final RamlTestRequestInterceptor interceptor;
+    private final RamlRequestInterceptor interceptor;
     private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlRestTemplate(RamlChecker checker, ClientHttpRequestFactory requestFactory) {
-        originalRequestFactory = requestFactory;
-        interceptor = new RamlTestRequestInterceptor(reportStore, checker);
+    public RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ClientHttpRequestFactory requestFactory) {
+        this.ramlChecker = ramlChecker;
+        this.notSending = notSending;
+        this.originalRequestFactory = requestFactory;
+        interceptor = new RamlRequestInterceptor(ramlChecker, notSending, reportStore);
         setRequestFactory(new InterceptingClientHttpRequestFactory(requestFactory, Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
-    public RamlRestTemplate(RamlChecker checker, RestTemplate restTemplate) {
-        this(checker, restTemplate.getRequestFactory());
+    public RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, RestTemplate restTemplate) {
+        this(ramlChecker, notSending, restTemplate.getRequestFactory());
         init(restTemplate);
     }
 
-    public RamlRestTemplate(RamlChecker checker, RamlRestTemplate restTemplate) {
-        this(checker, restTemplate.originalRequestFactory);
+    public RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, RamlRestTemplate restTemplate) {
+        this(ramlChecker, notSending, restTemplate.originalRequestFactory);
         init(restTemplate);
+    }
+
+    public RamlRestTemplate notSending() {
+        return new RamlRestTemplate(ramlChecker, true, this);
     }
 
     private void init(RestTemplate restTemplate) {

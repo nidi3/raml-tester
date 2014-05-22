@@ -16,37 +16,46 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlChecker;
+import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.ReportStore;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 
 import java.io.IOException;
 
 /**
  *
  */
-public class RamlTestRequestInterceptor implements ClientHttpRequestInterceptor {
-    private final ReportStore reportStore;
+public class RamlRequestInterceptor implements ClientHttpRequestInterceptor {
     private final RamlChecker checker;
+    private final boolean notSending;
+    private final ReportStore reportStore;
 
-    public RamlTestRequestInterceptor(ReportStore reportStore, RamlChecker checker) {
-        this.reportStore = reportStore;
+    public RamlRequestInterceptor(RamlChecker checker, boolean notSending, ReportStore reportStore) {
         this.checker = checker;
-    }
-
-    public RamlChecker getChecker() {
-        return checker;
+        this.notSending = notSending;
+        this.reportStore = reportStore;
     }
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
         reportStore.storeReport(null);
-        final ClientHttpResponse response = execution.execute(request, body);
-        final SpringClientHttpResponseRamlResponse ramlResponse = new SpringClientHttpResponseRamlResponse(response);
         final SpringHttpRequestRamlRequest ramlRequest = new SpringHttpRequestRamlRequest(request, body);
-        reportStore.storeReport(checker.check(ramlRequest, ramlResponse));
-        return ramlResponse;
+        final RamlReport report;
+        final ClientHttpResponse response;
+        if (notSending) {
+            response = new MockClientHttpResponse((byte[]) null, HttpStatus.NO_CONTENT);
+            report = checker.checkRequest(ramlRequest);
+        } else {
+            response = execution.execute(request, body);
+            final SpringClientHttpResponseRamlResponse ramlResponse = new SpringClientHttpResponseRamlResponse(response);
+            report = checker.check(ramlRequest, ramlResponse);
+        }
+        reportStore.storeReport(report);
+        return response;
     }
 }

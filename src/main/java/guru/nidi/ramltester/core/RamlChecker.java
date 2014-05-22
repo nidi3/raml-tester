@@ -50,15 +50,21 @@ public class RamlChecker {
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
         try {
-            Action action = checkRequest(request);
-            checkResponse(action, response);
+            Action action = checkRequestAndFindAction(request);
+            if (response != null) {
+                checkResponse(action, response);
+            }
         } catch (RamlViolationException e) {
             //ignore, results are in report
         }
         return report;
     }
 
-    public Action checkRequest(RamlRequest request) {
+    public RamlReport checkRequest(RamlRequest request) {
+        return check(request, null);
+    }
+
+    public Action checkRequestAndFindAction(RamlRequest request) {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(servletUri));
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
 

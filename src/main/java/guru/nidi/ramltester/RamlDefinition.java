@@ -74,11 +74,11 @@ public class RamlDefinition {
     }
 
     public RamlRestTemplate createRestTemplate(ClientHttpRequestFactory requestFactory) {
-        return new RamlRestTemplate(createTester(), requestFactory);
+        return new RamlRestTemplate(createTester(), false, requestFactory);
     }
 
     public RamlRestTemplate createRestTemplate(RestTemplate restTemplate) {
-        return new RamlRestTemplate(createTester(), restTemplate);
+        return new RamlRestTemplate(createTester(), false, restTemplate);
     }
 
     public RamlHttpClient createHttpClient() {
