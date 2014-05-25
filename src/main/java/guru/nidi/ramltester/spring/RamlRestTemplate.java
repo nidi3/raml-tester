@@ -19,6 +19,7 @@ import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.ReportStore;
 import guru.nidi.ramltester.core.ThreadLocalReportStore;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
@@ -41,7 +42,8 @@ public class RamlRestTemplate extends RestTemplate {
         this.notSending = notSending;
         this.originalRequestFactory = requestFactory;
         interceptor = new RamlRequestInterceptor(ramlChecker, notSending, reportStore);
-        setRequestFactory(new InterceptingClientHttpRequestFactory(requestFactory, Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
+        setRequestFactory(new InterceptingClientHttpRequestFactory(
+                new BufferingClientHttpRequestFactory(requestFactory), Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
     public RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, RestTemplate restTemplate) {

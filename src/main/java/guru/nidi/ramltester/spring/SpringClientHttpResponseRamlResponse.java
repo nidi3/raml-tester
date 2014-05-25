@@ -21,7 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,6 @@ import java.util.Map;
 public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse, RamlResponse {
     private final ClientHttpResponse response;
     private final String encoding;
-    private byte[] body;
 
     public SpringClientHttpResponseRamlResponse(ClientHttpResponse response, String encoding) {
         this.response = response;
@@ -92,12 +93,7 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
 
     @Override
     public InputStream getBody() throws IOException {
-        if (body == null) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            copy(response.getBody(), out);
-            body = out.toByteArray();
-        }
-        return new ByteArrayInputStream(body);
+       return response.getBody();
     }
 
     @Override
@@ -112,14 +108,5 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
             headers.put(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]));
         }
         return headers;
-    }
-
-    private void copy(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1000];
-        int read;
-        while ((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);
-        }
-        out.flush();
     }
 }
