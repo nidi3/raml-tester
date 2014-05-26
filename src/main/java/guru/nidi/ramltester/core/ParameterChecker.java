@@ -123,7 +123,7 @@ class ParameterChecker {
                 violations.addIf(param.getEnumeration() != null && !param.getEnumeration().contains(value),
                         detail.withMessageParam("enum.invalid", param.getEnumeration()));
                 try {
-                    violations.addIf(param.getPattern() != null && !javaRegexOf(param.getPattern()).matcher(value).matches(),
+                    violations.addIf(param.getPattern() != null && !JsRegex.matches(value, param.getPattern()),
                             detail.withMessageParam("pattern.invalid", param.getPattern()));
                 } catch (PatternSyntaxException e) {
                     log.warn("Could not execute regex '" + param.getPattern(), e);
@@ -141,32 +141,5 @@ class ParameterChecker {
                 message.withMessageParam("value.tooSmall", param.getMinimum()));
         violations.addIf(param.getMaximum() != null && param.getMaximum().compareTo(value) < 0,
                 message.withMessageParam("value.tooBig", param.getMaximum()));
-    }
-
-    private Pattern javaRegexOf(String regex) {
-        if (isDoubleQuoted(regex) || isSingleQuoted(regex)) {
-            regex = regex.substring(1, regex.length() - 1);
-        }
-        int flags = 0;
-        if (regex.startsWith("/")) {
-            int pos = regex.lastIndexOf("/");
-            if (pos >= regex.length() - 3) {
-                String flagString = pos == regex.length() - 1 ? "" : regex.substring(pos + 1);
-                regex = regex.substring(1, pos);
-                regex = regex.replace("\\/", "/");
-                if (flagString.contains("i")) {
-                    flags |= Pattern.CASE_INSENSITIVE;
-                }
-            }
-        }
-        return Pattern.compile(regex, flags);
-    }
-
-    private boolean isDoubleQuoted(String regex) {
-        return regex.startsWith("\"") && regex.endsWith("\"");
-    }
-
-    private boolean isSingleQuoted(String regex) {
-        return regex.startsWith("'") && regex.endsWith("'");
     }
 }
