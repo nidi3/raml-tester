@@ -17,10 +17,13 @@ package guru.nidi.ramltester.util;
 
 import org.apache.catalina.*;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.JarScanner;
+import org.apache.tomcat.JarScannerCallback;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +36,11 @@ public abstract class ServerTest {
     private static Server server;
     private static Context ctx;
     private static Set<Class<?>> inited = new HashSet<>();
+    private final static JarScanner NO_SCAN = new JarScanner() {
+        @Override
+        public void scan(ServletContext context, ClassLoader classloader, JarScannerCallback callback, Set<String> jarsToSkip) {
+        }
+    };
 
     @Before
     public void initImpl() throws LifecycleException, ServletException {
@@ -45,6 +53,7 @@ public abstract class ServerTest {
             tomcat.setPort(port());
             tomcat.setBaseDir(".");
             ctx = tomcat.addWebapp("/", "src/test");
+            ctx.setJarScanner(NO_SCAN);
             ((Host) ctx.getParent()).setAppBase("");
 
             init(ctx);
