@@ -49,7 +49,7 @@ public class RamlRequestInterceptor implements ClientHttpRequestInterceptor {
         final ClientHttpResponse response;
         if (notSending) {
             response = new MockClientHttpResponse((byte[]) null, HttpStatus.NO_CONTENT);
-            report = checker.checkRequest(ramlRequest);
+            report = checker.check(ramlRequest);
         } else {
             response = execution.execute(request, body);
             final SpringClientHttpResponseRamlResponse ramlResponse = new SpringClientHttpResponseRamlResponse(response);

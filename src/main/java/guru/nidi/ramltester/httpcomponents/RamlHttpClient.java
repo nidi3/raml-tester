@@ -19,16 +19,14 @@ import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.ReportStore;
 import guru.nidi.ramltester.core.ThreadLocalReportStore;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -41,18 +39,25 @@ import java.io.IOException;
  */
 public class RamlHttpClient implements HttpClient, Closeable {
     private static final String RAML_TESTED = "raml.tested";
+    private static final BasicHttpResponse DUMMY_RESPONSE = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_NO_CONTENT, "not sending");
 
     private final RamlChecker checker;
+    private final boolean notSending;
     private final CloseableHttpClient delegate;
     private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlHttpClient(RamlChecker checker, CloseableHttpClient delegate) {
+    public RamlHttpClient(RamlChecker checker, boolean notSending, CloseableHttpClient delegate) {
         this.checker = checker;
+        this.notSending = notSending;
         this.delegate = delegate;
     }
 
     public RamlHttpClient(RamlChecker checker) {
-        this(checker, HttpClientBuilder.create().build());
+        this(checker, false, HttpClientBuilder.create().build());
+    }
+
+    public RamlHttpClient notSending() {
+        return new RamlHttpClient(checker, true, delegate);
     }
 
     public RamlReport getLastReport() {
@@ -61,45 +66,50 @@ public class RamlHttpClient implements HttpClient, Closeable {
 
     @Override
     public HttpResponse execute(HttpHost target, HttpRequest request, HttpContext context) throws IOException {
-        if (alreadyTested(context)) {
-            return delegate.execute(target, request, context);
-        }
         reportStore.storeReport(null);
-        final CloseableHttpResponse response = delegate.execute(target, request, context);
-        reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
-        return response;
-    }
-
-
-    @Override
-    public HttpResponse execute(HttpUriRequest request, HttpContext context) throws IOException {
-        if (alreadyTested(context)) {
-            return delegate.execute(request, context);
+        final HttpComponentsRamlRequest ramlRequest = new HttpComponentsRamlRequest(target, request);
+        final HttpResponse response;
+        final RamlReport report;
+        if (notSending) {
+            response = DUMMY_RESPONSE;
+            report = checker.check(ramlRequest);
+        } else {
+            response = delegate.execute(target, request, context);
+            report = checker.check(ramlRequest, new HttpComponentsRamlResponse(response));
         }
-        reportStore.storeReport(null);
-        final HttpResponse response = delegate.execute(request, context);
-        reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
-        return response;
-    }
-
-    @Override
-    public HttpResponse execute(HttpUriRequest request) throws IOException {
-        final BasicHttpContext context = new BasicHttpContext();
-        final HttpResponse response = delegate.execute(request, context);
         if (!alreadyTested(context)) {
-            reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(request), new HttpComponentsRamlResponse(response)));
+            reportStore.storeReport(report);
         }
         return response;
     }
 
     @Override
     public HttpResponse execute(HttpHost target, HttpRequest request) throws IOException {
-        final BasicHttpContext context = new BasicHttpContext();
-        final HttpResponse response = delegate.execute(target, request, context);
+        return execute(target, request, new BasicHttpContext());
+    }
+
+    @Override
+    public HttpResponse execute(HttpUriRequest request, HttpContext context) throws IOException {
+        reportStore.storeReport(null);
+        final HttpComponentsRamlRequest ramlRequest = new HttpComponentsRamlRequest(request);
+        final HttpResponse response;
+        final RamlReport report;
+        if (notSending) {
+            response = DUMMY_RESPONSE;
+            report = checker.check(ramlRequest);
+        } else {
+            response = delegate.execute(request, context);
+            report = checker.check(ramlRequest, new HttpComponentsRamlResponse(response));
+        }
         if (!alreadyTested(context)) {
-            reportStore.storeReport(checker.check(new HttpComponentsRamlRequest(target, request), new HttpComponentsRamlResponse(response)));
+            reportStore.storeReport(report);
         }
         return response;
+    }
+
+    @Override
+    public HttpResponse execute(HttpUriRequest request) throws IOException {
+        return execute(request, new BasicHttpContext());
     }
 
     @Override

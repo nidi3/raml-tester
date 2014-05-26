@@ -21,6 +21,7 @@ import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.junit.Before;
@@ -81,6 +82,15 @@ public class HttpCommonsTest extends ServerTest {
                         "Content: illegal json\n" +
                         "Message: Schema invalid: ")
         );
+    }
+
+    @Test
+    public void notSending() throws IOException {
+        final HttpGet get = new HttpGet("http://localhost:8082/data");
+        final HttpResponse response = client.notSending().execute(get);
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
+        assertEquals(null, response.getEntity());
+        assertTrue(client.getLastReport().isEmpty());
     }
 
     private static class TestServlet extends HttpServlet {

@@ -86,7 +86,7 @@ public class RamlDefinition {
     }
 
     public RamlHttpClient createHttpClient(CloseableHttpClient httpClient) {
-        return new RamlHttpClient(createTester(), httpClient);
+        return new RamlHttpClient(createTester(), false, httpClient);
     }
 
     public RamlChecker createTester() {

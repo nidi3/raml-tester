@@ -60,7 +60,7 @@ public class RamlChecker {
         return report;
     }
 
-    public RamlReport checkRequest(RamlRequest request) {
+    public RamlReport check(RamlRequest request) {
         return check(request, null);
     }
 
