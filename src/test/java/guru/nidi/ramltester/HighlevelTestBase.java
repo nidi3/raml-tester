@@ -92,7 +92,7 @@ public class HighlevelTestBase {
     }
 
     private RamlReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
-        return raml.assumingServletUri("http://nidi.guru/raml/v1").testAgainst(
+        return raml.assumingBaseUri("http://nidi.guru/raml/v1").testAgainst(
                 new SpringMockRamlRequest(request),
                 new SpringMockRamlResponse(response));
     }

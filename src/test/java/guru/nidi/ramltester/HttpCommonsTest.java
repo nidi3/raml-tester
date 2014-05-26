@@ -45,9 +45,9 @@ public class HttpCommonsTest extends ServerTest {
 
     @Before
     public void setup() {
-        client = RamlTester
+        client = RamlLoaders
                 .fromClasspath(SimpleTest.class).load("simple.raml")
-                .assumingServletUri("http://nidi.guru/raml/v1")
+                .assumingBaseUri("http://nidi.guru/raml/v1")
                 .createHttpClient();
     }
 

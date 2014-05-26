@@ -31,7 +31,7 @@ public class SpringMockRamlRequest implements RamlRequest {
     }
 
     @Override
-    public String getRequestUrl(String servletUri) {
+    public String getRequestUrl(String baseUri) {
 //        if (servletUri != null) {
 //            final UriComponents uri = UriComponents.fromHttpUrl(servletUri);
 //            final String scheme = uri.getScheme();
@@ -49,7 +49,7 @@ public class SpringMockRamlRequest implements RamlRequest {
 //        final StringBuffer requestURL = delegate.getRequestURL();
 //        final int pathStart = requestURL.length() - delegate.getRequestURI().length();
 //        return requestURL.substring(0, pathStart) + delegate.getContextPath() + requestURL.substring(pathStart);
-        return servletUri != null ? servletUri + delegate.getPathInfo() : delegate.getRequestURL().toString();
+        return baseUri != null ? baseUri + delegate.getPathInfo() : delegate.getRequestURL().toString();
     }
 
     @Override

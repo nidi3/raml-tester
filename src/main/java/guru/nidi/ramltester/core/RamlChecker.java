@@ -35,14 +35,14 @@ public class RamlChecker {
 
     private final Raml raml;
     private final List<SchemaValidator> schemaValidators;
-    private final String servletUri;
+    private final String baseUri;
     private RamlReport report;
     private RamlViolations requestViolations, responseViolations;
 
-    public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String servletUri) {
+    public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String baseUri) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
-        this.servletUri = servletUri;
+        this.baseUri = baseUri;
     }
 
     public RamlReport check(RamlRequest request, RamlResponse response) {
@@ -65,7 +65,7 @@ public class RamlChecker {
     }
 
     public Action checkRequestAndFindAction(RamlRequest request) {
-        final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(servletUri));
+        final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(baseUri));
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
 
         checkProtocol(requestUri, ramlUri);

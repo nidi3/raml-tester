@@ -18,6 +18,9 @@ package guru.nidi.ramltester.apidesigner;
 
 import guru.nidi.ramltester.loader.RepositoryEntry;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 /**
  *
  */
@@ -52,7 +55,11 @@ public class ApiDesignerFile implements RepositoryEntry {
     }
 
     public void setContents(String contents) {
-        this.contents = contents;
+        try {
+            this.contents = URLDecoder.decode(contents, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override

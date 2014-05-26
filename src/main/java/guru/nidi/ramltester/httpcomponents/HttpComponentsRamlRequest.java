@@ -46,8 +46,8 @@ public class HttpComponentsRamlRequest implements RamlRequest {
     }
 
     @Override
-    public String getRequestUrl(String servletUri) {
-        return servletUri != null ? (servletUri + path) : url;
+    public String getRequestUrl(String baseUri) {
+        return baseUri != null ? (baseUri + path) : url;
     }
 
     @Override

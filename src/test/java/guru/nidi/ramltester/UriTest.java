@@ -36,7 +36,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
  */
 @Controller
 public class UriTest extends HighlevelTestBase {
-    private RamlDefinition api = RamlTester.fromClasspath(getClass()).load("uri.raml");
+    private RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("uri.raml");
     private MockMvc mockMvc;
 
     @Before
@@ -61,19 +61,19 @@ public class UriTest extends HighlevelTestBase {
     @Test(expected = IllegalArgumentException.class)
     public void invalidServletUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd"))
-                .andExpect(api.assumingServletUri("invalid").matches());
+                .andExpect(api.assumingBaseUri("invalid").matches());
     }
 
     @Test
     public void correctServletUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd/type"))
-                .andExpect(api.assumingServletUri("http://nidi.guru").matches());
+                .andExpect(api.assumingBaseUri("http://nidi.guru").matches());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/v1/undefd/type"))
-                .andExpect(api.assumingServletUri("http://nidi.guru/raml").matches());
+                .andExpect(api.assumingBaseUri("http://nidi.guru/raml").matches());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/undefd/type"))
-                .andExpect(api.assumingServletUri("http://nidi.guru/raml/v1").matches());
+                .andExpect(api.assumingBaseUri("http://nidi.guru/raml/v1").matches());
     }
 
     @Test
@@ -105,7 +105,7 @@ public class UriTest extends HighlevelTestBase {
     public void overwrittenBaseUriParametersNok() throws Exception {
         final MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd/bu")).andReturn();
         assertOneViolationThat(
-                api.assumingServletUri("http://nidi.guru").testAgainst(mvcResult).getRequestViolations(),
+                api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult).getRequestViolations(),
                 equalTo("BaseUri parameter 'host' on action(GET /bu) : Value 'nidi.guru' is not a member of enum '[bu-host]'"));
     }
 
@@ -113,17 +113,17 @@ public class UriTest extends HighlevelTestBase {
     public void overwrittenBaseUriParametersNok2() throws Exception {
         final MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/sub-raml/v1/undefd/bu/sub")).andReturn();
         assertOneViolationThat(
-                api.assumingServletUri("http://sub-host").testAgainst(result).getRequestViolations(),
+                api.assumingBaseUri("http://sub-host").testAgainst(result).getRequestViolations(),
                 equalTo("BaseUri parameter 'host' on action(GET /bu/sub) : Value 'sub-host' is not a member of enum '[sub-host-get]'"));
     }
 
     @Test
     public void overwrittenBaseUriParameters() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd/bu"))
-                .andExpect(api.assumingServletUri("http://bu-host").matches());
+                .andExpect(api.assumingBaseUri("http://bu-host").matches());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/sub-raml/v1/undefd/bu/sub"))
-                .andExpect(api.assumingServletUri("http://sub-host-get").matches());
+                .andExpect(api.assumingBaseUri("http://sub-host-get").matches());
 
     }
 }

@@ -19,7 +19,6 @@ import guru.nidi.ramltester.core.MediaType;
 import guru.nidi.ramltester.core.Message;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
-import guru.nidi.ramltester.loader.ClassPathRamlLoader;
 import guru.nidi.ramltester.loader.RamlLoader;
 import org.junit.Test;
 
@@ -36,7 +35,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
  */
 public class SimpleTest extends HighlevelTestBase {
 
-    private RamlDefinition simple = RamlTester.fromClasspath(getClass()).load("simple.raml");
+    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
 
     @Test
     public void simpleOk() throws Exception {
@@ -240,20 +239,20 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void apiPortalReferenced() throws IOException {
-        final RamlLoaders ramlLoader = RamlTester.fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
+        final RamlLoaders ramlLoader = RamlLoaders.fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
         final RamlDefinition ramlDefinition = ramlLoader.load("test.raml");
         assertNoViolations(ramlDefinition, get("/test"), jsonResponse(200, "\"hula\""));
     }
 
     @Test(expected = RamlLoader.ResourceNotFoundException.class)
     public void loadFileWithUnfindableReference() {
-        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub")).load("simple.raml");
+        RamlLoaders.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub")).load("simple.raml");
     }
 
     @Test
     public void loadFileWithSecondLoader() {
-        RamlTester.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub"))
-                .addLoader(new ClassPathRamlLoader("guru/nidi/ramltester"))
+        RamlLoaders.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub"))
+                .andFromClasspath("guru/nidi/ramltester")
                 .load("simple.raml");
     }
 
@@ -272,7 +271,7 @@ public class SimpleTest extends HighlevelTestBase {
     @Test
     public void defaultMediaType() throws Exception {
         assertOneResponseViolationThat(
-                RamlTester.fromClasspath(getClass()).addSchemaValidator(new DummySchemaValidator()).load("simple.raml"),
+                RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DummySchemaValidator()).load("simple.raml"),
                 get("/mediaType"),
                 jsonResponse(200, "\"hula\"", "application/default"),
                 equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +

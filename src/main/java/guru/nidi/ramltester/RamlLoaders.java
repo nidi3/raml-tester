@@ -15,17 +15,23 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.apidesigner.ApiRamlLoader;
 import guru.nidi.ramltester.core.SchemaValidator;
-import guru.nidi.ramltester.loader.CompositeRamlLoader;
-import guru.nidi.ramltester.loader.RamlLoader;
-import guru.nidi.ramltester.loader.RamlLoaderRamlParserResourceLoader;
+import guru.nidi.ramltester.loader.*;
 import org.raml.model.Raml;
 import org.raml.parser.visitor.RamlDocumentBuilder;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
  */
 public class RamlLoaders {
+    private static final Pattern URI_PATTERN = Pattern.compile("([^:]+)://(.*)");
+
     private final RamlLoader loader;
     private final SchemaValidators schemaValidators;
 
@@ -38,12 +44,117 @@ public class RamlLoaders {
         this(loader, SchemaValidators.standard());
     }
 
-    public RamlLoaders addSchemaValidator(SchemaValidator schemaValidator) {
-        return new RamlLoaders(loader, schemaValidators.addSchemaValidator(schemaValidator));
+    private static RamlLoader classpathLoader(Class<?> basePackage) {
+        return classpathLoader(basePackage.getPackage().getName().replace('.', '/'));
     }
 
-    public RamlLoaders addLoader(RamlLoader loader) {
+    private static RamlLoader classpathLoader(String basePackage) {
+        return new ClassPathRamlLoader(basePackage);
+    }
+
+    private static RamlLoader fileLoader(File baseDirectory) {
+        return new FileRamlLoader(baseDirectory);
+    }
+
+    private static RamlLoader urlLoader(String baseUrl) {
+        return new UrlRamlLoader(baseUrl);
+    }
+
+    private static RamlLoader apiPortalLoader(String user, String password) throws IOException {
+        return new ApiRamlLoader(user, password);
+    }
+
+    private static RamlLoader apiDesignerLoader(String url) throws IOException {
+        return new ApiRamlLoader(url);
+    }
+
+    public static RamlDefinition loadFromUri(String uri) {
+        final Matcher matcher = URI_PATTERN.matcher(uri);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Illegal uri: " + uri);
+        }
+        final String path = matcher.group(2);
+        int pos = path.lastIndexOf('/');
+        if (pos < 0) {
+            throw new IllegalArgumentException("Missing '/' in uri: " + uri);
+        }
+        if (pos == path.length() - 1) {
+            throw new IllegalArgumentException("uri must not end with '/': " + uri);
+        }
+        String base = path.substring(0, pos);
+        String file = path.substring(pos + 1);
+        switch (matcher.group(1)) {
+            case "classpath":
+                return fromClasspath(base).load(file);
+            case "file":
+                return fromFile(new File(base)).load(file);
+            case "http":
+            case "https":
+                return fromUrl(base).load(file);
+            default:
+                throw new IllegalArgumentException("Unknown scheme " + matcher.group(1));
+        }
+    }
+
+    public static RamlLoaders fromClasspath(Class<?> basePackage) {
+        return using(classpathLoader(basePackage));
+    }
+
+    public static RamlLoaders fromClasspath(String basePackage) {
+        return using(classpathLoader(basePackage));
+    }
+
+    public static RamlLoaders fromFile(File baseDirectory) {
+        return using(fileLoader(baseDirectory));
+    }
+
+    public static RamlLoaders fromUrl(String baseUrl) {
+        return using(urlLoader(baseUrl));
+    }
+
+    public static RamlLoaders fromApiPortal(String user, String password) throws IOException {
+        return using(apiPortalLoader(user, password));
+    }
+
+    public static RamlLoaders fromApiDesigner(String url) throws IOException {
+        return using(apiDesignerLoader(url));
+    }
+
+    public static RamlLoaders using(RamlLoader loader) {
+        return new RamlLoaders(loader);
+    }
+
+
+    public RamlLoaders andFromClasspath(Class<?> basePackage) {
+        return andUsing(classpathLoader(basePackage));
+    }
+
+    public RamlLoaders andFromClasspath(String basePackage) {
+        return andUsing(classpathLoader(basePackage));
+    }
+
+    public RamlLoaders andFromFile(File baseDirectory) {
+        return andUsing(fileLoader(baseDirectory));
+    }
+
+    public RamlLoaders andFromUrl(String baseUrl) {
+        return andUsing(urlLoader(baseUrl));
+    }
+
+    public RamlLoaders andFromApiPortal(String user, String password) throws IOException {
+        return andUsing(apiPortalLoader(user, password));
+    }
+
+    public RamlLoaders andFromApiDesigner(String url) throws IOException {
+        return andUsing(apiDesignerLoader(url));
+    }
+
+    public RamlLoaders andUsing(RamlLoader loader) {
         return new RamlLoaders(new CompositeRamlLoader(this.loader, loader), schemaValidators);
+    }
+
+    public RamlLoaders addSchemaValidator(SchemaValidator schemaValidator) {
+        return new RamlLoaders(loader, schemaValidators.addSchemaValidator(schemaValidator));
     }
 
     public RamlDefinition load(String name) {

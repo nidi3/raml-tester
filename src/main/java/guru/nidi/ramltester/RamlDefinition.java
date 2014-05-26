@@ -41,20 +41,20 @@ import java.io.IOException;
 public class RamlDefinition {
     private final Raml raml;
     private final SchemaValidators schemaValidators;
-    private final String servletUri;
+    private final String baseUri;
 
-    public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String servletUri) {
+    public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String baseUri) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
-        this.servletUri = servletUri;
+        this.baseUri = baseUri;
     }
 
     public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
         this(raml, schemaValidators, null);
     }
 
-    public RamlDefinition assumingServletUri(String servletUri) {
-        return new RamlDefinition(raml, schemaValidators, servletUri);
+    public RamlDefinition assumingBaseUri(String baseUri) {
+        return new RamlDefinition(raml, schemaValidators, baseUri);
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
@@ -90,7 +90,7 @@ public class RamlDefinition {
     }
 
     public RamlChecker createTester() {
-        return new RamlChecker(raml, schemaValidators.getValidators(), servletUri);
+        return new RamlChecker(raml, schemaValidators.getValidators(), baseUri);
     }
 
 }
