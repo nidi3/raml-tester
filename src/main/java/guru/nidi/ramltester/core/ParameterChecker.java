@@ -39,16 +39,30 @@ class ParameterChecker {
 
     private final RamlViolations violations;
     private final boolean acceptUndefined;
+    private final boolean acceptWildcard;
     private final Set<String> predefined;
 
-    ParameterChecker(RamlViolations violations, boolean acceptUndefined, Set<String> predefined) {
+    ParameterChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, Set<String> predefined) {
         this.violations = violations;
         this.acceptUndefined = acceptUndefined;
+        this.acceptWildcard = acceptWildcard;
         this.predefined = predefined;
     }
 
-    ParameterChecker(RamlViolations violations, boolean acceptUndefined) {
-        this(violations, acceptUndefined, Collections.<String>emptySet());
+    ParameterChecker(RamlViolations violations) {
+        this(violations, false, false, Collections.<String>emptySet());
+    }
+
+    ParameterChecker acceptUndefined() {
+        return new ParameterChecker(violations, true, acceptWildcard, predefined);
+    }
+
+    ParameterChecker acceptWildcard() {
+        return new ParameterChecker(violations, acceptUndefined, true, predefined);
+    }
+
+    ParameterChecker predefined(Set<String> predefined) {
+        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, predefined);
     }
 
     public void checkParameters(Map<String, ? extends AbstractParam> params, Values values, Message message) {
@@ -63,7 +77,8 @@ class ParameterChecker {
         Set<String> found = new HashSet<>();
         for (Map.Entry<String, List<String>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
-            final List<? extends AbstractParam> parameters = params.get(entry.getKey());
+            final String paramName = findMatchingParamName(params.keySet(), entry.getKey());
+            final List<? extends AbstractParam> parameters = params.get(paramName);
             if (parameters == null || parameters.isEmpty()) {
                 violations.addIf(!acceptUndefined && !predefined.contains(entry.getKey().toLowerCase()), namedMsg.withMessageParam("undefined"));
             } else {
@@ -73,7 +88,7 @@ class ParameterChecker {
                         checkParameter(parameter, value, namedMsg);
                     }
                 }
-                found.add(entry.getKey());
+                found.add(paramName);
             }
         }
         for (Map.Entry<String, List<? extends AbstractParam>> entry : params.entrySet()) {
@@ -82,6 +97,24 @@ class ParameterChecker {
                 violations.addIf(parameter.isRequired() && !found.contains(entry.getKey()), namedMsg.withMessageParam("required.missing"));
             }
         }
+    }
+
+    private String findMatchingParamName(Collection<String> paramNames, String name) {
+        if (!acceptWildcard) {
+            return name;
+        }
+        for (String key : paramNames) {
+            int pos = key.indexOf("{?}");
+            if (pos >= 0) {
+                if ((pos == 0 || name.startsWith(key.substring(0, pos))) &&
+                        (pos == key.length() - 3 || name.endsWith(key.substring(pos + 3)))) {
+                    return key;
+                }
+            } else if (key.equals(name)) {
+                return key;
+            }
+        }
+        return null;
     }
 
     public void checkParameter(AbstractParam param, String value, Message message) {

@@ -23,7 +23,7 @@ import org.hamcrest.Matcher;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.UnsupportedEncodingException;
 
@@ -35,15 +35,6 @@ import static org.junit.Assert.assertTrue;
  *
  */
 public class HighlevelTestBase {
-    protected MockHttpServletRequest get(String url) {
-        return MockMvcRequestBuilders.get(url).buildRequest(new MockServletContext());
-    }
-
-    protected MockHttpServletRequest post(String url) {
-        return MockMvcRequestBuilders.post(url).buildRequest(new MockServletContext());
-    }
-
-
     protected MockHttpServletResponse jsonResponse(int code, String json, String contentType) throws UnsupportedEncodingException {
         final MockHttpServletResponse response = new MockHttpServletResponse();
         response.setStatus(code);
@@ -60,7 +51,7 @@ public class HighlevelTestBase {
         return jsonResponse(code, "", "application/json");
     }
 
-    protected void assertNoViolations(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
+    protected void assertNoViolations(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
         final RamlReport report = test(raml, request, response);
         assertNoViolations(report);
     }
@@ -73,22 +64,26 @@ public class HighlevelTestBase {
         assertTrue("Expected no violations, but found: " + violations, violations.isEmpty());
     }
 
-    protected void assertOneRequestViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
+    protected void assertOneRequestViolationThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
         final RamlReport report = test(raml, request, response);
         assertNoViolations(report.getResponseViolations());
         assertOneViolationThat(report.getRequestViolations(), matcher);
     }
 
-    protected void assertOneResponseViolationThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
+    protected void assertOneResponseViolationThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
         final RamlReport report = test(raml, request, response);
         assertNoViolations(report.getRequestViolations());
         assertOneViolationThat(report.getResponseViolations(), matcher);
     }
 
-    protected void assertResponseViolationsThat(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response, Matcher<String> matcher) {
+    protected void assertResponseViolationsThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
         final RamlReport report = test(raml, request, response);
         assertNoViolations(report.getRequestViolations());
         assertViolationsThat(report.getResponseViolations(), matcher);
+    }
+
+    private RamlReport test(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
+        return test(raml, request.buildRequest(new MockServletContext()), response);
     }
 
     private RamlReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {

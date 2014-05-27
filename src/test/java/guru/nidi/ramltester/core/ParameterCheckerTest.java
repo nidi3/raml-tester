@@ -218,25 +218,25 @@ public class ParameterCheckerTest extends CoreTestBase {
 
     private void assertNoViolation(AbstractParam param, String value) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations, false).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new ParameterChecker(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(AbstractParam param, String value, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations, false).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new ParameterChecker(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertOneViolationThat(violations, matcher);
     }
 
     private void assertNoViolation(Map<String, ? extends AbstractParam> params, Values values) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations, false).checkParameters(params, values, new Message("baseUriParam", "action"));
+        new ParameterChecker(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(Map<String, ? extends AbstractParam> params,Values values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations, false).checkParameters(params, values, new Message("baseUriParam", "action"));
+        new ParameterChecker(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);
     }
 }

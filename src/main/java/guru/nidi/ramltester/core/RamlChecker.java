@@ -83,17 +83,17 @@ public class RamlChecker {
     }
 
     private void checkQueryParameters(Values values, Action action) {
-        new ParameterChecker(requestViolations, false)
+        new ParameterChecker(requestViolations)
                 .checkParameters(action.getQueryParameters(), values, new Message("queryParam", action));
     }
 
     private void checkRequestHeaderParameters(Values values, Action action) {
-        new ParameterChecker(requestViolations, false, DefaultHeaders.REQUEST)
+        new ParameterChecker(requestViolations).acceptWildcard().predefined(DefaultHeaders.REQUEST)
                 .checkParameters(action.getHeaders(), values, new Message("headerParam", action));
     }
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
-        final ParameterChecker paramChecker = new ParameterChecker(requestViolations, true);
+        final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
         final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(action);
         paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", action));
         paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", action));
@@ -150,7 +150,7 @@ public class RamlChecker {
     }
 
     private void checkUriParams(Values values, Resource resource) {
-        final ParameterChecker paramChecker = new ParameterChecker(requestViolations, true);
+        final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
         for (Map.Entry<String, List<String>> entry : values) {
             final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
             if (uriParam != null) {
@@ -238,7 +238,7 @@ public class RamlChecker {
 
     public void checkResponse(Action action, RamlResponse response) {
         Response res = findResponse(action, response.getStatus());
-        checkResponseHeaderParameters(response.getHeaderValues(), res);
+        checkResponseHeaderParameters(response.getHeaderValues(), action, res);
         final Map<String, MimeType> bodies = res.getBody();
         if (isNoOrEmptyBodies(bodies)) {
             responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
@@ -264,9 +264,9 @@ public class RamlChecker {
         }
     }
 
-    private void checkResponseHeaderParameters(Values values, Response response) {
-        new ParameterChecker(requestViolations, false, DefaultHeaders.RESPONSE)
-                .checkParameters(response.getHeaders(), values, new Message("headerParam", response));
+    private void checkResponseHeaderParameters(Values values, Action action, Response response) {
+        new ParameterChecker(responseViolations).acceptWildcard().predefined(DefaultHeaders.RESPONSE)
+                .checkParameters(response.getHeaders(), values, new Message("headerParam", action));
     }
 
     private Response findResponse(Action action, int status) {
