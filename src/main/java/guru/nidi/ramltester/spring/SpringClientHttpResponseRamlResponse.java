@@ -16,6 +16,7 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlResponse;
+import guru.nidi.ramltester.util.Values;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +25,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +93,7 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
 
     @Override
     public InputStream getBody() throws IOException {
-       return response.getBody();
+        return response.getBody();
     }
 
     @Override
@@ -102,10 +102,10 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
     }
 
     @Override
-    public Map<String, String[]> getHeaderMap() {
-        final HashMap<String, String[]> headers = new HashMap<>();
+    public Values getHeaderValues() {
+        final Values headers = new Values();
         for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
-            headers.put(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]));
+            headers.addValues(entry.getKey(), entry.getValue());
         }
         return headers;
     }

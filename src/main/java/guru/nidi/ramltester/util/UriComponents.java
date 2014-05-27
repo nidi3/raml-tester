@@ -43,7 +43,7 @@ public class UriComponents {
     private final Integer port;
     private final String path;
     private final String queryString;
-    private final ParameterValues queryParameters;
+    private final Values queryParameters;
 
     private UriComponents(String scheme, String userInfo, String host, Integer port, String path, String query) {
         this.scheme = scheme;
@@ -79,8 +79,8 @@ public class UriComponents {
         }
     }
 
-    private ParameterValues parseQuery(String query) {
-        ParameterValues q = new ParameterValues();
+    private Values parseQuery(String query) {
+        Values q = new Values();
         if (query != null) {
             Matcher m = Pattern.QUERY_PARAM.matcher(query);
             while (m.find()) {
@@ -129,7 +129,7 @@ public class UriComponents {
         return queryString;
     }
 
-    public ParameterValues getQueryParameters() {
+    public Values getQueryParameters() {
         return queryParameters;
     }
 }

@@ -17,10 +17,10 @@ package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.util.UriComponents;
+import guru.nidi.ramltester.util.Values;
 import org.springframework.http.HttpRequest;
 
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,15 +49,15 @@ public class SpringHttpRequestRamlRequest implements RamlRequest {
     }
 
     @Override
-    public Map<String, String[]> getParameterMap() {
-        return uriComponents.getQueryParameters().getValues();
+    public Values getQueryValues() {
+        return uriComponents.getQueryParameters();
     }
 
     @Override
-    public Map<String, String[]> getHeaderMap() {
-        final HashMap<String, String[]> headers = new HashMap<>();
+    public Values getHeaderValues() {
+        final Values headers = new Values();
         for (Map.Entry<String, List<String>> entry : request.getHeaders().entrySet()) {
-            headers.put(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]));
+            headers.addValues(entry.getKey(), entry.getValue());
         }
         return headers;
     }

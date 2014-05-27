@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.util.Values;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.raml.model.ParamType;
@@ -227,13 +228,13 @@ public class ParameterCheckerTest extends CoreTestBase {
         assertOneViolationThat(violations, matcher);
     }
 
-    private void assertNoViolation(Map<String, ? extends AbstractParam> params, Map<String, String[]> values) {
+    private void assertNoViolation(Map<String, ? extends AbstractParam> params, Values values) {
         final RamlViolations violations = new RamlViolations();
         new ParameterChecker(violations, false).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertNoViolations(violations);
     }
 
-    private void assertOneViolationThat(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Matcher<String> matcher) {
+    private void assertOneViolationThat(Map<String, ? extends AbstractParam> params,Values values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
         new ParameterChecker(violations, false).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);

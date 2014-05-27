@@ -16,7 +16,7 @@
 package guru.nidi.ramltester.servlet;
 
 import guru.nidi.ramltester.core.RamlResponse;
-import guru.nidi.ramltester.util.ParameterValues;
+import guru.nidi.ramltester.util.Values;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +25,6 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -39,7 +38,7 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     private ServletOutputStream outputStream;
 
     private int status = HttpServletResponse.SC_OK;
-    private final ParameterValues headers = new ParameterValues();
+    private final Values headers = new Values();
 
     public ServletRamlResponse(HttpServletResponse delegate) {
         super(delegate);
@@ -143,7 +142,7 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     }
 
     @Override
-    public Map<String, String[]> getHeaderMap() {
-        return headers.getValues();
+    public Values getHeaderValues() {
+        return headers;
     }
 }

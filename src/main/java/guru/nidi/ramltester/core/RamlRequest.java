@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import java.util.Map;
+import guru.nidi.ramltester.util.Values;
 
 /**
  *
@@ -25,9 +25,9 @@ public interface RamlRequest {
 
     String getMethod();
 
-    Map<String, String[]> getParameterMap();
+    Values getQueryValues();
 
-    Map<String, String[]> getHeaderMap();
+    Values getHeaderValues();
 
     String getContent();
 }

@@ -16,12 +16,10 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlResponse;
+import guru.nidi.ramltester.util.Values;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -53,11 +51,10 @@ public class SpringMockRamlResponse implements RamlResponse {
     }
 
     @Override
-    public Map<String, String[]> getHeaderMap() {
-        final HashMap<String, String[]> headers = new HashMap<>();
+    public Values getHeaderValues() {
+        final Values headers = new Values();
         for (String name : delegate.getHeaderNames()) {
-            final List<Object> values = delegate.getHeaderValues(name);
-            headers.put(name, values.toArray(new String[values.size()]));
+            headers.addValues(name, delegate.getHeaders(name));
         }
         return headers;
     }

@@ -16,10 +16,11 @@
 package guru.nidi.ramltester.servlet;
 
 import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.util.Values;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.util.*;
+import java.util.Enumeration;
 
 /**
  *
@@ -39,17 +40,20 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
     }
 
     @Override
-    public Map<String, String[]> getHeaderMap() {
-        final HashMap<String, String[]> headers = new HashMap<>();
+    public Values getQueryValues() {
+        return new Values(getParameterMap());
+    }
+
+    @Override
+    public Values getHeaderValues() {
+        final Values headers = new Values();
         final Enumeration<String> names = request().getHeaderNames();
         while (names.hasMoreElements()) {
             final String name = names.nextElement();
             final Enumeration<String> values = request().getHeaders(name);
-            final List<String> valueList = new ArrayList<>();
             while (values.hasMoreElements()) {
-                valueList.add(values.nextElement());
+                headers.addValue(name, values.nextElement());
             }
-            headers.put(name, valueList.toArray(new String[valueList.size()]));
         }
         return headers;
     }

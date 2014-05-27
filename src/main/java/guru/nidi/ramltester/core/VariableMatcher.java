@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.util.ParameterValues;
+import guru.nidi.ramltester.util.Values;
 
 /**
  *
@@ -24,9 +24,9 @@ class VariableMatcher {
     private final boolean matches;
     private final boolean completeMatch;
     private final String suffix;
-    private final ParameterValues variables;
+    private final Values variables;
 
-    private VariableMatcher(boolean matches, boolean completeMatch, String suffix, ParameterValues variables) {
+    private VariableMatcher(boolean matches, boolean completeMatch, String suffix, Values variables) {
         this.matches = matches;
         this.completeMatch = completeMatch;
         this.suffix = suffix;
@@ -34,7 +34,7 @@ class VariableMatcher {
     }
 
     public static VariableMatcher match(String pattern, String value) {
-        final ParameterValues variables = new ParameterValues();
+        final Values variables = new Values();
         int patternPos = 0, valuePos = 0;
         while (patternPos < pattern.length() && valuePos < value.length()) {
             if (pattern.charAt(patternPos) == '{') {
@@ -57,7 +57,7 @@ class VariableMatcher {
                 variables.addValue(varName.toString(), varValue.toString());
             } else {
                 if (pattern.charAt(patternPos) != value.charAt(valuePos)) {
-                    return new VariableMatcher(false, false, "", new ParameterValues());
+                    return new VariableMatcher(false, false, "", new Values());
                 }
                 patternPos++;
                 valuePos++;
@@ -80,7 +80,7 @@ class VariableMatcher {
         return suffix;
     }
 
-    public ParameterValues getVariables() {
+    public Values getVariables() {
         return variables;
     }
 }

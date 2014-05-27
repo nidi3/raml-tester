@@ -16,14 +16,12 @@
 package guru.nidi.ramltester.httpcomponents;
 
 import guru.nidi.ramltester.core.RamlRequest;
-import guru.nidi.ramltester.util.ParameterValues;
 import guru.nidi.ramltester.util.UriComponents;
+import guru.nidi.ramltester.util.Values;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
-
-import java.util.Map;
 
 /**
  *
@@ -56,18 +54,18 @@ public class HttpComponentsRamlRequest implements RamlRequest {
     }
 
     @Override
-    public Map<String, String[]> getParameterMap() {
+    public Values getQueryValues() {
         final UriComponents uriComponents = UriComponents.fromHttpUrl(request.getRequestLine().getUri());
-        return uriComponents.getQueryParameters().getValues();
+        return uriComponents.getQueryParameters();
     }
 
     @Override
-    public Map<String, String[]> getHeaderMap() {
-        ParameterValues headers = new ParameterValues();
+    public Values getHeaderValues() {
+        Values headers = new Values();
         for (Header header : request.getAllHeaders()) {
             headers.addValue(header.getName(), header.getValue());
         }
-        return headers.getValues();
+        return headers;
     }
 
     @Override

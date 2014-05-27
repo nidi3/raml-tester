@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.util.ParameterValues;
 import guru.nidi.ramltester.util.UriComponents;
+import guru.nidi.ramltester.util.Values;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.UriParameter;
@@ -77,17 +77,17 @@ public class RamlChecker {
         Action action = findAction(resource, request.getMethod());
 
         checkBaseUriParameters(hostMatch, pathMatch, action);
-        checkQueryParameters(request.getParameterMap(), action);
-        checkRequestHeaderParameters(request.getHeaderMap(), action);
+        checkQueryParameters(request.getQueryValues(), action);
+        checkRequestHeaderParameters(request.getHeaderValues(), action);
         return action;
     }
 
-    private void checkQueryParameters(Map<String, String[]> values, Action action) {
+    private void checkQueryParameters(Values values, Action action) {
         new ParameterChecker(requestViolations, false)
                 .checkParameters(action.getQueryParameters(), values, new Message("queryParam", action));
     }
 
-    private void checkRequestHeaderParameters(Map<String, String[]> values, Action action) {
+    private void checkRequestHeaderParameters(Values values, Action action) {
         new ParameterChecker(requestViolations, false, DefaultHeaders.REQUEST)
                 .checkParameters(action.getHeaders(), values, new Message("headerParam", action));
     }
@@ -95,8 +95,8 @@ public class RamlChecker {
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations, true);
         final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(action);
-        paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables().getValues(), new Message("baseUriParam", action));
-        paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables().getValues(), new Message("baseUriParam", action));
+        paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", action));
+        paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", action));
     }
 
     private Action findAction(Resource resource, String method) {
@@ -140,21 +140,21 @@ public class RamlChecker {
     }
 
     private Resource findResource(String resourcePath) {
-        final ParameterValues parameterValues = new ParameterValues();
-        final Resource resource = findResource(resourcePath, raml.getResources(), parameterValues);
+        final Values values = new Values();
+        final Resource resource = findResource(resourcePath, raml.getResources(), values);
         if (resource == null) {
             requestViolations.addAndThrow("resource.undefined", resourcePath);
         }
-        checkUriParams(parameterValues, resource);
+        checkUriParams(values, resource);
         return resource;
     }
 
-    private void checkUriParams(ParameterValues parameterValues, Resource resource) {
+    private void checkUriParams(Values values, Resource resource) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations, true);
-        for (Map.Entry<String, String[]> entry : parameterValues.getValues().entrySet()) {
+        for (Map.Entry<String, List<String>> entry : values) {
             final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
             if (uriParam != null) {
-                paramChecker.checkParameter(uriParam, entry.getValue()[0], new Message("uriParam", entry.getKey(), resource));
+                paramChecker.checkParameter(uriParam, entry.getValue().get(0), new Message("uriParam", entry.getKey(), resource));
             }
         }
     }
@@ -198,7 +198,7 @@ public class RamlChecker {
         }
     }
 
-    private Resource findResource(String resourcePath, Map<String, Resource> resources, ParameterValues parameterValues) {
+    private Resource findResource(String resourcePath, Map<String, Resource> resources, Values values) {
         List<ResourceMatch> matches = new ArrayList<>();
         for (Map.Entry<String, Resource> entry : resources.entrySet()) {
             final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
@@ -209,12 +209,12 @@ public class RamlChecker {
         Collections.sort(matches);
         for (ResourceMatch match : matches) {
             if (match.match.isCompleteMatch()) {
-                parameterValues.addValues(match.match.getVariables());
+                values.addValues(match.match.getVariables());
                 return match.resource;
             }
             if (match.match.isMatch()) {
-                parameterValues.addValues(match.match.getVariables());
-                return findResource(match.match.getSuffix(), match.resource.getResources(), parameterValues);
+                values.addValues(match.match.getVariables());
+                return findResource(match.match.getSuffix(), match.resource.getResources(), values);
             }
 
         }
@@ -238,7 +238,7 @@ public class RamlChecker {
 
     public void checkResponse(Action action, RamlResponse response) {
         Response res = findResponse(action, response.getStatus());
-        checkResponseHeaderParameters(response.getHeaderMap(), res);
+        checkResponseHeaderParameters(response.getHeaderValues(), res);
         final Map<String, MimeType> bodies = res.getBody();
         if (isNoOrEmptyBodies(bodies)) {
             responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
@@ -264,7 +264,7 @@ public class RamlChecker {
         }
     }
 
-    private void checkResponseHeaderParameters(Map<String, String[]> values, Response response) {
+    private void checkResponseHeaderParameters(Values values, Response response) {
         new ParameterChecker(requestViolations, false, DefaultHeaders.RESPONSE)
                 .checkParameters(response.getHeaders(), values, new Message("headerParam", response));
     }

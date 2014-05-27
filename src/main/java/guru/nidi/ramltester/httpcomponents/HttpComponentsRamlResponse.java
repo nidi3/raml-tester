@@ -16,7 +16,7 @@
 package guru.nidi.ramltester.httpcomponents;
 
 import guru.nidi.ramltester.core.RamlResponse;
-import guru.nidi.ramltester.util.ParameterValues;
+import guru.nidi.ramltester.util.Values;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -24,7 +24,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  *
@@ -65,11 +64,11 @@ public class HttpComponentsRamlResponse implements RamlResponse {
     }
 
     @Override
-    public Map<String, String[]> getHeaderMap() {
-        ParameterValues headers = new ParameterValues();
+    public Values getHeaderValues() {
+        Values headers = new Values();
         for (Header header : response.getAllHeaders()) {
             headers.addValue(header.getName(), header.getValue());
         }
-        return headers.getValues();
+        return headers;
     }
 }

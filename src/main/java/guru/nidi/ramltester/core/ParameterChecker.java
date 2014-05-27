@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.util.Values;
 import org.raml.model.parameter.AbstractParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ class ParameterChecker {
         this(violations, acceptUndefined, Collections.<String>emptySet());
     }
 
-    public void checkParameters(Map<String, ? extends AbstractParam> params, Map<String, String[]> values, Message message) {
+    public void checkParameters(Map<String, ? extends AbstractParam> params, Values values, Message message) {
         Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
         for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
@@ -58,16 +59,16 @@ class ParameterChecker {
         checkListParameters(listParams, values, message);
     }
 
-    public void checkListParameters(Map<String, List<? extends AbstractParam>> params, Map<String, String[]> values, Message message) {
+    public void checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
         Set<String> found = new HashSet<>();
-        for (Map.Entry<String, String[]> entry : values.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
             final List<? extends AbstractParam> parameters = params.get(entry.getKey());
             if (parameters == null || parameters.isEmpty()) {
                 violations.addIf(!acceptUndefined && !predefined.contains(entry.getKey().toLowerCase()), namedMsg.withMessageParam("undefined"));
             } else {
                 for (AbstractParam parameter : parameters) {
-                    violations.addIf(!parameter.isRepeat() && entry.getValue().length > 1, namedMsg.withMessageParam("repeat.superfluous"));
+                    violations.addIf(!parameter.isRepeat() && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
                     for (String value : entry.getValue()) {
                         checkParameter(parameter, value, namedMsg);
                     }

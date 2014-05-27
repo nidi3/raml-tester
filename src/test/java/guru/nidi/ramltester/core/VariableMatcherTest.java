@@ -60,7 +60,7 @@ public class VariableMatcherTest extends CoreTestBase {
         assertEquals(matches, vm.isMatch());
         assertEquals(completeMatch, vm.isCompleteMatch());
         assertEquals(suffix, vm.getSuffix());
-        assertStringArrayMapEquals(variables, vm.getVariables().getValues());
+        assertStringArrayMapEquals(variables, vm.getVariables());
     }
 
 

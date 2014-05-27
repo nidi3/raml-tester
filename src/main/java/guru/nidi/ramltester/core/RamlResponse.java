@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import java.util.Map;
+import guru.nidi.ramltester.util.Values;
 
 /**
  *
@@ -27,6 +27,6 @@ public interface RamlResponse {
 
     String getContent();
 
-    Map<String, String[]> getHeaderMap();
+    Values getHeaderValues();
 
 }
