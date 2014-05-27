@@ -53,19 +53,19 @@ public class UriTest extends HighlevelTestBase {
     }
 
     @Test(expected = AssertionError.class)
-    public void standardServletUri() throws Exception {
+    public void standardBaseUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd"))
                 .andExpect(api.matches());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void invalidServletUri() throws Exception {
+    public void invalidBaseUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd"))
                 .andExpect(api.assumingBaseUri("invalid").matches());
     }
 
     @Test
-    public void correctServletUri() throws Exception {
+    public void correctBaseUri() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/raml/v1/undefd/type"))
                 .andExpect(api.assumingBaseUri("http://nidi.guru").matches());
 
