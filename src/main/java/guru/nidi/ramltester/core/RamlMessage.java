@@ -20,10 +20,10 @@ import guru.nidi.ramltester.util.Values;
 /**
  *
  */
-public interface RamlRequest extends RamlMessage {
-    String getRequestUrl(String baseUri);
+public interface RamlMessage {
+    Values getHeaderValues();
 
-    String getMethod();
+    String getContentType();
 
-    Values getQueryValues();
+    String getContent();
 }

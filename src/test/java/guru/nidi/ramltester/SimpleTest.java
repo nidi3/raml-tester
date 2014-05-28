@@ -15,10 +15,6 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.MediaType;
-import guru.nidi.ramltester.core.Message;
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.loader.RamlLoader;
 import org.junit.Test;
 
@@ -80,7 +76,7 @@ public class SimpleTest extends HighlevelTestBase {
                 simple,
                 get("/data"),
                 jsonResponse(200, "\"hula\"", null),
-                equalTo("Response has no Content-Type header"));
+                equalTo("No Content-Type header given"));
     }
 
     @Test
@@ -134,7 +130,7 @@ public class SimpleTest extends HighlevelTestBase {
     @Test
     public void defaultMediaType() throws Exception {
         assertOneResponseViolationThat(
-                RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DummySchemaValidator()).load("simple.raml"),
+                RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DefaultOkSchemaValidator()).load("simple.raml"),
                 get("/mediaType"),
                 jsonResponse(200, "\"hula\"", "application/default"),
                 equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
@@ -143,20 +139,5 @@ public class SimpleTest extends HighlevelTestBase {
         );
     }
 
-    private static class DummySchemaValidator implements SchemaValidator {
-        @Override
-        public boolean supports(MediaType mediaType) {
-            return mediaType.isCompatibleWith(MediaType.valueOf("application/default"));
-        }
 
-        @Override
-        public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
-            return this;
-        }
-
-        @Override
-        public void validate(String content, String schema, RamlViolations violations, Message message) {
-            violations.add(message.withParam("ok"));
-        }
-    }
 }

@@ -15,18 +15,9 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.util.Values;
-
 /**
  *
  */
-public interface RamlResponse {
+public interface RamlResponse extends RamlMessage{
     int getStatus();
-
-    String getContentType();
-
-    String getContent();
-
-    Values getHeaderValues();
-
 }

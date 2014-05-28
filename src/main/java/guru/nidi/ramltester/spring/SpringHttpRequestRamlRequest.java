@@ -19,6 +19,7 @@ import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.util.Values;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.MediaType;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -60,6 +61,12 @@ public class SpringHttpRequestRamlRequest implements RamlRequest {
             headers.addValues(entry.getKey(), entry.getValue());
         }
         return headers;
+    }
+
+    @Override
+    public String getContentType() {
+        final MediaType contentType = request.getHeaders().getContentType();
+        return contentType == null ? null : contentType.toString();
     }
 
     @Override

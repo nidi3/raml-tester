@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.core.*;
+import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.hamcrest.Matcher;
@@ -103,5 +103,36 @@ public class HighlevelTestBase {
         }
     }
 
+    protected static class DefaultOkSchemaValidator implements SchemaValidator {
+        @Override
+        public boolean supports(MediaType mediaType) {
+            return mediaType.isCompatibleWith(MediaType.valueOf("application/default"));
+        }
 
+        @Override
+        public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
+            return this;
+        }
+
+        @Override
+        public void validate(String content, String schema, RamlViolations violations, Message message) {
+            violations.add(message.withParam("ok"));
+        }
+    }
+
+    protected static class FormEncodedSchemaValidator implements SchemaValidator {
+        @Override
+        public boolean supports(MediaType mediaType) {
+            return mediaType.isCompatibleWith(MediaType.valueOf("application/x-www-form-urlencoded"));
+        }
+
+        @Override
+        public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
+            return this;
+        }
+
+        @Override
+        public void validate(String content, String schema, RamlViolations violations, Message message) {
+        }
+    }
 }

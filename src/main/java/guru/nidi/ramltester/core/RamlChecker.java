@@ -19,8 +19,11 @@ import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.util.Values;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
+import org.raml.model.parameter.FormParameter;
 import org.raml.model.parameter.UriParameter;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -32,6 +35,9 @@ public class RamlChecker {
                 REQUEST = new HashSet<>(Arrays.asList("accept", "accept-charset", "accept-encoding", "accept-language", "accept-datetime", "authorization", "cache-control", "connection", "cookie", "content-length", "content-md5", "content-type", "date", "dnt", "expect", "from", "host", "if-match", "if-modified-since", "if-none-match", "if-range", "if-unmodified-since", "max-forwards", "origin", "pragma", "proxy-authorization", "range", "referer", "te", "user-agent", "upgrade", "via", "warning")),
                 RESPONSE = new HashSet<>(Arrays.asList("access-control-allow-origin", "accept-ranges", "age", "allow", "cache-control", "connection", "content-encoding", "content-language", "content-length", "content-location", "content-md5", "content-disposition", "content-range", "content-type", "date", "etag", "expires", "last-modified", "link", "location", "p3p", "pragma", "proxy-authenticate", "refresh", "retry-after", "server", "set-cookie", "status", "strict-transport-security", "trailer", "transfer-encoding", "upgrade", "vary", "via", "warning", "www-authenticate", "x-frame-options"));
     }
+
+    private static final MediaType FORM_ENCODED = MediaType.valueOf("application/x-www-form-urlencoded");
+    private static final MediaType MULTIPART = MediaType.valueOf("multipart/form-data");
 
     private final Raml raml;
     private final List<SchemaValidator> schemaValidators;
@@ -79,7 +85,56 @@ public class RamlChecker {
         checkBaseUriParameters(hostMatch, pathMatch, action);
         checkQueryParameters(request.getQueryValues(), action);
         checkRequestHeaderParameters(request.getHeaderValues(), action);
+
+        checkFormRequestBody(request, action);
+        checkBody(requestViolations, action, request, action.getBody(), "");
         return action;
+    }
+
+    private void checkFormRequestBody(RamlRequest request, Action action) {
+        if (action.getBody() != null) {
+            for (Map.Entry<String, MimeType> entry : action.getBody().entrySet()) {
+                final MediaType mediaType = MediaType.valueOf(entry.getKey());
+                if (mediaType.isCompatibleWith(FORM_ENCODED) || mediaType.isCompatibleWith(MULTIPART)) {
+                    checkFormParameters(request, action, entry.getValue());
+                }
+            }
+        }
+    }
+
+    private void checkFormParameters(RamlRequest request, Action action, MimeType mimeType) {
+        if (mimeType.getSchema() != null) {
+            requestViolations.add("schema.superfluous", action, mimeType);
+        }
+        final Map<String, List<FormParameter>> formParameters = mimeType.getFormParameters();
+        if (formParameters == null) {
+            requestViolations.add("formParameters.missing", action, mimeType);
+        } else {
+            checkFormParametersValues(request, action, formParameters);
+        }
+    }
+
+    private void checkFormParametersValues(RamlRequest request, Action action, Map formParameters) {
+        try {
+            final Values values = decodeFormParameters(request.getContent());
+            new ParameterChecker(requestViolations)
+                    .checkListParameters((Map) formParameters, values, new Message("formParam", action));
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private Values decodeFormParameters(String content) throws UnsupportedEncodingException {
+        final Values values = new Values();
+        if (content != null) {
+            for (String param : content.split("&")) {
+                final String[] parts = param.split("=");
+                final String key = URLDecoder.decode(parts[0], "utf-8");
+                final String value = URLDecoder.decode(parts[1], "utf-8");
+                values.addValue(key, value);
+            }
+        }
+        return values;
     }
 
     private void checkQueryParameters(Values values, Action action) {
@@ -239,28 +294,27 @@ public class RamlChecker {
     public void checkResponse(Action action, RamlResponse response) {
         Response res = findResponse(action, response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, res);
-        final Map<String, MimeType> bodies = res.getBody();
-        if (isNoOrEmptyBodies(bodies)) {
-            responseViolations.addIf(hasContent(response), "responseBody.superfluous", action, response.getStatus());
-        } else if (response.getContentType() == null) {
-            responseViolations.addAndThrowIf(hasContent(response) || !existSchemalessBody(bodies), "contentType.missing");
-        } else {
-            checkResponseBody(action, response, bodies);
-        }
+        checkBody(responseViolations, action, response, res.getBody(), new Message("response", response.getStatus()).toString());
     }
 
-    private void checkResponseBody(Action action, RamlResponse response, Map<String, MimeType> bodies) {
-        MediaType targetType = MediaType.valueOf(response.getContentType());
-        MimeType mimeType = findMatchingMimeType(bodies, targetType);
-        responseViolations.addAndThrowIf(mimeType == null, "mediaType.undefined", response.getContentType(), action, response.getStatus());
-        String schema = mimeType.getSchema();
-        if (schema != null) {
-            final SchemaValidator validator = findSchemaValidator(targetType);
-            responseViolations.addAndThrowIf(validator == null, "schemaValidator.missing", targetType, action, response.getStatus());
-            final String content = response.getContent();
-            String refSchema = raml.getConsolidatedSchemas().get(schema);
-            schema = refSchema != null ? refSchema : schema;
-            validator.validate(content, schema, responseViolations, new Message("responseBody.mismatch", action, response.getStatus(), mimeType, content));
+    private void checkBody(RamlViolations violations, Action action, RamlMessage message, Map<String, MimeType> bodies, String detail) {
+        if (isNoOrEmptyBodies(bodies)) {
+            violations.addIf(hasContent(message), "body.superfluous", action, detail);
+        } else if (message.getContentType() == null) {
+            violations.addAndThrowIf(hasContent(message) || !existSchemalessBody(bodies), "contentType.missing");
+        } else {
+            MediaType targetType = MediaType.valueOf(message.getContentType());
+            MimeType mimeType = findMatchingMimeType(bodies, targetType);
+            violations.addAndThrowIf(mimeType == null, "mediaType.undefined", message.getContentType(), action, detail);
+            String schema = mimeType.getSchema();
+            if (schema != null) {
+                final SchemaValidator validator = findSchemaValidator(targetType);
+                violations.addAndThrowIf(validator == null, "schemaValidator.missing", targetType, action, detail);
+                final String content = message.getContent();
+                String refSchema = raml.getConsolidatedSchemas().get(schema);
+                schema = refSchema != null ? refSchema : schema;
+                validator.validate(content, schema, violations, new Message("responseBody.mismatch", action, detail, mimeType, content));
+            }
         }
     }
 
@@ -288,8 +342,8 @@ public class RamlChecker {
         return bodies == null || bodies.isEmpty() || (bodies.size() == 1 && bodies.containsKey(null));
     }
 
-    private boolean hasContent(RamlResponse response) {
-        return response.getContent() != null && response.getContent().length() > 0;
+    private boolean hasContent(RamlMessage message) {
+        return message.getContent() != null && message.getContent().length() > 0;
     }
 
     private boolean existSchemalessBody(Map<String, MimeType> bodies) {

@@ -283,7 +283,7 @@ public class TypeTest extends HighlevelTestBase {
                 type,
                 post("/empty"),
                 jsonResponse(200, "", null),
-                equalTo("Response has no Content-Type header"));
+                equalTo("No Content-Type header given"));
     }
 
     @Test
@@ -304,6 +304,6 @@ public class TypeTest extends HighlevelTestBase {
                 type,
                 post("/empty"),
                 jsonResponse(201, "\"hula\""),
-                equalTo("Response body given but none defined on action(POST /empty) response(201)"));
+                equalTo("Body given but none defined on action(POST /empty) response(201)"));
     }
 }

@@ -19,6 +19,8 @@ import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.util.Values;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Enumeration;
 
 /**
@@ -33,23 +35,6 @@ public class SpringMockRamlRequest implements RamlRequest {
 
     @Override
     public String getRequestUrl(String baseUri) {
-//        if (servletUri != null) {
-//            final UriComponents uri = UriComponents.fromHttpUrl(servletUri);
-//            final String scheme = uri.getScheme();
-//            if (scheme == null || (!scheme.equals("http") && !scheme.equals("https"))) {
-//                throw new IllegalArgumentException("Servlet URI must start with http(s)://");
-//            }
-//            delegate.setScheme(scheme);
-//            delegate.setServerName(uri.getHost());
-//            if (uri.getPort() != null) {
-//                delegate.setServerPort(uri.getPort());
-//            }
-//            delegate.setContextPath(uri.getPath());
-//        }
-//
-//        final StringBuffer requestURL = delegate.getRequestURL();
-//        final int pathStart = requestURL.length() - delegate.getRequestURI().length();
-//        return requestURL.substring(0, pathStart) + delegate.getContextPath() + requestURL.substring(pathStart);
         return baseUri != null ? baseUri + delegate.getPathInfo() : delegate.getRequestURL().toString();
     }
 
@@ -78,7 +63,26 @@ public class SpringMockRamlRequest implements RamlRequest {
     }
 
     @Override
+    public String getContentType() {
+        return delegate.getContentType();
+    }
+
+    @Override
     public String getContent() {
-        return null;
+        try {
+            final BufferedReader reader = delegate.getReader();
+            if (reader == null) {
+                return null;
+            }
+            final StringBuilder sb = new StringBuilder();
+            final char[] buf = new char[1000];
+            while (reader.ready()) {
+                int read = reader.read(buf);
+                sb.append(buf, 0, read);
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read request body", e);
+        }
     }
 }

@@ -69,6 +69,12 @@ public class HttpComponentsRamlRequest implements RamlRequest {
     }
 
     @Override
+    public String getContentType() {
+        final Header contentType = request.getFirstHeader("Content-Type");
+        return contentType == null ? null : contentType.getValue();
+    }
+
+    @Override
     public String getContent() {
         return null;
     }
