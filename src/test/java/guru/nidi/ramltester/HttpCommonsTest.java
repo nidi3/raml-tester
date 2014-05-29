@@ -59,7 +59,7 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void testServletOk() throws IOException {
-        final HttpGet get = new HttpGet("http://localhost:8082/data");
+        final HttpGet get = new HttpGet(url("data"));
         final HttpResponse response = client.execute(get);
         assertEquals("\"json string\"", EntityUtils.toString(response.getEntity()));
         assertTrue(client.getLastReport().isEmpty());
@@ -67,7 +67,7 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void testServletNok() throws IOException {
-        final HttpGet get = new HttpGet("http://localhost:8082/data?param=bu");
+        final HttpGet get = new HttpGet(url("data?param=bu"));
         final HttpResponse response = client.execute(get);
         assertEquals("illegal json", EntityUtils.toString(response.getEntity()));
 
@@ -86,7 +86,7 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void notSending() throws IOException {
-        final HttpGet get = new HttpGet("http://localhost:8082/data");
+        final HttpGet get = new HttpGet(url("data"));
         final HttpResponse response = client.notSending().execute(get);
         assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
         assertEquals(null, response.getEntity());

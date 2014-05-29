@@ -66,7 +66,7 @@ public class ServletTest extends ServerTest {
 
     @Test
     public void testServletOk() throws IOException {
-        final HttpGet get = new HttpGet("http://localhost:8083/data");
+        final HttpGet get = new HttpGet(url("data"));
         final CloseableHttpResponse response = client.execute(get);
         assertEquals("\"json string\"", EntityUtils.toString(response.getEntity()));
         assertTrue(testFilter.report.isEmpty());
@@ -74,7 +74,7 @@ public class ServletTest extends ServerTest {
 
     @Test
     public void testServletNok() throws IOException {
-        final HttpGet get = new HttpGet("http://localhost:8083/data?param=bu");
+        final HttpGet get = new HttpGet(url("data?param=bu"));
         final CloseableHttpResponse response = client.execute(get);
         assertEquals("illegal json", EntityUtils.toString(response.getEntity()));
 

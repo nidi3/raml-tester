@@ -85,14 +85,14 @@ public class RestTemplateTest extends ServerTest {
 
     @Test
     public void testRestTemplateOk() {
-        final String res = restTemplate.getForObject("http://localhost:8081/data", String.class);
+        final String res = restTemplate.getForObject(url("data"), String.class);
         assertEquals("\"json string\"", res);
         assertTrue(restTemplate.getLastReport().isEmpty());
     }
 
     @Test
     public void testRestTemplateNok() {
-        final String res = restTemplate.getForObject("http://localhost:8081/data?param=bu", String.class);
+        final String res = restTemplate.getForObject(url("data?param=bu"), String.class);
         assertEquals("illegal json", res);
 
         final RamlViolations requestViolations = restTemplate.getLastReport().getRequestViolations();

@@ -36,13 +36,18 @@ public class Values implements Iterable<Map.Entry<String, List<String>>> {
         return values.size();
     }
 
-    public void addValue(String name, String value) {
+    public List<String> get(String name) {
+        return values.get(name);
+    }
+
+    public Values addValue(String name, String value) {
         List<String> vs = values.get(name);
         if (vs == null) {
             vs = new ArrayList<>();
             values.put(name, vs);
         }
         vs.add(value);
+        return this;
     }
 
     public void setValue(String name, String value) {

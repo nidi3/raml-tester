@@ -69,6 +69,10 @@ public abstract class ServerTest {
     protected void init(Context ctx) {
     }
 
+    protected String url(String path) {
+        return "http://localhost:" + port() + "/" + path;
+    }
+
     @AfterClass
     public static void stopTomcat() throws LifecycleException {
         if (tomcat.getServer() != null && tomcat.getServer().getState() != LifecycleState.DESTROYED) {
