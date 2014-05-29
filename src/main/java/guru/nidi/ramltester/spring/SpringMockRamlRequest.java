@@ -16,10 +16,10 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.util.IoUtils;
 import guru.nidi.ramltester.util.Values;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -70,17 +70,7 @@ public class SpringMockRamlRequest implements RamlRequest {
     @Override
     public String getContent() {
         try {
-            final BufferedReader reader = delegate.getReader();
-            if (reader == null) {
-                return null;
-            }
-            final StringBuilder sb = new StringBuilder();
-            final char[] buf = new char[1000];
-            while (reader.ready()) {
-                int read = reader.read(buf);
-                sb.append(buf, 0, read);
-            }
-            return sb.toString();
+            return IoUtils.readIntoString(delegate.getReader());
         } catch (IOException e) {
             throw new RuntimeException("Could not read request body", e);
         }

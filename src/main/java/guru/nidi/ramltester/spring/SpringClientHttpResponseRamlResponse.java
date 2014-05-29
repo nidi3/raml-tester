@@ -16,17 +16,18 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlResponse;
+import guru.nidi.ramltester.util.IoUtils;
 import guru.nidi.ramltester.util.Values;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
+
+import static guru.nidi.ramltester.spring.SpringUtils.contentTypeOf;
+import static guru.nidi.ramltester.spring.SpringUtils.headerValuesOf;
 
 /**
  *
@@ -55,17 +56,13 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
 
     @Override
     public String getContentType() {
-        final MediaType contentType = getHeaders().getContentType();
-        return contentType == null ? null : contentType.toString();
+        return contentTypeOf(getHeaders());
     }
 
     @Override
     public String getContent() {
         try {
-            char[] buf = new char[getBody().available()];
-            final InputStreamReader reader = new InputStreamReader(getBody(), encoding);
-            final int read = reader.read(buf);
-            return new String(buf, 0, read);
+            return IoUtils.readIntoString(new InputStreamReader(getBody(), encoding));
         } catch (IOException e) {
             throw new RuntimeException("Problem getting content", e);
         }
@@ -103,10 +100,6 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
 
     @Override
     public Values getHeaderValues() {
-        final Values headers = new Values();
-        for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
-            headers.addValues(entry.getKey(), entry.getValue());
-        }
-        return headers;
+        return headerValuesOf(response.getHeaders());
     }
 }

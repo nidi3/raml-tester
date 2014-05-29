@@ -17,13 +17,9 @@ package guru.nidi.ramltester.httpcomponents;
 
 import guru.nidi.ramltester.core.RamlResponse;
 import guru.nidi.ramltester.util.Values;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
+import static guru.nidi.ramltester.httpcomponents.HttpComponentsUtils.*;
 
 /**
  *
@@ -42,33 +38,16 @@ public class HttpComponentsRamlResponse implements RamlResponse {
 
     @Override
     public String getContentType() {
-        final Header[] headers = response.getHeaders("Content-Type");
-        return (headers == null || headers.length == 0) ? null : headers[0].getValue();
+        return contentTypeOf(response);
     }
 
     @Override
     public String getContent() {
-        try {
-            final HttpEntity entity = response.getEntity();
-            final Header encoding = entity.getContentEncoding();
-            final String s = EntityUtils.toString(entity, encoding != null ? encoding.getValue() : "UTF-8");
-            final StringEntity buffered = new StringEntity(s);
-            buffered.setChunked(entity.isChunked());
-            buffered.setContentEncoding(entity.getContentEncoding());
-            buffered.setContentType(entity.getContentType());
-            response.setEntity(buffered);
-            return s;
-        } catch (IOException e) {
-            throw new RuntimeException("Could not get response content", e);
-        }
+        return contentOf(buffered(response).getEntity());
     }
 
     @Override
     public Values getHeaderValues() {
-        Values headers = new Values();
-        for (Header header : response.getAllHeaders()) {
-            headers.addValue(header.getName(), header.getValue());
-        }
-        return headers;
+        return headerValuesOf(response);
     }
 }

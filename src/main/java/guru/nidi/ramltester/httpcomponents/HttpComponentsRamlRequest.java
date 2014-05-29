@@ -18,10 +18,12 @@ package guru.nidi.ramltester.httpcomponents;
 import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.util.Values;
-import org.apache.http.Header;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
+
+import static guru.nidi.ramltester.httpcomponents.HttpComponentsUtils.*;
 
 /**
  *
@@ -61,21 +63,18 @@ public class HttpComponentsRamlRequest implements RamlRequest {
 
     @Override
     public Values getHeaderValues() {
-        Values headers = new Values();
-        for (Header header : request.getAllHeaders()) {
-            headers.addValue(header.getName(), header.getValue());
-        }
-        return headers;
+        return headerValuesOf(request);
     }
 
     @Override
     public String getContentType() {
-        final Header contentType = request.getFirstHeader("Content-Type");
-        return contentType == null ? null : contentType.getValue();
+        return contentTypeOf(request);
     }
 
     @Override
     public String getContent() {
-        return null;
+        return (request instanceof HttpEntityEnclosingRequest)
+                ? contentOf(buffered((HttpEntityEnclosingRequest) request).getEntity())
+                : null;
     }
 }
