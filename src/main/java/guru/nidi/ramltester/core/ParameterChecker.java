@@ -15,7 +15,9 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.Values;
+import org.raml.model.ParamType;
 import org.raml.model.parameter.AbstractParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +77,7 @@ class ParameterChecker {
 
     public void checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
         Set<String> found = new HashSet<>();
-        for (Map.Entry<String, List<String>> entry : values) {
+        for (Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
             final String paramName = findMatchingParamName(params.keySet(), entry.getKey());
             final List<? extends AbstractParam> parameters = params.get(paramName);
@@ -84,7 +86,7 @@ class ParameterChecker {
             } else {
                 for (AbstractParam parameter : parameters) {
                     violations.addIf(!parameter.isRepeat() && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
-                    for (String value : entry.getValue()) {
+                    for (Object value : entry.getValue()) {
                         checkParameter(parameter, value, namedMsg);
                     }
                 }
@@ -117,8 +119,24 @@ class ParameterChecker {
         return null;
     }
 
-    public void checkParameter(AbstractParam param, String value, Message message) {
+    public void checkParameter(AbstractParam param, Object value, Message message) {
         Message detail = message.withInnerParam(new Message("value", value));
+        if (value instanceof String) {
+            checkStringParameter(param, (String) value, detail);
+        } else if (value instanceof FileValue) {
+            checkFileParameter(param, (FileValue) value, detail);
+        } else {
+            throw new IllegalArgumentException("Unhandled parameter value '" + value + "' of type " + value.getClass());
+        }
+    }
+
+    private void checkFileParameter(AbstractParam param, FileValue value, Message detail) {
+        if (param.getType() != ParamType.FILE) {
+            violations.add(detail.withMessageParam("file.superfluous", param.getType()));
+        }
+    }
+
+    private void checkStringParameter(AbstractParam param, String value, Message detail) {
         switch (param.getType()) {
             case BOOLEAN:
                 violations.addIf(!value.equals("true") && !value.equals("false"), detail.withMessageParam("boolean.invalid"));
@@ -133,7 +151,7 @@ class ParameterChecker {
                 }
                 break;
             case FILE:
-                //TODO
+                violations.add(detail.withMessageParam("file.invalid"));
                 break;
             case INTEGER:
                 if (INTEGER.matcher(value).matches()) {

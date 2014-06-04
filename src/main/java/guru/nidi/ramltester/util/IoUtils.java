@@ -45,6 +45,9 @@ public class IoUtils {
     }
 
     public static byte[] readIntoByteArray(InputStream in) throws IOException {
+        if (in == null) {
+            return new byte[0];
+        }
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             final byte[] buf = new byte[1000];
             int read;

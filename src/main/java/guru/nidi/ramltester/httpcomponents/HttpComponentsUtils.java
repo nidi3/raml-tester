@@ -15,10 +15,10 @@
  */
 package guru.nidi.ramltester.httpcomponents;
 
+import guru.nidi.ramltester.util.IoUtils;
 import guru.nidi.ramltester.util.Values;
 import org.apache.http.*;
 import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
@@ -70,9 +70,9 @@ class HttpComponentsUtils {
         return request;
     }
 
-    static String contentOf(HttpEntity entity) {
+    static byte[] contentOf(HttpEntity entity) {
         try {
-            return EntityUtils.toString(entity, encodingOf(entity));
+            return IoUtils.readIntoByteArray(entity.getContent());
         } catch (IOException e) {
             throw new RuntimeException("Could not get response content", e);
         }

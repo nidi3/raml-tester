@@ -79,7 +79,7 @@ public class UriComponents {
         }
     }
 
-    private Values parseQuery(String query) {
+    public static Values parseQuery(String query) {
         Values q = new Values();
         if (query != null) {
             Matcher m = Pattern.QUERY_PARAM.matcher(query);

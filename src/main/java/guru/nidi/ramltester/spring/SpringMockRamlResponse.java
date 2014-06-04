@@ -19,8 +19,6 @@ import guru.nidi.ramltester.core.RamlResponse;
 import guru.nidi.ramltester.util.Values;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.io.UnsupportedEncodingException;
-
 /**
  *
  */
@@ -42,12 +40,8 @@ public class SpringMockRamlResponse implements RamlResponse {
     }
 
     @Override
-    public String getContent() {
-        try {
-            return delegate.getContentAsString();
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Problem extracting response content", e);
-        }
+    public byte[] getContent() {
+        return delegate.getContentAsByteArray();
     }
 
     @Override

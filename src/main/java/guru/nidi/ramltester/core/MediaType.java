@@ -22,6 +22,7 @@ import java.util.*;
  *
  */
 public class MediaType {
+    private static final String CHARSET = "charset";
     private static final String WILDCARD_TYPE = "*";
 
     private String type;
@@ -133,6 +134,11 @@ public class MediaType {
 
     public Map<String, String> getParameters() {
         return parameters;
+    }
+
+    public String getCharset(String defaultCharset) {
+        final String charset = parameters.get(CHARSET);
+        return charset != null ? charset : defaultCharset;
     }
 
     private static String[] tokenizeToStringArray(String str, String delimiters) {

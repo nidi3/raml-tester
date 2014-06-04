@@ -20,8 +20,8 @@ import java.util.*;
 /**
  *
  */
-public class Values implements Iterable<Map.Entry<String, List<String>>> {
-    private final Map<String, List<String>> values = new HashMap<>();
+public class Values implements Iterable<Map.Entry<String, List<Object>>> {
+    private final Map<String, List<Object>> values = new HashMap<>();
 
     public Values() {
     }
@@ -36,12 +36,12 @@ public class Values implements Iterable<Map.Entry<String, List<String>>> {
         return values.size();
     }
 
-    public List<String> get(String name) {
+    public List<Object> get(String name) {
         return values.get(name);
     }
 
-    public Values addValue(String name, String value) {
-        List<String> vs = values.get(name);
+    public Values addValue(String name, Object value) {
+        List<Object> vs = values.get(name);
         if (vs == null) {
             vs = new ArrayList<>();
             values.put(name, vs);
@@ -51,25 +51,25 @@ public class Values implements Iterable<Map.Entry<String, List<String>>> {
     }
 
     public void setValue(String name, String value) {
-        final List<String> vs = new ArrayList<>();
+        final List<Object> vs = new ArrayList<>();
         vs.add(value);
         values.put(name, vs);
     }
 
-    public void addValues(String name, Iterable<String> values) {
-        for (String value : values) {
+    public void addValues(String name, Iterable<?> values) {
+        for (Object value : values) {
             addValue(name, value);
         }
     }
 
     public void addValues(Values values) {
-        for (Map.Entry<String, List<String>> value : values) {
+        for (Map.Entry<String, List<Object>> value : values) {
             addValues(value.getKey(), value.getValue());
         }
     }
 
     @Override
-    public Iterator<Map.Entry<String, List<String>>> iterator() {
+    public Iterator<Map.Entry<String, List<Object>>> iterator() {
         return values.entrySet().iterator();
     }
 

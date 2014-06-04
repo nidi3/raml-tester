@@ -32,7 +32,7 @@ public class FormTest extends HighlevelTestBase {
     public void formTest() throws Exception {
         assertNoViolations(
                 simple,
-                post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).content("param=a+%2Bb"),
+                post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("param","a+b"),
                 jsonResponse(200, "", null));
     }
 
@@ -40,7 +40,7 @@ public class FormTest extends HighlevelTestBase {
     public void undefinedParam() throws Exception {
         assertOneRequestViolationThat(
                 simple,
-                post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).content("hula=a+%2Bb"),
+                post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("hula","a+b"),
                 jsonResponse(200, "", null),
                 equalTo("Form parameter 'hula' on action(POST /form) is not defined"));
     }
@@ -49,7 +49,7 @@ public class FormTest extends HighlevelTestBase {
     public void noContentType() throws Exception {
         assertOneRequestViolationThat(
                 simple,
-                post("/form").content("param=a+%2Bb"),
+                post("/form").content("param=a+b"),
                 jsonResponse(200, "", null),
                 equalTo("No Content-Type header given"));
     }
@@ -83,7 +83,7 @@ public class FormTest extends HighlevelTestBase {
         assertNoViolations(
                 simple,
                 fileUpload("/form/multi").file("file", new byte[]{1, 2, 3})
-                        .contentType(MediaType.MULTIPART_FORM_DATA).content("param=a+%2Bb"),
+                        .contentType(MediaType.MULTIPART_FORM_DATA).param("param", "a +b"),
                 jsonResponse(200, "", null)
         );
     }

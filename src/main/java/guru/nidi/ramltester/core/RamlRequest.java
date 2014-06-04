@@ -26,4 +26,6 @@ public interface RamlRequest extends RamlMessage {
     String getMethod();
 
     Values getQueryValues();
+
+    Values getFormValues();
 }

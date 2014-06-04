@@ -25,5 +25,5 @@ public interface RamlMessage {
 
     String getContentType();
 
-    String getContent();
+    byte[] getContent();
 }

@@ -127,10 +127,10 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     }
 
     @Override
-    public String getContent() {
+    public byte[] getContent() {
         try {
             flushBuffer();
-            return characterEncoding != null ? content.toString(characterEncoding) : content.toString();
+            return content.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Problem getting content", e);
         }

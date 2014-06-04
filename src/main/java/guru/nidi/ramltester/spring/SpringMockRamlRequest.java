@@ -16,12 +16,18 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.IoUtils;
+import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.util.Values;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -45,7 +51,20 @@ public class SpringMockRamlRequest implements RamlRequest {
 
     @Override
     public Values getQueryValues() {
-        return new Values(delegate.getParameterMap());
+        return UriComponents.parseQuery(delegate.getQueryString());
+    }
+
+    @Override
+    public Values getFormValues() {
+        final Values values = new Values(delegate.getParameterMap());
+        if (delegate instanceof MockMultipartHttpServletRequest) {
+            for (Map.Entry<String, List<MultipartFile>> entry : ((MockMultipartHttpServletRequest) delegate).getMultiFileMap().entrySet()) {
+                for (MultipartFile file : entry.getValue()) {
+                    values.addValue(entry.getKey(), new FileValue());
+                }
+            }
+        }
+        return values;
     }
 
     @Override
@@ -68,9 +87,9 @@ public class SpringMockRamlRequest implements RamlRequest {
     }
 
     @Override
-    public String getContent() {
+    public byte[] getContent() {
         try {
-            return IoUtils.readIntoString(delegate.getReader());
+            return IoUtils.readIntoByteArray(delegate.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException("Could not read request body", e);
         }

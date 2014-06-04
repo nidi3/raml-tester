@@ -16,11 +16,10 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.util.Values;
 import org.springframework.http.HttpRequest;
-
-import java.nio.charset.Charset;
 
 import static guru.nidi.ramltester.spring.SpringUtils.contentTypeOf;
 import static guru.nidi.ramltester.spring.SpringUtils.headerValuesOf;
@@ -55,6 +54,11 @@ public class SpringHttpRequestRamlRequest implements RamlRequest {
     }
 
     @Override
+    public Values getFormValues() {
+        return new FormDecoder().decode(this);
+    }
+
+    @Override
     public Values getHeaderValues() {
         return headerValuesOf(request.getHeaders());
     }
@@ -65,7 +69,7 @@ public class SpringHttpRequestRamlRequest implements RamlRequest {
     }
 
     @Override
-    public String getContent() {
-        return new String(body, Charset.forName("utf-8"));
+    public byte[] getContent() {
+        return body;
     }
 }

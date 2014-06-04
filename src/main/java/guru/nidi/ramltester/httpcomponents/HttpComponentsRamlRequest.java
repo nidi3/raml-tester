@@ -16,6 +16,7 @@
 package guru.nidi.ramltester.httpcomponents;
 
 import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.util.Values;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -62,6 +63,11 @@ public class HttpComponentsRamlRequest implements RamlRequest {
     }
 
     @Override
+    public Values getFormValues() {
+        return new FormDecoder().decode(this);
+    }
+
+    @Override
     public Values getHeaderValues() {
         return headerValuesOf(request);
     }
@@ -72,7 +78,7 @@ public class HttpComponentsRamlRequest implements RamlRequest {
     }
 
     @Override
-    public String getContent() {
+    public byte[] getContent() {
         return (request instanceof HttpEntityEnclosingRequest)
                 ? contentOf(buffered((HttpEntityEnclosingRequest) request).getEntity())
                 : null;

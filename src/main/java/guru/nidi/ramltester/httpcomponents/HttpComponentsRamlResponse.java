@@ -42,7 +42,7 @@ public class HttpComponentsRamlResponse implements RamlResponse {
     }
 
     @Override
-    public String getContent() {
+    public byte[] getContent() {
         return contentOf(buffered(response).getEntity());
     }
 

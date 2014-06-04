@@ -24,7 +24,6 @@ import org.springframework.http.client.ClientHttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import static guru.nidi.ramltester.spring.SpringUtils.contentTypeOf;
 import static guru.nidi.ramltester.spring.SpringUtils.headerValuesOf;
@@ -60,9 +59,9 @@ public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse,
     }
 
     @Override
-    public String getContent() {
+    public byte[] getContent() {
         try {
-            return IoUtils.readIntoString(new InputStreamReader(getBody(), encoding));
+            return IoUtils.readIntoByteArray(getBody());
         } catch (IOException e) {
             throw new RuntimeException("Problem getting content", e);
         }

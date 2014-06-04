@@ -19,6 +19,7 @@ import guru.nidi.ramltester.core.RamlRequest;
 import guru.nidi.ramltester.core.RamlResponse;
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.servlet.ServletRamlResponse;
+import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.ServerTest;
 import guru.nidi.ramltester.util.Values;
 import org.apache.catalina.Context;
@@ -26,12 +27,16 @@ import org.apache.catalina.deploy.FilterDef;
 import org.apache.catalina.deploy.FilterMap;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,19 +46,27 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  *
  */
-public class ServletLowlevelTest extends ServerTest {
+public class ServletRamlMessageTest extends ServerTest {
     private CloseableHttpClient client;
     private static TestFilter testFilter;
     private static TestServlet testServlet;
     private static MessageTester tester;
-    private static Error error;
+    private static BlockingQueue<Error> error = new ArrayBlockingQueue<>(1);
+    private static Error OK = new Error() {
+    };
 
     @BeforeClass
     public static void setupClass() {
@@ -76,13 +89,13 @@ public class ServletLowlevelTest extends ServerTest {
     }
 
     @Test
-    public void base() throws IOException {
+    public void base() throws Exception {
         final HttpGet get = new HttpGet(url("path/more?param=value&param=v2"));
         get.addHeader("header", "pedro");
         execute(get, new MessageTester() {
             @Override
             public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) {
-                assertEquals("", ramlRequest.getContent());
+                assertEquals(0, ramlRequest.getContent().length);
                 assertEquals(null, ramlRequest.getContentType());
                 assertEquals(Arrays.asList("pedro"), ramlRequest.getHeaderValues().get("header"));
                 assertEquals("GET", ramlRequest.getMethod());
@@ -90,7 +103,7 @@ public class ServletLowlevelTest extends ServerTest {
                 assertEquals(url("path/more"), ramlRequest.getRequestUrl(null));
                 assertEquals("https://base/path/more", ramlRequest.getRequestUrl("https://base"));
 
-                assertEquals("", ramlResponse.getContent());
+                assertEquals(0, ramlResponse.getContent().length);
                 assertEquals(null, ramlResponse.getContentType());
                 assertEquals(new Values().addValue("resHeader", "hula"), ramlResponse.getHeaderValues());
                 assertEquals(222, ramlResponse.getStatus());
@@ -99,7 +112,7 @@ public class ServletLowlevelTest extends ServerTest {
     }
 
     @Test
-    public void content() throws IOException {
+    public void content() throws Exception {
         final HttpPost post = new HttpPost(url("path/more"));
         final HttpEntity entity = new ByteArrayEntity(new byte[]{65, 66, 67});
         post.setEntity(entity);
@@ -107,17 +120,72 @@ public class ServletLowlevelTest extends ServerTest {
         execute(post, new MessageTester() {
             @Override
             public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
-                assertEquals("ABC", ramlRequest.getContent());
-                assertEquals("ABC", ramlResponse.getContent());
+                assertEquals("ABC", stringOf(ramlRequest.getContent()));
+                assertEquals("ABC", stringOf(ramlResponse.getContent()));
             }
         });
     }
 
-    private void execute(HttpUriRequest request, MessageTester messageTester) throws IOException {
+    @Test
+    public void urlEncodedForm() throws Exception {
+        final HttpPost post = new HttpPost(url("path/more"));
+        final HttpEntity entity = new UrlEncodedFormEntity(Arrays.asList(
+                new BasicNameValuePair("param", "value"),
+                new BasicNameValuePair("param", "v2"),
+                new BasicNameValuePair("p2", "äöü+$% ")));
+        post.setEntity(entity);
+
+        execute(post, new MessageTester() {
+            @Override
+            public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
+                final Values values = new Values()
+                        .addValue("param", "value")
+                        .addValue("param", "v2")
+                        .addValue("p2", "äöü+$% ");
+                assertEquals(values, ramlRequest.getFormValues());
+                assertEquals("param=value&param=v2&p2=" + URLEncoder.encode("äöü+$% ", "iso-8859-1"), stringOf(ramlResponse.getContent()));
+            }
+        });
+    }
+
+    @Test
+    public void multipartForm() throws Exception {
+        final HttpPost post = new HttpPost(url("path/more"));
+        final HttpEntity entity = MultipartEntityBuilder.create()
+                .addBinaryBody("binary", new byte[]{65, 66, 67}, ContentType.APPLICATION_OCTET_STREAM, "filename")
+                .addTextBody("param", "value")
+                .addTextBody("param", "v2")
+                .addTextBody("p2", "äöü+$% ")
+                .build();
+        post.setEntity(entity);
+
+        execute(post, new MessageTester() {
+            @Override
+            public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
+                final Values values = new Values()
+                        .addValue("binary", new FileValue())
+                        .addValue("param", "value")
+                        .addValue("param", "v2")
+                        .addValue("p2", "äöü+$% ");
+                assertEquals(values, ramlRequest.getFormValues());
+            }
+        });
+    }
+
+    private String stringOf(byte[] bytes) throws UnsupportedEncodingException {
+        return new String(bytes, "iso-8859-1");
+    }
+
+    private void execute(HttpUriRequest request, MessageTester messageTester) throws IOException, InterruptedException {
         tester = messageTester;
+        error.clear();
         client.execute(request);
-        if (error != null) {
-            throw error;
+        final Error e = error.poll(100, TimeUnit.MILLISECONDS);
+        if (e == null) {
+            fail("Got no response");
+        }
+        if (e != OK) {
+            throw e;
         }
     }
 
@@ -132,10 +200,10 @@ public class ServletLowlevelTest extends ServerTest {
             final ServletRamlResponse res = new ServletRamlResponse((HttpServletResponse) response);
             chain.doFilter(req, res);
             try {
-                error = null;
                 tester.test((HttpServletRequest) request, (HttpServletResponse) response, req, res);
+                error.add(OK);
             } catch (Error e) {
-                error = e;
+                error.add(e);
             }
         }
 

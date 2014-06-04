@@ -16,7 +16,9 @@
 package guru.nidi.ramltester.servlet;
 
 import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.IoUtils;
+import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.util.Values;
 
 import javax.servlet.ServletInputStream;
@@ -49,7 +51,12 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
 
     @Override
     public Values getQueryValues() {
-        return new Values(getParameterMap());
+        return UriComponents.parseQuery(request().getQueryString());
+    }
+
+    @Override
+    public Values getFormValues() {
+        return new FormDecoder().decode(this);
     }
 
     @Override
@@ -82,10 +89,10 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
     }
 
     @Override
-    public String getContent() {
+    public byte[] getContent() {
         try {
             readContentIfNeeded();
-            return IoUtils.readIntoString(getReader());
+            return IoUtils.readIntoByteArray(getInputStream());
         } catch (IOException e) {
             throw new RuntimeException("Could not read content", e);
         }
