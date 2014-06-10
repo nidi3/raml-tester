@@ -20,7 +20,7 @@ public class SimpleTest {
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        RamlDefinition api = RamlDefinition.load("api.yaml").fromClasspath(getClass());
+        RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
         apiMatches = api.matches().assumingServletUri("http://nidi.guru/raml/simple/v1");
     }
 
@@ -44,7 +44,7 @@ public class RamlFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        api = RamlDefinition.load("api.yaml").fromClasspath(getClass());
+        api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
     }
 
     @Override
@@ -56,6 +56,21 @@ public class RamlFilter implements Filter {
 
     @Override
     public void destroy() {}
+}
+
+```
+Or see the demo project https://github.com/nidi3/raml-tester-uc-servlet
+
+Use together with Apache HttpComponents
+---------------------------------------
+```
+@Test
+public void testRequest(){
+    RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+    RamlHttpClient client = api.createHttpClient();
+    HttpGet get = new HttpGet("http://test.server/path");
+    HttpResponse response = client.execute(get);
+    Assert.assertTrue(client.getLastResport().isEmpty());
 }
 
 ```
