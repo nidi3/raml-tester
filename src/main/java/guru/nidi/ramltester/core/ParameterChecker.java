@@ -120,13 +120,26 @@ class ParameterChecker {
     }
 
     public void checkParameter(AbstractParam param, Object value, Message message) {
-        Message detail = message.withInnerParam(new Message("value", value));
-        if (value instanceof String) {
-            checkStringParameter(param, (String) value, detail);
-        } else if (value instanceof FileValue) {
-            checkFileParameter(param, (FileValue) value, detail);
+        if (value == null) {
+            Message detail = message.withInnerParam(new Message("value", "empty"));
+            checkNullParameter(param, detail);
         } else {
-            throw new IllegalArgumentException("Unhandled parameter value '" + value + "' of type " + value.getClass());
+            Message detail = message.withInnerParam(new Message("value", value));
+            if (value instanceof String) {
+                checkStringParameter(param, (String) value, detail);
+            } else if (value instanceof FileValue) {
+                checkFileParameter(param, (FileValue) value, detail);
+            } else {
+                throw new IllegalArgumentException("Unhandled parameter value '" + value + "' of type " + value.getClass());
+            }
+        }
+    }
+
+    private void checkNullParameter(AbstractParam param, Message detail) {
+        if (param.getType() != ParamType.STRING) {
+            violations.add(detail.withMessageParam("value.empty"));
+        } else {
+            checkStringParameter(param, "", detail);
         }
     }
 

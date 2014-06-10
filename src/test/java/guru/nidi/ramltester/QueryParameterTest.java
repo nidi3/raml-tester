@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 /**
  *
  */
@@ -60,4 +61,29 @@ public class QueryParameterTest extends HighlevelTestBase {
                 equalTo("Query parameter 'req' on action(GET /query) is required but not found"));
     }
 
+    @Test
+    public void undefinedEmptyParam() throws Exception {
+        assertOneRequestViolationThat(
+                simple,
+                get("/query?req&hula"),
+                jsonResponse(200, "\"hula\""),
+                equalTo("Query parameter 'hula' on action(GET /query) is not defined"));
+    }
+
+    @Test
+    public void invalidEmptyParam() throws Exception {
+        assertOneRequestViolationThat(
+                simple,
+                get("/query?req&int"),
+                jsonResponse(200, "\"hula\""),
+                equalTo("Query parameter 'int' on action(GET /query) : Value 'empty' is only allowed with type string"));
+    }
+
+    @Test
+    public void validEmptyParam() throws Exception {
+        assertNoViolations(
+                simple,
+                get("/query?req"),
+                jsonResponse(200, "\"hula\""));
+    }
 }
