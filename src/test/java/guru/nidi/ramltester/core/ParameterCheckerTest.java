@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.util.Values;
+import guru.nidi.ramltester.model.Values;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.raml.model.ParamType;

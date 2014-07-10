@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.httpcomponents;
 
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.IoUtils;
-import guru.nidi.ramltester.util.Values;
 import org.apache.http.*;
 import org.apache.http.entity.BufferedHttpEntity;
 

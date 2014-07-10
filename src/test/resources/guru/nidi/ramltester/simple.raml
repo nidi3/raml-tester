@@ -15,21 +15,6 @@ schemas:
           application/json:
             schema: |
               {"type":"string"}
-/query:
-  get:
-    queryParameters:
-      req:
-        required: true
-      rep:
-        repeat: true
-      int:
-        type: integer
-    responses:
-      200:
-        body:
-          application/json:
-            schema: |
-              {"type":"string"}
 /schema:
   get:
     responses:
@@ -91,80 +76,5 @@ schemas:
       200:
         body:
           schema: string
-/header:
-  get:
-    headers:
-      req:
-        required: true
-      rep:
-        repeat: true
-      x-{?}:
-    responses:
-      200:
-        body:
-          application/json:
-            schema: |
-              {"type":"string"}
-  /reqwild:
-    get:
-      headers:
-        x-{?}:
-          required: true
-      responses:
-        200:
-/resheader:
-  get:
-    responses:
-      200:
-        headers:
-          req:
-            required: true
-          rep:
-            repeat: true
-          x-{?}:
-        body:
-          application/json:
-            schema: |
-              {"type":"string"}
-  /reqwild:
-    get:
-      responses:
-        200:
-          headers:
-            x-{?}:
-              required: true
-/form:
-  post:
-    body:
-      application/x-www-form-urlencoded:
-        formParameters:
-          param:
-    responses:
-      200:
+/fjhsdsdkjhs:
 
-  /parameterless:
-    post:
-      body:
-        application/x-www-form-urlencoded:
-      responses:
-        200:
-
-  /schema:
-    post:
-      body:
-        application/x-www-form-urlencoded:
-          formParameters:
-          schema: string
-      responses:
-        200:
-
-  /multi:
-    post:
-      body:
-        multipart/form-data:
-          formParameters:
-            param:
-            file:
-              type: file
-      responses:
-        200:

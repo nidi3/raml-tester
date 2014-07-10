@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.spring;
 
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FileValue;
-import guru.nidi.ramltester.util.Values;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
@@ -67,10 +67,13 @@ public class SpringMockRamlMessageTest {
 
         assertEquals("contentä", new String(ramlRequest.getContent(), "utf-8"));
         assertEquals("text/plain", ramlRequest.getContentType());
+
         final Values formValues = new Values().addValue("param", "val").addValue("param2", "val2");
         assertEquals(formValues, ramlRequest.getFormValues());
+
         final Values headerValues = new Values().addValue("head", "hval").addValue("Content-Type", "text/plain;charset=utf-8");
         assertEquals(headerValues, ramlRequest.getHeaderValues());
+
         assertEquals("GET", ramlRequest.getMethod());
         assertEquals(new Values().addValue("param", "val"), ramlRequest.getQueryValues());
         assertEquals("http://test.com/path", ramlRequest.getRequestUrl(null));
@@ -80,15 +83,17 @@ public class SpringMockRamlMessageTest {
 
         assertEquals("responsö", new String(ramlResponse.getContent(), "iso-8859-1"));
         assertEquals("text/dummy", ramlResponse.getContentType());
-        final Values resHeaderValues = new Values().addValue("head", "resValue").addValue("Content-Length", "" + ("responsö" .length())).addValue("Content-Type", "text/dummy");
+
+        final Values resHeaderValues = new Values().addValue("head", "resValue").addValue("Content-Length", "" + ("responsö".length())).addValue("Content-Type", "text/dummy");
         assertEquals(resHeaderValues, ramlResponse.getHeaderValues());
+
         assertEquals(202, ramlResponse.getStatus());
     }
 
     @Test
     public void multipart() throws Exception {
         final MvcResult result = mockMvc.perform(fileUpload("http://test.com/path?param=val")
-                .file("file",new byte[]{})
+                .file("file", new byte[]{})
                 .characterEncoding("utf-8")
                 .content("contentä")
                 .param("param2", "val2")
@@ -98,10 +103,13 @@ public class SpringMockRamlMessageTest {
 
         assertEquals("contentä", new String(ramlRequest.getContent(), "utf-8"));
         assertEquals("multipart/form-data", ramlRequest.getContentType());
-        final Values formValues = new Values().addValue("param", "val").addValue("param2", "val2").addValue("file",new FileValue());
+
+        final Values formValues = new Values().addValue("param", "val").addValue("param2", "val2").addValue("file", new FileValue());
         assertEquals(formValues, ramlRequest.getFormValues());
+
         final Values headerValues = new Values().addValue("head", "hval").addValue("Content-Type", "multipart/form-data;charset=utf-8");
         assertEquals(headerValues, ramlRequest.getHeaderValues());
+
         assertEquals("POST", ramlRequest.getMethod());
         assertEquals(new Values().addValue("param", "val"), ramlRequest.getQueryValues());
         assertEquals("http://test.com/path", ramlRequest.getRequestUrl(null));

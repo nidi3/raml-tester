@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.util.Values;
+import guru.nidi.ramltester.model.Values;
 
 /**
  *

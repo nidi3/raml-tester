@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.util;
+package guru.nidi.ramltester.model;
 
 import java.util.*;
 
@@ -71,6 +71,10 @@ public class Values implements Iterable<Map.Entry<String, List<Object>>> {
     @Override
     public Iterator<Map.Entry<String, List<Object>>> iterator() {
         return values.entrySet().iterator();
+    }
+
+    public Set<String> names() {
+        return values.keySet();
     }
 
     @Override

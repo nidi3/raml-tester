@@ -15,6 +15,8 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.junit.ExpectedCoverage;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -25,77 +27,86 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class HeaderTest extends HighlevelTestBase {
-    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
+    private static RamlDefinition header = RamlLoaders.fromClasspath(HeaderTest.class).load("header.raml");
+    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
+
+    @ClassRule
+    public static ExpectedCoverage expectedCoverage = new ExpectedCoverage(aggregator);
 
     @Test
     public void undefinedRequestHeader() throws Exception {
-        assertOneRequestViolationThat(
-                simple,
-                get("/data").header("a", "b"),
-                jsonResponse(200, "\"hula\""),
-                equalTo("Header 'a' on action(GET /data) is not defined"));
+        assertOneRequestViolationThat(test(aggregator,
+                        header,
+                        get("/data").header("a", "b"),
+                        jsonResponse(200, "\"hula\"")),
+                equalTo("Header 'a' on action(GET /data) is not defined")
+        );
     }
 
     @Test
     public void illegallyRepeatRequestHeader() throws Exception {
-        assertOneRequestViolationThat(
-                simple,
-                get("/header").header("req", "1").header("req", "2"),
-                jsonResponse(200, "\"hula\""),
-                equalTo("Header 'req' on action(GET /header) is not repeat but found repeatedly"));
+        assertOneRequestViolationThat(test(aggregator,
+                        header,
+                        get("/header").header("req", "1").header("req", "2"),
+                        jsonResponse(200, "\"hula\"")),
+                equalTo("Header 'req' on action(GET /header) is not repeat but found repeatedly")
+        );
     }
 
     @Test
     public void allowedRepeatRequestHeader() throws Exception {
-        assertNoViolations(
-                simple,
+        assertNoViolations(test(aggregator,
+                header,
                 get("/header").header("rep", "1").header("rep", "2").header("req", "xxx"),
-                jsonResponse(200, "\"hula\""));
+                jsonResponse(200, "\"hula\"")));
     }
 
     @Test
     public void missingRequiredRequestHeader() throws Exception {
-        assertOneRequestViolationThat(
-                simple,
-                get("/header"),
-                jsonResponse(200, "\"hula\""),
-                equalTo("Header 'req' on action(GET /header) is required but not found"));
+        assertOneRequestViolationThat(test(aggregator,
+                        header,
+                        get("/header"),
+                        jsonResponse(200, "\"hula\"")),
+                equalTo("Header 'req' on action(GET /header) is required but not found")
+        );
     }
 
     @Test
     public void wildcardRequestHeader() throws Exception {
-        assertNoViolations(
-                simple,
+        assertNoViolations(test(aggregator,
+                header,
                 get("/header").header("x-bla", "1").header("x-hula", "2").header("req", "3"),
-                jsonResponse(200, "\"hula\""));
+                jsonResponse(200, "\"hula\"")));
     }
 
     @Test
     public void missingRequiredWildcardRequestHeader() throws Exception {
-        assertOneRequestViolationThat(
-                simple,
-                get("/header/reqwild"),
-                jsonResponse(200),
-                equalTo("Header 'x-{?}' on action(GET /header/reqwild) is required but not found"));
+        assertOneRequestViolationThat(test(aggregator,
+                        header,
+                        get("/header/reqwild"),
+                        jsonResponse(200)),
+                equalTo("Header 'x-{?}' on action(GET /header/reqwild) is required but not found")
+        );
     }
 
     @Test
     public void existingRequiredWildcardRequestHeader() throws Exception {
-        assertNoViolations(
-                simple,
+        assertNoViolations(test(aggregator,
+                header,
                 get("/header/reqwild").header("x-", "w"),
-                jsonResponse(200));
+                jsonResponse(200)));
     }
 
     @Test
     public void undefinedResponseHeader() throws Exception {
         final MockHttpServletResponse response = jsonResponse(200, "\"hula\"");
         response.addHeader("a", "b");
-        assertOneResponseViolationThat(
-                simple,
-                get("/data"),
-                response,
-                equalTo("Header 'a' on action(GET /data) is not defined"));
+        assertOneResponseViolationThat(test(aggregator,
+                        header,
+                        get("/data"),
+                        response),
+                equalTo("Header 'a' on action(GET /data) is not defined")
+        );
     }
 
     @Test
@@ -103,11 +114,12 @@ public class HeaderTest extends HighlevelTestBase {
         final MockHttpServletResponse response = jsonResponse(200, "\"hula\"");
         response.addHeader("req", "1");
         response.addHeader("req", "2");
-        assertOneResponseViolationThat(
-                simple,
-                get("/resheader"),
-                response,
-                equalTo("Header 'req' on action(GET /resheader) is not repeat but found repeatedly"));
+        assertOneResponseViolationThat(test(aggregator,
+                        header,
+                        get("/resheader"),
+                        response),
+                equalTo("Header 'req' on action(GET /resheader) is not repeat but found repeatedly")
+        );
     }
 
     @Test
@@ -116,19 +128,20 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("rep", "1");
         response.addHeader("rep", "2");
         response.addHeader("req", "xxx");
-        assertNoViolations(
-                simple,
+        assertNoViolations(test(aggregator,
+                header,
                 get("/resheader"),
-                response);
+                response));
     }
 
     @Test
     public void missingRequiredResponseHeader() throws Exception {
-        assertOneResponseViolationThat(
-                simple,
-                get("/resheader"),
-                jsonResponse(200, "\"hula\""),
-                equalTo("Header 'req' on action(GET /resheader) is required but not found"));
+        assertOneResponseViolationThat(test(aggregator,
+                        header,
+                        get("/resheader"),
+                        jsonResponse(200, "\"hula\"")),
+                equalTo("Header 'req' on action(GET /resheader) is required but not found")
+        );
     }
 
     @Test
@@ -137,29 +150,30 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("x-bla", "1");
         response.addHeader("x-hula", "2");
         response.addHeader("req", "3");
-        assertNoViolations(
-                simple,
+        assertNoViolations(test(aggregator,
+                header,
                 get("/resheader"),
-                response);
+                response));
     }
 
     @Test
     public void missingRequiredWildcardResponseHeader() throws Exception {
-        assertOneResponseViolationThat(
-                simple,
-                get("/resheader/reqwild"),
-                jsonResponse(200),
-                equalTo("Header 'x-{?}' on action(GET /resheader/reqwild) is required but not found"));
+        assertOneResponseViolationThat(test(aggregator,
+                        header,
+                        get("/resheader/reqwild"),
+                        jsonResponse(200)),
+                equalTo("Header 'x-{?}' on action(GET /resheader/reqwild) is required but not found")
+        );
     }
 
     @Test
     public void existingRequiredWildcardResponseHeader() throws Exception {
         final MockHttpServletResponse response = jsonResponse(200);
         response.addHeader("x-", "w");
-        assertNoViolations(
-                simple,
+        assertNoViolations(test(aggregator,
+                header,
                 get("/resheader/reqwild"),
-                response);
+                response));
     }
 
 }

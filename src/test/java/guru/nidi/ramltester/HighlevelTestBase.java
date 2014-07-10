@@ -15,11 +15,17 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.*;
+import guru.nidi.ramltester.core.Message;
+import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
+import guru.nidi.ramltester.util.MediaType;
 import org.hamcrest.Matcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -35,6 +41,8 @@ import static org.junit.Assert.assertTrue;
  *
  */
 public class HighlevelTestBase {
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
     protected MockHttpServletResponse jsonResponse(int code, String json, String contentType) throws UnsupportedEncodingException {
         final MockHttpServletResponse response = new MockHttpServletResponse();
         response.setStatus(code);
@@ -52,8 +60,7 @@ public class HighlevelTestBase {
     }
 
     protected void assertNoViolations(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
-        final RamlReport report = test(raml, request, response);
-        assertNoViolations(report);
+        assertNoViolations(test(raml, request, response));
     }
 
     protected void assertNoViolations(RamlReport report) {
@@ -65,28 +72,41 @@ public class HighlevelTestBase {
     }
 
     protected void assertOneRequestViolationThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlReport report = test(raml, request, response);
+        assertOneRequestViolationThat(test(raml, request, response), matcher);
+    }
+
+    protected void assertOneRequestViolationThat(RamlReport report, Matcher<String> matcher) {
         assertNoViolations(report.getResponseViolations());
         assertOneViolationThat(report.getRequestViolations(), matcher);
     }
 
     protected void assertOneResponseViolationThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlReport report = test(raml, request, response);
+        assertOneResponseViolationThat(test(raml, request, response), matcher);
+    }
+
+    protected void assertOneResponseViolationThat(RamlReport report, Matcher<String> matcher) {
         assertNoViolations(report.getRequestViolations());
         assertOneViolationThat(report.getResponseViolations(), matcher);
     }
 
     protected void assertResponseViolationsThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
-        final RamlReport report = test(raml, request, response);
+        assertResponseViolationsThat(test(raml, request, response), matcher);
+    }
+
+    protected void assertResponseViolationsThat(RamlReport report, Matcher<String> matcher) {
         assertNoViolations(report.getRequestViolations());
         assertViolationsThat(report.getResponseViolations(), matcher);
     }
 
-    private RamlReport test(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
+    protected RamlReport test(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
         return test(raml, request.buildRequest(new MockServletContext()), response);
     }
 
-    private RamlReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
+    protected RamlReport test(ReportAggregator aggregator, RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
+        return aggregator.addReport(test(raml, request.buildRequest(new MockServletContext()), response));
+    }
+
+    protected RamlReport test(RamlDefinition raml, MockHttpServletRequest request, MockHttpServletResponse response) {
         return raml.assumingBaseUri("http://nidi.guru/raml/v1").testAgainst(
                 new SpringMockRamlRequest(request),
                 new SpringMockRamlResponse(response));

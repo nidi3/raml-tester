@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class FormTest extends HighlevelTestBase {
-    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
+    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("form.raml");
 
     @Test
     public void formTest() throws Exception {
@@ -68,7 +68,7 @@ public class FormTest extends HighlevelTestBase {
         final RamlDefinition simple = RamlLoaders
                 .fromClasspath(getClass())
                 .addSchemaValidator(new FormEncodedSchemaValidator())
-                .load("simple.raml");
+                .load("form.raml");
 
         assertOneRequestViolationThat(
                 simple,

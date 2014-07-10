@@ -15,10 +15,10 @@
  */
 package guru.nidi.ramltester.httpcomponents;
 
-import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.UriComponents;
-import guru.nidi.ramltester.util.Values;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;

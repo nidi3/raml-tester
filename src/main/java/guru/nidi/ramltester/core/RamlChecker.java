@@ -15,8 +15,13 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.RamlMessage;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.util.InvalidMediaTypeException;
+import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.UriComponents;
-import guru.nidi.ramltester.util.Values;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.FormParameter;
@@ -38,8 +43,8 @@ public class RamlChecker {
     private final Raml raml;
     private final List<SchemaValidator> schemaValidators;
     private final String baseUri;
-    private RamlReport report;
     private RamlViolations requestViolations, responseViolations;
+    private Usage usage;
 
     public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String baseUri) {
         this.raml = raml;
@@ -48,7 +53,8 @@ public class RamlChecker {
     }
 
     public RamlReport check(RamlRequest request, RamlResponse response) {
-        report = new RamlReport();
+        RamlReport report = new RamlReport(raml);
+        usage = report.getUsage();
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
         try {
@@ -76,6 +82,7 @@ public class RamlChecker {
         final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
 
         Resource resource = findResource(pathMatch.getSuffix());
+        usage.setPath(resource.getUri());
         Action action = findAction(resource, request.getMethod());
 
         checkBaseUriParameters(hostMatch, pathMatch, action);
@@ -114,8 +121,10 @@ public class RamlChecker {
     }
 
     private void checkRequestHeaderParameters(Values values, Action action) {
-        new ParameterChecker(requestViolations).acceptWildcard().predefined(DefaultHeaders.REQUEST)
-                .checkParameters(action.getHeaders(), values, new Message("headerParam", action));
+        usage.setRequestHeaders(
+                new ParameterChecker(requestViolations).acceptWildcard().predefined(DefaultHeaders.REQUEST)
+                        .checkParameters(action.getHeaders(), values, new Message("headerParam", action))
+        );
     }
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
@@ -318,8 +327,10 @@ public class RamlChecker {
     }
 
     private void checkResponseHeaderParameters(Values values, Action action, Response response) {
-        new ParameterChecker(responseViolations).acceptWildcard().predefined(DefaultHeaders.RESPONSE)
-                .checkParameters(response.getHeaders(), values, new Message("headerParam", action));
+        usage.setResponseHeaders(
+                new ParameterChecker(responseViolations).acceptWildcard().predefined(DefaultHeaders.RESPONSE)
+                        .checkParameters(response.getHeaders(), values, new Message("headerParam", action))
+        );
     }
 
     private Response findResponse(Action action, int status) {

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
+package guru.nidi.ramltester.util;
 
 /**
  *
  */
-class InvalidMediaTypeException extends RuntimeException {
+public class InvalidMediaTypeException extends RuntimeException {
     private final String mimeType;
 
     public InvalidMediaTypeException(String mimeType, String message) {

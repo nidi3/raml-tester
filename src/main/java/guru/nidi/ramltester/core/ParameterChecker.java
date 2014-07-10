@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FileValue;
-import guru.nidi.ramltester.util.Values;
 import org.raml.model.ParamType;
 import org.raml.model.parameter.AbstractParam;
 import org.slf4j.Logger;
@@ -67,15 +67,15 @@ class ParameterChecker {
         return new ParameterChecker(violations, acceptUndefined, acceptWildcard, predefined);
     }
 
-    public void checkParameters(Map<String, ? extends AbstractParam> params, Values values, Message message) {
+    public Set<String> checkParameters(Map<String, ? extends AbstractParam> params, Values values, Message message) {
         Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
         for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
-        checkListParameters(listParams, values, message);
+        return checkListParameters(listParams, values, message);
     }
 
-    public void checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
+    public Set<String> checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
         Set<String> found = new HashSet<>();
         for (Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
@@ -99,6 +99,7 @@ class ParameterChecker {
                 violations.addIf(parameter.isRequired() && !found.contains(entry.getKey()), namedMsg.withMessageParam("required.missing"));
             }
         }
+        return found;
     }
 
     private String findMatchingParamName(Collection<String> paramNames, String name) {

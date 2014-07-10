@@ -15,14 +15,19 @@
  */
 package guru.nidi.ramltester.core;
 
+import org.raml.model.Raml;
+
 /**
  *
  */
 public class RamlReport {
+    private final Raml raml;
+    private final Usage usage = new Usage();
     private final RamlViolations requestViolations = new RamlViolations();
     private final RamlViolations responseViolations = new RamlViolations();
 
-    public RamlReport() {
+    public RamlReport(Raml raml) {
+        this.raml = raml;
     }
 
     public boolean isEmpty() {
@@ -35,6 +40,14 @@ public class RamlReport {
                 "requestViolations=" + requestViolations +
                 ", responseViolations=" + responseViolations +
                 '}';
+    }
+
+    Usage getUsage() {
+        return usage;
+    }
+
+    public Raml getRaml() {
+        return raml;
     }
 
     public RamlViolations getRequestViolations() {

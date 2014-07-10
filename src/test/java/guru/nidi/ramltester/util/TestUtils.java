@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.util;
 
+import guru.nidi.ramltester.model.Values;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

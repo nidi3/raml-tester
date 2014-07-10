@@ -15,9 +15,9 @@
  */
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.core.RamlResponse;
+import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.IoUtils;
-import guru.nidi.ramltester.util.Values;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;

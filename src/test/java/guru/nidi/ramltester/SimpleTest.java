@@ -15,7 +15,9 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.junit.ExpectedCoverage;
 import guru.nidi.ramltester.loader.RamlLoader;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.io.File;
@@ -32,68 +34,77 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 public class SimpleTest extends HighlevelTestBase {
 
-    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
+    private static RamlDefinition simple = RamlLoaders.fromClasspath(SimpleTest.class).load("simple.raml");
+    private static MultiReportAggregator aggregator = new MultiReportAggregator();
+
+    @ClassRule
+    public static ExpectedCoverage expectedCoverage = new ExpectedCoverage(aggregator.coverageProvider(simple));
 
     @Test
     public void simpleOk() throws Exception {
-        assertNoViolations(
+        assertNoViolations(test(aggregator,
                 simple,
                 get("/data"),
-                jsonResponse(200, "\"hula\""));
+                jsonResponse(200, "\"hula\"")));
     }
 
     @Test
     public void undefinedResource() throws Exception {
-        assertOneRequestViolationThat(
-                simple,
-                get("/data2"),
-                jsonResponse(200, "\"hula\""),
-                equalTo("Resource '/data2' is not defined"));
+        assertOneRequestViolationThat(test(aggregator,
+                        simple,
+                        get("/data2"),
+                        jsonResponse(200, "\"hula\"")),
+                equalTo("Resource '/data2' is not defined")
+        );
     }
 
     @Test
     public void undefinedAction() throws Exception {
-        assertOneRequestViolationThat(
-                simple,
-                post("/data"),
-                jsonResponse(200, "\"hula\""),
-                equalTo("Action POST is not defined on resource(/data)"));
+        assertOneRequestViolationThat(test(aggregator,
+                        simple,
+                        post("/data"),
+                        jsonResponse(200, "\"hula\"")),
+                equalTo("Action POST is not defined on resource(/data)")
+        );
     }
 
 
     @Test
     public void undefinedResponseCode() throws Exception {
-        assertOneResponseViolationThat(
-                simple,
-                get("/data"),
-                jsonResponse(201, "\"hula\""),
-                equalTo("Response(201) is not defined on action(GET /data)"));
+        assertOneResponseViolationThat(test(aggregator,
+                        simple,
+                        get("/data"),
+                        jsonResponse(201, "\"hula\"")),
+                equalTo("Response(201) is not defined on action(GET /data)")
+        );
     }
 
     @Test
     public void noMediaType() throws Exception {
-        assertOneResponseViolationThat(
-                simple,
-                get("/data"),
-                jsonResponse(200, "\"hula\"", null),
-                equalTo("No Content-Type header given"));
+        assertOneResponseViolationThat(test(aggregator,
+                        simple,
+                        get("/data"),
+                        jsonResponse(200, "\"hula\"", null)),
+                equalTo("No Content-Type header given")
+        );
     }
 
     @Test
     public void undefinedMediaType() throws Exception {
-        assertOneResponseViolationThat(
-                simple,
-                get("/data"),
-                jsonResponse(200, "\"hula\"", "text/plain"),
-                equalTo("Media type 'text/plain' is not defined on action(GET /data) response(200)"));
+        assertOneResponseViolationThat(test(aggregator,
+                        simple,
+                        get("/data"),
+                        jsonResponse(200, "\"hula\"", "text/plain")),
+                equalTo("Media type 'text/plain' is not defined on action(GET /data) response(200)")
+        );
     }
 
     @Test
     public void compatibleMediaType() throws Exception {
-        assertNoViolations(
+        assertNoViolations(test(aggregator,
                 simple,
                 get("/data"),
-                jsonResponse(200, "\"hula\"", "application/json;charset=utf-8"));
+                jsonResponse(200, "\"hula\"", "application/json;charset=utf-8")));
     }
 
     @Test
@@ -117,10 +128,10 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void undefinedSchema() throws Exception {
-        assertOneResponseViolationThat(
-                simple,
-                get("/schema"),
-                jsonResponse(203, "5"),
+        assertOneResponseViolationThat(test(aggregator,
+                        simple,
+                        get("/schema"),
+                        jsonResponse(203, "5")),
                 startsWith("Response content does not match schema for action(GET /schema) response(203) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: Schema invalid:")
@@ -129,10 +140,10 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void defaultMediaType() throws Exception {
-        assertOneResponseViolationThat(
-                RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DefaultOkSchemaValidator()).load("simple.raml"),
-                get("/mediaType"),
-                jsonResponse(200, "\"hula\"", "application/default"),
+        assertOneResponseViolationThat(test(aggregator,
+                        RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DefaultOkSchemaValidator()).load("simple.raml"),
+                        get("/mediaType"),
+                        jsonResponse(200, "\"hula\"", "application/default")),
                 equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
                         "Content: \"hula\"\n" +
                         "Message: ok")

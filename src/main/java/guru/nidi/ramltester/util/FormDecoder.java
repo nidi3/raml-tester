@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.util;
 
-import guru.nidi.ramltester.core.MediaType;
-import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.Values;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;

@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class QueryParameterTest extends HighlevelTestBase {
-    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
+    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("query.raml");
 
     @Test
     public void undefinedQueryParameter() throws Exception {

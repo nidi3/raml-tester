@@ -17,9 +17,9 @@ package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlRequest;
-import guru.nidi.ramltester.core.RamlResponse;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
@@ -47,6 +47,10 @@ public class RamlDefinition {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.baseUri = baseUri;
+    }
+
+    public Raml getRaml() {
+        return raml;
     }
 
     public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {

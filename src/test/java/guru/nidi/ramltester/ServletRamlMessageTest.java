@@ -15,13 +15,13 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.RamlRequest;
-import guru.nidi.ramltester.core.RamlResponse;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.servlet.ServletRamlResponse;
 import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.ServerTest;
-import guru.nidi.ramltester.util.Values;
 import org.apache.catalina.Context;
 import org.apache.catalina.deploy.FilterDef;
 import org.apache.catalina.deploy.FilterMap;

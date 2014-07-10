@@ -15,10 +15,10 @@
  */
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.UriComponents;
-import guru.nidi.ramltester.util.Values;
 import org.springframework.http.HttpRequest;
 
 import static guru.nidi.ramltester.spring.SpringUtils.contentTypeOf;

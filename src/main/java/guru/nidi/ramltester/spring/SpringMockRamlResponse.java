@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.core.RamlResponse;
-import guru.nidi.ramltester.util.Values;
+import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.Values;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**

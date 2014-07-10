@@ -15,11 +15,11 @@
  */
 package guru.nidi.ramltester.servlet;
 
-import guru.nidi.ramltester.core.RamlRequest;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.IoUtils;
 import guru.nidi.ramltester.util.UriComponents;
-import guru.nidi.ramltester.util.Values;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;

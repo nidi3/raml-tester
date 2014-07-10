@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
-
-import guru.nidi.ramltester.util.Values;
+package guru.nidi.ramltester.model;
 
 /**
  *
  */
-public interface RamlRequest extends RamlMessage {
-    String getRequestUrl(String baseUri);
-
-    String getMethod();
-
-    Values getQueryValues();
-
-    Values getFormValues();
+public interface RamlResponse extends RamlMessage {
+    int getStatus();
 }
