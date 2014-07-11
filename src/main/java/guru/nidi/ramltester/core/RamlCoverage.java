@@ -15,10 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.model.Action;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-import org.raml.model.Response;
+import org.raml.model.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,16 +27,62 @@ import java.util.Set;
  */
 public class RamlCoverage {
     private final Set<String> unusedPaths;
+    private final Set<String> unusedQueryParameters;
+    private final Set<String> unusedFormParameters;
     private final Set<String> unusedRequestHeaders;
     private final Set<String> unusedResponseHeaders;
+    private final Set<String> unusedResponseCodes;
 
     public RamlCoverage(Raml raml, List<RamlReport> reports) {
-        unusedPaths = pathsOf(raml.getResources());
-        unusedRequestHeaders = requestHeadersOf(raml.getResources());
-        unusedResponseHeaders = responseHeadersOf(raml.getResources());
+        final Map<String, Resource> resources = raml.getResources();
+        unusedPaths = pathsOf(resources);
+        unusedQueryParameters = queryParametersOf(resources);
+        unusedFormParameters = formParametersOf(resources);
+        unusedRequestHeaders = requestHeadersOf(resources);
+        unusedResponseHeaders = responseHeadersOf(resources);
+        unusedResponseCodes = responseCodesOf(resources);
         for (RamlReport report : reports) {
             addUsage(report);
         }
+    }
+
+    private Set<String> queryParametersOf(Map<String, Resource> resources) {
+        Set<String> query = new HashSet<>();
+        for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+            for (Action action : entry.getValue().getActions().values()) {
+                query.addAll(action.getQueryParameters().keySet());
+            }
+            query.addAll(queryParametersOf(entry.getValue().getResources()));
+        }
+        return query;
+    }
+
+    private Set<String> formParametersOf(Map<String, Resource> resources) {
+        Set<String> form = new HashSet<>();
+        for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+            for (Action action : entry.getValue().getActions().values()) {
+                if (action.getBody() != null) {
+                    for (MimeType mimeType : action.getBody().values()) {
+                        if (mimeType.getFormParameters() != null) {
+                            form.addAll(mimeType.getFormParameters().keySet());
+                        }
+                    }
+                }
+            }
+            form.addAll(formParametersOf(entry.getValue().getResources()));
+        }
+        return form;
+    }
+
+    private Set<String> responseCodesOf(Map<String, Resource> resources) {
+        Set<String> form = new HashSet<>();
+        for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+            for (Action action : entry.getValue().getActions().values()) {
+                form.addAll(action.getResponses().keySet());
+            }
+            form.addAll(responseCodesOf(entry.getValue().getResources()));
+        }
+        return form;
     }
 
     private Set<String> requestHeadersOf(Map<String, Resource> resources) {
@@ -78,12 +121,23 @@ public class RamlCoverage {
     private void addUsage(RamlReport report) {
         final Usage usage = report.getUsage();
         unusedPaths.remove(usage.getPath());
+        unusedQueryParameters.removeAll(usage.getQueryParameters());
+        unusedFormParameters.removeAll(usage.getFormParameters());
         unusedRequestHeaders.removeAll(usage.getRequestHeaders());
         unusedResponseHeaders.removeAll(usage.getResponseHeaders());
+        unusedResponseCodes.remove(usage.getResponseCode());
     }
 
     public Set<String> getUnusedPaths() {
         return unusedPaths;
+    }
+
+    public Set<String> getUnusedQueryParameters() {
+        return unusedQueryParameters;
+    }
+
+    public Set<String> getUnusedFormParameters() {
+        return unusedFormParameters;
     }
 
     public Set<String> getUnusedRequestHeaders() {
@@ -94,12 +148,19 @@ public class RamlCoverage {
         return unusedResponseHeaders;
     }
 
+    public Set<String> getUnusedResponseCodes() {
+        return unusedResponseCodes;
+    }
+
     @Override
     public String toString() {
         return "RamlCoverage{" +
                 "unusedPaths=" + unusedPaths +
+                ", unusedQueryParameters=" + unusedQueryParameters +
+                ", unusedFormParameters=" + unusedFormParameters +
                 ", unusedRequestHeaders=" + unusedRequestHeaders +
                 ", unusedResponseHeaders=" + unusedResponseHeaders +
+                ", unusedResponseCodes=" + unusedResponseCodes +
                 '}';
     }
 }

@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester;
-
-import guru.nidi.ramltester.core.RamlReport;
+package guru.nidi.ramltester.core;
 
 /**
  *
  */
-public interface ReportAggregator {
-    RamlReport addReport(RamlReport report);
+public interface CoverageProvider {
+    RamlCoverage getCoverage();
 }

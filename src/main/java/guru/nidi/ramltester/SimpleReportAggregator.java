@@ -15,8 +15,10 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.core.CoverageProvider;
 import guru.nidi.ramltester.core.RamlCoverage;
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.ReportAggregator;
 import org.raml.model.Raml;
 
 import java.util.ArrayList;

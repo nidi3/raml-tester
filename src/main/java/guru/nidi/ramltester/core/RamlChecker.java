@@ -110,14 +110,18 @@ public class RamlChecker {
     }
 
     private void checkFormParametersValues(Action action, Values values, Map formParameters) {
-        new ParameterChecker(requestViolations)
-                .checkListParameters(formParameters, values, new Message("formParam", action));
+        usage.setFormParameters(
+                new ParameterChecker(requestViolations)
+                        .checkListParameters(formParameters, values, new Message("formParam", action))
+        );
     }
 
 
     private void checkQueryParameters(Values values, Action action) {
-        new ParameterChecker(requestViolations)
-                .checkParameters(action.getQueryParameters(), values, new Message("queryParam", action));
+        usage.setQueryParameters(
+                new ParameterChecker(requestViolations)
+                        .checkParameters(action.getQueryParameters(), values, new Message("queryParam", action))
+        );
     }
 
     private void checkRequestHeaderParameters(Values values, Action action) {
@@ -273,6 +277,7 @@ public class RamlChecker {
 
     public void checkResponse(Action action, RamlResponse response) {
         Response res = findResponse(action, response.getStatus());
+        usage.setResponseCode("" + response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, res);
 
         final String detail = new Message("response", response.getStatus()).toString();

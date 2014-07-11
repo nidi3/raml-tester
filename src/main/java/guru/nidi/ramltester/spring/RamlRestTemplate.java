@@ -15,10 +15,7 @@
  */
 package guru.nidi.ramltester.spring;
 
-import guru.nidi.ramltester.core.RamlChecker;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.ReportStore;
-import guru.nidi.ramltester.core.ThreadLocalReportStore;
+import guru.nidi.ramltester.core.*;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -33,31 +30,48 @@ import java.util.Collections;
 public class RamlRestTemplate extends RestTemplate {
     private final RamlChecker ramlChecker;
     private final boolean notSending;
+    private final ReportStore reportStore;
     private final ClientHttpRequestFactory originalRequestFactory;
     private final RamlRequestInterceptor interceptor;
-    private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ClientHttpRequestFactory requestFactory) {
+    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore, ClientHttpRequestFactory requestFactory) {
         this.ramlChecker = ramlChecker;
         this.notSending = notSending;
+        this.reportStore = reportStore;
         this.originalRequestFactory = requestFactory;
         interceptor = new RamlRequestInterceptor(ramlChecker, notSending, reportStore);
         setRequestFactory(new InterceptingClientHttpRequestFactory(
                 new BufferingClientHttpRequestFactory(requestFactory), Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
-    public RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, RestTemplate restTemplate) {
-        this(ramlChecker, notSending, restTemplate.getRequestFactory());
+    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore, RamlRestTemplate restTemplate) {
+        this(ramlChecker, notSending, reportStore, restTemplate.originalRequestFactory);
         init(restTemplate);
     }
 
-    public RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, RamlRestTemplate restTemplate) {
-        this(ramlChecker, notSending, restTemplate.originalRequestFactory);
+    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore, RestTemplate restTemplate) {
+        this(ramlChecker, notSending, reportStore, restTemplate.getRequestFactory());
         init(restTemplate);
+    }
+
+    public RamlRestTemplate(RamlChecker ramlChecker, ClientHttpRequestFactory requestFactory) {
+        this(ramlChecker, false, new ThreadLocalReportStore(), requestFactory);
+    }
+
+    public RamlRestTemplate(RamlChecker ramlChecker, RestTemplate restTemplate) {
+        this(ramlChecker, false, new ThreadLocalReportStore(), restTemplate);
+    }
+
+    public RamlRestTemplate(RamlChecker ramlChecker, RamlRestTemplate restTemplate) {
+        this(ramlChecker, false, new ThreadLocalReportStore(), restTemplate);
     }
 
     public RamlRestTemplate notSending() {
-        return new RamlRestTemplate(ramlChecker, true, this);
+        return new RamlRestTemplate(ramlChecker, true, reportStore, this);
+    }
+
+    public RamlRestTemplate aggregating(ReportAggregator aggregator) {
+        return new RamlRestTemplate(ramlChecker, notSending, new AggregatingReportStore(reportStore, aggregator), this);
     }
 
     private void init(RestTemplate restTemplate) {

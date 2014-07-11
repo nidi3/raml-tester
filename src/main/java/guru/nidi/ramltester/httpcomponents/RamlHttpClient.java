@@ -15,10 +15,7 @@
  */
 package guru.nidi.ramltester.httpcomponents;
 
-import guru.nidi.ramltester.core.RamlChecker;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.ReportStore;
-import guru.nidi.ramltester.core.ThreadLocalReportStore;
+import guru.nidi.ramltester.core.*;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -43,21 +40,30 @@ public class RamlHttpClient implements HttpClient, Closeable {
 
     private final RamlChecker checker;
     private final boolean notSending;
+    private final ReportStore reportStore;
     private final CloseableHttpClient delegate;
-    private final ReportStore reportStore = new ThreadLocalReportStore();
 
-    public RamlHttpClient(RamlChecker checker, boolean notSending, CloseableHttpClient delegate) {
+    public RamlHttpClient(RamlChecker checker, boolean notSending, ReportStore reportStore, CloseableHttpClient delegate) {
         this.checker = checker;
         this.notSending = notSending;
+        this.reportStore = reportStore;
         this.delegate = delegate;
     }
 
     public RamlHttpClient(RamlChecker checker) {
-        this(checker, false, HttpClientBuilder.create().build());
+        this(checker, false, new ThreadLocalReportStore(), HttpClientBuilder.create().build());
+    }
+
+    public RamlHttpClient(RamlChecker checker, CloseableHttpClient httpClient) {
+        this(checker, false, new ThreadLocalReportStore(), httpClient);
     }
 
     public RamlHttpClient notSending() {
-        return new RamlHttpClient(checker, true, delegate);
+        return new RamlHttpClient(checker, true, reportStore, delegate);
+    }
+
+    public RamlHttpClient aggregating(ReportAggregator aggregator) {
+        return new RamlHttpClient(checker, notSending, new AggregatingReportStore(reportStore, aggregator), delegate);
     }
 
     public RamlReport getLastReport() {

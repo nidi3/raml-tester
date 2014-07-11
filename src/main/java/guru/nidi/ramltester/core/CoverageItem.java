@@ -27,6 +27,18 @@ public enum CoverageItem {
             return coverage.getUnusedPaths();
         }
     },
+    QUERY_PARAMETER {
+        @Override
+        public Set<String> get(RamlCoverage coverage) {
+            return coverage.getUnusedQueryParameters();
+        }
+    },
+    FORM_PARAMETER {
+        @Override
+        public Set<String> get(RamlCoverage coverage) {
+            return coverage.getUnusedFormParameters();
+        }
+    },
     REQUEST_HEADER {
         @Override
         public Set<String> get(RamlCoverage coverage) {
@@ -37,6 +49,12 @@ public enum CoverageItem {
         @Override
         public Set<String> get(RamlCoverage coverage) {
             return coverage.getUnusedResponseHeaders();
+        }
+    },
+    RESPONSE_CODE {
+        @Override
+        public Set<String> get(RamlCoverage coverage) {
+            return coverage.getUnusedResponseCodes();
         }
     };
 

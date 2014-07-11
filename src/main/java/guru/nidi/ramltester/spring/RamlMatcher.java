@@ -15,8 +15,10 @@
  */
 package guru.nidi.ramltester.spring;
 
+import guru.nidi.ramltester.core.DummyReportAggragator;
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.ReportAggregator;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -25,9 +27,19 @@ import org.springframework.test.web.servlet.ResultMatcher;
  */
 public class RamlMatcher implements ResultMatcher {
     private final RamlChecker checker;
+    private final ReportAggregator aggregator;
+
+    private RamlMatcher(RamlChecker checker, ReportAggregator aggregator) {
+        this.checker = checker;
+        this.aggregator = aggregator;
+    }
 
     public RamlMatcher(RamlChecker checker) {
-        this.checker = checker;
+        this(checker, new DummyReportAggragator());
+    }
+
+    public RamlMatcher aggregating(ReportAggregator aggregator) {
+        return new RamlMatcher(checker, aggregator);
     }
 
     @Override
@@ -39,8 +51,8 @@ public class RamlMatcher implements ResultMatcher {
     }
 
     public RamlReport testAgainst(MvcResult result) {
-        return checker.check(
+        return aggregator.addReport(checker.check(
                 new SpringMockRamlRequest(result.getRequest()),
-                new SpringMockRamlResponse(result.getResponse()));
+                new SpringMockRamlResponse(result.getResponse())));
     }
 }

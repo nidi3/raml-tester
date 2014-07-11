@@ -23,8 +23,11 @@ import java.util.Set;
  */
 class Usage {
     private String path;
+    private Set<String> queryParameters = Collections.emptySet();
+    private Set<String> formParameters = Collections.emptySet();
     private Set<String> requestHeaders = Collections.emptySet();
     private Set<String> responseHeaders = Collections.emptySet();
+    private String responseCode;
 
     public String getPath() {
         return path;
@@ -50,12 +53,39 @@ class Usage {
         this.responseHeaders = responseHeaders;
     }
 
+    public Set<String> getQueryParameters() {
+        return queryParameters;
+    }
+
+    public void setQueryParameters(Set<String> queryParameters) {
+        this.queryParameters = queryParameters;
+    }
+
+    public Set<String> getFormParameters() {
+        return formParameters;
+    }
+
+    public void setFormParameters(Set<String> formParameters) {
+        this.formParameters = formParameters;
+    }
+
+    public String getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(String responseCode) {
+        this.responseCode = responseCode;
+    }
+
     @Override
     public String toString() {
         return "Usage{" +
                 "path='" + path + '\'' +
+                ", queryParameters=" + queryParameters +
+                ", formParameters=" + formParameters +
                 ", requestHeaders=" + requestHeaders +
                 ", responseHeaders=" + responseHeaders +
+                ", responseCode='" + responseCode + '\'' +
                 '}';
     }
 }

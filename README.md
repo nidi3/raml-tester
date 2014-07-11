@@ -11,28 +11,34 @@ Use in a spring MVC test
 @ContextConfiguration(classes = Application.class)
 public class SimpleTest {
 
+    private static RamlDefinition api = RamlLoaders.fromClasspath(SimpleTest.class).load("api.raml")
+        .assumingBaseUri("http://nidi.guru/raml/simple/v1");
+    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
+
+    @ClassRule
+    public static ExpectedCoverage expectedCoverage = new ExpectedCoverage(aggregator);
+
     @Autowired
     private WebApplicationContext wac;
 
     private MockMvc mockMvc;
-    private RamlMatcher apiMatches;
 
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
-        apiMatches = api.matches().assumingServletUri("http://nidi.guru/raml/simple/v1");
     }
 
     @Test
     public void greeting() throws Exception {
         mockMvc.perform(get("/greeting").accept(MediaType.parseMediaType("application/json")))
-                .andExpect(apiMatches);
+                .andExpect(api.matches().aggregating(aggregator));
     }
 
 }
 ```
-Or see the demo project https://github.com/nidi3/raml-tester-uc-spring
+The ExpectedCoverage rule additionally checks if all resources, query parameters, form parameters, headers and response codes
+defined in the RAML are at least used once.
+See also the demo project https://github.com/nidi3/raml-tester-uc-spring
 
 
 Use in a pure servlet environment

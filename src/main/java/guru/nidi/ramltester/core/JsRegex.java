@@ -21,7 +21,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-public final class JsRegex {
+final class JsRegex {
     private static final String MATCHES_IN_JS
             = "var matches = function(input, re, flags){"
             + "    var r = flags ? new RegExp(re,flags) : new RegExp(re);"

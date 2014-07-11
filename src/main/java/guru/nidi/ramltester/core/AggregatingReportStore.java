@@ -13,13 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester;
-
-import guru.nidi.ramltester.core.RamlCoverage;
+package guru.nidi.ramltester.core;
 
 /**
  *
  */
-public interface CoverageProvider {
-    RamlCoverage getCoverage();
+public class AggregatingReportStore implements ReportStore {
+    private final ReportStore delegate;
+    private final ReportAggregator aggregator;
+
+    public AggregatingReportStore(ReportStore delegate, ReportAggregator aggregator) {
+        this.delegate = delegate;
+        this.aggregator = aggregator;
+    }
+
+    @Override
+    public void storeReport(RamlReport report) {
+        delegate.storeReport(aggregator.addReport(report));
+    }
+
+    @Override
+    public RamlReport getLastReport() {
+        return delegate.getLastReport();
+    }
 }

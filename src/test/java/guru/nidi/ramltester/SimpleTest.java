@@ -23,6 +23,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static guru.nidi.ramltester.core.CoverageItem.PATH;
 import static guru.nidi.ramltester.util.TestUtils.getEnv;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -38,7 +39,7 @@ public class SimpleTest extends HighlevelTestBase {
     private static MultiReportAggregator aggregator = new MultiReportAggregator();
 
     @ClassRule
-    public static ExpectedCoverage expectedCoverage = new ExpectedCoverage(aggregator.coverageProvider(simple));
+    public static ExpectedCoverage expectedCoverage = new ExpectedCoverage(aggregator.coverageProvider(simple), PATH);
 
     @Test
     public void simpleOk() throws Exception {

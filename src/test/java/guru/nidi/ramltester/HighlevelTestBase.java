@@ -15,10 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.Message;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.core.SchemaValidator;
+import guru.nidi.ramltester.core.*;
 import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;

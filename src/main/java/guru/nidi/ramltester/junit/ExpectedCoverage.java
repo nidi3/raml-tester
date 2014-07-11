@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.junit;
 
-import guru.nidi.ramltester.CoverageProvider;
 import guru.nidi.ramltester.core.CoverageItem;
+import guru.nidi.ramltester.core.CoverageProvider;
 import guru.nidi.ramltester.core.Message;
 import guru.nidi.ramltester.core.RamlCoverage;
 import org.junit.rules.Verifier;
