@@ -38,6 +38,7 @@ public class SimpleTest {
 ```
 The ExpectedCoverage rule additionally checks if all resources, query parameters, form parameters, headers and response codes
 defined in the RAML are at least used once.
+
 See also the demo project https://github.com/nidi3/raml-tester-uc-spring
 
 
