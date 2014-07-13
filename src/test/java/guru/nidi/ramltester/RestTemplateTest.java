@@ -16,11 +16,12 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
-import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.Configuration;
@@ -50,16 +51,17 @@ import static org.junit.Assert.*;
 @Configuration
 public class RestTemplateTest extends ServerTest {
 
-    private RamlRestTemplate restTemplate;
+    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
-    @Before
-    public void setup() {
-        restTemplate = RamlLoaders
-                .fromClasspath(RestTemplateTest.class)
-                .load("simple.raml")
-                .assumingBaseUri("http://nidi.guru/raml/v1")
-                .createRestTemplate(new HttpComponentsClientHttpRequestFactory());
-    }
+    private static RamlRestTemplate restTemplate = RamlLoaders
+            .fromClasspath(RestTemplateTest.class)
+            .load("template.raml")
+            .assumingBaseUri("http://nidi.guru/raml/v1")
+            .createRestTemplate(new HttpComponentsClientHttpRequestFactory())
+            .aggregating(aggregator);
+
+    @ClassRule
+    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @RequestMapping(value = "/data")
     @ResponseBody

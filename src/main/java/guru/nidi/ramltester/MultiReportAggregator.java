@@ -15,10 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.CoverageProvider;
-import guru.nidi.ramltester.core.RamlCoverage;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.ReportAggregator;
+import guru.nidi.ramltester.core.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +30,11 @@ public class MultiReportAggregator implements ReportAggregator {
 
     @Override
     public RamlReport addReport(RamlReport report) {
-        final String title = report.getRaml().getTitle();
-        final List<RamlReport> reportList = getOrCreateReports(title);
-        reportList.add(report);
+        if (report != null) {
+            final String title = report.getRaml().getTitle();
+            final List<RamlReport> reportList = getOrCreateReports(title);
+            reportList.add(report);
+        }
         return report;
     }
 
@@ -43,15 +42,15 @@ public class MultiReportAggregator implements ReportAggregator {
         return getOrCreateReports(definition.getRaml().getTitle());
     }
 
-    public RamlCoverage getCoverage(RamlDefinition definition) {
-        return new RamlCoverage(definition.getRaml(), getReports(definition));
+    public Usage getUsage(RamlDefinition definition) {
+        return UsageBuilder.usage(definition.getRaml(), getReports(definition));
     }
 
-    public CoverageProvider coverageProvider(final RamlDefinition definition) {
-        return new CoverageProvider() {
+    public UsageProvider usageProvider(final RamlDefinition definition) {
+        return new UsageProvider() {
             @Override
-            public RamlCoverage getCoverage() {
-                return MultiReportAggregator.this.getCoverage(definition);
+            public Usage getUsage() {
+                return MultiReportAggregator.this.getUsage(definition);
             }
         };
     }
@@ -60,10 +59,10 @@ public class MultiReportAggregator implements ReportAggregator {
         return reports.entrySet();
     }
 
-    public Iterable<Map.Entry<String, RamlCoverage>> coverages() {
-        Map<String, RamlCoverage> res = new HashMap<>();
+    public Iterable<Map.Entry<String, Usage>> usages() {
+        Map<String, Usage> res = new HashMap<>();
         for (Map.Entry<String, List<RamlReport>> entry : reports.entrySet()) {
-            res.put(entry.getKey(), new RamlCoverage(entry.getValue().get(0).getRaml(), entry.getValue()));
+            res.put(entry.getKey(), UsageBuilder.usage(entry.getValue().get(0).getRaml(), entry.getValue()));
         }
         return res.entrySet();
     }

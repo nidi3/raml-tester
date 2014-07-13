@@ -30,6 +30,8 @@ import org.raml.model.parameter.UriParameter;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import static guru.nidi.ramltester.core.UsageBuilder.*;
+
 /**
  *
  */
@@ -82,8 +84,9 @@ public class RamlChecker {
         final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
 
         Resource resource = findResource(pathMatch.getSuffix());
-        usage.setPath(resource.getUri());
+        resourceUsage(usage, resource).incUses(1);
         Action action = findAction(resource, request.getMethod());
+        actionUsage(usage, action).incUses(1);
 
         checkBaseUriParameters(hostMatch, pathMatch, action);
         checkQueryParameters(request.getQueryValues(), action);
@@ -105,12 +108,12 @@ public class RamlChecker {
         if (formParameters == null) {
             requestViolations.add("formParameters.missing", action, mimeType);
         } else {
-            checkFormParametersValues(action, values, formParameters);
+            checkFormParametersValues(action, mimeType, values, formParameters);
         }
     }
 
-    private void checkFormParametersValues(Action action, Values values, Map formParameters) {
-        usage.setFormParameters(
+    private void checkFormParametersValues(Action action, MimeType mimeType, Values values, Map formParameters) {
+        mimeTypeUsage(usage, action, mimeType).addFormParameters(
                 new ParameterChecker(requestViolations)
                         .checkListParameters(formParameters, values, new Message("formParam", action))
         );
@@ -118,14 +121,15 @@ public class RamlChecker {
 
 
     private void checkQueryParameters(Values values, Action action) {
-        usage.setQueryParameters(
+        actionUsage(usage, action).addQueryParameters(
                 new ParameterChecker(requestViolations)
                         .checkParameters(action.getQueryParameters(), values, new Message("queryParam", action))
         );
     }
 
+
     private void checkRequestHeaderParameters(Values values, Action action) {
-        usage.setRequestHeaders(
+        actionUsage(usage, action).addRequestHeaders(
                 new ParameterChecker(requestViolations).acceptWildcard().predefined(DefaultHeaders.REQUEST)
                         .checkParameters(action.getHeaders(), values, new Message("headerParam", action))
         );
@@ -277,8 +281,8 @@ public class RamlChecker {
 
     public void checkResponse(Action action, RamlResponse response) {
         Response res = findResponse(action, response.getStatus());
-        usage.setResponseCode("" + response.getStatus());
-        checkResponseHeaderParameters(response.getHeaderValues(), action, res);
+        actionUsage(usage, action).addResponseCode("" + response.getStatus());
+        checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 
         final String detail = new Message("response", response.getStatus()).toString();
         final Type type = findType(responseViolations, action, response, res.getBody(), detail);
@@ -331,8 +335,8 @@ public class RamlChecker {
         }
     }
 
-    private void checkResponseHeaderParameters(Values values, Action action, Response response) {
-        usage.setResponseHeaders(
+    private void checkResponseHeaderParameters(Values values, Action action, String responseCode, Response response) {
+        responseUsage(usage, action, responseCode).addResponseHeaders(
                 new ParameterChecker(responseViolations).acceptWildcard().predefined(DefaultHeaders.RESPONSE)
                         .checkParameters(response.getHeaders(), values, new Message("headerParam", action))
         );

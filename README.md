@@ -16,7 +16,7 @@ public class SimpleTest {
     private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     @ClassRule
-    public static ExpectedCoverage expectedCoverage = new ExpectedCoverage(aggregator);
+    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @Autowired
     private WebApplicationContext wac;
@@ -36,7 +36,7 @@ public class SimpleTest {
 
 }
 ```
-The ExpectedCoverage rule additionally checks if all resources, query parameters, form parameters, headers and response codes
+The ExpectedUsage rule additionally checks if all resources, query parameters, form parameters, headers and response codes
 defined in the RAML are at least used once.
 
 See also the demo project https://github.com/nidi3/raml-tester-uc-spring

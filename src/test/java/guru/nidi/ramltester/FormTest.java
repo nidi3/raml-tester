@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.junit.ExpectedCoverage;
+import guru.nidi.ramltester.junit.ExpectedUsage;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -32,7 +32,7 @@ public class FormTest extends HighlevelTestBase {
     private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     @ClassRule
-    public static ExpectedCoverage expectedCoverage = new ExpectedCoverage(aggregator);
+    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @Test
     public void formTest() throws Exception {

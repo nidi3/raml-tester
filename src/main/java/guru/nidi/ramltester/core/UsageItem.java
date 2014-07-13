@@ -20,43 +20,49 @@ import java.util.Set;
 /**
  *
  */
-public enum CoverageItem {
-    PATH {
+public enum UsageItem {
+    RESOURCE {
         @Override
-        public Set<String> get(RamlCoverage coverage) {
-            return coverage.getUnusedPaths();
+        public Set<String> get(Usage usage) {
+            return usage.getUnusedResources();
+        }
+    },
+    ACTION {
+        @Override
+        public Set<String> get(Usage usage) {
+            return usage.getUnusedActions();
         }
     },
     QUERY_PARAMETER {
         @Override
-        public Set<String> get(RamlCoverage coverage) {
-            return coverage.getUnusedQueryParameters();
+        public Set<String> get(Usage usage) {
+            return usage.getUnusedQueryParameters();
         }
     },
     FORM_PARAMETER {
         @Override
-        public Set<String> get(RamlCoverage coverage) {
-            return coverage.getUnusedFormParameters();
+        public Set<String> get(Usage usage) {
+            return usage.getUnusedFormParameters();
         }
     },
     REQUEST_HEADER {
         @Override
-        public Set<String> get(RamlCoverage coverage) {
-            return coverage.getUnusedRequestHeaders();
+        public Set<String> get(Usage usage) {
+            return usage.getUnusedRequestHeaders();
         }
     },
     RESPONSE_HEADER {
         @Override
-        public Set<String> get(RamlCoverage coverage) {
-            return coverage.getUnusedResponseHeaders();
+        public Set<String> get(Usage usage) {
+            return usage.getUnusedResponseHeaders();
         }
     },
     RESPONSE_CODE {
         @Override
-        public Set<String> get(RamlCoverage coverage) {
-            return coverage.getUnusedResponseCodes();
+        public Set<String> get(Usage usage) {
+            return usage.getUnusedResponseCodes();
         }
     };
 
-    public abstract Set<String> get(RamlCoverage coverage);
+    public abstract Set<String> get(Usage usage);
 }

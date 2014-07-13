@@ -15,10 +15,10 @@
  */
 package guru.nidi.ramltester.junit;
 
-import guru.nidi.ramltester.core.CoverageItem;
-import guru.nidi.ramltester.core.CoverageProvider;
 import guru.nidi.ramltester.core.Message;
-import guru.nidi.ramltester.core.RamlCoverage;
+import guru.nidi.ramltester.core.Usage;
+import guru.nidi.ramltester.core.UsageItem;
+import guru.nidi.ramltester.core.UsageProvider;
 import org.junit.rules.Verifier;
 
 import java.util.Arrays;
@@ -29,20 +29,20 @@ import static org.junit.Assert.assertThat;
 /**
  *
  */
-public class ExpectedCoverage extends Verifier {
-    private final CoverageProvider coverageProvider;
-    private final EnumSet<CoverageItem> items;
+public class ExpectedUsage extends Verifier {
+    private final UsageProvider usageProvider;
+    private final EnumSet<UsageItem> items;
 
-    public ExpectedCoverage(CoverageProvider coverageProvider, CoverageItem... items) {
-        this.coverageProvider = coverageProvider;
-        this.items = items.length == 0 ? EnumSet.allOf(CoverageItem.class) : EnumSet.copyOf(Arrays.asList(items));
+    public ExpectedUsage(UsageProvider usageProvider, UsageItem... items) {
+        this.usageProvider = usageProvider;
+        this.items = items.length == 0 ? EnumSet.allOf(UsageItem.class) : EnumSet.copyOf(Arrays.asList(items));
     }
 
     @Override
     protected void verify() throws Throwable {
-        final RamlCoverage coverage = coverageProvider.getCoverage();
-        for (CoverageItem item : items) {
-            assertThat(item.get(coverage), new EmptyMatcher(new Message("coverage." + item.name()).toString()));
+        final Usage usage = usageProvider.getUsage();
+        for (UsageItem item : items) {
+            assertThat(item.get(usage), new EmptyMatcher(new Message("usage." + item.name()).toString()));
         }
     }
 }

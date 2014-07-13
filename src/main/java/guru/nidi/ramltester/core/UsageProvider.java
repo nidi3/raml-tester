@@ -18,6 +18,6 @@ package guru.nidi.ramltester.core;
 /**
  *
  */
-public interface CoverageProvider {
-    RamlCoverage getCoverage();
+public interface UsageProvider {
+    Usage getUsage();
 }

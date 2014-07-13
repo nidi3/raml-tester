@@ -17,6 +17,7 @@ package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
+import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
@@ -24,7 +25,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import javax.servlet.ServletException;
@@ -42,15 +43,16 @@ import static org.junit.Assert.*;
  *
  */
 public class HttpCommonsTest extends ServerTest {
-    private RamlHttpClient client;
+    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
-    @Before
-    public void setup() {
-        client = RamlLoaders
-                .fromClasspath(SimpleTest.class).load("simple.raml")
-                .assumingBaseUri("http://nidi.guru/raml/v1")
-                .createHttpClient();
-    }
+    private static RamlHttpClient client = RamlLoaders
+            .fromClasspath(SimpleTest.class).load("template.raml")
+            .assumingBaseUri("http://nidi.guru/raml/v1")
+            .createHttpClient()
+            .aggregating(aggregator);
+
+    @ClassRule
+    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @Override
     protected int port() {
