@@ -19,12 +19,12 @@ import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.UriComponents;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
-import org.raml.model.parameter.FormParameter;
 import org.raml.model.parameter.UriParameter;
 
 import java.io.UnsupportedEncodingException;
@@ -94,9 +94,12 @@ public class RamlChecker {
 
         final Type type = findType(requestViolations, action, request, action.getBody(), "");
         if (type != null) {
-            checkFormParameters(action, request.getFormValues(), type.mime);
+            if (FormDecoder.supportsFormParameters(type.media)) {
+                checkFormParameters(action, request.getFormValues(), type.mime);
+            } else {
+                checkSchema(requestViolations, action, request.getContent(), type, "");
+            }
         }
-        checkBody(requestViolations, action, request, type, "");
         return action;
     }
 
@@ -104,7 +107,7 @@ public class RamlChecker {
         if (mimeType.getSchema() != null) {
             requestViolations.add("schema.superfluous", action, mimeType);
         }
-        final Map<String, List<FormParameter>> formParameters = mimeType.getFormParameters();
+        final Map<String, List<? extends AbstractParam>> formParameters = (Map) mimeType.getFormParameters();
         if (formParameters == null) {
             requestViolations.add("formParameters.missing", action, mimeType);
         } else {
@@ -112,7 +115,7 @@ public class RamlChecker {
         }
     }
 
-    private void checkFormParametersValues(Action action, MimeType mimeType, Values values, Map formParameters) {
+    private void checkFormParametersValues(Action action, MimeType mimeType, Values values, Map<String, List<? extends AbstractParam>> formParameters) {
         mimeTypeUsage(usage, action, mimeType).addFormParameters(
                 new ParameterChecker(requestViolations)
                         .checkListParameters(formParameters, values, new Message("formParam", action))
@@ -286,7 +289,7 @@ public class RamlChecker {
 
         final String detail = new Message("response", response.getStatus()).toString();
         final Type type = findType(responseViolations, action, response, res.getBody(), detail);
-        checkBody(responseViolations, action, response, type, detail);
+        checkSchema(responseViolations, action, response.getContent(), type, detail);
     }
 
     private Type findType(RamlViolations violations, Action action, RamlMessage message, Map<String, MimeType> bodies, String detail) {
@@ -296,12 +299,15 @@ public class RamlChecker {
         }
 
         if (message.getContentType() == null) {
-            violations.addAndThrowIf(hasContent(message) || !existSchemalessBody(bodies), "contentType.missing");
+            violations.addIf(hasContent(message) || !existSchemalessBody(bodies), "contentType.missing");
             return null;
         }
         MediaType targetType = MediaType.valueOf(message.getContentType());
         final MimeType mimeType = findMatchingMimeType(bodies, targetType);
-        violations.addAndThrowIf(mimeType == null, "mediaType.undefined", message.getContentType(), action, detail);
+        if (mimeType == null) {
+            violations.add("mediaType.undefined", message.getContentType(), action, detail);
+            return null;
+        }
         return new Type(mimeType, targetType);
     }
 
@@ -315,23 +321,32 @@ public class RamlChecker {
         }
     }
 
-    private void checkBody(RamlViolations violations, Action action, RamlMessage message, Type type, String detail) {
+    private void checkSchema(RamlViolations violations, Action action, byte[] body, Type type, String detail) {
         if (type == null) {
             return;
         }
-        String schema = type.mime.getSchema();
-        if (schema != null) {
-            final SchemaValidator validator = findSchemaValidator(type.media);
-            violations.addAndThrowIf(validator == null, "schemaValidator.missing", type.media, action, detail);
-            final String charset = type.media.getCharset("iso-8859-1");
-            try {
-                final String content = new String(message.getContent(), charset);
-                String refSchema = raml.getConsolidatedSchemas().get(schema);
-                schema = refSchema != null ? refSchema : schema;
-                validator.validate(content, schema, violations, new Message("responseBody.mismatch", action, detail, type.mime, content));
-            } catch (UnsupportedEncodingException e) {
-                violations.add("charset.invalid", charset);
-            }
+        final String schema = type.mime.getSchema();
+        if (schema == null) {
+            return;
+        }
+        final SchemaValidator validator = findSchemaValidator(type.media);
+        if (validator == null) {
+            violations.add("schemaValidator.missing", type.media, action, detail);
+            return;
+        }
+        if (body.length == 0) {
+            violations.add("body.empty", type.media, action, detail);
+            return;
+        }
+
+        final String charset = type.media.getCharset("iso-8859-1");
+        try {
+            final String content = new String(body, charset);
+            final String refSchema = raml.getConsolidatedSchemas().get(schema);
+            final String schemaToUse = refSchema != null ? refSchema : schema;
+            validator.validate(content, schemaToUse, violations, new Message("schema.mismatch", action, detail, type.mime, content));
+        } catch (UnsupportedEncodingException e) {
+            violations.add("charset.invalid", charset);
         }
     }
 

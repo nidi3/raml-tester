@@ -104,7 +104,7 @@ public class RestTemplateTest extends ServerTest {
         final RamlViolations responseViolations = restTemplate.getLastReport().getResponseViolations();
         assertEquals(1, responseViolations.size());
         assertThat(responseViolations.iterator().next(),
-                startsWith("Response content does not match schema for action(GET /data) response(200) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /data) response(200) mime-type('application/json')\n" +
                         "Content: illegal json\n" +
                         "Message: Schema invalid: ")
         );

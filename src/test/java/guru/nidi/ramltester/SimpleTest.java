@@ -101,6 +101,16 @@ public class SimpleTest extends HighlevelTestBase {
     }
 
     @Test
+    public void emptyResponseBody() throws Exception {
+        assertOneResponseViolationThat(test(aggregator,
+                        simple,
+                        get("/data"),
+                        jsonResponse(200)),
+                equalTo("Schema defined but empty body for media type 'application/json' on action(GET /data) response(200)")
+        );
+    }
+
+    @Test
     public void compatibleMediaType() throws Exception {
         assertNoViolations(test(aggregator,
                 simple,
@@ -133,7 +143,7 @@ public class SimpleTest extends HighlevelTestBase {
                         simple,
                         get("/schema"),
                         jsonResponse(203, "5")),
-                startsWith("Response content does not match schema for action(GET /schema) response(203) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(203) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: Schema invalid:")
         );
@@ -145,7 +155,7 @@ public class SimpleTest extends HighlevelTestBase {
                         RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DefaultOkSchemaValidator()).load("simple.raml"),
                         get("/mediaType"),
                         jsonResponse(200, "\"hula\"", "application/default")),
-                equalTo("Response content does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
+                equalTo("Body does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
                         "Content: \"hula\"\n" +
                         "Message: ok")
         );

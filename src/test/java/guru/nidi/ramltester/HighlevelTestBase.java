@@ -110,7 +110,7 @@ public class HighlevelTestBase {
     }
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
-        assertThat("Expected exactly one violation", 1, equalTo(violations.size()));
+        assertThat("Expected exactly one violation", violations.size(), equalTo(1));
         assertThat(violations.iterator().next(), matcher);
     }
 

@@ -38,6 +38,10 @@ public class FormDecoder {
     private static final Pattern QUERY_PARAM = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
 
+    public static boolean supportsFormParameters(MediaType mediaType) {
+        return mediaType.isCompatibleWith(URL_ENCODED) || mediaType.isCompatibleWith(MULTIPART);
+    }
+
     public Values decode(RamlRequest request) {
         if (request.getContentType() == null) {
             return new Values();

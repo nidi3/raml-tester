@@ -97,4 +97,13 @@ public class FormTest extends HighlevelTestBase {
         ));
     }
 
+    @Test
+    public void noFormMimeType() throws Exception {
+        assertNoViolations(test(aggregator,
+                form,
+                post("/noForm").contentType(MediaType.APPLICATION_JSON).content("\"hula\""),
+                jsonResponse(200)
+        ));
+    }
+
 }

@@ -57,7 +57,7 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(200, "5"),
-                startsWith("Response content does not match schema for action(GET /schema) response(200) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(200) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: ")
         );
@@ -69,7 +69,7 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(201, "5"),
-                startsWith("Response content does not match schema for action(GET /schema) response(201) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(201) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: ")
         );
@@ -81,7 +81,7 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(202, "5"),
-                startsWith("Response content does not match schema for action(GET /schema) response(202) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(202) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: ")
         );
@@ -93,7 +93,7 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(208, "<api-request>str</api-request>", "text/xml"),
-                startsWith("Response content does not match schema for action(GET /schema) response(208) mime-type('text/xml')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(208) mime-type('text/xml')\n" +
                         "Content: <api-request>str</api-request>\n" +
                         "Message: ")
         );
@@ -105,7 +105,7 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(206, "5", "application/xml"),
-                startsWith("Response content does not match schema for action(GET /schema) response(206) mime-type('application/xml')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(206) mime-type('application/xml')\n" +
                         "Content: 5\n" +
                         "Message: ")
         );
@@ -117,7 +117,7 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(207, "5", "application/xml"),
-                startsWith("Response content does not match schema for action(GET /schema) response(207) mime-type('application/xml')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(207) mime-type('application/xml')\n" +
                         "Content: 5\n" +
                         "Message: ")
         );

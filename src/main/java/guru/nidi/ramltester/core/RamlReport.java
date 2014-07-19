@@ -37,8 +37,8 @@ public class RamlReport {
     @Override
     public String toString() {
         return "RamlReport{" +
-                "requestViolations=" + requestViolations +
-                ", responseViolations=" + responseViolations +
+                "\n  requestViolations =" + requestViolations +
+                "\n  responseViolations=" + responseViolations +
                 '}';
     }
 
