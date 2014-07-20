@@ -124,6 +124,19 @@ public class UriTest extends HighlevelTestBase {
 
         mockMvc.perform(get("/sub-raml/v1/undefd/bu/sub"))
                 .andExpect(api.assumingBaseUri("http://sub-host-get").matches());
+    }
 
+    @Test
+    public void allowedProtocol() throws Exception {
+        final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/type/sub")).andReturn();
+        assertNoViolations(api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult).getRequestViolations());
+        assertNoViolations(api.assumingBaseUri("https://nidi.guru").testAgainst(mvcResult).getRequestViolations());
+    }
+
+    @Test
+    public void notAllowedProtocol() throws Exception {
+        final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/type")).andReturn();
+        assertOneViolationThat(api.assumingBaseUri("https://nidi.guru").testAgainst(mvcResult).getRequestViolations(),
+                equalTo("Protocol https is not defined on action(GET /type)"));
     }
 }

@@ -3,6 +3,7 @@
 title: uri
 baseUri: http://{host}/{root}/{version}/{undefined}
 version: v1
+protocols: ['HTTP','HTTPS']
 baseUriParameters:
   host:
     enum: ['nidi.guru']
@@ -11,6 +12,7 @@ baseUriParameters:
 
 /type:
   get:
+    protocols: ['HTTP']
     responses:
       200:
   /sub:

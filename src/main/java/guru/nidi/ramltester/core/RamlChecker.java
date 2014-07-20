@@ -78,8 +78,6 @@ public class RamlChecker {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(baseUri));
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
 
-        checkProtocol(requestUri, ramlUri);
-
         final VariableMatcher hostMatch = getHostMatch(requestUri, ramlUri);
         final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
 
@@ -88,6 +86,7 @@ public class RamlChecker {
         Action action = findAction(resource, request.getMethod());
         actionUsage(usage, action).incUses(1);
 
+        checkProtocol(action, requestUri, ramlUri);
         checkBaseUriParameters(hostMatch, pathMatch, action);
         checkQueryParameters(request.getQueryValues(), action);
         checkRequestHeaderParameters(request.getHeaderValues(), action);
@@ -107,6 +106,7 @@ public class RamlChecker {
         if (mimeType.getSchema() != null) {
             requestViolations.add("schema.superfluous", action, mimeType);
         }
+        @SuppressWarnings("unchecked")
         final Map<String, List<? extends AbstractParam>> formParameters = (Map) mimeType.getFormParameters();
         if (formParameters == null) {
             requestViolations.add("formParameters.missing", action, mimeType);
@@ -167,12 +167,20 @@ public class RamlChecker {
         return hostMatch;
     }
 
-    private void checkProtocol(UriComponents requestUri, UriComponents ramlUri) {
-        if (raml.getProtocols() != null && !raml.getProtocols().isEmpty()) {
-            requestViolations.addIf(!raml.getProtocols().contains(protocolOf(requestUri.getScheme())), "protocol.undefined", requestUri.getScheme());
-        } else {
-            requestViolations.addIf(!ramlUri.getScheme().equalsIgnoreCase(requestUri.getScheme()), "protocol.undefined", requestUri.getScheme());
+    private void checkProtocol(Action action, UriComponents requestUri, UriComponents ramlUri) {
+        final List<Protocol> protocols = findProtocols(action, ramlUri.getScheme());
+        requestViolations.addIf(!protocols.contains(protocolOf(requestUri.getScheme())), "protocol.undefined", requestUri.getScheme(), action);
+    }
+
+    private List<Protocol> findProtocols(Action action, String fallback) {
+        List<Protocol> protocols = action.getProtocols();
+        if (protocols == null || protocols.isEmpty()) {
+            protocols = raml.getProtocols();
         }
+        if (protocols == null || protocols.isEmpty()) {
+            protocols = Collections.singletonList(Protocol.valueOf(fallback.toUpperCase()));
+        }
+        return protocols;
     }
 
     private Protocol protocolOf(String s) {
@@ -262,7 +270,6 @@ public class RamlChecker {
                 values.addValues(match.match.getVariables());
                 return findResource(match.match.getSuffix(), match.resource.getResources(), values);
             }
-
         }
         return null;
     }
