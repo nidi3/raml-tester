@@ -22,14 +22,13 @@ import guru.nidi.ramltester.loader.UrlRamlLoader;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
  *
  */
 public class ApiRamlLoader extends RepositoryRamlLoader {
-    public ApiRamlLoader(String user, String password) throws IOException {
+    public ApiRamlLoader(String user, String password) {
         super(new UrlRamlLoader("http://api-portal.anypoint.mulesoft.com",
                 new FormLoginUrlFetcher("rest/raml/v1", "ajax/apihub/login-register/form?section=login", user, password, "name", "pass") {
                     @Override
@@ -40,7 +39,7 @@ public class ApiRamlLoader extends RepositoryRamlLoader {
         ), "files", ApiPortalFilesResponse.class);
     }
 
-    public ApiRamlLoader(String baseUrl) throws IOException {
+    public ApiRamlLoader(String baseUrl) {
         super(new UrlRamlLoader(baseUrl, new SimpleUrlFetcher()), "files", ApiDesignerFilesResponse.class);
     }
 }

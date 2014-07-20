@@ -22,7 +22,6 @@ import org.raml.model.Raml;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -60,11 +59,11 @@ public class RamlLoaders {
         return new UrlRamlLoader(baseUrl);
     }
 
-    private static RamlLoader apiPortalLoader(String user, String password) throws IOException {
+    private static RamlLoader apiPortalLoader(String user, String password) {
         return new ApiRamlLoader(user, password);
     }
 
-    private static RamlLoader apiDesignerLoader(String url) throws IOException {
+    private static RamlLoader apiDesignerLoader(String url) {
         return new ApiRamlLoader(url);
     }
 
@@ -74,15 +73,15 @@ public class RamlLoaders {
             throw new IllegalArgumentException("Illegal uri: " + uri);
         }
         final String path = matcher.group(2);
-        int pos = path.lastIndexOf('/');
+        final int pos = path.lastIndexOf('/');
         if (pos < 0) {
             throw new IllegalArgumentException("Missing '/' in uri: " + uri);
         }
         if (pos == path.length() - 1) {
             throw new IllegalArgumentException("uri must not end with '/': " + uri);
         }
-        String base = path.substring(0, pos);
-        String file = path.substring(pos + 1);
+        final String base = path.substring(0, pos);
+        final String file = path.substring(pos + 1);
         switch (matcher.group(1)) {
             case "classpath":
                 return fromClasspath(base).load(file);
@@ -91,6 +90,14 @@ public class RamlLoaders {
             case "http":
             case "https":
                 return fromUrl(base).load(file);
+            case "apiportal":
+                final String[] cred = base.split(":");
+                if (cred.length != 2) {
+                    throw new IllegalArgumentException("Username and password must be separated by ':'");
+                }
+                return fromApiPortal(cred[0], cred[1]).load(file);
+            case "apidesigner":
+                return fromApiDesigner(base).load(file);
             default:
                 throw new IllegalArgumentException("Unknown scheme " + matcher.group(1));
         }
@@ -112,11 +119,11 @@ public class RamlLoaders {
         return using(urlLoader(baseUrl));
     }
 
-    public static RamlLoaders fromApiPortal(String user, String password) throws IOException {
+    public static RamlLoaders fromApiPortal(String user, String password) {
         return using(apiPortalLoader(user, password));
     }
 
-    public static RamlLoaders fromApiDesigner(String url) throws IOException {
+    public static RamlLoaders fromApiDesigner(String url) {
         return using(apiDesignerLoader(url));
     }
 
@@ -141,11 +148,11 @@ public class RamlLoaders {
         return andUsing(urlLoader(baseUrl));
     }
 
-    public RamlLoaders andFromApiPortal(String user, String password) throws IOException {
+    public RamlLoaders andFromApiPortal(String user, String password) {
         return andUsing(apiPortalLoader(user, password));
     }
 
-    public RamlLoaders andFromApiDesigner(String url) throws IOException {
+    public RamlLoaders andFromApiDesigner(String url) {
         return andUsing(apiDesignerLoader(url));
     }
 

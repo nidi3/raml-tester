@@ -29,18 +29,20 @@ import java.nio.charset.Charset;
 public class RepositoryRamlLoader implements RamlLoader {
     private final RamlLoader loader;
     private final String responseName;
-    private final RepositoryResponse response;
     private final Class<? extends RepositoryResponse> responseClass;
+    private RepositoryResponse response;
 
-    public RepositoryRamlLoader(RamlLoader loader, String responseName, Class<? extends RepositoryResponse> responseClass) throws IOException {
+    public RepositoryRamlLoader(RamlLoader loader, String responseName, Class<? extends RepositoryResponse> responseClass) {
         this.loader = loader;
         this.responseName = responseName;
         this.responseClass = responseClass;
-        this.response = load();
     }
 
     @Override
     public InputStream fetchResource(String resourceName) {
+        if (response == null) {
+            response = load();
+        }
         final RepositoryEntry entry = findEntry(resourceName);
         if (entry == null) {
             throw new ResourceNotFoundException(resourceName);
@@ -48,11 +50,15 @@ public class RepositoryRamlLoader implements RamlLoader {
         return new ByteArrayInputStream(entry.getContent().getBytes(Charset.forName("utf-8")));
     }
 
-    protected RepositoryResponse load() throws IOException {
+    protected RepositoryResponse load() {
         final ObjectMapper mapper = createMapper();
         final InputStream files = loader.fetchResource(responseName);
         //TODO when empty, files is an empty array, not object!?
-        return mapper.readValue(files, responseClass);
+        try {
+            return mapper.readValue(files, responseClass);
+        } catch (IOException e) {
+            throw new ResourceNotFoundException(responseName, e);
+        }
     }
 
     private ObjectMapper createMapper() {
