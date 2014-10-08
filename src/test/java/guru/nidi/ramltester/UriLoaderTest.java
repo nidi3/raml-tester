@@ -15,8 +15,20 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.util.ServerTest;
+import org.apache.catalina.Context;
+import org.apache.catalina.startup.Tomcat;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 
 import static guru.nidi.ramltester.util.TestUtils.getEnv;
 import static org.junit.Assert.assertNotNull;
@@ -24,7 +36,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  *
  */
-public class UriLoaderTest {
+public class UriLoaderTest extends ServerTest {
     @Test
     public void file() {
         assertNotNull(RamlLoaders.loadFromUri("file://" + getClass().getResource("simple.raml").getFile()));
@@ -36,9 +48,8 @@ public class UriLoaderTest {
     }
 
     @Test
-    @Ignore
     public void url() {
-        assertNotNull(RamlLoaders.loadFromUri("http://todo"));
+        assertNotNull(RamlLoaders.loadFromUri("http://localhost:" + port() + "/deliver/form.raml"));
     }
 
     @Test
@@ -50,5 +61,28 @@ public class UriLoaderTest {
     @Ignore
     public void apiDesigner() {
         assertNotNull(RamlLoaders.loadFromUri("apidesigner://todo"));
+    }
+
+    private static class FileDeliveringServlet extends HttpServlet {
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            final URL in = getClass().getResource(req.getPathInfo().substring(1));
+            if (in == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            } else {
+                Files.copy(new File(in.getFile()).toPath(), resp.getOutputStream());
+            }
+        }
+    }
+
+    @Override
+    protected int port() {
+        return 8085;
+    }
+
+    @Override
+    protected void init(Context ctx) {
+        Tomcat.addServlet(ctx, "app", new FileDeliveringServlet());
+        ctx.addServletMapping("/deliver/*", "app");
     }
 }

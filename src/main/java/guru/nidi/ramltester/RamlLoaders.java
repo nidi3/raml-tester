@@ -72,6 +72,7 @@ public class RamlLoaders {
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Illegal uri: " + uri);
         }
+        final String protocol = matcher.group(1);
         final String path = matcher.group(2);
         final int pos = path.lastIndexOf('/');
         if (pos < 0) {
@@ -82,14 +83,14 @@ public class RamlLoaders {
         }
         final String base = path.substring(0, pos);
         final String file = path.substring(pos + 1);
-        switch (matcher.group(1)) {
+        switch (protocol) {
             case "classpath":
                 return fromClasspath(base).load(file);
             case "file":
                 return fromFile(new File(base)).load(file);
             case "http":
             case "https":
-                return fromUrl(base).load(file);
+                return fromUrl(protocol + "://" + base).load(file);
             case "apiportal":
                 final String[] cred = base.split(":");
                 if (cred.length != 2) {
@@ -99,7 +100,7 @@ public class RamlLoaders {
             case "apidesigner":
                 return fromApiDesigner(base).load(file);
             default:
-                throw new IllegalArgumentException("Unknown scheme " + matcher.group(1));
+                throw new IllegalArgumentException("Unknown protocol " + protocol);
         }
     }
 
