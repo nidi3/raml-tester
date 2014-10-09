@@ -41,6 +41,11 @@ public interface RamlLoader {
         public String getResourceName() {
             return resourceName;
         }
+
+        @Override
+        public String getMessage() {
+            return "Resource '" + resourceName + "' not found: " + super.getMessage();
+        }
     }
 
     InputStream fetchResource(String name) throws ResourceNotFoundException;
