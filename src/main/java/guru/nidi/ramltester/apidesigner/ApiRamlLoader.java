@@ -15,10 +15,7 @@
  */
 package guru.nidi.ramltester.apidesigner;
 
-import guru.nidi.ramltester.loader.FormLoginUrlFetcher;
-import guru.nidi.ramltester.loader.RepositoryRamlLoader;
-import guru.nidi.ramltester.loader.SimpleUrlFetcher;
-import guru.nidi.ramltester.loader.UrlRamlLoader;
+import guru.nidi.ramltester.loader.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -41,5 +38,33 @@ public class ApiRamlLoader extends RepositoryRamlLoader {
 
     public ApiRamlLoader(String baseUrl) {
         super(new UrlRamlLoader(baseUrl, new SimpleUrlFetcher()), "files", ApiDesignerFilesResponse.class);
+    }
+
+    public static class Portal implements RamlLoaderFactory {
+        @Override
+        public String supportedProtocol() {
+            return "apiportal";
+        }
+
+        @Override
+        public RamlLoader getRamlLoader(String base) {
+            final String[] cred = base.split(":");
+            if (cred.length != 2) {
+                throw new IllegalArgumentException("Username and password must be separated by ':'");
+            }
+            return new ApiRamlLoader(cred[0], cred[1]);
+        }
+    }
+
+    public static class Designer implements RamlLoaderFactory {
+        @Override
+        public String supportedProtocol() {
+            return "apidesigner";
+        }
+
+        @Override
+        public RamlLoader getRamlLoader(String base) {
+            return new ApiRamlLoader(base);
+        }
     }
 }

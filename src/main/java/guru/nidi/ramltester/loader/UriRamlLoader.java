@@ -15,18 +15,30 @@
  */
 package guru.nidi.ramltester.loader;
 
-import guru.nidi.ramltester.apidesigner.ApiRamlLoader;
-
-import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Handles resources with absolute URIs. Handling of relative URIs are delegated to another RamlLoader.
+ * Loaders are registered in META-INF/services/guru.nidi.ramltester.loader.RamlLoaderFactory
  */
 public class UriRamlLoader implements RamlLoader {
     private static final Pattern ABSOLUTE_URI_PATTERN = Pattern.compile("([^:]+)://(.+)/([^/]+)");
+
+    private static Map<String, RamlLoaderFactory> factories = new HashMap<>();
+
+    static {
+        final ServiceLoader<RamlLoaderFactory> loader = ServiceLoader.load(RamlLoaderFactory.class);
+        for (Iterator<RamlLoaderFactory> iter = loader.iterator(); iter.hasNext(); ) {
+            final RamlLoaderFactory factory = iter.next();
+            factories.put(factory.supportedProtocol(), factory);
+        }
+    }
 
     private final RamlLoader relativeLoader;
 
@@ -55,32 +67,19 @@ public class UriRamlLoader implements RamlLoader {
         }
         final int firstProtocol = name.indexOf("://");
         final int secondProtocol = name.indexOf("://", firstProtocol + 1);
-        if (secondProtocol > 0) {
-            final int endOfFirst = name.lastIndexOf("/", secondProtocol);
+        final int protocol = secondProtocol < 0 ? firstProtocol : secondProtocol;
+        final int endOfFirst = name.lastIndexOf("/", protocol);
+        if (endOfFirst >= 0) {
             return name.substring(endOfFirst + 1);
         }
         return name;
     }
 
     private RamlLoader absoluteLoader(String protocol, String base) {
-        switch (protocol) {
-            case "classpath":
-                return new ClassPathRamlLoader(base);
-            case "file":
-                return new FileRamlLoader(new File(base));
-            case "http":
-            case "https":
-                return new UrlRamlLoader(protocol + "://" + base);
-            case "apiportal":
-                final String[] cred = base.split(":");
-                if (cred.length != 2) {
-                    throw new IllegalArgumentException("Username and password must be separated by ':'");
-                }
-                return new ApiRamlLoader(cred[0], cred[1]);
-            case "apidesigner":
-                return new ApiRamlLoader(base);
-            default:
-                throw new IllegalArgumentException("Unknown protocol " + protocol);
+        final RamlLoaderFactory factory = factories.get(protocol);
+        if (factory == null) {
+            throw new IllegalArgumentException("Unsupported protocol " + protocol);
         }
+        return factory.getRamlLoader(base);
     }
 }
