@@ -38,4 +38,17 @@ public class FileRamlLoader implements RamlLoader {
             throw new ResourceNotFoundException(name, e);
         }
     }
+
+    public static class Factory implements RamlLoaderFactory {
+        @Override
+        public String supportedProtocol() {
+            return "file";
+        }
+
+        @Override
+        public RamlLoader getRamlLoader(String base) {
+            return new FileRamlLoader(new File(base));
+        }
+    }
+
 }

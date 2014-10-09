@@ -53,4 +53,28 @@ public class UrlRamlLoader implements RamlLoader {
             throw new ResourceNotFoundException(name, e);
         }
     }
+
+    public static class HttpFactory implements RamlLoaderFactory {
+        @Override
+        public String supportedProtocol() {
+            return "http";
+        }
+
+        @Override
+        public RamlLoader getRamlLoader(String base) {
+            return new UrlRamlLoader("http://" + base);
+        }
+    }
+
+    public static class HttpsFactory implements RamlLoaderFactory {
+        @Override
+        public String supportedProtocol() {
+            return "https";
+        }
+
+        @Override
+        public RamlLoader getRamlLoader(String base) {
+            return new UrlRamlLoader("https://" + base);
+        }
+    }
 }

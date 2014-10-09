@@ -35,4 +35,17 @@ public class ClassPathRamlLoader implements RamlLoader {
         }
         return resource;
     }
+
+    public static class Factory implements RamlLoaderFactory {
+        @Override
+        public String supportedProtocol() {
+            return "classpath";
+        }
+
+        @Override
+        public RamlLoader getRamlLoader(String base) {
+            return new ClassPathRamlLoader(base);
+        }
+    }
+
 }

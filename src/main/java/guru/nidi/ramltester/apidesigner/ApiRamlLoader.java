@@ -40,7 +40,7 @@ public class ApiRamlLoader extends RepositoryRamlLoader {
         super(new UrlRamlLoader(baseUrl, new SimpleUrlFetcher()), "files", ApiDesignerFilesResponse.class);
     }
 
-    public static class Portal implements RamlLoaderFactory {
+    public static class PortalFactory implements RamlLoaderFactory {
         @Override
         public String supportedProtocol() {
             return "apiportal";
@@ -56,7 +56,7 @@ public class ApiRamlLoader extends RepositoryRamlLoader {
         }
     }
 
-    public static class Designer implements RamlLoaderFactory {
+    public static class DesignerFactory implements RamlLoaderFactory {
         @Override
         public String supportedProtocol() {
             return "apidesigner";
