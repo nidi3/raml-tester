@@ -22,15 +22,11 @@ import org.raml.model.Raml;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 
 import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
  */
 public class RamlLoaders {
-    private static final Pattern URI_PATTERN = Pattern.compile("([^:]+)://(.*)");
-
     private final RamlLoader loader;
     private final SchemaValidators schemaValidators;
 
@@ -67,43 +63,6 @@ public class RamlLoaders {
         return new ApiRamlLoader(url);
     }
 
-    public static RamlDefinition loadFromUri(String uri) {
-        final Matcher matcher = URI_PATTERN.matcher(uri);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Illegal uri: " + uri);
-        }
-        final String protocol = matcher.group(1);
-        final String path = matcher.group(2);
-        final int pos = path.lastIndexOf('/');
-        if (pos < 0) {
-            throw new IllegalArgumentException("Missing '/' in uri: " + uri);
-        }
-        if (pos == path.length() - 1) {
-            throw new IllegalArgumentException("uri must not end with '/': " + uri);
-        }
-        final String base = path.substring(0, pos);
-        final String file = path.substring(pos + 1);
-        switch (protocol) {
-            case "classpath":
-                return fromClasspath(base).load(file);
-            case "file":
-                return fromFile(new File(base)).load(file);
-            case "http":
-            case "https":
-                return fromUrl(protocol + "://" + base).load(file);
-            case "apiportal":
-                final String[] cred = base.split(":");
-                if (cred.length != 2) {
-                    throw new IllegalArgumentException("Username and password must be separated by ':'");
-                }
-                return fromApiPortal(cred[0], cred[1]).load(file);
-            case "apidesigner":
-                return fromApiDesigner(base).load(file);
-            default:
-                throw new IllegalArgumentException("Unknown protocol " + protocol);
-        }
-    }
-
     public static RamlLoaders fromClasspath(Class<?> basePackage) {
         return using(classpathLoader(basePackage));
     }
@@ -126,6 +85,10 @@ public class RamlLoaders {
 
     public static RamlLoaders fromApiDesigner(String url) {
         return using(apiDesignerLoader(url));
+    }
+
+    public static RamlLoaders absolutely() {
+        return using(null);
     }
 
     public static RamlLoaders using(RamlLoader loader) {
@@ -166,8 +129,9 @@ public class RamlLoaders {
     }
 
     public RamlDefinition load(String name) {
-        final Raml raml = new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(loader)).build(name);
-        final SchemaValidators validators = schemaValidators.withResourceLoader(loader);
+        final RamlLoader decorated = new UriRamlLoader(loader);
+        final Raml raml = new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(decorated)).build(name);
+        final SchemaValidators validators = schemaValidators.withResourceLoader(decorated);
         return new RamlDefinition(raml, validators);
     }
 

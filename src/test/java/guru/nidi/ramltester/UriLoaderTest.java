@@ -29,38 +29,60 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static guru.nidi.ramltester.util.TestUtils.getEnv;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  *
  */
 public class UriLoaderTest extends ServerTest {
     @Test
+    public void uriRegex() {
+        final Pattern ABSOLUTE_URI_PATTERN = Pattern.compile("([^:]+)://(.+)/([^/]+)");
+        final Matcher matcher = ABSOLUTE_URI_PATTERN.matcher("http://a/b/c");
+        assertTrue(matcher.matches());
+        assertEquals("http", matcher.group(1));
+        assertEquals("a/b", matcher.group(2));
+        assertEquals("c", matcher.group(3));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void absoluteWithoutProtocol() {
+        RamlLoaders.absolutely().load("relative.raml");
+    }
+
+    @Test
     public void file() {
-        assertNotNull(RamlLoaders.loadFromUri("file://" + getClass().getResource("simple.raml").getFile()));
+        assertNotNull(RamlLoaders.absolutely().load("file://" + getClass().getResource("simple.raml").getFile()));
     }
 
     @Test
     public void classpath() {
-        assertNotNull(RamlLoaders.loadFromUri("classpath://guru/nidi/ramltester/simple.raml"));
+        assertNotNull(RamlLoaders.absolutely().load("classpath://guru/nidi/ramltester/simple.raml"));
     }
 
     @Test
     public void url() {
-        assertNotNull(RamlLoaders.loadFromUri("http://localhost:" + port() + "/deliver/form.raml"));
+        assertNotNull(RamlLoaders.absolutely().load("http://localhost:" + port() + "/deliver/form.raml"));
     }
 
     @Test
     public void apiPortal() {
-        assertNotNull(RamlLoaders.loadFromUri("apiportal://" + getEnv("API_PORTAL_USER") + ":" + getEnv("API_PORTAL_PASS") + "/test.raml"));
+        assertNotNull(RamlLoaders.absolutely().load("apiportal://" + getEnv("API_PORTAL_USER") + ":" + getEnv("API_PORTAL_PASS") + "/test.raml"));
     }
 
     @Test
     @Ignore
     public void apiDesigner() {
-        assertNotNull(RamlLoaders.loadFromUri("apidesigner://todo"));
+        assertNotNull(RamlLoaders.absolutely().load("apidesigner://todo"));
+    }
+
+    @Test
+    public void ramlWithAbsoluteIncludes() {
+        assertNotNull(RamlLoaders.absolutely().load("http://localhost:" + port() + "/deliver/load.raml"));
     }
 
     private static class FileDeliveringServlet extends HttpServlet {
