@@ -14,6 +14,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dependency.locations.enabled>false</dependency.locations.enabled>
+        <spring.version>4.0.8.RELEASE</spring.version>
+        <tomcat.version>7.0.30</tomcat.version>
     </properties>
 
     <build>
@@ -170,7 +172,7 @@
         <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser</artifactId>
-            <version>0.8.9</version>
+            <version>0.8.10</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
@@ -232,7 +234,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.0.0.RELEASE</version>
+            <version>${spring.version}</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
@@ -244,7 +246,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>4.0.0.RELEASE</version>
+            <version>${spring.version}</version>
             <optional>true</optional>
         </dependency>
 
@@ -291,19 +293,19 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
-            <version>7.0.30</version>
+            <version>${tomcat.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-logging-juli</artifactId>
-            <version>7.0.30</version>
+            <version>${tomcat.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
-            <version>7.0.30</version>
+            <version>${tomcat.version}</version>
             <scope>test</scope>
         </dependency>
 
