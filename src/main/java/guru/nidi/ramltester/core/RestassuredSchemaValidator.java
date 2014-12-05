@@ -34,8 +34,6 @@ import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonS
  *
  */
 public class RestassuredSchemaValidator implements SchemaValidator {
-    private static final MediaType APPLICATION_JSON = MediaType.valueOf("application/json");
-
     private final JsonSchemaFactory schemaFactory;
     private final JsonSchemaValidatorSettings schemaValidatorSettings;
 
@@ -58,7 +56,7 @@ public class RestassuredSchemaValidator implements SchemaValidator {
 
     @Override
     public boolean supports(MediaType mediaType) {
-        return mediaType.isCompatibleWith(APPLICATION_JSON);
+        return mediaType.isCompatibleWith(MediaType.JSON);
     }
 
     @Override

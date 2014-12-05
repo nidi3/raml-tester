@@ -22,8 +22,13 @@ import java.util.*;
  *
  */
 public class MediaType {
+    public static final MediaType JSON = valueOf("application/json");
+
     private static final String CHARSET = "charset";
     private static final String WILDCARD_TYPE = "*";
+    private static final Map<String, MediaType> KNOWN_SUFFICES = new HashMap<String, MediaType>() {{
+        put("json", JSON);
+    }};
 
     private String type;
     private String subtype;
@@ -95,33 +100,45 @@ public class MediaType {
         }
         if (isWildcardType() || other.isWildcardType()) {
             return true;
-        } else if (getType().equals(other.getType())) {
-            if (getSubtype().equals(other.getSubtype())) {
+        }
+        final MediaType thisKnown = applyKnownSuffices();
+        final MediaType otherKnown = other.applyKnownSuffices();
+        if ((thisKnown != this || otherKnown != other) && thisKnown.isCompatibleWith(otherKnown)) {
+            return true;
+        }
+        if (!getType().equals(other.getType())) {
+            return false;
+        }
+        if (getSubtype().equals(other.getSubtype())) {
+            return true;
+        }
+        // wildcard with suffix? e.g. application/*+xml
+        if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
+            final String[] thisSubtypeParts = findSuffix();
+            final String[] otherSubtypeParts = other.findSuffix();
+            if (thisSubtypeParts[1] == null && otherSubtypeParts[1] == null) {
                 return true;
             }
-            // wildcard with suffix? e.g. application/*+xml
-            if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
-
-                int thisPlusIdx = getSubtype().indexOf('+');
-                int otherPlusIdx = other.getSubtype().indexOf('+');
-
-                if (thisPlusIdx == -1 && otherPlusIdx == -1) {
+            if (thisSubtypeParts[1] != null && otherSubtypeParts[1] != null) {
+                if (thisSubtypeParts[1].equals(otherSubtypeParts[1]) &&
+                        (WILDCARD_TYPE.equals(thisSubtypeParts[0]) || WILDCARD_TYPE.equals(otherSubtypeParts[0]))) {
                     return true;
-                } else if (thisPlusIdx != -1 && otherPlusIdx != -1) {
-                    String thisSubtypeNoSuffix = getSubtype().substring(0, thisPlusIdx);
-                    String otherSubtypeNoSuffix = other.getSubtype().substring(0, otherPlusIdx);
-
-                    String thisSubtypeSuffix = getSubtype().substring(thisPlusIdx + 1);
-                    String otherSubtypeSuffix = other.getSubtype().substring(otherPlusIdx + 1);
-
-                    if (thisSubtypeSuffix.equals(otherSubtypeSuffix) &&
-                            (WILDCARD_TYPE.equals(thisSubtypeNoSuffix) || WILDCARD_TYPE.equals(otherSubtypeNoSuffix))) {
-                        return true;
-                    }
                 }
             }
         }
         return false;
+    }
+
+    private MediaType applyKnownSuffices() {
+        final MediaType known = KNOWN_SUFFICES.get(findSuffix()[1]);
+        return known == null ? this : known;
+    }
+
+    private String[] findSuffix() {
+        int pos = getSubtype().indexOf('+');
+        return pos == -1
+                ? new String[]{getSubtype(), null}
+                : new String[]{getSubtype().substring(0, pos), getSubtype().substring(pos + 1)};
     }
 
     public String getType() {
@@ -159,6 +176,28 @@ public class MediaType {
 
     private static String[] toStringArray(Collection<String> collection) {
         return collection == null ? null : collection.toArray(new String[collection.size()]);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof MediaType)) {
+            return false;
+        }
+        MediaType otherType = (MediaType) other;
+        return (this.type.equalsIgnoreCase(otherType.type) &&
+                this.subtype.equalsIgnoreCase(otherType.subtype) &&
+                this.parameters.equals(otherType.parameters));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = this.type.hashCode();
+        result = 31 * result + this.subtype.hashCode();
+        result = 31 * result + this.parameters.hashCode();
+        return result;
     }
 
     @Override

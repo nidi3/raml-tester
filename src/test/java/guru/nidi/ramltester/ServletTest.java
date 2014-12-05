@@ -85,7 +85,7 @@ public class ServletTest extends ServerTest {
         final RamlViolations responseViolations = testFilter.report.getResponseViolations();
         assertEquals(1, responseViolations.size());
         assertThat(responseViolations.iterator().next(),
-                startsWith("Body does not match schema for action(GET /data) response(200) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /data) response(200) mime-type('abc/xyz+json')\n" +
                         "Content: illegal json\n" +
                         "Message: Schema invalid: ")
         );

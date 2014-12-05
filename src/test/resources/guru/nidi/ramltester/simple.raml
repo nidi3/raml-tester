@@ -12,7 +12,7 @@ schemas:
     responses:
       200:
         body:
-          application/json:
+          abc/xyz+json:
             schema: |
               {"type":"string"}
 /schema:
@@ -76,4 +76,19 @@ schemas:
       200:
         body:
           schema: string
-
+      201:
+        body:
+          application/json:
+            schema: string
+          abc/xyz+json:
+            schema: string
+  post:
+    body:
+      application/json:
+        schema: string
+      abc/xyz+json:
+        schema: string
+    responses:
+      201:
+        body:
+          application/json:

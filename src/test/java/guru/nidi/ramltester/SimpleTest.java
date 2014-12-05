@@ -19,6 +19,7 @@ import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.loader.RamlLoader;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.springframework.http.MediaType;
 
 import java.io.File;
 import java.io.IOException;
@@ -161,5 +162,22 @@ public class SimpleTest extends HighlevelTestBase {
         );
     }
 
+    @Test
+    public void ambiguousMediaTypesInRequest() throws Exception {
+        assertOneRequestViolationThat(test(aggregator,
+                        simple,
+                        post("/mediaType").content("\"hula\"").contentType(MediaType.APPLICATION_JSON),
+                        jsonResponse(201)),
+                equalTo("Ambiguous definition: mime-type('application/json') and also mime-type('abc/xyz+json') used on action(POST /mediaType) "));
+    }
+
+    @Test
+    public void ambiguousMediaTypesInResponse() throws Exception {
+        assertOneResponseViolationThat(test(aggregator,
+                        simple,
+                        get("/mediaType"),
+                        jsonResponse(201, "\"hula\"")),
+                equalTo("Ambiguous definition: mime-type('application/json') and also mime-type('abc/xyz+json') used on action(GET /mediaType) response(201)"));
+    }
 
 }

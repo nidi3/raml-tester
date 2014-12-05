@@ -310,7 +310,7 @@ public class RamlChecker {
             return null;
         }
         MediaType targetType = MediaType.valueOf(message.getContentType());
-        final MimeType mimeType = findMatchingMimeType(bodies, targetType);
+        final MimeType mimeType = findMatchingMimeType(violations, action, bodies, targetType, detail);
         if (mimeType == null) {
             violations.add("mediaType.undefined", message.getContentType(), action, detail);
             return null;
@@ -396,17 +396,22 @@ public class RamlChecker {
         return false;
     }
 
-    private MimeType findMatchingMimeType(Map<String, MimeType> bodies, MediaType targetType) {
+    private MimeType findMatchingMimeType(RamlViolations violations, Action action, Map<String, MimeType> bodies, MediaType targetType, String detail) {
+        MimeType res = null;
         try {
             for (Map.Entry<String, MimeType> entry : bodies.entrySet()) {
                 if (targetType.isCompatibleWith(MediaType.valueOf(entry.getKey()))) {
-                    return entry.getValue();
+                    if (res == null) {
+                        res = entry.getValue();
+                    } else {
+                        violations.add("mediaType.ambiguous", res, entry.getValue(), action, detail);
+                    }
                 }
             }
         } catch (InvalidMediaTypeException e) {
-            responseViolations.add("mediaType.illegal", e.getMimeType());
+            violations.add("mediaType.illegal", e.getMimeType());
         }
-        return null;
+        return res;
     }
 
 }
