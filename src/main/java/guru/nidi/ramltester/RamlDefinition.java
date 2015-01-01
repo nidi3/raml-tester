@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.client.RestTemplate;
 
 import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.specification.RequestSpecification;
 
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
@@ -41,6 +40,7 @@ import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.restassured.RamlValidationFilter;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
@@ -116,8 +116,9 @@ public class RamlDefinition {
         return new RamlHttpClient(createTester());
     }
 
-    public RequestSpecification createRestAssured(){
-    	return RestAssured.given().filter(new RamlValidationFilter(createTester()));
+    public RestAssuredClient createRestAssured(){
+    	RamlValidationFilter ramlValidationFilter = new RamlValidationFilter(createTester());
+    	return new RestAssuredClient(RestAssured.given().filter(ramlValidationFilter), ramlValidationFilter.getReportStore());
     }
     
     public RamlHttpClient createHttpClient(CloseableHttpClient httpClient) {

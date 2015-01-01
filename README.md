@@ -141,11 +141,14 @@ Use together with RestAssured
 ---------------------------------------
 ```
 @Test
-public void testServletOk() throws IOException {
-	RamlDefinition api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("api.raml")
-				.assumingBaseUri("http://my.base.uri/v1");
-	RestAssured.baseURI = "http://my.base.uri/v1";
-	given().filter(new RamlValidationFilter(api)).get("/base/data").andReturn();
+public void testWithRestAssured(){
+	RestAssured.baseURI = "http://test.server/path";
+	RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+	Assert.assertThat(api.validate(), validates());
+	
+	RestAssuredClient restAssured = api.createRestAssured();
+	restAssured.given().get("/base/data").andReturn();
+	Assert.assertTrue(restAssured.getLastReport().isEmpty());
 }
 
 ```
@@ -161,3 +164,23 @@ There is special support for javascript.
 
 See [raml-tester-js](https://github.com/nidi3/raml-tester-js) for details and
 [raml-tester-uc-js](https://github.com/nidi3/raml-tester-uc-js) for examples.
+
+
+
+FailFast
+---------------------------------------
+Use can configure the RamlDefinition to throw an exception in case a violation is found
+
+```
+@Test(expected=RamlViolationException.class)
+public void testInvalidResource() {
+	RestAssured.baseURI = "http://test.server/path";
+	RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+	Assert.assertThat(api.validate(), validates());
+	
+	RestAssuredClient restAssured = api.failFast().createRestAssured();
+	restAssured.given().get("/wrong/path").andReturn();
+	fail("Should throw RamlViolationException");
+}
+
+```

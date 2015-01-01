@@ -22,21 +22,33 @@ import com.jayway.restassured.specification.FilterableRequestSpecification;
 import com.jayway.restassured.specification.FilterableResponseSpecification;
 
 import guru.nidi.ramltester.core.RamlChecker;
+import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.ReportStore;
+import guru.nidi.ramltester.core.ThreadLocalReportStore;
 
 public class RamlValidationFilter implements Filter {
 
-	private final RamlChecker api;
+	private final RamlChecker ramlChecker;
+	
+	private final ReportStore reportStore;
 
 	public RamlValidationFilter(RamlChecker ramlChecker) {
-		this.api = ramlChecker;
+		this.ramlChecker = ramlChecker;
+		this.reportStore = new ThreadLocalReportStore();
 	}
 
 	@Override
 	public Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec,
 			FilterContext filterContext) {
 		Response response = filterContext.next(requestSpec, responseSpec);
-		api.check(new RestAssuredRamlRequest(requestSpec, filterContext), new RestAssuredRamlResponse(response));
+		RamlReport report = ramlChecker.check(new RestAssuredRamlRequest(requestSpec, filterContext), new RestAssuredRamlResponse(response));
+		System.out.println("INSIDE: "+report);
+		reportStore.storeReport(report);
 		return response;
 
+	}
+	
+	public ReportStore getReportStore(){
+		return reportStore;
 	}
 }
