@@ -77,6 +77,10 @@ public class Values implements Iterable<Map.Entry<String, List<Object>>> {
         return values.keySet();
     }
 
+    public Map<String, List<Object>> asMap() {
+        return values;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
