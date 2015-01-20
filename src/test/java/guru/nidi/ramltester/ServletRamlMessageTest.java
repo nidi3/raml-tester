@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPOutputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -62,7 +63,7 @@ import static org.junit.Assert.fail;
 public class ServletRamlMessageTest extends ServerTest {
     private CloseableHttpClient client;
     private static TestFilter testFilter;
-    private static TestServlet testServlet;
+    private static HttpServlet testServlet, gzipTestServlet;
     private static MessageTester tester;
     private static BlockingQueue<Error> error = new ArrayBlockingQueue<>(1);
     private static Error OK = new Error() {
@@ -72,6 +73,7 @@ public class ServletRamlMessageTest extends ServerTest {
     public static void setupClass() {
         testFilter = new TestFilter();
         testServlet = new TestServlet();
+        gzipTestServlet = new GzipTestServlet();
     }
 
     @Before
@@ -90,7 +92,7 @@ public class ServletRamlMessageTest extends ServerTest {
 
     @Test
     public void base() throws Exception {
-        final HttpGet get = new HttpGet(url("path/more?param=value&param=v2"));
+        final HttpGet get = new HttpGet(url("test/more?param=value&param=v2"));
         get.addHeader("header", "pedro");
         execute(get, new MessageTester() {
             @Override
@@ -100,8 +102,8 @@ public class ServletRamlMessageTest extends ServerTest {
                 assertEquals(Arrays.asList("pedro"), ramlRequest.getHeaderValues().get("header"));
                 assertEquals("GET", ramlRequest.getMethod());
                 assertEquals(new Values().addValue("param", "value").addValue("param", "v2"), ramlRequest.getQueryValues());
-                assertEquals(url("path/more"), ramlRequest.getRequestUrl(null));
-                assertEquals("https://base/path/more", ramlRequest.getRequestUrl("https://base"));
+                assertEquals(url("test/more"), ramlRequest.getRequestUrl(null));
+                assertEquals("https://base/more", ramlRequest.getRequestUrl("https://base"));
 
                 assertEquals(0, ramlResponse.getContent().length);
                 assertEquals(null, ramlResponse.getContentType());
@@ -113,7 +115,7 @@ public class ServletRamlMessageTest extends ServerTest {
 
     @Test
     public void content() throws Exception {
-        final HttpPost post = new HttpPost(url("path/more"));
+        final HttpPost post = new HttpPost(url("test/more"));
         final HttpEntity entity = new ByteArrayEntity(new byte[]{65, 66, 67});
         post.setEntity(entity);
 
@@ -128,7 +130,7 @@ public class ServletRamlMessageTest extends ServerTest {
 
     @Test
     public void urlEncodedForm() throws Exception {
-        final HttpPost post = new HttpPost(url("path/more"));
+        final HttpPost post = new HttpPost(url("test/more"));
         final HttpEntity entity = new UrlEncodedFormEntity(Arrays.asList(
                 new BasicNameValuePair("param", "value"),
                 new BasicNameValuePair("param", "v2"),
@@ -150,7 +152,7 @@ public class ServletRamlMessageTest extends ServerTest {
 
     @Test
     public void multipartForm() throws Exception {
-        final HttpPost post = new HttpPost(url("path/more"));
+        final HttpPost post = new HttpPost(url("test/more"));
         final HttpEntity entity = MultipartEntityBuilder.create()
                 .addBinaryBody("binary", new byte[]{65, 66, 67}, ContentType.APPLICATION_OCTET_STREAM, "filename")
                 .addTextBody("param", "value")
@@ -168,6 +170,18 @@ public class ServletRamlMessageTest extends ServerTest {
                         .addValue("param", "v2")
                         .addValue("p2", "äöü+$% ");
                 assertEquals(values, ramlRequest.getFormValues());
+            }
+        });
+    }
+
+    @Test
+    public void gzip() throws Exception {
+        final HttpGet get = new HttpGet(url("gzip/path"));
+
+        execute(get, new MessageTester() {
+            @Override
+            public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
+                assertEquals("Gzip works!", new String(ramlResponse.getContent()));
             }
         });
     }
@@ -229,6 +243,18 @@ public class ServletRamlMessageTest extends ServerTest {
         }
     }
 
+    private static class GzipTestServlet extends HttpServlet {
+        @Override
+        protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+            res.addHeader("Content-Encoding", "gzip");
+            res.setStatus(200);
+            final GZIPOutputStream gzipOut = new GZIPOutputStream(res.getOutputStream());
+            gzipOut.write("Gzip works!".getBytes());
+            gzipOut.finish();
+            res.getOutputStream().flush();
+        }
+    }
+
     @Override
     protected void init(Context ctx) {
         final FilterDef filterDef = new FilterDef();
@@ -237,12 +263,13 @@ public class ServletRamlMessageTest extends ServerTest {
         ctx.addFilterDef(filterDef);
 
         final FilterMap filterMap = new FilterMap();
-        filterMap.addServletName("app");
         filterMap.addURLPattern("/*");
         filterMap.setFilterName("filter");
         ctx.addFilterMap(filterMap);
 
-        Tomcat.addServlet(ctx, "app", testServlet);
-        ctx.addServletMapping("/*", "app");
+        Tomcat.addServlet(ctx, "test", testServlet);
+        Tomcat.addServlet(ctx, "gzip", gzipTestServlet);
+        ctx.addServletMapping("/test/*", "test");
+        ctx.addServletMapping("/gzip/*", "gzip");
     }
 }

@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.zip.GZIPInputStream;
 
 /**
  *
@@ -130,10 +131,22 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     public byte[] getContent() {
         try {
             flushBuffer();
-            return content.toByteArray();
+            final byte[] data = content.toByteArray();
+            return "gzip".equalsIgnoreCase(getHeader("Content-Encoding")) ? gunzip(data) : data;
         } catch (IOException e) {
             throw new RuntimeException("Problem getting content", e);
         }
+    }
+
+    private byte[] gunzip(byte[] gzipped) throws IOException {
+        final GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(gzipped));
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final byte[] buf = new byte[1000];
+        int read;
+        while ((read = gzip.read(buf)) > 0) {
+            out.write(buf, 0, read);
+        }
+        return out.toByteArray();
     }
 
     @Override
