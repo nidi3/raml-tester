@@ -37,6 +37,18 @@ public class LoaderTest {
         assertThat(stream.read(), not(equalTo(-1)));
     }
 
+    @Test
+    public void classPathWithEndSlash() throws IOException {
+        final InputStream stream = new ClassPathRamlLoader("guru/nidi/ramltester/").fetchResource("simple.raml");
+        assertThat(stream.read(), not(equalTo(-1)));
+    }
+
+    @Test
+    public void emptyBaseClassPath() throws IOException {
+        final InputStream stream = new ClassPathRamlLoader().fetchResource("guru/nidi/ramltester/simple.raml");
+        assertThat(stream.read(), not(equalTo(-1)));
+    }
+
     @Test(expected = RamlLoader.ResourceNotFoundException.class)
     public void classPathNok() {
         new ClassPathRamlLoader("guru/nidi/ramltester").fetchResource("bla");
@@ -73,7 +85,6 @@ public class LoaderTest {
         final InputStream inputStream = new FileRamlLoader(new File("src/test/resources/guru/nidi/ramltester")).fetchResource("simple.raml");
         assertThat(inputStream.read(), not(equalTo(-1)));
     }
-
 
 
 }

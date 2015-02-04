@@ -71,6 +71,10 @@ public class RamlLoaders {
         return using(classpathLoader(basePackage));
     }
 
+    public static RamlLoaders fromClasspath() {
+        return using(classpathLoader(""));
+    }
+
     public static RamlLoaders fromFile(File baseDirectory) {
         return using(fileLoader(baseDirectory));
     }

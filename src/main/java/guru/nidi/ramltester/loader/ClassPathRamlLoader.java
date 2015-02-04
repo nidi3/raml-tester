@@ -23,25 +23,21 @@ import java.io.InputStream;
 public class ClassPathRamlLoader implements RamlLoader {
     private final String base;
 
+    public ClassPathRamlLoader() {
+        this("");
+    }
+
     public ClassPathRamlLoader(String base) {
-        this.base = base;
+        this.base = (base == null || base.length() == 0) ? "" : base.endsWith("/") ? base : base + "/";
     }
 
     @Override
     public InputStream fetchResource(String name) {
-        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(getBaseDir() + name);
+        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(base + name);
         if (resource == null) {
             throw new ResourceNotFoundException(name);
         }
         return resource;
-    }
-
-    private String getBaseDir() {
-        String baseDir = "";
-        if(base != null && !base.equals("")){
-            baseDir = base + "/";
-        }
-        return baseDir;
     }
 
     public static class Factory implements RamlLoaderFactory {
