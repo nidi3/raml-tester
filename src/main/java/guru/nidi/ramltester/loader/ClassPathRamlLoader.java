@@ -29,11 +29,19 @@ public class ClassPathRamlLoader implements RamlLoader {
 
     @Override
     public InputStream fetchResource(String name) {
-        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(base + "/" + name);
+        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(getBaseDir() + name);
         if (resource == null) {
             throw new ResourceNotFoundException(name);
         }
         return resource;
+    }
+
+    private String getBaseDir() {
+        String baseDir = "";
+        if(base != null && !base.equals("")){
+            baseDir = base + "/";
+        }
+        return baseDir;
     }
 
     public static class Factory implements RamlLoaderFactory {
