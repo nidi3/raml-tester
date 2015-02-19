@@ -45,13 +45,15 @@ public class RamlChecker {
     private final Raml raml;
     private final List<SchemaValidator> schemaValidators;
     private final String baseUri;
+    private final boolean ignoreXheaders;
     private RamlViolations requestViolations, responseViolations;
     private Usage usage;
 
-    public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String baseUri) {
+    public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String baseUri, boolean ignoreXheaders) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.baseUri = baseUri;
+        this.ignoreXheaders = ignoreXheaders;
     }
 
     public RamlReport check(RamlRequest request, RamlResponse response) {
@@ -130,10 +132,12 @@ public class RamlChecker {
         );
     }
 
-
     private void checkRequestHeaderParameters(Values values, Action action) {
         actionUsage(usage, action).addRequestHeaders(
-                new ParameterChecker(requestViolations).acceptWildcard().predefined(DefaultHeaders.REQUEST)
+                new ParameterChecker(requestViolations)
+                        .acceptWildcard()
+                        .ignoreX(ignoreXheaders)
+                        .predefined(DefaultHeaders.REQUEST)
                         .checkParameters(action.getHeaders(), values, new Message("headerParam", action))
         );
     }
@@ -359,7 +363,10 @@ public class RamlChecker {
 
     private void checkResponseHeaderParameters(Values values, Action action, String responseCode, Response response) {
         responseUsage(usage, action, responseCode).addResponseHeaders(
-                new ParameterChecker(responseViolations).acceptWildcard().predefined(DefaultHeaders.RESPONSE)
+                new ParameterChecker(responseViolations)
+                        .acceptWildcard()
+                        .ignoreX(ignoreXheaders)
+                        .predefined(DefaultHeaders.RESPONSE)
                         .checkParameters(response.getHeaders(), values, new Message("headerParam", action))
         );
     }

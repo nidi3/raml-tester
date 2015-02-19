@@ -42,11 +42,13 @@ public class RamlDefinition {
     private final Raml raml;
     private final SchemaValidators schemaValidators;
     private final String baseUri;
+    private final boolean ignoreXheaders;
 
-    public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String baseUri) {
+    public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String baseUri, boolean ignoreXheaders) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.baseUri = baseUri;
+        this.ignoreXheaders = ignoreXheaders;
     }
 
     public Raml getRaml() {
@@ -54,11 +56,15 @@ public class RamlDefinition {
     }
 
     public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
-        this(raml, schemaValidators, null);
+        this(raml, schemaValidators, null, false);
     }
 
     public RamlDefinition assumingBaseUri(String baseUri) {
-        return new RamlDefinition(raml, schemaValidators, baseUri);
+        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders);
+    }
+
+    public RamlDefinition ignoringXheaders() {
+        return new RamlDefinition(raml, schemaValidators, baseUri, true);
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
@@ -94,7 +100,7 @@ public class RamlDefinition {
     }
 
     public RamlChecker createTester() {
-        return new RamlChecker(raml, schemaValidators.getValidators(), baseUri);
+        return new RamlChecker(raml, schemaValidators.getValidators(), baseUri, ignoreXheaders);
     }
 
 }

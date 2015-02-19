@@ -42,29 +42,35 @@ class ParameterChecker {
     private final RamlViolations violations;
     private final boolean acceptUndefined;
     private final boolean acceptWildcard;
+    private final boolean ignoreX;
     private final Set<String> predefined;
 
-    ParameterChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, Set<String> predefined) {
+    ParameterChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, Set<String> predefined) {
         this.violations = violations;
         this.acceptUndefined = acceptUndefined;
         this.acceptWildcard = acceptWildcard;
+        this.ignoreX = ignoreX;
         this.predefined = predefined;
     }
 
     ParameterChecker(RamlViolations violations) {
-        this(violations, false, false, Collections.<String>emptySet());
+        this(violations, false, false, false, Collections.<String>emptySet());
     }
 
     ParameterChecker acceptUndefined() {
-        return new ParameterChecker(violations, true, acceptWildcard, predefined);
+        return new ParameterChecker(violations, true, acceptWildcard, ignoreX, predefined);
     }
 
     ParameterChecker acceptWildcard() {
-        return new ParameterChecker(violations, acceptUndefined, true, predefined);
+        return new ParameterChecker(violations, acceptUndefined, true, ignoreX, predefined);
+    }
+
+    ParameterChecker ignoreX(boolean ignoreX) {
+        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, predefined);
     }
 
     ParameterChecker predefined(Set<String> predefined) {
-        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, predefined);
+        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, predefined);
     }
 
     public Set<String> checkParameters(Map<String, ? extends AbstractParam> params, Values values, Message message) {
@@ -75,6 +81,10 @@ class ParameterChecker {
         return checkListParameters(listParams, values, message);
     }
 
+    private boolean acceptUndefined(String name) {
+        return acceptUndefined || predefined.contains(name) || (ignoreX && name.startsWith("x-"));
+    }
+
     public Set<String> checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
         Set<String> found = new HashSet<>();
         for (Map.Entry<String, List<Object>> entry : values) {
@@ -82,7 +92,7 @@ class ParameterChecker {
             final String paramName = findMatchingParamName(params.keySet(), entry.getKey());
             final List<? extends AbstractParam> parameters = params.get(paramName);
             if (parameters == null || parameters.isEmpty()) {
-                violations.addIf(!acceptUndefined && !predefined.contains(entry.getKey().toLowerCase()), namedMsg.withMessageParam("undefined"));
+                violations.addIf(!acceptUndefined(entry.getKey().toLowerCase()), namedMsg.withMessageParam("undefined"));
             } else {
                 for (AbstractParam parameter : parameters) {
                     violations.addIf(!parameter.isRepeat() && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));

@@ -176,4 +176,35 @@ public class HeaderTest extends HighlevelTestBase {
                 response));
     }
 
+    @Test
+    public void ignoreXheaders() throws Exception {
+        final MockHttpServletResponse response = jsonResponse(200, "\"hula\"");
+        response.addHeader("x-hula", "hop");
+        assertNoViolations(test(aggregator,
+                header.ignoringXheaders(),
+                get("/data").header("x-bla", "blu"),
+                response));
+    }
+
+    @Test
+    public void notIgnoreXrequestHeadersIfGiven() throws Exception {
+        assertOneRequestViolationThat(test(aggregator,
+                        header.ignoringXheaders(),
+                        get("/header/xint").header("x-int", "blu").header("x-ig", "nix"),
+                        jsonResponse(200)),
+                equalTo("Header 'x-int' on action(GET /header/xint) : Value 'blu' is not a valid integer"));
+    }
+
+    @Test
+    public void notIgnoreXresponseHeadersIfGiven() throws Exception {
+        final MockHttpServletResponse response = jsonResponse(200);
+        response.addHeader("x-int", "blu");
+        response.addHeader("x-ig", "nix");
+        assertOneResponseViolationThat(test(aggregator,
+                        header.ignoringXheaders(),
+                        get("/header/xint"),
+                        response),
+                equalTo("Header 'x-int' on action(GET /header/xint) : Value 'blu' is not a valid integer"));
+    }
+
 }

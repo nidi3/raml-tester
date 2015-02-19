@@ -36,6 +36,16 @@ schemas:
           required: true
       responses:
         200:
+  /xint:
+    get:
+      headers:
+        x-int:
+          type: integer
+      responses:
+        200:
+          headers:
+            x-int:
+              type: integer
 /resheader:
   get:
     responses:
