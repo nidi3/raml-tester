@@ -64,7 +64,11 @@ public class RamlDefinition {
     }
 
     public RamlDefinition ignoringXheaders() {
-        return new RamlDefinition(raml, schemaValidators, baseUri, true);
+        return ignoringXheaders(true);
+    }
+
+    public RamlDefinition ignoringXheaders(boolean ignoreXheaders) {
+        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders);
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
