@@ -16,6 +16,7 @@
 package guru.nidi.ramltester.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -64,6 +65,10 @@ public class RamlViolations implements Iterable<String> {
 
     public boolean isEmpty() {
         return violations.isEmpty();
+    }
+
+    public List<String> asList() {
+        return Collections.unmodifiableList(violations);
     }
 
     @Override
