@@ -26,7 +26,7 @@ import java.util.Map;
  *
  */
 public class MultiReportAggregator implements ReportAggregator {
-    private Map<String, List<RamlReport>> reports = new HashMap<>();
+    private final Map<String, List<RamlReport>> reports = new HashMap<>();
 
     @Override
     public RamlReport addReport(RamlReport report) {
@@ -59,12 +59,18 @@ public class MultiReportAggregator implements ReportAggregator {
         return reports.entrySet();
     }
 
+    @Override
     public Iterable<Map.Entry<String, Usage>> usages() {
         Map<String, Usage> res = new HashMap<>();
         for (Map.Entry<String, List<RamlReport>> entry : reports.entrySet()) {
             res.put(entry.getKey(), UsageBuilder.usage(entry.getValue().get(0).getRaml(), entry.getValue()));
         }
         return res.entrySet();
+    }
+
+    @Override
+    public void clear() {
+        reports.clear();
     }
 
     private List<RamlReport> getOrCreateReports(String name) {

@@ -19,7 +19,9 @@ import guru.nidi.ramltester.core.*;
 import org.raml.model.Raml;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -41,8 +43,22 @@ public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
         return report;
     }
 
+    @Override
+    public Iterable<Map.Entry<String, Usage>> usages() {
+        return Collections.singletonMap(raml.getTitle(), UsageBuilder.usage(raml, reports)).entrySet();
+    }
+
+    @Override
+    public void clear() {
+        reports.clear();
+    }
+
     public List<RamlReport> getReports() {
         return reports;
+    }
+
+    protected Raml getRaml() {
+        return raml;
     }
 
     public Usage getUsage() {

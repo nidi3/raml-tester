@@ -15,9 +15,15 @@
  */
 package guru.nidi.ramltester.core;
 
+import java.util.Map;
+
 /**
  *
  */
 public interface ReportAggregator {
     RamlReport addReport(RamlReport report);
+
+    Iterable<Map.Entry<String, Usage>> usages();
+
+    void clear();
 }
