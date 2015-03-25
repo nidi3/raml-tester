@@ -260,7 +260,7 @@ public class RamlChecker {
         List<ResourceMatch> matches = new ArrayList<>();
         for (Map.Entry<String, Resource> entry : resources.entrySet()) {
             final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
-            if (pathMatch.isMatch()) {
+            if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
                 matches.add(new ResourceMatch(pathMatch, entry.getValue()));
             }
         }

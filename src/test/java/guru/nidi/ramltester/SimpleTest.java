@@ -44,10 +44,9 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void simpleOk() throws Exception {
-        assertNoViolations(test(aggregator,
-                simple,
-                get("/data"),
-                jsonResponse(200, "\"hula\"")));
+        assertNoViolations(test(aggregator, simple, get("/"), jsonResponse(200)));
+        assertNoViolations(test(aggregator, simple, get("/d"), jsonResponse(200)));
+        assertNoViolations(test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"")));
     }
 
     @Test
