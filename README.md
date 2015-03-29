@@ -39,7 +39,7 @@ public class SimpleTest {
 The ExpectedUsage rule additionally checks if all resources, query parameters, form parameters, headers and response codes
 defined in the RAML are at least used once.
 
-See also the demo project https://github.com/nidi3/raml-tester-uc-spring
+See also the [raml-tester-uc-spring](https://github.com/nidi3/raml-tester-uc-spring) project.
 
 
 Use in a pure servlet environment
@@ -66,7 +66,7 @@ public class RamlFilter implements Filter {
 }
 
 ```
-Or see the demo project https://github.com/nidi3/raml-tester-uc-servlet
+Or see the [raml-tester-uc-sevlet](https://github.com/nidi3/raml-tester-uc-servlet) project.
 
 Use together with Apache HttpComponents
 ---------------------------------------
@@ -81,9 +81,16 @@ public void testRequest(){
 }
 
 ```
-Or see the demo project https://github.com/nidi3/raml-tester-uc-servlet
+Or see the [raml-tester-uc-servlet](https://github.com/nidi3/raml-tester-uc-servlet) project.
 
 Use as a standalone proxy
 -------------------------
 When used as a proxy, any service can be tested, regardless of the technology used to implement it.
-See raml-proxy project: https://github.com/nidi3/raml-tester-proxy
+See [raml-proxy](https://github.com/nidi3/raml-tester-proxy) project.
+
+Use with Javascript
+-------------------
+There is special support for javascript.
+
+See [raml-tester-js](https://github.com/nidi3/raml-tester-js) for details and
+[raml-tester-uc-js](https://github.com/nidi3/raml-tester-uc-js) for examples.
