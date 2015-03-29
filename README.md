@@ -86,7 +86,7 @@ Or see the [raml-tester-uc-servlet](https://github.com/nidi3/raml-tester-uc-serv
 Use as a standalone proxy
 -------------------------
 When used as a proxy, any service can be tested, regardless of the technology used to implement it.
-See [raml-proxy](https://github.com/nidi3/raml-tester-proxy) project.
+See the [raml-proxy](https://github.com/nidi3/raml-tester-proxy) project.
 
 Use with Javascript
 -------------------
