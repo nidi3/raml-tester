@@ -29,7 +29,8 @@ import java.io.InputStream;
 public class SimpleUrlFetcher implements UrlFetcher {
     @Override
     public InputStream fetchFromUrl(CloseableHttpClient client, String base, String name) throws IOException {
-        final HttpGet get = postProcessGet(new HttpGet(base + "/" + encodeUrl(name)));
+        final String suffix = (name == null || name.length() == 0) ? "" : ("/" + encodeUrl(name));
+        final HttpGet get = postProcessGet(new HttpGet(base + suffix));
         final CloseableHttpResponse getResult = client.execute(get);
         if (getResult.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
             throw new IOException("Http response status not ok: " + getResult.getStatusLine().toString());

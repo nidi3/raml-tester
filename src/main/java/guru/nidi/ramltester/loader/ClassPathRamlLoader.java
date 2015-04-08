@@ -47,7 +47,7 @@ public class ClassPathRamlLoader implements RamlLoader {
         }
 
         @Override
-        public RamlLoader getRamlLoader(String base) {
+        public RamlLoader getRamlLoader(String base,String username,String password) {
             return new ClassPathRamlLoader(base);
         }
     }

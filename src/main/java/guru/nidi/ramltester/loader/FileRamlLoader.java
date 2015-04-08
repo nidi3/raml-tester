@@ -46,7 +46,7 @@ public class FileRamlLoader implements RamlLoader {
         }
 
         @Override
-        public RamlLoader getRamlLoader(String base) {
+        public RamlLoader getRamlLoader(String base, String username, String password) {
             return new FileRamlLoader(new File(base));
         }
     }

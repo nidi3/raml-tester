@@ -26,6 +26,10 @@ import java.util.List;
  */
 public class ApiRamlLoader extends RepositoryRamlLoader {
     public ApiRamlLoader(String user, String password) {
+        this(null, user, password);
+    }
+
+    public ApiRamlLoader(String base, String user, String password) {
         super(new UrlRamlLoader("http://api-portal.anypoint.mulesoft.com",
                 new FormLoginUrlFetcher("rest/raml/v1", "ajax/apihub/login-register/form?section=login", user, password, "name", "pass") {
                     @Override
@@ -33,11 +37,11 @@ public class ApiRamlLoader extends RepositoryRamlLoader {
                         parameters.add(new BasicNameValuePair("form_id", "user_login"));
                     }
                 }
-        ), "files", ApiPortalFilesResponse.class);
+        ), base, "files", ApiPortalFilesResponse.class);
     }
 
     public ApiRamlLoader(String baseUrl) {
-        super(new UrlRamlLoader(baseUrl, new SimpleUrlFetcher()), "files", ApiDesignerFilesResponse.class);
+        super(new UrlRamlLoader(baseUrl, new SimpleUrlFetcher()), null, "files", ApiDesignerFilesResponse.class);
     }
 
     public static class PortalFactory implements RamlLoaderFactory {
@@ -47,12 +51,8 @@ public class ApiRamlLoader extends RepositoryRamlLoader {
         }
 
         @Override
-        public RamlLoader getRamlLoader(String base) {
-            final String[] cred = base.split(":");
-            if (cred.length != 2) {
-                throw new IllegalArgumentException("Username and password must be separated by ':'");
-            }
-            return new ApiRamlLoader(cred[0], cred[1]);
+        public RamlLoader getRamlLoader(String base, String username, String password) {
+            return new ApiRamlLoader(base, username, password);
         }
     }
 
@@ -63,7 +63,7 @@ public class ApiRamlLoader extends RepositoryRamlLoader {
         }
 
         @Override
-        public RamlLoader getRamlLoader(String base) {
+        public RamlLoader getRamlLoader(String base, String username, String password) {
             return new ApiRamlLoader(base);
         }
     }

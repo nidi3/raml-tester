@@ -70,8 +70,18 @@ public class UriLoaderTest extends ServerTest {
     }
 
     @Test
+    public void publicGithub() {
+        assertNotNull(RamlLoaders.absolutely().load("github://nidi3/raml-tester/src/test/resources/guru/nidi/ramltester/uri.raml"));
+    }
+
+    @Test
+    public void privateGithub() throws IOException {
+        assertNotNull(RamlLoaders.absolutely().load(getEnv("GITHUB_TOKEN") + "@github://nidi3/blog/simple.raml"));
+    }
+
+    @Test
     public void apiPortal() {
-        assertNotNull(RamlLoaders.absolutely().load("apiportal://" + getEnv("API_PORTAL_USER") + ":" + getEnv("API_PORTAL_PASS") + "/test.raml"));
+        assertNotNull(RamlLoaders.absolutely().load(getEnv("API_PORTAL_USER") + ":" + getEnv("API_PORTAL_PASS") + "@apiportal://test.raml"));
     }
 
     @Test

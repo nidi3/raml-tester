@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.loader;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -25,15 +26,15 @@ import java.io.InputStream;
  *
  */
 public class UrlRamlLoader implements RamlLoader {
-    private final String base;
-    private final CloseableHttpClient client;
-    private final UrlFetcher fetcher;
+    protected final String base;
+    protected final CloseableHttpClient client;
+    protected final UrlFetcher fetcher;
 
     public UrlRamlLoader(String base, UrlFetcher fetcher, CloseableHttpClient httpClient) {
         this.base = base;
         this.fetcher = fetcher;
         this.client = httpClient == null
-                ? HttpClientBuilder.create().build()
+                ? HttpClientBuilder.create().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build()
                 : httpClient;
     }
 
@@ -61,8 +62,10 @@ public class UrlRamlLoader implements RamlLoader {
         }
 
         @Override
-        public RamlLoader getRamlLoader(String base) {
-            return new UrlRamlLoader("http://" + base);
+        public RamlLoader getRamlLoader(String base, String username, String password) {
+            return username == null
+                    ? new UrlRamlLoader("http://" + base)
+                    : new BasicAuthUrlRamlLoader("http://" + base, username, password);
         }
     }
 
@@ -73,8 +76,10 @@ public class UrlRamlLoader implements RamlLoader {
         }
 
         @Override
-        public RamlLoader getRamlLoader(String base) {
-            return new UrlRamlLoader("https://" + base);
+        public RamlLoader getRamlLoader(String base, String username, String password) {
+            return username == null
+                    ? new UrlRamlLoader("https://" + base)
+                    : new BasicAuthUrlRamlLoader("https://" + base, username, password);
         }
     }
 }

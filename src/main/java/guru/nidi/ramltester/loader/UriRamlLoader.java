@@ -17,7 +17,6 @@ package guru.nidi.ramltester.loader;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.regex.Matcher;
@@ -28,14 +27,13 @@ import java.util.regex.Pattern;
  * Loaders are registered in META-INF/services/guru.nidi.ramltester.loader.RamlLoaderFactory
  */
 public class UriRamlLoader implements RamlLoader {
-    private static final Pattern ABSOLUTE_URI_PATTERN = Pattern.compile("([^:]+)://(.+)/([^/]+)");
+    private static final Pattern ABSOLUTE_URI_PATTERN = Pattern.compile("(([^:]+):?([^@]*)@)?([^:]+)://(.+)");
 
     private static Map<String, RamlLoaderFactory> factories = new HashMap<>();
 
     static {
         final ServiceLoader<RamlLoaderFactory> loader = ServiceLoader.load(RamlLoaderFactory.class);
-        for (Iterator<RamlLoaderFactory> iter = loader.iterator(); iter.hasNext(); ) {
-            final RamlLoaderFactory factory = iter.next();
+        for (final RamlLoaderFactory factory : loader) {
             factories.put(factory.supportedProtocol(), factory);
         }
     }
@@ -51,10 +49,18 @@ public class UriRamlLoader implements RamlLoader {
         name = normalizeResourceName(name);
         final Matcher matcher = ABSOLUTE_URI_PATTERN.matcher(name);
         if (matcher.matches()) {
-            return absoluteLoader(matcher.group(1), matcher.group(2)).fetchResource(matcher.group(3));
+            String path = matcher.group(5);
+            String res = null;
+            final int lastSlash = path.lastIndexOf('/');
+            if (lastSlash >= 0 && lastSlash < path.length() - 1) {
+                res = path.substring(lastSlash + 1);
+                path = path.substring(0, lastSlash);
+            }
+            return absoluteLoader(matcher.group(4), path, matcher.group(2), matcher.group(3))
+                    .fetchResource(res);
         }
         if (relativeLoader == null) {
-            throw new IllegalArgumentException("Expected absolute uri (<protocol>://<base>/<file>), but got '" + name + "'");
+            throw new IllegalArgumentException("Expected absolute uri '[username:password@]protocol://base[/file]', but got '" + name + "'");
         }
         return relativeLoader.fetchResource(name);
     }
@@ -75,11 +81,11 @@ public class UriRamlLoader implements RamlLoader {
         return name;
     }
 
-    private RamlLoader absoluteLoader(String protocol, String base) {
+    private RamlLoader absoluteLoader(String protocol, String base, String username, String password) {
         final RamlLoaderFactory factory = factories.get(protocol);
         if (factory == null) {
             throw new IllegalArgumentException("Unsupported protocol " + protocol);
         }
-        return factory.getRamlLoader(base);
+        return factory.getRamlLoader(base, username, password);
     }
 }

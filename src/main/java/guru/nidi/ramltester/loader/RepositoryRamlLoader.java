@@ -28,12 +28,14 @@ import java.nio.charset.Charset;
  */
 public class RepositoryRamlLoader implements RamlLoader {
     private final RamlLoader loader;
+    private final String defaultResourceName;
     private final String responseName;
     private final Class<? extends RepositoryResponse> responseClass;
     private RepositoryResponse response;
 
-    public RepositoryRamlLoader(RamlLoader loader, String responseName, Class<? extends RepositoryResponse> responseClass) {
+    public RepositoryRamlLoader(RamlLoader loader, String defaultResourceName, String responseName, Class<? extends RepositoryResponse> responseClass) {
         this.loader = loader;
+        this.defaultResourceName = defaultResourceName;
         this.responseName = responseName;
         this.responseClass = responseClass;
     }
@@ -43,9 +45,10 @@ public class RepositoryRamlLoader implements RamlLoader {
         if (response == null) {
             response = load();
         }
-        final RepositoryEntry entry = findEntry(resourceName);
+        final String name = resourceName != null ? resourceName : defaultResourceName;
+        final RepositoryEntry entry = findEntry(name);
         if (entry == null) {
-            throw new ResourceNotFoundException(resourceName);
+            throw new ResourceNotFoundException(name);
         }
         return new ByteArrayInputStream(entry.getContent().getBytes(Charset.forName("utf-8")));
     }

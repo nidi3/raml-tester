@@ -21,5 +21,5 @@ package guru.nidi.ramltester.loader;
 public interface RamlLoaderFactory {
     String supportedProtocol();
 
-    RamlLoader getRamlLoader(String base);
+    RamlLoader getRamlLoader(String base, String username, String password);
 }

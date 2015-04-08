@@ -17,13 +17,11 @@ package guru.nidi.ramltester.loader;
 
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 
+import static guru.nidi.ramltester.util.TestUtils.getEnv;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -33,20 +31,20 @@ import static org.junit.Assert.assertThat;
 public class LoaderTest {
     @Test
     public void classPathOk() throws IOException {
-        final InputStream stream = new ClassPathRamlLoader("guru/nidi/ramltester").fetchResource("simple.raml");
-        assertThat(stream.read(), not(equalTo(-1)));
+        final InputStream in = new ClassPathRamlLoader("guru/nidi/ramltester").fetchResource("simple.raml");
+        assertStreamStart(in, "#%RAML 0.8");
     }
 
     @Test
     public void classPathWithEndSlash() throws IOException {
-        final InputStream stream = new ClassPathRamlLoader("guru/nidi/ramltester/").fetchResource("simple.raml");
-        assertThat(stream.read(), not(equalTo(-1)));
+        final InputStream in = new ClassPathRamlLoader("guru/nidi/ramltester/").fetchResource("simple.raml");
+        assertStreamStart(in, "#%RAML 0.8");
     }
 
     @Test
     public void emptyBaseClassPath() throws IOException {
-        final InputStream stream = new ClassPathRamlLoader().fetchResource("guru/nidi/ramltester/simple.raml");
-        assertThat(stream.read(), not(equalTo(-1)));
+        final InputStream in = new ClassPathRamlLoader().fetchResource("guru/nidi/ramltester/simple.raml");
+        assertStreamStart(in, "#%RAML 0.8");
     }
 
     @Test(expected = RamlLoader.ResourceNotFoundException.class)
@@ -58,22 +56,23 @@ public class LoaderTest {
     public void fileOk() throws IOException {
         final URL resource = Thread.currentThread().getContextClassLoader().getResource("guru/nidi/ramltester");
         assertEquals("file", resource.getProtocol());
-        final InputStream stream = new FileRamlLoader(new File(resource.getPath().toString())).fetchResource("simple.raml");
-        assertThat(stream.read(), not(equalTo(-1)));
+        final InputStream in = new FileRamlLoader(new File(resource.getPath())).fetchResource("simple.raml");
+        assertStreamStart(in, "#%RAML 0.8");
     }
 
     @Test(expected = RamlLoader.ResourceNotFoundException.class)
     public void fileNok() {
         final URL resource = Thread.currentThread().getContextClassLoader().getResource("guru/nidi/ramltester");
         assertEquals("file", resource.getProtocol());
-        new FileRamlLoader(new File(resource.getPath().toString())).fetchResource("bla");
+        new FileRamlLoader(new File(resource.getPath())).fetchResource("bla");
     }
 
     @Test
     public void urlOk() throws IOException {
-        final InputStream stream = new UrlRamlLoader("http://en.wikipedia.org/wiki").fetchResource("Short");
-        assertThat(stream.read(), not(equalTo(-1)));
+        final InputStream in = new UrlRamlLoader("http://en.wikipedia.org/wiki").fetchResource("Short");
+        assertStreamStart(in, "<!DOCTYPE html>");
     }
+
 
     @Test(expected = RamlLoader.ResourceNotFoundException.class)
     public void urlNok() {
@@ -82,9 +81,26 @@ public class LoaderTest {
 
     @Test
     public void loadFile() throws IOException {
-        final InputStream inputStream = new FileRamlLoader(new File("src/test/resources/guru/nidi/ramltester")).fetchResource("simple.raml");
-        assertThat(inputStream.read(), not(equalTo(-1)));
+        final InputStream in = new FileRamlLoader(new File("src/test/resources/guru/nidi/ramltester")).fetchResource("simple.raml");
+        assertStreamStart(in, "#%RAML 0.8");
     }
 
+    @Test
+    public void publicGithub() throws IOException {
+        final InputStream in = new GithubRamlLoader("nidi3/raml-tester").fetchResource("src/test/resources/guru/nidi/ramltester/simple.raml");
+        assertStreamStart(in, "#%RAML 0.8");
+    }
+
+    @Test
+    public void privateGithub() throws IOException {
+        final InputStream in = new GithubRamlLoader(getEnv("GITHUB_TOKEN"), "nidi3/blog").fetchResource("README.md");
+        assertStreamStart(in, "blog");
+    }
+
+    private void assertStreamStart(InputStream in, String s) throws IOException {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+            assertThat(reader.readLine(), equalTo(s));
+        }
+    }
 
 }

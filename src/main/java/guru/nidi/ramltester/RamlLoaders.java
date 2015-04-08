@@ -55,6 +55,10 @@ public class RamlLoaders {
         return new UrlRamlLoader(baseUrl);
     }
 
+    private static RamlLoader githubLoader(String token, String project) {
+        return new GithubRamlLoader(token, project);
+    }
+
     private static RamlLoader apiPortalLoader(String user, String password) {
         return new ApiRamlLoader(user, password);
     }
@@ -83,6 +87,14 @@ public class RamlLoaders {
         return using(urlLoader(baseUrl));
     }
 
+    public static RamlLoaders fromGithub(String project) {
+        return fromGithub(null, project);
+    }
+
+    public static RamlLoaders fromGithub(String token, String project) {
+        return using(githubLoader(token, project));
+    }
+
     public static RamlLoaders fromApiPortal(String user, String password) {
         return using(apiPortalLoader(user, password));
     }
@@ -91,6 +103,20 @@ public class RamlLoaders {
         return using(apiDesignerLoader(url));
     }
 
+    /**
+     * These URI schemas are supported:
+     * <pre>
+     * - http://google.com/file.raml
+     * - user:password@https://google.com/file.raml
+     * - file:///tmp/temp.raml
+     * - classpath://guru/nidi/ramltester/simple.raml
+     * - token@github://nidi3/raml-tester/src/test/resources/simple.raml
+     * - user:password@apiportal://test.raml
+     * </pre>
+     * TODO - apidesigner://
+     *
+     * @return
+     */
     public static RamlLoaders absolutely() {
         return using(null);
     }
@@ -114,6 +140,14 @@ public class RamlLoaders {
 
     public RamlLoaders andFromUrl(String baseUrl) {
         return andUsing(urlLoader(baseUrl));
+    }
+
+    public RamlLoaders andFromGithub(String project) {
+        return andFromGithub(null, project);
+    }
+
+    public RamlLoaders andFromGithub(String token, String project) {
+        return andUsing(githubLoader(token, project));
     }
 
     public RamlLoaders andFromApiPortal(String user, String password) {
