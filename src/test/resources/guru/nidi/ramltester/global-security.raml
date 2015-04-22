@@ -1,0 +1,27 @@
+#%RAML 0.8
+---
+title: global-security
+baseUri: http://nidi.guru/raml/{version}
+version: v1
+securitySchemes:
+  - oauth_2_0: !include oauth20.yaml
+  - oauth_1_0:
+      type: OAuth 1.0
+      describedBy:
+        headers:
+          Authorization1:
+
+securedBy: [oauth_2_0]
+
+/sec2:
+  get:
+
+/sec12:
+  get:
+    securedBy: [oauth_1_0]
+    responses:
+      200:
+
+/unsec:
+  get:
+    securedBy: [null]

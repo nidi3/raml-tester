@@ -62,9 +62,11 @@ public class RamlChecker {
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
         try {
-            Action action = checkRequestAndFindAction(request);
+            Action action = findAction(request);
+            final SecurityExtractor security = new SecurityExtractor(raml, action);
+            checkRequest(request, action, security);
             if (response != null) {
-                checkResponse(action, response);
+                checkResponse(response, action, security);
             }
         } catch (RamlViolationException e) {
             //ignore, results are in report
@@ -76,7 +78,7 @@ public class RamlChecker {
         return check(request, null);
     }
 
-    public Action checkRequestAndFindAction(RamlRequest request) {
+    public Action findAction(RamlRequest request) {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(baseUri));
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
 
@@ -90,8 +92,13 @@ public class RamlChecker {
 
         checkProtocol(action, requestUri, ramlUri);
         checkBaseUriParameters(hostMatch, pathMatch, action);
-        checkQueryParameters(request.getQueryValues(), action);
-        checkRequestHeaderParameters(request.getHeaderValues(), action);
+
+        return action;
+    }
+
+    public void checkRequest(RamlRequest request, Action action, SecurityExtractor security) {
+        checkQueryParameters(request.getQueryValues(), action, security);
+        checkRequestHeaderParameters(request.getHeaderValues(), action, security);
 
         final Type type = findType(requestViolations, action, request, action.getBody(), "");
         if (type != null) {
@@ -101,7 +108,6 @@ public class RamlChecker {
                 checkSchema(requestViolations, action, request.getContent(), type, "");
             }
         }
-        return action;
     }
 
     private void checkFormParameters(Action action, Values values, MimeType mimeType) {
@@ -124,21 +130,20 @@ public class RamlChecker {
         );
     }
 
-
-    private void checkQueryParameters(Values values, Action action) {
+    private void checkQueryParameters(Values values, Action action, SecurityExtractor security) {
         actionUsage(usage, action).addQueryParameters(
                 new ParameterChecker(requestViolations)
-                        .checkParameters(action.getQueryParameters(), values, new Message("queryParam", action))
+                        .checkParameters(action.getQueryParameters(), security.queryParameters(), values, new Message("queryParam", action))
         );
     }
 
-    private void checkRequestHeaderParameters(Values values, Action action) {
+    private void checkRequestHeaderParameters(Values values, Action action, SecurityExtractor security) {
         actionUsage(usage, action).addRequestHeaders(
                 new ParameterChecker(requestViolations)
                         .acceptWildcard()
                         .ignoreX(ignoreXheaders)
                         .predefined(DefaultHeaders.REQUEST)
-                        .checkParameters(action.getHeaders(), values, new Message("headerParam", action))
+                        .checkParameters(action.getHeaders(), security.headers(), values, new Message("headerParam", action))
         );
     }
 
@@ -293,8 +298,8 @@ public class RamlChecker {
         }
     }
 
-    public void checkResponse(Action action, RamlResponse response) {
-        Response res = findResponse(action, response.getStatus());
+    public void checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
+        Response res = findResponse(action, response.getStatus(), security);
         actionUsage(usage, action).addResponseCode("" + response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 
@@ -371,8 +376,19 @@ public class RamlChecker {
         );
     }
 
-    private Response findResponse(Action action, int status) {
+    private Response findResponse(Action action, int status, SecurityExtractor security) {
         Response res = action.getResponses().get("" + status);
+        if (res == null) {
+            final Iterator<Map<String, Response>> iter = security.responses().iterator();
+            //there could be more that 1 matching response, problem?
+            while (iter.hasNext()) {
+                final Map<String, Response> resMap = iter.next();
+                res = resMap.get("" + status);
+                if (res == null) {
+                    iter.remove();
+                }
+            }
+        }
         responseViolations.addAndThrowIf(res == null, "responseCode.undefined", status, action);
         return res;
     }

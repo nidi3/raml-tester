@@ -21,8 +21,6 @@ import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import guru.nidi.ramltester.util.MediaType;
 import org.hamcrest.Matcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -38,8 +36,6 @@ import static org.junit.Assert.assertTrue;
  *
  */
 public class HighlevelTestBase {
-    protected final Logger log = LoggerFactory.getLogger(getClass());
-
     protected MockHttpServletResponse jsonResponse(int code, String json, String contentType) throws UnsupportedEncodingException {
         final MockHttpServletResponse response = new MockHttpServletResponse();
         response.setStatus(code);
@@ -75,6 +71,12 @@ public class HighlevelTestBase {
     protected void assertOneRequestViolationThat(RamlReport report, Matcher<String> matcher) {
         assertNoViolations(report.getResponseViolations());
         assertOneViolationThat(report.getRequestViolations(), matcher);
+    }
+
+    @SafeVarargs
+    protected final void assertRequestViolationsThat(RamlReport report, Matcher<String>... matcher) {
+        assertNoViolations(report.getResponseViolations());
+        assertViolationsThat(report.getRequestViolations(), matcher);
     }
 
     protected void assertOneResponseViolationThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
@@ -114,9 +116,12 @@ public class HighlevelTestBase {
         assertThat(violations.iterator().next(), matcher);
     }
 
-    protected void assertViolationsThat(RamlViolations violations, Matcher<String> matcher) {
+    @SafeVarargs
+    protected final void assertViolationsThat(RamlViolations violations, Matcher<String>... matcher) {
+        int i = 0;
         for (String violation : violations) {
-            assertThat(violation, matcher);
+            assertThat(violation, matcher[i % matcher.length]);
+            i++;
         }
     }
 

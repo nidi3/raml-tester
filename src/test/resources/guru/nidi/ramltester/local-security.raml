@@ -1,0 +1,16 @@
+#%RAML 0.8
+---
+title: local-security
+baseUri: http://nidi.guru/raml/{version}
+version: v1
+securitySchemes:
+  - oauth_2_0: !include oauth20.yaml
+
+/sec:
+  get:
+    securedBy: [oauth_2_0]
+
+/unsec:
+  get:
+    responses:
+      200:

@@ -74,11 +74,43 @@ class ParameterChecker {
     }
 
     public Set<String> checkParameters(Map<String, ? extends AbstractParam> params, Values values, Message message) {
-        Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
+        return checkParameters(params, Collections.<Map<String, ? extends AbstractParam>>emptyList(), values, message);
+    }
+
+    public Set<String> checkParameters(Map<String, ? extends AbstractParam> params, List<? extends Map<String, ? extends AbstractParam>> extensions,
+                                       Values values, Message message) {
+        if (extensions.isEmpty()) {
+            final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
+            for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
+                listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+            }
+            return checkListParameters(listParams, values, message);
+        }
+
+        final Iterator<? extends Map<String, ? extends AbstractParam>> iter = extensions.iterator();
+        Set<String> ok = null;
+        while (iter.hasNext()) {
+            final Map<String, ? extends AbstractParam> extension = iter.next();
+            final RamlViolations violations = new RamlViolations();
+            ok = checkExtendedParameters(params, extension, values, message, violations);
+            if (!violations.isEmpty()) {
+                iter.remove();
+            }
+        }
+        return extensions.isEmpty() ? checkParameters(params, extensions, values, message) : ok;
+    }
+
+    private Set<String> checkExtendedParameters(Map<String, ? extends AbstractParam> params, Map<String, ? extends AbstractParam> extension,
+                                                Values values, Message message, RamlViolations violations) {
+        final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
+        for (Map.Entry<String, ? extends AbstractParam> entry : extension.entrySet()) {
+            listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+        }
         for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
-        return checkListParameters(listParams, values, message);
+        final ParameterChecker checker = new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, predefined);
+        return checker.checkListParameters(listParams, values, message);
     }
 
     private boolean acceptUndefined(String name) {
