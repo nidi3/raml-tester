@@ -62,6 +62,7 @@ public class RamlChecker {
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
         try {
+            checkSecurity(raml.getSecuritySchemes());
             Action action = findAction(request);
             final SecurityExtractor security = new SecurityExtractor(raml, action);
             checkRequest(request, action, security);
@@ -72,6 +73,17 @@ public class RamlChecker {
             //ignore, results are in report
         }
         return report;
+    }
+
+    private void checkSecurity(List<Map<String, SecurityScheme>> schemes) {
+        for (final Map<String, SecurityScheme> schemeMap : schemes) {
+            for (final SecurityScheme scheme : schemeMap.values()) {
+                final SecuritySchemeType type = SecuritySchemeType.byName(scheme.getType());
+                if (type != null) {
+                    type.check(scheme, requestViolations);
+                }
+            }
+        }
     }
 
     public RamlReport check(RamlRequest request) {

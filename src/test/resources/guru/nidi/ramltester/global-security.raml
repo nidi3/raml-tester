@@ -5,8 +5,8 @@ baseUri: http://nidi.guru/raml/{version}
 version: v1
 securitySchemes:
   - oauth_2_0: !include oauth20.yaml
-  - oauth_1_0:
-      type: OAuth 1.0
+  - other:
+      type: x-other
       describedBy:
         headers:
           Authorization1:
@@ -18,7 +18,7 @@ securedBy: [oauth_2_0]
 
 /sec12:
   get:
-    securedBy: [oauth_1_0]
+    securedBy: [other]
     responses:
       200:
 
