@@ -46,7 +46,7 @@ public class RamlLoaderLSResourceResolver implements LSResourceResolver {
         input.setPublicId(publicId);
         input.setSystemId(systemId);
         input.setBaseURI(baseURI);
-        input.setByteStream(resourceLoader.fetchResource(systemId));
+        input.setByteStream(resourceLoader.fetchResource(systemId, -1));
         return input;
     }
 }

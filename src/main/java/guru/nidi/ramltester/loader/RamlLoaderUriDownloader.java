@@ -33,6 +33,6 @@ public class RamlLoaderUriDownloader implements URIDownloader {
 
     @Override
     public InputStream fetch(URI source) throws IOException {
-        return delegate.fetchResource(source.getPath());
+        return delegate.fetchResource(source.getPath(), -1);
     }
 }

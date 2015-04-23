@@ -24,5 +24,5 @@ import java.io.InputStream;
  *
  */
 public interface UrlFetcher {
-    InputStream fetchFromUrl(CloseableHttpClient client, String base, String name) throws IOException;
+    InputStream fetchFromUrl(CloseableHttpClient client, String base, String name, long ifModifiedSince) throws IOException;
 }

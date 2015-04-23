@@ -51,11 +51,15 @@ public class GithubRamlLoader extends UrlRamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String name) {
+    public InputStream fetchResource(String name, long ifModifiedSince) {
         try {
+            final InputStream raw = fetcher.fetchFromUrl(client, base, resourceBase + name, ifModifiedSince);
+            if (raw == null) {
+                return null;
+            }
             @SuppressWarnings("unchecked")
-            final Map<String, String> desc = new ObjectMapper().readValue(fetcher.fetchFromUrl(client, base, resourceBase + name), Map.class);
-            return fetcher.fetchFromUrl(client, desc.get("download_url"), "");
+            final Map<String, String> desc = new ObjectMapper().readValue(raw, Map.class);
+            return fetcher.fetchFromUrl(client, desc.get("download_url"), "", ifModifiedSince);
         } catch (IOException e) {
             throw new ResourceNotFoundException(resourceBase + name, e);
         }

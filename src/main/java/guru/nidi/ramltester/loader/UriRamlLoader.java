@@ -45,7 +45,7 @@ public class UriRamlLoader implements RamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String name) throws ResourceNotFoundException {
+    public InputStream fetchResource(String name, long ifModifiedSince) throws ResourceNotFoundException {
         name = normalizeResourceName(name);
         final Matcher matcher = ABSOLUTE_URI_PATTERN.matcher(name);
         if (matcher.matches()) {
@@ -57,12 +57,12 @@ public class UriRamlLoader implements RamlLoader {
                 path = path.substring(0, lastSlash);
             }
             return absoluteLoader(matcher.group(4), path, matcher.group(2), matcher.group(3))
-                    .fetchResource(res);
+                    .fetchResource(res, ifModifiedSince);
         }
         if (relativeLoader == null) {
             throw new IllegalArgumentException("Expected absolute uri '[username:password@]protocol://base[/file]', but got '" + name + "'");
         }
-        return relativeLoader.fetchResource(name);
+        return relativeLoader.fetchResource(name, ifModifiedSince);
     }
 
     //raml parser does its own absolute/relative handling (org.raml.parser.tagresolver.ContextPath#resolveAbsolutePath)

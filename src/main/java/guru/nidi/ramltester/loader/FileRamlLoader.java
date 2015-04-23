@@ -31,9 +31,11 @@ public class FileRamlLoader implements RamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String name) {
+    public InputStream fetchResource(String name, long ifModifiedSince) {
         try {
-            return new FileInputStream(new File(base, name));
+            final File file = new File(base, name);
+            return file.lastModified() > ifModifiedSince
+                    ? new FileInputStream(file) : null;
         } catch (FileNotFoundException e) {
             throw new ResourceNotFoundException(name, e);
         }

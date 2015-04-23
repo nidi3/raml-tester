@@ -48,5 +48,14 @@ public interface RamlLoader {
         }
     }
 
-    InputStream fetchResource(String name) throws ResourceNotFoundException;
+    /**
+     * Fetch the resource with the given name.
+     * If it has NOT been modified since the given point in time, null should be returned.
+     *
+     * @param name
+     * @param ifModifiedSince
+     * @return
+     * @throws ResourceNotFoundException
+     */
+    InputStream fetchResource(String name, long ifModifiedSince) throws ResourceNotFoundException;
 }

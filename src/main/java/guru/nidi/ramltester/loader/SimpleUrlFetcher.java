@@ -19,23 +19,37 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  *
  */
 public class SimpleUrlFetcher implements UrlFetcher {
+    private static final String HTTP_DATE_FORMAT = "E, dd MMM yyyy HH:mm:ss 'GMT'";
+
     @Override
-    public InputStream fetchFromUrl(CloseableHttpClient client, String base, String name) throws IOException {
+    public InputStream fetchFromUrl(CloseableHttpClient client, String base, String name, long ifModifiedSince) throws IOException {
         final String suffix = (name == null || name.length() == 0) ? "" : ("/" + encodeUrl(name));
         final HttpGet get = postProcessGet(new HttpGet(base + suffix));
-        final CloseableHttpResponse getResult = client.execute(get);
-        if (getResult.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            throw new IOException("Http response status not ok: " + getResult.getStatusLine().toString());
+        if (ifModifiedSince > 0) {
+            get.addHeader("if-modified-since", httpDate(ifModifiedSince));
         }
-        return getResult.getEntity().getContent();
+        final CloseableHttpResponse getResult = client.execute(get);
+        switch (getResult.getStatusLine().getStatusCode()) {
+            case HttpStatus.SC_OK:
+                return getResult.getEntity().getContent();
+            case HttpStatus.SC_NOT_MODIFIED:
+                EntityUtils.consume(getResult.getEntity());
+                return null;
+            default:
+                throw new IOException("Http response status not ok: " + getResult.getStatusLine().toString());
+        }
     }
 
     protected String encodeUrl(String name) {
@@ -46,4 +60,9 @@ public class SimpleUrlFetcher implements UrlFetcher {
         return get;
     }
 
+    private String httpDate(long date) {
+        final SimpleDateFormat format = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.ENGLISH);
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return format.format(date);
+    }
 }

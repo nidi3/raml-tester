@@ -31,6 +31,6 @@ public class RamlLoaderRamlParserResourceLoader implements ResourceLoader {
 
     @Override
     public InputStream fetchResource(String resourceName) {
-        return delegate.fetchResource(resourceName);
+        return delegate.fetchResource(resourceName, -1);
     }
 }

@@ -47,9 +47,9 @@ public class UrlRamlLoader implements RamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String name) {
+    public InputStream fetchResource(String name, long ifModifiedSince) {
         try {
-            return fetcher.fetchFromUrl(client, base, name);
+            return fetcher.fetchFromUrl(client, base, name, ifModifiedSince);
         } catch (IOException e) {
             throw new ResourceNotFoundException(name, e);
         }

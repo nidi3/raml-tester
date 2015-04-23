@@ -41,7 +41,7 @@ public class RepositoryRamlLoader implements RamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String resourceName) {
+    public InputStream fetchResource(String resourceName, long ifModifiedSince) {
         if (response == null) {
             response = load();
         }
@@ -55,7 +55,7 @@ public class RepositoryRamlLoader implements RamlLoader {
 
     protected RepositoryResponse load() {
         final ObjectMapper mapper = createMapper();
-        final InputStream files = loader.fetchResource(responseName);
+        final InputStream files = loader.fetchResource(responseName, -1);
         //TODO when empty, files is an empty array, not object!?
         try {
             return mapper.readValue(files, responseClass);

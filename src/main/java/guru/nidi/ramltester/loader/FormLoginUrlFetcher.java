@@ -50,7 +50,7 @@ public class FormLoginUrlFetcher extends SimpleUrlFetcher {
     }
 
     @Override
-    public InputStream fetchFromUrl(CloseableHttpClient client, String base, String name) {
+    public InputStream fetchFromUrl(CloseableHttpClient client, String base, String name, long ifModifiedSince) {
         try {
             final HttpPost login = new HttpPost(base + "/" + loginUrl);
             List<NameValuePair> params = new ArrayList<>();
@@ -63,7 +63,7 @@ public class FormLoginUrlFetcher extends SimpleUrlFetcher {
                 throw new RamlLoader.ResourceNotFoundException(name, "Could not login: " + getResult.getStatusLine().toString());
             }
             EntityUtils.consume(getResult.getEntity());
-            return super.fetchFromUrl(client, base + "/" + loadPath, name);
+            return super.fetchFromUrl(client, base + "/" + loadPath, name, ifModifiedSince);
         } catch (IOException e) {
             throw new RamlLoader.ResourceNotFoundException(name, e);
         }

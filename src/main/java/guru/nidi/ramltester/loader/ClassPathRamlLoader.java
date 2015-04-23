@@ -15,7 +15,10 @@
  */
 package guru.nidi.ramltester.loader;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  *
@@ -32,12 +35,29 @@ public class ClassPathRamlLoader implements RamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String name) {
-        final InputStream resource = Thread.currentThread().getContextClassLoader().getResourceAsStream(base + name);
-        if (resource == null) {
+    public InputStream fetchResource(String name, long ifModifiedSince) {
+        final URL url = Thread.currentThread().getContextClassLoader().getResource(base + name);
+        if (url == null) {
             throw new ResourceNotFoundException(name);
         }
-        return resource;
+        try {
+            switch (url.getProtocol()) {
+                case "file":
+                    final File file = new File(url.getPath());
+                    return file.lastModified() > ifModifiedSince ? url.openStream() : null;
+                case "jar":
+                    if (url.getPath().startsWith("file:")) {
+                        final int pos = url.getPath().indexOf('!');
+                        final File jar = new File(url.getPath().substring(5, pos));
+                        return jar.lastModified() > ifModifiedSince ? url.openStream() : null;
+                    }
+                    return url.openStream();
+                default:
+                    return url.openStream();
+            }
+        } catch (IOException e) {
+            throw new ResourceNotFoundException(name);
+        }
     }
 
     public static class Factory implements RamlLoaderFactory {
@@ -47,7 +67,7 @@ public class ClassPathRamlLoader implements RamlLoader {
         }
 
         @Override
-        public RamlLoader getRamlLoader(String base,String username,String password) {
+        public RamlLoader getRamlLoader(String base, String username, String password) {
             return new ClassPathRamlLoader(base);
         }
     }

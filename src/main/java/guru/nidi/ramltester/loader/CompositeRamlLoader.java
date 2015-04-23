@@ -28,13 +28,10 @@ public class CompositeRamlLoader implements RamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String name) throws ResourceNotFoundException {
+    public InputStream fetchResource(String name, long ifModifiedSince) throws ResourceNotFoundException {
         for (RamlLoader loader : loaders) {
             try {
-                final InputStream resource = loader.fetchResource(name);
-                if (resource != null) {
-                    return resource;
-                }
+                return loader.fetchResource(name, ifModifiedSince);
             } catch (ResourceNotFoundException e) {
                 //ignore
             }
