@@ -41,6 +41,11 @@ public class FileRamlLoader implements RamlLoader {
         }
     }
 
+    @Override
+    public String config() {
+        return "file-" + base.getAbsolutePath();
+    }
+
     public static class Factory implements RamlLoaderFactory {
         @Override
         public String supportedProtocol() {

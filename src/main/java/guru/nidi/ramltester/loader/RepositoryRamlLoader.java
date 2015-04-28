@@ -53,6 +53,11 @@ public class RepositoryRamlLoader implements RamlLoader {
         return new ByteArrayInputStream(entry.getContent().getBytes(Charset.forName("utf-8")));
     }
 
+    @Override
+    public String config() {
+        return "repository-"+defaultResourceName+"-"+loader.config();
+    }
+
     protected RepositoryResponse load() {
         final ObjectMapper mapper = createMapper();
         final InputStream files = loader.fetchResource(responseName, -1);

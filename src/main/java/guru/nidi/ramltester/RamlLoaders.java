@@ -29,14 +29,12 @@ import java.io.File;
 public class RamlLoaders {
     private final RamlLoader loader;
     private final SchemaValidators schemaValidators;
+    private final boolean caching;
 
-    public RamlLoaders(RamlLoader loader, SchemaValidators schemaValidators) {
+    public RamlLoaders(RamlLoader loader, SchemaValidators schemaValidators, boolean caching) {
         this.loader = loader;
         this.schemaValidators = schemaValidators;
-    }
-
-    public RamlLoaders(RamlLoader loader) {
-        this(loader, SchemaValidators.standard());
+        this.caching = caching;
     }
 
     private static RamlLoader classpathLoader(Class<?> basePackage) {
@@ -122,7 +120,7 @@ public class RamlLoaders {
     }
 
     public static RamlLoaders using(RamlLoader loader) {
-        return new RamlLoaders(loader);
+        return new RamlLoaders(loader, SchemaValidators.standard(), false);
     }
 
 
@@ -159,18 +157,19 @@ public class RamlLoaders {
     }
 
     public RamlLoaders andUsing(RamlLoader loader) {
-        return new RamlLoaders(new CompositeRamlLoader(this.loader, loader), schemaValidators);
+        return new RamlLoaders(new CompositeRamlLoader(this.loader, loader), schemaValidators, caching);
     }
 
     public RamlLoaders addSchemaValidator(SchemaValidator schemaValidator) {
-        return new RamlLoaders(loader, schemaValidators.addSchemaValidator(schemaValidator));
+        return new RamlLoaders(loader, schemaValidators.addSchemaValidator(schemaValidator), caching);
     }
 
     public RamlDefinition load(String name) {
         final RamlLoader decorated = new UriRamlLoader(loader);
-        final Raml raml = new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(decorated)).build(name);
+        final Raml raml = caching
+                ? new CachingRamlLoader(decorated).loadRaml(name)
+                : new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(decorated)).build(name);
         final SchemaValidators validators = schemaValidators.withResourceLoader(decorated);
         return new RamlDefinition(raml, validators);
     }
-
 }

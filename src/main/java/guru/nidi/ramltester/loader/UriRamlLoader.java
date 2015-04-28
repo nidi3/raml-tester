@@ -65,6 +65,11 @@ public class UriRamlLoader implements RamlLoader {
         return relativeLoader.fetchResource(name, ifModifiedSince);
     }
 
+    @Override
+    public String config() {
+        return "uri-" + (relativeLoader == null ? "" : relativeLoader.config());
+    }
+
     //raml parser does its own absolute/relative handling (org.raml.parser.tagresolver.ContextPath#resolveAbsolutePath)
     // -> hack to undo this
     private String normalizeResourceName(String name) {

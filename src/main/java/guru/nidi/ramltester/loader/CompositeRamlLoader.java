@@ -38,4 +38,13 @@ public class CompositeRamlLoader implements RamlLoader {
         }
         throw new ResourceNotFoundException(name);
     }
+
+    @Override
+    public String config() {
+        String s = "composite";
+        for (final RamlLoader loader : loaders) {
+            s += "-" + loader.config();
+        }
+        return s;
+    }
 }

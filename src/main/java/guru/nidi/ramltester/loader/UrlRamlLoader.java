@@ -55,6 +55,11 @@ public class UrlRamlLoader implements RamlLoader {
         }
     }
 
+    @Override
+    public String config() {
+        return "url-" + base;
+    }
+
     public static class HttpFactory implements RamlLoaderFactory {
         @Override
         public String supportedProtocol() {

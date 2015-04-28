@@ -58,4 +58,6 @@ public interface RamlLoader {
      * @throws ResourceNotFoundException
      */
     InputStream fetchResource(String name, long ifModifiedSince) throws ResourceNotFoundException;
+
+    String config();
 }

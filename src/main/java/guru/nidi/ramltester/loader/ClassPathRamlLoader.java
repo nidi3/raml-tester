@@ -60,6 +60,11 @@ public class ClassPathRamlLoader implements RamlLoader {
         }
     }
 
+    @Override
+    public String config() {
+        return "classpath-" + base;
+    }
+
     public static class Factory implements RamlLoaderFactory {
         @Override
         public String supportedProtocol() {

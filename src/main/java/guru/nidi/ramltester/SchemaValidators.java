@@ -28,7 +28,7 @@ import java.util.List;
 /**
  *
  */
-class SchemaValidators {
+public class SchemaValidators {
     private final List<SchemaValidator> validators;
 
     private SchemaValidators(List<SchemaValidator> validators) {
