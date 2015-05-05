@@ -97,9 +97,9 @@ public class RamlChecker {
         final VariableMatcher hostMatch = getHostMatch(requestUri, ramlUri);
         final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
 
-        Resource resource = findResource(pathMatch.getSuffix());
+        final Resource resource = findResource(pathMatch.getSuffix());
         resourceUsage(usage, resource).incUses(1);
-        Action action = findAction(resource, request.getMethod());
+        final Action action = findAction(resource, request.getMethod());
         actionUsage(usage, action).incUses(1);
 
         checkProtocol(action, requestUri, ramlUri);
