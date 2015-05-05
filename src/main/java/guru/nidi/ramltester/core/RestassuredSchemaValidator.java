@@ -34,24 +34,26 @@ import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonS
  *
  */
 public class RestassuredSchemaValidator implements SchemaValidator {
-    private final JsonSchemaFactory schemaFactory;
-    private final JsonSchemaValidatorSettings schemaValidatorSettings;
+    private JsonSchemaFactory factory;
+    private final JsonSchemaValidatorSettings settings;
+    private final RamlLoader loader;
 
-    private RestassuredSchemaValidator(JsonSchemaFactory schemaFactory, JsonSchemaValidatorSettings schemaValidatorSettings) {
-        this.schemaFactory = schemaFactory;
-        this.schemaValidatorSettings = schemaValidatorSettings;
+    private RestassuredSchemaValidator(JsonSchemaFactory factory, JsonSchemaValidatorSettings settings, RamlLoader loader) {
+        this.factory = factory;
+        this.settings = settings;
+        this.loader = loader;
     }
 
     public RestassuredSchemaValidator() {
-        this(null, null);
+        this(null, null, null);
     }
 
-    public RestassuredSchemaValidator using(JsonSchemaFactory jsonSchemaFactory) {
-        return new RestassuredSchemaValidator(jsonSchemaFactory, null);
+    public RestassuredSchemaValidator using(JsonSchemaFactory factory) {
+        return new RestassuredSchemaValidator(factory, settings, loader);
     }
 
-    public RestassuredSchemaValidator using(JsonSchemaValidatorSettings jsonSchemaValidatorSettings) {
-        return new RestassuredSchemaValidator(null, jsonSchemaValidatorSettings);
+    public RestassuredSchemaValidator using(JsonSchemaValidatorSettings settings) {
+        return new RestassuredSchemaValidator(factory, settings, loader);
     }
 
     @Override
@@ -60,27 +62,34 @@ public class RestassuredSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
-        final LoadingConfigurationBuilder loadingConfig = LoadingConfiguration.newBuilder();
-        final String simpleName = resourceLoader.getClass().getSimpleName();
-        loadingConfig.addScheme(simpleName, new RamlLoaderUriDownloader(resourceLoader));
-        loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(simpleName + ":///").freeze());
-        return using(JsonSchemaFactory.newBuilder().setLoadingConfiguration(loadingConfig.freeze()).freeze());
+    public SchemaValidator withResourceLoader(RamlLoader loader) {
+        return new RestassuredSchemaValidator(factory, settings, loader);
+    }
+
+    private synchronized void init() {
+        if (loader != null && factory == null) {
+            final LoadingConfigurationBuilder loadingConfig = LoadingConfiguration.newBuilder();
+            final String simpleName = loader.getClass().getSimpleName();
+            loadingConfig.addScheme(simpleName, new RamlLoaderUriDownloader(loader));
+            loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(simpleName + ":///").freeze());
+            factory = JsonSchemaFactory.newBuilder().setLoadingConfiguration(loadingConfig.freeze()).freeze();
+        }
     }
 
     @SuppressWarnings("unchecked")
     private Matcher<String> getMatcher(String data) {
-        if (schemaFactory != null) {
-            return (Matcher<String>) matchesJsonSchema(data).using(schemaFactory);
+        if (factory != null) {
+            return (Matcher<String>) matchesJsonSchema(data).using(factory);
         }
-        if (schemaValidatorSettings != null) {
-            return (Matcher<String>) matchesJsonSchema(data).using(schemaValidatorSettings);
+        if (settings != null) {
+            return (Matcher<String>) matchesJsonSchema(data).using(settings);
         }
         return matchesJsonSchema(data);
     }
 
     @Override
     public void validate(String content, String schema, RamlViolations violations, Message message) {
+        init();
         try {
             final Matcher<String> matcher = getMatcher(schema);
             if (!matcher.matches(content)) {
