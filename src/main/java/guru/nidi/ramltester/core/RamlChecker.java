@@ -57,13 +57,13 @@ public class RamlChecker {
     }
 
     public RamlReport check(RamlRequest request, RamlResponse response) {
-        RamlReport report = new RamlReport(raml);
+        final RamlReport report = new RamlReport(raml);
         usage = report.getUsage();
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
         try {
             checkSecurity(raml.getSecuritySchemes());
-            Action action = findAction(request);
+            final Action action = findAction(request);
             final SecurityExtractor security = new SecurityExtractor(raml, action);
             checkRequest(request, action, security);
             if (response != null) {
@@ -167,7 +167,7 @@ public class RamlChecker {
     }
 
     private Action findAction(Resource resource, String method) {
-        Action action = resource.getAction(method);
+        final Action action = resource.getAction(method);
         requestViolations.addAndThrowIf(action == null, "action.undefined", method, resource);
         return action;
     }
@@ -226,7 +226,7 @@ public class RamlChecker {
 
     private void checkUriParams(Values values, Resource resource) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
-        for (Map.Entry<String, List<Object>> entry : values) {
+        for (final Map.Entry<String, List<Object>> entry : values) {
             final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
             if (uriParam != null) {
                 paramChecker.checkParameter(uriParam, entry.getValue().get(0), new Message("uriParam", entry.getKey(), resource));
@@ -246,7 +246,7 @@ public class RamlChecker {
     }
 
     private Map<String, List<? extends AbstractParam>> getEffectiveBaseUriParams(Action action) {
-        Map<String, List<? extends AbstractParam>> params = new HashMap<>();
+        final Map<String, List<? extends AbstractParam>> params = new HashMap<>();
         if (action.getBaseUriParameters() != null) {
             params.putAll(action.getBaseUriParameters());
         }
@@ -256,7 +256,7 @@ public class RamlChecker {
 
     private void addNotSetBaseUriParams(Resource resource, Map<String, List<? extends AbstractParam>> params) {
         if (resource.getBaseUriParameters() != null) {
-            for (Map.Entry<String, List<UriParameter>> entry : resource.getBaseUriParameters().entrySet()) {
+            for (final Map.Entry<String, List<UriParameter>> entry : resource.getBaseUriParameters().entrySet()) {
                 if (!params.containsKey(entry.getKey())) {
                     params.put(entry.getKey(), entry.getValue());
                 }
@@ -265,7 +265,7 @@ public class RamlChecker {
         if (resource.getParentResource() != null) {
             addNotSetBaseUriParams(resource.getParentResource(), params);
         } else if (raml.getBaseUriParameters() != null) {
-            for (Map.Entry<String, UriParameter> entry : raml.getBaseUriParameters().entrySet()) {
+            for (final Map.Entry<String, UriParameter> entry : raml.getBaseUriParameters().entrySet()) {
                 if (!params.containsKey(entry.getKey())) {
                     params.put(entry.getKey(), Collections.singletonList(entry.getValue()));
                 }
@@ -274,8 +274,8 @@ public class RamlChecker {
     }
 
     private Resource findResource(String resourcePath, Map<String, Resource> resources, Values values) {
-        List<ResourceMatch> matches = new ArrayList<>();
-        for (Map.Entry<String, Resource> entry : resources.entrySet()) {
+        final List<ResourceMatch> matches = new ArrayList<>();
+        for (final Map.Entry<String, Resource> entry : resources.entrySet()) {
             final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
             if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
                 matches.add(new ResourceMatch(pathMatch, entry.getValue()));
@@ -295,7 +295,7 @@ public class RamlChecker {
         return null;
     }
 
-    private static class ResourceMatch implements Comparable<ResourceMatch> {
+    private static final class ResourceMatch implements Comparable<ResourceMatch> {
         private final VariableMatcher match;
         private final Resource resource;
 
@@ -311,7 +311,7 @@ public class RamlChecker {
     }
 
     public void checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
-        Response res = findResponse(action, response.getStatus(), security);
+        final Response res = findResponse(action, response.getStatus(), security);
         actionUsage(usage, action).addResponseCode("" + response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 
@@ -330,7 +330,7 @@ public class RamlChecker {
             violations.addIf(hasContent(message) || !existSchemalessBody(bodies), "contentType.missing");
             return null;
         }
-        MediaType targetType = MediaType.valueOf(message.getContentType());
+        final MediaType targetType = MediaType.valueOf(message.getContentType());
         final MimeType mimeType = findMatchingMimeType(violations, action, bodies, targetType, detail);
         if (mimeType == null) {
             violations.add("mediaType.undefined", message.getContentType(), action, detail);
@@ -339,7 +339,7 @@ public class RamlChecker {
         return new Type(mimeType, targetType);
     }
 
-    private static class Type {
+    private static final class Type {
         private final MimeType mime;
         private final MediaType media;
 
@@ -371,7 +371,7 @@ public class RamlChecker {
         try {
             final String content = new String(body, charset);
             final String refSchema = raml.getConsolidatedSchemas().get(schema);
-            final String schemaToUse = refSchema != null ? refSchema : schema;
+            final String schemaToUse = refSchema == null ? schema : refSchema;
             validator.validate(content, schemaToUse, violations, new Message("schema.mismatch", action, detail, type.mime, content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
@@ -406,7 +406,7 @@ public class RamlChecker {
     }
 
     private SchemaValidator findSchemaValidator(MediaType mediaType) {
-        for (SchemaValidator validator : schemaValidators) {
+        for (final SchemaValidator validator : schemaValidators) {
             if (validator.supports(mediaType)) {
                 return validator;
             }
@@ -423,7 +423,7 @@ public class RamlChecker {
     }
 
     private boolean existSchemalessBody(Map<String, MimeType> bodies) {
-        for (MimeType mimeType : bodies.values()) {
+        for (final MimeType mimeType : bodies.values()) {
             if (mimeType.getSchema() == null) {
                 return true;
             }
@@ -434,7 +434,7 @@ public class RamlChecker {
     private MimeType findMatchingMimeType(RamlViolations violations, Action action, Map<String, MimeType> bodies, MediaType targetType, String detail) {
         MimeType res = null;
         try {
-            for (Map.Entry<String, MimeType> entry : bodies.entrySet()) {
+            for (final Map.Entry<String, MimeType> entry : bodies.entrySet()) {
                 if (targetType.isCompatibleWith(MediaType.valueOf(entry.getKey()))) {
                     if (res == null) {
                         res = entry.getValue();

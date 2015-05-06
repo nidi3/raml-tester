@@ -55,7 +55,7 @@ public class RepositoryRamlLoader implements RamlLoader {
 
     @Override
     public String config() {
-        return "repository-"+defaultResourceName+"-"+loader.config();
+        return "repository-" + defaultResourceName + "-" + loader.config();
     }
 
     protected RepositoryResponse load() {

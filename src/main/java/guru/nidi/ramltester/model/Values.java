@@ -27,7 +27,7 @@ public class Values implements Iterable<Map.Entry<String, List<Object>>> {
     }
 
     public Values(Map<String, String[]> values) {
-        for (Map.Entry<String, String[]> entry : values.entrySet()) {
+        for (final Map.Entry<String, String[]> entry : values.entrySet()) {
             addValues(entry.getKey(), Arrays.asList(entry.getValue()));
         }
     }
@@ -57,13 +57,13 @@ public class Values implements Iterable<Map.Entry<String, List<Object>>> {
     }
 
     public void addValues(String name, Iterable<?> values) {
-        for (Object value : values) {
+        for (final Object value : values) {
             addValue(name, value);
         }
     }
 
     public void addValues(Values values) {
-        for (Map.Entry<String, List<Object>> value : values) {
+        for (final Map.Entry<String, List<Object>> value : values) {
             addValues(value.getKey(), value.getValue());
         }
     }
@@ -90,7 +90,7 @@ public class Values implements Iterable<Map.Entry<String, List<Object>>> {
             return false;
         }
 
-        Values values1 = (Values) o;
+        final Values values1 = (Values) o;
 
         if (!values.equals(values1.values)) {
             return false;

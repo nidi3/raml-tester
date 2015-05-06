@@ -25,7 +25,7 @@ import static guru.nidi.ramltester.httpcomponents.HttpComponentsUtils.*;
  *
  */
 public class HttpComponentsRamlResponse implements RamlResponse {
-    private HttpResponse response;
+    private final HttpResponse response;
 
     public HttpComponentsRamlResponse(HttpResponse response) {
         this.response = response;

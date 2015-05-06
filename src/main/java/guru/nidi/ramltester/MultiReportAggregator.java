@@ -61,8 +61,8 @@ public class MultiReportAggregator implements ReportAggregator {
 
     @Override
     public Iterable<Map.Entry<String, Usage>> usages() {
-        Map<String, Usage> res = new HashMap<>();
-        for (Map.Entry<String, List<RamlReport>> entry : reports.entrySet()) {
+        final Map<String, Usage> res = new HashMap<>();
+        for (final Map.Entry<String, List<RamlReport>> entry : reports.entrySet()) {
             res.put(entry.getKey(), UsageBuilder.usage(entry.getValue().get(0).getRaml(), entry.getValue()));
         }
         return res.entrySet();

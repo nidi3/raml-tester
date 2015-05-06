@@ -35,7 +35,7 @@ public class ServletTester {
     public ServletTester(RamlChecker checker) {
         this.checker = checker;
     }
-   
+
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!(request instanceof HttpServletRequest)) {
             return null;

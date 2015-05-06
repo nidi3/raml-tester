@@ -25,12 +25,12 @@ import java.io.IOException;
 /**
  *
  */
-class HttpComponentsUtils {
+final class HttpComponentsUtils {
     private HttpComponentsUtils() {
     }
 
     static String encodingOf(HttpEntity entity) {
-        return entity.getContentEncoding() != null ? entity.getContentEncoding().getValue() : "utf-8";
+        return entity.getContentEncoding() == null ? "utf-8" : entity.getContentEncoding().getValue();
     }
 
     static String contentTypeOf(HttpMessage message) {

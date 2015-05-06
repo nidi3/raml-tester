@@ -89,7 +89,7 @@ public class Message {
     @Override
     public String toString() {
         final String pattern = MESSAGES.getProperty(key);
-        return MessageFormat.format(pattern != null ? pattern : key, params);
+        return MessageFormat.format(pattern == null ? key : pattern, params);
     }
 
     private static class InnerMessage extends Message {

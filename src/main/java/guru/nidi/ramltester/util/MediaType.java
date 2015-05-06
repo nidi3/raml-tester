@@ -30,9 +30,9 @@ public class MediaType {
         put("json", JSON);
     }};
 
-    private String type;
-    private String subtype;
-    private Map<String, String> parameters;
+    private final String type;
+    private final String subtype;
+    private final Map<String, String> parameters;
 
     public MediaType(String type, String subtype, Map<String, String> parameters) {
         this.type = type;
@@ -44,34 +44,34 @@ public class MediaType {
         if (mimeType == null || mimeType.length() == 0) {
             throw new InvalidMediaTypeException(mimeType, "'mimeType' must not be empty");
         }
-        String[] parts = tokenizeToStringArray(mimeType, ";");
+        final String[] parts = tokenizeToStringArray(mimeType, ";");
 
         String fullType = parts[0].trim();
         // java.net.HttpURLConnection returns a *; q=.2 Accept header
         if (WILDCARD_TYPE.equals(fullType)) {
             fullType = "*/*";
         }
-        int subIndex = fullType.indexOf('/');
+        final int subIndex = fullType.indexOf('/');
         if (subIndex == -1) {
             throw new InvalidMediaTypeException(mimeType, "does not contain '/'");
         }
         if (subIndex == fullType.length() - 1) {
             throw new InvalidMediaTypeException(mimeType, "does not contain subtype after '/'");
         }
-        String type = fullType.substring(0, subIndex);
-        String subtype = fullType.substring(subIndex + 1, fullType.length());
+        final String type = fullType.substring(0, subIndex);
+        final String subtype = fullType.substring(subIndex + 1, fullType.length());
         if (WILDCARD_TYPE.equals(type) && !WILDCARD_TYPE.equals(subtype)) {
             throw new InvalidMediaTypeException(mimeType, "wildcard type is legal only in '*/*' (all mime types)");
         }
 
-        Map<String, String> parameters = new LinkedHashMap<>(parts.length);
+        final Map<String, String> parameters = new LinkedHashMap<>(parts.length);
         if (parts.length > 1) {
             for (int i = 1; i < parts.length; i++) {
-                String parameter = parts[i];
-                int eqIndex = parameter.indexOf('=');
+                final String parameter = parts[i];
+                final int eqIndex = parameter.indexOf('=');
                 if (eqIndex != -1) {
-                    String attribute = parameter.substring(0, eqIndex);
-                    String value = parameter.substring(eqIndex + 1, parameter.length());
+                    final String attribute = parameter.substring(0, eqIndex);
+                    final String value = parameter.substring(eqIndex + 1, parameter.length());
                     parameters.put(attribute, value);
                 }
             }
@@ -135,7 +135,7 @@ public class MediaType {
     }
 
     private String[] findSuffix() {
-        int pos = getSubtype().indexOf('+');
+        final int pos = getSubtype().indexOf('+');
         return pos == -1
                 ? new String[]{getSubtype(), null}
                 : new String[]{getSubtype().substring(0, pos), getSubtype().substring(pos + 1)};
@@ -155,15 +155,15 @@ public class MediaType {
 
     public String getCharset(String defaultCharset) {
         final String charset = parameters.get(CHARSET);
-        return charset != null ? charset : defaultCharset;
+        return charset == null ? defaultCharset : charset;
     }
 
     private static String[] tokenizeToStringArray(String str, String delimiters) {
         if (str == null) {
             return null;
         }
-        StringTokenizer st = new StringTokenizer(str, delimiters);
-        List<String> tokens = new ArrayList<>();
+        final StringTokenizer st = new StringTokenizer(str, delimiters);
+        final List<String> tokens = new ArrayList<>();
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
             token = token.trim();
@@ -186,7 +186,7 @@ public class MediaType {
         if (!(other instanceof MediaType)) {
             return false;
         }
-        MediaType otherType = (MediaType) other;
+        final MediaType otherType = (MediaType) other;
         return (this.type.equalsIgnoreCase(otherType.type) &&
                 this.subtype.equalsIgnoreCase(otherType.subtype) &&
                 this.parameters.equals(otherType.parameters));
@@ -203,7 +203,7 @@ public class MediaType {
     @Override
     public String toString() {
         String res = type + "/" + subtype;
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+        for (final Map.Entry<String, String> entry : parameters.entrySet()) {
             res += ";" + entry.getKey() + "=" + entry.getValue();
         }
         return res;

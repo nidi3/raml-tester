@@ -42,7 +42,7 @@ class SecurityExtractor {
 
     public List<Map<String, QueryParameter>> queryParameters() {
         final List<Map<String, QueryParameter>> res = new RemovePropagatingList<>();
-        for (SecurityScheme scheme : schemes) {
+        for (final SecurityScheme scheme : schemes) {
             res.add(scheme.getDescribedBy().getQueryParameters());
         }
         return res;
@@ -50,7 +50,7 @@ class SecurityExtractor {
 
     public List<Map<String, Header>> headers() {
         final List<Map<String, Header>> res = new RemovePropagatingList<>();
-        for (SecurityScheme scheme : schemes) {
+        for (final SecurityScheme scheme : schemes) {
             res.add(scheme.getDescribedBy().getHeaders());
         }
         return res;
@@ -58,7 +58,7 @@ class SecurityExtractor {
 
     public List<Map<String, Response>> responses() {
         final List<Map<String, Response>> res = new RemovePropagatingList<>();
-        for (SecurityScheme scheme : schemes) {
+        for (final SecurityScheme scheme : schemes) {
             res.add(scheme.getDescribedBy().getResponses());
         }
         return res;
@@ -75,7 +75,7 @@ class SecurityExtractor {
 
     private List<SecurityScheme> securitySchemes(Raml raml, List<SecurityReference> refs, Set<String> ignore) {
         final List<SecurityScheme> res = new ArrayList<>();
-        for (SecurityReference ref : refs) {
+        for (final SecurityReference ref : refs) {
             final String name = ref.getName();
             if (!ignore.contains(name)) {
                 ignore.add(name);

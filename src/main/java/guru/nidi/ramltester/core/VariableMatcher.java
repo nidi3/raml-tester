@@ -20,7 +20,7 @@ import guru.nidi.ramltester.model.Values;
 /**
  *
  */
-class VariableMatcher {
+final class VariableMatcher {
     private final boolean matches;
     private final boolean completeMatch;
     private final String suffix;
@@ -38,7 +38,7 @@ class VariableMatcher {
         int patternPos = 0, valuePos = 0;
         while (patternPos < pattern.length() && valuePos < value.length()) {
             if (pattern.charAt(patternPos) == '{') {
-                StringBuilder varName = new StringBuilder();
+                final StringBuilder varName = new StringBuilder();
                 patternPos++;
                 while (patternPos < pattern.length() && pattern.charAt(patternPos) != '}') {
                     varName.append(pattern.charAt(patternPos));
@@ -48,8 +48,8 @@ class VariableMatcher {
                     throw new IllegalVariablePatternException("Unclosed variable " + varName, pattern);
                 }
                 patternPos++;
-                char next = patternPos < pattern.length() ? pattern.charAt(patternPos) : '/';
-                StringBuilder varValue = new StringBuilder();
+                final char next = patternPos < pattern.length() ? pattern.charAt(patternPos) : '/';
+                final StringBuilder varValue = new StringBuilder();
                 while (valuePos < value.length() && value.charAt(valuePos) != next) {
                     varValue.append(value.charAt(valuePos));
                     valuePos++;

@@ -28,7 +28,7 @@ import java.util.List;
 /**
  *
  */
-public class SchemaValidators {
+public final class SchemaValidators {
     private final List<SchemaValidator> validators;
 
     private SchemaValidators(List<SchemaValidator> validators) {
@@ -51,7 +51,7 @@ public class SchemaValidators {
 
     public SchemaValidators withResourceLoader(RamlLoader resourceLoader) {
         final ArrayList<SchemaValidator> newValidators = new ArrayList<>();
-        for (SchemaValidator validator : validators) {
+        for (final SchemaValidator validator : validators) {
             newValidators.add(validator.withResourceLoader(resourceLoader));
         }
         return new SchemaValidators(newValidators);

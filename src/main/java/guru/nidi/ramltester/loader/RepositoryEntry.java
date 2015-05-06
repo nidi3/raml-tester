@@ -22,6 +22,6 @@ public interface RepositoryEntry {
     String getName();
 
     String getPath();
-    
+
     String getContent();
 }

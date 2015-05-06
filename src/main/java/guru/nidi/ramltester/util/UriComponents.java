@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 /**
  *
  */
-public class UriComponents {
+public final class UriComponents {
     private static final class Pattern {
         private static final String
                 HTTP = "(?i)(http|https):",
@@ -61,7 +61,7 @@ public class UriComponents {
         Matcher m = Pattern.HTTP_URL.matcher(httpUrl);
         if (m.matches()) {
             String scheme = m.group(1);
-            scheme = (scheme != null) ? scheme.toLowerCase() : null;
+            scheme = scheme == null ? null : scheme.toLowerCase();
             String userInfo = m.group(4);
             String host = m.group(5);
             if (scheme != null && scheme.length() > 0 && (host == null || host.length() == 0)) {
@@ -82,15 +82,15 @@ public class UriComponents {
     }
 
     public static Values parseQuery(String query) {
-        Values q = new Values();
+        final Values q = new Values();
         if (query != null) {
-            Matcher m = Pattern.QUERY_PARAM.matcher(query);
+            final Matcher m = Pattern.QUERY_PARAM.matcher(query);
             while (m.find()) {
-                String name = m.group(1);
-                String eq = m.group(2);
-                String value = m.group(3);
-                q.addValue(name, (value != null ? value :
-                        (eq != null && eq.length() > 0 ? "" : null)));
+                final String name = m.group(1);
+                final String eq = m.group(2);
+                final String value = m.group(3);
+                final String emptyValue = eq != null && eq.length() > 0 ? "" : null;
+                q.addValue(name, value == null ? emptyValue : value);
             }
         }
         return q;

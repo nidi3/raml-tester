@@ -23,7 +23,7 @@ import java.io.Reader;
 /**
  *
  */
-public class IoUtils {
+public final class IoUtils {
     private IoUtils() {
     }
 

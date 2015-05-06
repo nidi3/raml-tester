@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  *
  */
-public class UsageBuilder {
+public final class UsageBuilder {
     private UsageBuilder() {
     }
 

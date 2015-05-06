@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  *
  */
-class SpringUtils {
+final class SpringUtils {
     private SpringUtils() {
     }
 

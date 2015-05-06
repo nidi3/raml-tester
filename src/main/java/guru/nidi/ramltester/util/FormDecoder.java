@@ -118,13 +118,13 @@ public class FormDecoder {
     }
 
     private Values decodeUrlEncoded(String content, String charset) {
-        Values q = new Values();
+        final Values q = new Values();
         if (content != null) {
-            Matcher m = QUERY_PARAM.matcher(content);
+            final Matcher m = QUERY_PARAM.matcher(content);
             while (m.find()) {
-                String name = urlDecode(m.group(1), charset);
-                String eq = m.group(2);
-                String value = m.group(3);
+                final String name = urlDecode(m.group(1), charset);
+                final String eq = m.group(2);
+                final String value = m.group(3);
                 q.addValue(name, (value != null ? urlDecode(value, charset) :
                         (eq != null && eq.length() > 0 ? "" : null)));
             }

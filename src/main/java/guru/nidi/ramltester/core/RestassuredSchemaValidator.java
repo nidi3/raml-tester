@@ -93,7 +93,7 @@ public class RestassuredSchemaValidator implements SchemaValidator {
         try {
             final Matcher<String> matcher = getMatcher(schema);
             if (!matcher.matches(content)) {
-                Description description = new StringDescription().appendDescriptionOf(matcher);
+                final Description description = new StringDescription().appendDescriptionOf(matcher);
                 violations.add(message.withParam(description.toString()));
             }
         } catch (JsonSchemaValidationException e) {

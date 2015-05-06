@@ -26,9 +26,9 @@ import java.util.Set;
 /**
  *
  */
-public class ApiDesignerFilesResponse extends AbstractMap<String,ApiDesignerFile> implements RepositoryResponse {
-    private final Map<String,ApiDesignerFile> files=new HashMap<>();
-    
+public class ApiDesignerFilesResponse extends AbstractMap<String, ApiDesignerFile> implements RepositoryResponse {
+    private final Map<String, ApiDesignerFile> files = new HashMap<>();
+
     @Override
     public Iterable<? extends RepositoryEntry> getFiles() {
         return files.values();

@@ -81,7 +81,7 @@ class ParameterChecker {
                                        Values values, Message message) {
         if (extensions.isEmpty()) {
             final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
-            for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
+            for (final Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
                 listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
             }
             return checkListParameters(listParams, values, message);
@@ -103,10 +103,10 @@ class ParameterChecker {
     private Set<String> checkExtendedParameters(Map<String, ? extends AbstractParam> params, Map<String, ? extends AbstractParam> extension,
                                                 Values values, Message message, RamlViolations violations) {
         final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
-        for (Map.Entry<String, ? extends AbstractParam> entry : extension.entrySet()) {
+        for (final Map.Entry<String, ? extends AbstractParam> entry : extension.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
-        for (Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
+        for (final Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
         final ParameterChecker checker = new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, predefined);
@@ -118,7 +118,7 @@ class ParameterChecker {
     }
 
     public Set<String> checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
-        Set<String> found = new HashSet<>();
+        final Set<String> found = new HashSet<>();
         for (Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
             final String paramName = findMatchingParamName(params.keySet(), entry.getKey());
@@ -126,9 +126,9 @@ class ParameterChecker {
             if (parameters == null || parameters.isEmpty()) {
                 violations.addIf(!acceptUndefined(entry.getKey().toLowerCase()), namedMsg.withMessageParam("undefined"));
             } else {
-                for (AbstractParam parameter : parameters) {
+                for (final AbstractParam parameter : parameters) {
                     violations.addIf(!parameter.isRepeat() && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
-                    for (Object value : entry.getValue()) {
+                    for (final Object value : entry.getValue()) {
                         checkParameter(parameter, value, namedMsg);
                     }
                 }
@@ -137,7 +137,7 @@ class ParameterChecker {
         }
         for (Map.Entry<String, List<? extends AbstractParam>> entry : params.entrySet()) {
             final Message namedMsg = message.withParam(entry.getKey());
-            for (AbstractParam parameter : entry.getValue()) {
+            for (final AbstractParam parameter : entry.getValue()) {
                 violations.addIf(parameter.isRequired() && !found.contains(entry.getKey()), namedMsg.withMessageParam("required.missing"));
             }
         }
@@ -148,8 +148,8 @@ class ParameterChecker {
         if (!acceptWildcard) {
             return name;
         }
-        for (String key : paramNames) {
-            int pos = key.indexOf("{?}");
+        for (final String key : paramNames) {
+            final int pos = key.indexOf("{?}");
             if (pos >= 0) {
                 if ((pos == 0 || name.startsWith(key.substring(0, pos))) &&
                         (pos == key.length() - 3 || name.endsWith(key.substring(pos + 3)))) {
@@ -164,10 +164,10 @@ class ParameterChecker {
 
     public void checkParameter(AbstractParam param, Object value, Message message) {
         if (value == null) {
-            Message detail = message.withInnerParam(new Message("value", "empty"));
+            final Message detail = message.withInnerParam(new Message("value", "empty"));
             checkNullParameter(param, detail);
         } else {
-            Message detail = message.withInnerParam(new Message("value", value));
+            final Message detail = message.withInnerParam(new Message("value", value));
             if (value instanceof String) {
                 checkStringParameter(param, (String) value, detail);
             } else if (value instanceof FileValue) {
@@ -179,10 +179,10 @@ class ParameterChecker {
     }
 
     private void checkNullParameter(AbstractParam param, Message detail) {
-        if (param.getType() != ParamType.STRING) {
-            violations.add(detail.withMessageParam("value.empty"));
-        } else {
+        if (param.getType() == ParamType.STRING) {
             checkStringParameter(param, "", detail);
+        } else {
+            violations.add(detail.withMessageParam("value.empty"));
         }
     }
 

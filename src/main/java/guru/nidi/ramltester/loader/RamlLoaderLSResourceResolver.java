@@ -21,8 +21,8 @@ import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 
 /**
-*
-*/
+ *
+ */
 public class RamlLoaderLSResourceResolver implements LSResourceResolver {
     private static final DOMImplementationLS DOM_IMPLEMENTATION_LS;
 

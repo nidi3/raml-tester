@@ -46,7 +46,9 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
 
     @Override
     public String getRequestUrl(String baseUri) {
-        return baseUri != null ? (baseUri + request().getPathInfo()) : request().getRequestURL().toString();
+        return baseUri == null
+                ? request().getRequestURL().toString()
+                : (baseUri + request().getPathInfo());
     }
 
     @Override
@@ -83,9 +85,10 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
     @Override
     public BufferedReader getReader() throws IOException {
         readContentIfNeeded();
-        return new BufferedReader(getCharacterEncoding() != null
-                ? new InputStreamReader(new ByteArrayInputStream(content), getCharacterEncoding())
-                : new InputStreamReader(new ByteArrayInputStream(content)));
+        final InputStreamReader in = getCharacterEncoding() == null
+                ? new InputStreamReader(new ByteArrayInputStream(content))
+                : new InputStreamReader(new ByteArrayInputStream(content), getCharacterEncoding());
+        return new BufferedReader(in);
     }
 
     @Override

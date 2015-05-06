@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
     private Raml raml;
-    private List<RamlReport> reports = new ArrayList<>();
+    private final List<RamlReport> reports = new ArrayList<>();
 
     @Override
     public RamlReport addReport(RamlReport report) {

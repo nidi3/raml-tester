@@ -24,7 +24,7 @@ class CountSet<T> extends AbstractSet<T> {
     private final Map<T, Integer> map = new HashMap<>();
 
     public void add(T value, int count) {
-        int old = getCount(value);
+        final int old = getCount(value);
         map.put(value, old + count);
     }
 
@@ -44,7 +44,7 @@ class CountSet<T> extends AbstractSet<T> {
     }
 
     public void addAll(Collection<? extends T> values, int count) {
-        for (T value : values) {
+        for (final T value : values) {
             add(value, count);
         }
     }
@@ -55,7 +55,7 @@ class CountSet<T> extends AbstractSet<T> {
     }
 
     public int getCount(T value) {
-        Integer count = map.get(value);
+        final Integer count = map.get(value);
         return count == null ? 0 : count;
     }
 
