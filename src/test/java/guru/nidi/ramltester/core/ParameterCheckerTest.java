@@ -234,7 +234,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         assertNoViolations(violations);
     }
 
-    private void assertOneViolationThat(Map<String, ? extends AbstractParam> params,Values values, Matcher<String> matcher) {
+    private void assertOneViolationThat(Map<String, ? extends AbstractParam> params, Values values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
         new ParameterChecker(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);

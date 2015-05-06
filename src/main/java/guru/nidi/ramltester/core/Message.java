@@ -63,7 +63,7 @@ public class Message {
 
     private Object[] addParam(Object param) {
         param = transformParam(param);
-        final  Object[] newParams = new Object[params.length + 1];
+        final Object[] newParams = new Object[params.length + 1];
         System.arraycopy(params, 0, newParams, 0, params.length);
         newParams[newParams.length - 1] = param;
         return newParams;
@@ -99,7 +99,7 @@ public class Message {
 
         @Override
         public Message withParam(Object p) {
-            final  Object[] newParams = new Object[params.length];
+            final Object[] newParams = new Object[params.length];
             System.arraycopy(params, 0, newParams, 0, params.length);
             newParams[params.length - 1] = ((Message) newParams[params.length - 1]).withParam(p);
             return new Message(key, newParams);

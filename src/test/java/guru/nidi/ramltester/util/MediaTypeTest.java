@@ -85,7 +85,7 @@ public class MediaTypeTest {
     }
 
     @Test
-    public void jsonCompatibility(){
+    public void jsonCompatibility() {
         assertTrue(MediaType.JSON.isCompatibleWith(valueOf("a/b+json")));
         assertTrue(valueOf("a/b+json").isCompatibleWith(MediaType.JSON));
     }

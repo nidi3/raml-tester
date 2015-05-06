@@ -70,7 +70,7 @@ public class RepositoryRamlLoader implements RamlLoader {
     }
 
     private ObjectMapper createMapper() {
-        final  ObjectMapper mapper = new ObjectMapper();
+        final ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper;
     }
