@@ -43,7 +43,9 @@ class SecurityExtractor {
     public List<Map<String, QueryParameter>> queryParameters() {
         final List<Map<String, QueryParameter>> res = new RemovePropagatingList<>();
         for (final SecurityScheme scheme : schemes) {
-            res.add(scheme.getDescribedBy().getQueryParameters());
+            if (scheme.getDescribedBy() != null) {
+                res.add(scheme.getDescribedBy().getQueryParameters());
+            }
         }
         return res;
     }
@@ -51,7 +53,9 @@ class SecurityExtractor {
     public List<Map<String, Header>> headers() {
         final List<Map<String, Header>> res = new RemovePropagatingList<>();
         for (final SecurityScheme scheme : schemes) {
-            res.add(scheme.getDescribedBy().getHeaders());
+            if (scheme.getDescribedBy() != null) {
+                res.add(scheme.getDescribedBy().getHeaders());
+            }
         }
         return res;
     }
@@ -59,7 +63,9 @@ class SecurityExtractor {
     public List<Map<String, Response>> responses() {
         final List<Map<String, Response>> res = new RemovePropagatingList<>();
         for (final SecurityScheme scheme : schemes) {
-            res.add(scheme.getDescribedBy().getResponses());
+            if (scheme.getDescribedBy() != null) {
+                res.add(scheme.getDescribedBy().getResponses());
+            }
         }
         return res;
     }

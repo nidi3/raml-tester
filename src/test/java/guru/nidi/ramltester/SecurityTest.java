@@ -73,4 +73,21 @@ public class SecurityTest extends HighlevelTestBase {
                 equalTo("Header 'Authorization2' on action(GET /unsec) is not defined"));
     }
 
+    @Test
+    public void allowSecurityWithoutDescribedBy() throws Exception {
+        assertNoViolations(test(
+                global,
+                get("/undesc"),
+                jsonResponse(200, "", null)));
+    }
+
+    @Test
+    //TODO should this test fail because of wrong securityScheme.type?
+    public void allowWrongSecurityType() throws Exception {
+        assertNoViolations(test(
+                global,
+                get("/type"),
+                jsonResponse(200, "", null)));
+    }
+
 }

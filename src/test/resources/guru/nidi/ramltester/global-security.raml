@@ -10,6 +10,10 @@ securitySchemes:
       describedBy:
         headers:
           Authorization1:
+  - noDesc:
+      type: x-noDesc
+  - wrongType:
+      type: wrong
 
 securedBy: [oauth_2_0]
 
@@ -25,3 +29,15 @@ securedBy: [oauth_2_0]
 /unsec:
   get:
     securedBy: [null]
+
+/undesc:
+  get:
+    securedBy: [noDesc]
+    responses:
+      200:
+
+/type:
+  get:
+    securedBy: [wrongType]
+    responses:
+      200:
