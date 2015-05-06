@@ -98,7 +98,7 @@ public class CachingRamlLoader {
             }
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("Could not read resource '" + name + "'");
+            throw new RuntimeException("Could not read resource '" + name + "'", e);
         }
     }
 

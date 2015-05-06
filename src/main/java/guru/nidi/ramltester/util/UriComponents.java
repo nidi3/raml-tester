@@ -18,12 +18,13 @@ package guru.nidi.ramltester.util;
 import guru.nidi.ramltester.model.Values;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
  */
 public final class UriComponents {
-    private static final class Pattern {
+    private static final class HttpUrl {
         private static final String
                 HTTP = "(?i)(http|https):",
                 USERINFO = "([^@/]*)",
@@ -34,9 +35,25 @@ public final class UriComponents {
                 PATH = "([^?#]*)",
                 LAST = "(.*)";
 
-        public static final java.util.regex.Pattern
-                HTTP_URL = java.util.regex.Pattern.compile("^" + HTTP + "(//(" + USERINFO + "@)?" + HOST + "(:" + PORT + ")?" + ")?" + PATH + "(\\?" + LAST + ")?"),
-                QUERY_PARAM = java.util.regex.Pattern.compile("([^&=]+)(=?)([^&]+)?");
+        public static final Pattern
+                PATTERN = Pattern.compile("^" + HTTP + "(//(" + USERINFO + "@)?" + HOST + "(:" + PORT + ")?" + ")?" + PATH + "(\\?" + LAST + ")?");
+
+        public static final int
+                GROUP_SCHEME = 1,
+                GROUP_USER = 4,
+                GROUP_HOST = 5,
+                GROUP_PORT = 7,
+                GROUP_PATH = 8,
+                GROUP_QUERY = 10;
+    }
+
+    private static final class QueryParam {
+        public static final Pattern PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
+
+        public static final int
+                GROUP_NAME = 1,
+                GROUP_EQUAL = 2,
+                GROUP_VALUE = 3;
     }
 
     private final String scheme;
@@ -58,20 +75,20 @@ public final class UriComponents {
     }
 
     public static UriComponents fromHttpUrl(String httpUrl) {
-        final Matcher m = Pattern.HTTP_URL.matcher(httpUrl);
+        final Matcher m = HttpUrl.PATTERN.matcher(httpUrl);
         if (m.matches()) {
-            final String scheme = m.group(1) == null ? null : m.group(1).toLowerCase();
-            final String userInfo = m.group(4);
-            final String host = m.group(5);
+            final String scheme = m.group(HttpUrl.GROUP_SCHEME) == null ? null : m.group(HttpUrl.GROUP_SCHEME).toLowerCase();
+            final String userInfo = m.group(HttpUrl.GROUP_USER);
+            final String host = m.group(HttpUrl.GROUP_HOST);
             if (scheme != null && scheme.length() > 0 && (host == null || host.length() == 0)) {
                 throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
             }
-            final String portString = m.group(7);
+            final String portString = m.group(HttpUrl.GROUP_PORT);
             final Integer port = (portString != null && portString.length() > 0)
                     ? Integer.parseInt(portString)
                     : null;
-            final String path = m.group(8);
-            final String query = m.group(10);
+            final String path = m.group(HttpUrl.GROUP_PATH);
+            final String query = m.group(HttpUrl.GROUP_QUERY);
 
             return new UriComponents(scheme, userInfo, host, port, path, query);
         } else {
@@ -82,11 +99,11 @@ public final class UriComponents {
     public static Values parseQuery(String query) {
         final Values q = new Values();
         if (query != null) {
-            final Matcher m = Pattern.QUERY_PARAM.matcher(query);
+            final Matcher m = QueryParam.PATTERN.matcher(query);
             while (m.find()) {
-                final String name = m.group(1);
-                final String eq = m.group(2);
-                final String value = m.group(3);
+                final String name = m.group(QueryParam.GROUP_NAME);
+                final String eq = m.group(QueryParam.GROUP_EQUAL);
+                final String value = m.group(QueryParam.GROUP_VALUE);
                 final String emptyValue = eq != null && eq.length() > 0 ? "" : null;
                 q.addValue(name, value == null ? emptyValue : value);
             }

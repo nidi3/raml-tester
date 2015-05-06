@@ -36,7 +36,10 @@ public class FormDecoder {
     private static final MediaType MULTIPART = MediaType.valueOf("multipart/form-data");
     private static final MediaType URL_ENCODED = MediaType.valueOf("application/x-www-form-urlencoded");
     private static final Pattern QUERY_PARAM = Pattern.compile("([^&=]+)(=?)([^&]+)?");
-
+    private static final int
+            GROUP_NAME = 1,
+            GROUP_EQUAL = 2,
+            GROUP_VALUE = 3;
 
     public static boolean supportsFormParameters(MediaType mediaType) {
         return mediaType.isCompatibleWith(URL_ENCODED) || mediaType.isCompatibleWith(MULTIPART);
@@ -52,8 +55,10 @@ public class FormDecoder {
             try {
                 final String content = IoUtils.readIntoString(new InputStreamReader(new ByteArrayInputStream(request.getContent()), charset));
                 return decodeUrlEncoded(content, charset);
-            } catch (IOException e) {
+            } catch (UnsupportedEncodingException e) {
                 throw new IllegalArgumentException("Unknown charset " + charset);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not read request content", e);
             }
         }
         if (type.isCompatibleWith(MULTIPART)) {
@@ -122,9 +127,9 @@ public class FormDecoder {
         if (content != null) {
             final Matcher m = QUERY_PARAM.matcher(content);
             while (m.find()) {
-                final String name = urlDecode(m.group(1), charset);
-                final String eq = m.group(2);
-                final String value = m.group(3);
+                final String name = urlDecode(m.group(GROUP_NAME), charset);
+                final String eq = m.group(GROUP_EQUAL);
+                final String value = m.group(GROUP_VALUE);
                 q.addValue(name, (value != null ? urlDecode(value, charset) :
                         (eq != null && eq.length() > 0 ? "" : null)));
             }

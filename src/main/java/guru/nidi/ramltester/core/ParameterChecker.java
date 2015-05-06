@@ -36,6 +36,7 @@ class ParameterChecker {
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
     private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
+    private static final String WILDCARD = "{?}";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -149,10 +150,9 @@ class ParameterChecker {
             return name;
         }
         for (final String key : paramNames) {
-            final int pos = key.indexOf("{?}");
+            final int pos = key.indexOf(WILDCARD);
             if (pos >= 0) {
-                if ((pos == 0 || name.startsWith(key.substring(0, pos))) &&
-                        (pos == key.length() - 3 || name.endsWith(key.substring(pos + 3)))) {
+                if (nameMatchesKeyStart(name, key, pos) && nameMatchesKeyEnd(name, key, pos)) {
                     return key;
                 }
             } else if (key.equals(name)) {
@@ -160,6 +160,15 @@ class ParameterChecker {
             }
         }
         return null;
+    }
+
+    private boolean nameMatchesKeyStart(String name, String key, int wildcardPos) {
+        return wildcardPos == 0 || name.startsWith(key.substring(0, wildcardPos));
+    }
+
+    private boolean nameMatchesKeyEnd(String name, String key, int wildcardPos) {
+        return wildcardPos == key.length() - WILDCARD.length() ||
+                name.endsWith(key.substring(wildcardPos + WILDCARD.length()));
     }
 
     public void checkParameter(AbstractParam param, Object value, Message message) {

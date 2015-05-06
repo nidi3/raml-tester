@@ -28,13 +28,18 @@ import java.util.regex.Pattern;
  */
 public class UriRamlLoader implements RamlLoader {
     private static final Pattern ABSOLUTE_URI_PATTERN = Pattern.compile("(([^:]+):?([^@]*)@)?([^:]+)://(.+)");
+    private static final int
+            GROUP_USER = 2,
+            GROUP_PASSWORD = 3,
+            GROUP_PROTOCOL = 4,
+            GROUP_PATH = 5;
 
-    private static Map<String, RamlLoaderFactory> factories = new HashMap<>();
+    private static final Map<String, RamlLoaderFactory> FACTORIES = new HashMap<>();
 
     static {
         final ServiceLoader<RamlLoaderFactory> loader = ServiceLoader.load(RamlLoaderFactory.class);
         for (final RamlLoaderFactory factory : loader) {
-            factories.put(factory.supportedProtocol(), factory);
+            FACTORIES.put(factory.supportedProtocol(), factory);
         }
     }
 
@@ -49,14 +54,14 @@ public class UriRamlLoader implements RamlLoader {
         name = normalizeResourceName(name);
         final Matcher matcher = ABSOLUTE_URI_PATTERN.matcher(name);
         if (matcher.matches()) {
-            String path = matcher.group(5);
+            String path = matcher.group(GROUP_PATH);
             String res = null;
             final int lastSlash = path.lastIndexOf('/');
             if (lastSlash >= 0 && lastSlash < path.length() - 1) {
                 res = path.substring(lastSlash + 1);
                 path = path.substring(0, lastSlash);
             }
-            return absoluteLoader(matcher.group(4), path, matcher.group(2), matcher.group(3))
+            return absoluteLoader(matcher.group(GROUP_PROTOCOL), path, matcher.group(GROUP_USER), matcher.group(GROUP_PASSWORD))
                     .fetchResource(res, ifModifiedSince);
         }
         if (relativeLoader == null) {
@@ -87,7 +92,7 @@ public class UriRamlLoader implements RamlLoader {
     }
 
     private RamlLoader absoluteLoader(String protocol, String base, String username, String password) {
-        final RamlLoaderFactory factory = factories.get(protocol);
+        final RamlLoaderFactory factory = FACTORIES.get(protocol);
         if (factory == null) {
             throw new IllegalArgumentException("Unsupported protocol " + protocol);
         }

@@ -24,6 +24,7 @@ import java.net.URL;
  *
  */
 public class ClassPathRamlLoader implements RamlLoader {
+    private static final String FILE_COLON = "file:";
     private final String base;
 
     public ClassPathRamlLoader() {
@@ -41,14 +42,15 @@ public class ClassPathRamlLoader implements RamlLoader {
             throw new ResourceNotFoundException(name);
         }
         try {
+            final String path = url.getPath();
             switch (url.getProtocol()) {
                 case "file":
-                    final File file = new File(url.getPath());
+                    final File file = new File(path);
                     return file.lastModified() > ifModifiedSince ? url.openStream() : null;
                 case "jar":
-                    if (url.getPath().startsWith("file:")) {
-                        final int pos = url.getPath().indexOf('!');
-                        final File jar = new File(url.getPath().substring(5, pos));
+                    if (path.startsWith(FILE_COLON)) {
+                        final int pos = path.indexOf('!');
+                        final File jar = new File(path.substring(FILE_COLON.length(), pos));
                         return jar.lastModified() > ifModifiedSince ? url.openStream() : null;
                     }
                     return url.openStream();
@@ -56,7 +58,7 @@ public class ClassPathRamlLoader implements RamlLoader {
                     return url.openStream();
             }
         } catch (IOException e) {
-            throw new ResourceNotFoundException(name);
+            throw new ResourceNotFoundException(name, e);
         }
     }
 

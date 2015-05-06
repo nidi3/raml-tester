@@ -15,13 +15,12 @@
  */
 package guru.nidi.ramltester.util;
 
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
 
 /**
  *
  */
-public class MediaType {
+public final class MediaType {
     public static final MediaType JSON = valueOf("application/json");
 
     private static final String CHARSET = "charset";
@@ -77,13 +76,7 @@ public class MediaType {
             }
         }
 
-        try {
-            return new MediaType(type, subtype, parameters);
-        } catch (UnsupportedCharsetException ex) {
-            throw new InvalidMediaTypeException(mimeType, "unsupported charset '" + ex.getCharsetName() + "'");
-        } catch (IllegalArgumentException ex) {
-            throw new InvalidMediaTypeException(mimeType, ex.getMessage());
-        }
+        return new MediaType(type, subtype, parameters);
     }
 
     public boolean isWildcardType() {

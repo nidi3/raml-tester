@@ -19,6 +19,7 @@ import jdepend.framework.DependencyConstraint;
 import jdepend.framework.JDepend;
 import jdepend.framework.JavaPackage;
 import jdepend.framework.PackageFilter;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,12 +33,17 @@ import static org.junit.Assert.*;
  */
 public class DependencyTest {
     private static final String BASE = "guru.nidi.ramltester";
+    private static JDepend depend;
+
+    @BeforeClass
+    public static void init() throws IOException {
+        depend = new JDepend(new PackageFilter(Arrays.asList("org.", "java.", "com.", "javax.")));
+        depend.addDirectory("target/classes");
+        depend.analyze();
+    }
 
     @Test
     public void dependencies() throws IOException {
-        final JDepend jDepend = new JDepend(new PackageFilter(Arrays.asList("org.", "java.", "com.", "javax.")));
-        jDepend.addDirectory("target/classes");
-
         DependencyConstraint constraint = new DependencyConstraint();
 
         final JavaPackage
@@ -76,25 +82,25 @@ public class DependencyTest {
         spring.dependsUpon(util);
         spring.dependsUpon(core);
 
-        jDepend.analyze();
-
-        assertTrue("Dependency mismatch", jDepend.dependencyMatch(constraint));
+        assertTrue("Dependency mismatch", depend.dependencyMatch(constraint));
     }
 
     @Test
-    public void circular() throws IOException {
-        final JDepend jDepend = new JDepend();
-        jDepend.addDirectory("target/classes");
+    public void noCircularDependencies() throws IOException {
+        assertFalse("Cyclic dependencies", depend.containsCycles());
+    }
 
-        final Collection<JavaPackage> packages = jDepend.analyze();
-        assertFalse("Cyclic dependencies", jDepend.containsCycles());
+    @Test
+    public void maxDistance() throws IOException {
+        @SuppressWarnings("unchecked")
+        final Collection<JavaPackage> packages = depend.getPackages();
 
         System.out.println("Name                                      abst  inst  dist");
         System.out.println("----------------------------------------------------------");
         for (JavaPackage pack : packages) {
             if (pack.getName().startsWith("guru.")) {
                 System.out.printf("%-40s: %-1.2f  %-1.2f  %-1.2f%n", pack.getName(), pack.abstractness(), pack.instability(), pack.distance());
-                assertEquals("Distance exceeded: " + pack.getName(), 0, pack.distance(), .4f);
+                assertEquals("Distance exceeded: " + pack.getName(), 0, pack.distance(), .85f);
             }
         }
     }

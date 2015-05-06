@@ -18,7 +18,7 @@ package guru.nidi.ramltester.util;
 /**
  *
  */
-public class FileValue {
+public final class FileValue {
     @Override
     public int hashCode() {
         return 0;
