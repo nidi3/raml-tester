@@ -32,14 +32,13 @@ public class RamlRestTemplate extends RestTemplate {
     private final boolean notSending;
     private final ReportStore reportStore;
     private final ClientHttpRequestFactory originalRequestFactory;
-    private final RamlRequestInterceptor interceptor;
 
     private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore, ClientHttpRequestFactory requestFactory) {
         this.ramlChecker = ramlChecker;
         this.notSending = notSending;
         this.reportStore = reportStore;
         this.originalRequestFactory = requestFactory;
-        interceptor = new RamlRequestInterceptor(ramlChecker, notSending, reportStore);
+        final RamlRequestInterceptor interceptor = new RamlRequestInterceptor(ramlChecker, notSending, reportStore);
         setRequestFactory(new InterceptingClientHttpRequestFactory(
                 new BufferingClientHttpRequestFactory(requestFactory), Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }

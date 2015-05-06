@@ -53,7 +53,7 @@ public class FormLoginUrlFetcher extends SimpleUrlFetcher {
     public InputStream fetchFromUrl(CloseableHttpClient client, String base, String name, long ifModifiedSince) {
         try {
             final HttpPost login = new HttpPost(base + "/" + loginUrl);
-            List<NameValuePair> params = new ArrayList<>();
+            final List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair(loginField, this.login));
             params.add(new BasicNameValuePair(passwordField, password));
             postProcessLoginParameters(params);

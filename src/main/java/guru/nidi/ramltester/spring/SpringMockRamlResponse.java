@@ -47,7 +47,7 @@ public class SpringMockRamlResponse implements RamlResponse {
     @Override
     public Values getHeaderValues() {
         final Values headers = new Values();
-        for (String name : delegate.getHeaderNames()) {
+        for (final String name : delegate.getHeaderNames()) {
             headers.addValues(name, delegate.getHeaders(name));
         }
         return headers;

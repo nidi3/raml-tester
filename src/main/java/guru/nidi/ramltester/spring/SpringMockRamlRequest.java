@@ -58,8 +58,8 @@ public class SpringMockRamlRequest implements RamlRequest {
     public Values getFormValues() {
         final Values values = new Values(delegate.getParameterMap());
         if (delegate instanceof MockMultipartHttpServletRequest) {
-            for (Map.Entry<String, List<MultipartFile>> entry : ((MockMultipartHttpServletRequest) delegate).getMultiFileMap().entrySet()) {
-                for (MultipartFile file : entry.getValue()) {
+            for (final Map.Entry<String, List<MultipartFile>> entry : ((MockMultipartHttpServletRequest) delegate).getMultiFileMap().entrySet()) {
+                for (final MultipartFile file : entry.getValue()) {
                     values.addValue(entry.getKey(), new FileValue());
                 }
             }

@@ -120,26 +120,22 @@ public class RamlHttpClient implements HttpClient, Closeable {
 
     @Override
     public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler) throws IOException {
-        final T response = delegate.execute(request, responseHandler);
-        return response;
+        return delegate.execute(request, responseHandler);
     }
 
     @Override
     public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context) throws IOException {
-        final T response = delegate.execute(request, responseHandler, context);
-        return response;
+        return delegate.execute(request, responseHandler, context);
     }
 
     @Override
     public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler) throws IOException {
-        final T response = delegate.execute(target, request, responseHandler);
-        return response;
+        return delegate.execute(target, request, responseHandler);
     }
 
     @Override
     public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context) throws IOException {
-        final T response = delegate.execute(target, request, responseHandler, context);
-        return response;
+        return delegate.execute(target, request, responseHandler, context);
     }
 
     @Override

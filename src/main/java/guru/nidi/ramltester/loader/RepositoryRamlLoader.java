@@ -70,13 +70,13 @@ public class RepositoryRamlLoader implements RamlLoader {
     }
 
     private ObjectMapper createMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+        final  ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return mapper;
     }
 
     private RepositoryEntry findEntry(String name) {
-        for (RepositoryEntry file : response.getFiles()) {
+        for (final RepositoryEntry file : response.getFiles()) {
             if (name.equals(file.getName()) || name.equals(file.getPath())) {
                 return file;
             }

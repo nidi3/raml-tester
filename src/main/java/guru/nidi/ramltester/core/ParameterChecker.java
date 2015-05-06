@@ -119,7 +119,7 @@ class ParameterChecker {
 
     public Set<String> checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
         final Set<String> found = new HashSet<>();
-        for (Map.Entry<String, List<Object>> entry : values) {
+        for (final Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
             final String paramName = findMatchingParamName(params.keySet(), entry.getKey());
             final List<? extends AbstractParam> parameters = params.get(paramName);
@@ -135,7 +135,7 @@ class ParameterChecker {
                 found.add(paramName);
             }
         }
-        for (Map.Entry<String, List<? extends AbstractParam>> entry : params.entrySet()) {
+        for (final Map.Entry<String, List<? extends AbstractParam>> entry : params.entrySet()) {
             final Message namedMsg = message.withParam(entry.getKey());
             for (final AbstractParam parameter : entry.getValue()) {
                 violations.addIf(parameter.isRequired() && !found.contains(entry.getKey()), namedMsg.withMessageParam("required.missing"));

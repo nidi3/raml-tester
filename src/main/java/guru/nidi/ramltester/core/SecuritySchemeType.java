@@ -69,7 +69,7 @@ enum SecuritySchemeType {
         this.name = name;
     }
 
-    abstract public void check(SecurityScheme scheme, RamlViolations violations);
+    public abstract void check(SecurityScheme scheme, RamlViolations violations);
 
     public static SecuritySchemeType byName(String name) {
         for (final SecuritySchemeType type : values()) {

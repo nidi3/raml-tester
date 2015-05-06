@@ -35,7 +35,7 @@ public final class IoUtils {
             final StringBuilder sb = new StringBuilder();
             final char[] buf = new char[1000];
             while (reader.ready()) {
-                int read = reader.read(buf);
+                final int read = reader.read(buf);
                 sb.append(buf, 0, read);
             }
             return sb.toString();

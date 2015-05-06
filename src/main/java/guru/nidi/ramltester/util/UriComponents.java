@@ -58,22 +58,20 @@ public final class UriComponents {
     }
 
     public static UriComponents fromHttpUrl(String httpUrl) {
-        Matcher m = Pattern.HTTP_URL.matcher(httpUrl);
+        final Matcher m = Pattern.HTTP_URL.matcher(httpUrl);
         if (m.matches()) {
-            String scheme = m.group(1);
-            scheme = scheme == null ? null : scheme.toLowerCase();
-            String userInfo = m.group(4);
-            String host = m.group(5);
+            final String scheme = m.group(1) == null ? null : m.group(1).toLowerCase();
+            final String userInfo = m.group(4);
+            final String host = m.group(5);
             if (scheme != null && scheme.length() > 0 && (host == null || host.length() == 0)) {
                 throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
             }
-            Integer port = null;
-            String portString = m.group(7);
-            if (portString != null && portString.length() > 0) {
-                port = Integer.parseInt(portString);
-            }
-            String path = m.group(8);
-            String query = m.group(10);
+            final String portString = m.group(7);
+            final Integer port = (portString != null && portString.length() > 0)
+                    ? Integer.parseInt(portString)
+                    : null;
+            final String path = m.group(8);
+            final String query = m.group(10);
 
             return new UriComponents(scheme, userInfo, host, port, path, query);
         } else {

@@ -48,13 +48,13 @@ final class JsRegex {
         }
     }
 
-    public static boolean matches(String input, String regex) throws InvalidRegexException {
+    public static boolean matches(String input, String regex) {
         if (isDoubleQuoted(regex) || isSingleQuoted(regex)) {
             regex = regex.substring(1, regex.length() - 1);
         }
         String flags = null;
         if (regex.startsWith("/")) {
-            int pos = regex.lastIndexOf("/");
+            final int pos = regex.lastIndexOf("/");
             if (pos >= regex.length() - 3) {
                 flags = pos == regex.length() - 1 ? "" : regex.substring(pos + 1);
                 regex = regex.substring(1, pos).replace("\\/", "/");

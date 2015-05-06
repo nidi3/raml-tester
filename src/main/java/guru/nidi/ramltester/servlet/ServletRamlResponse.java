@@ -98,7 +98,7 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     }
 
     private String dateToString(long date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         return dateFormat.format(new Date(date));
     }
@@ -112,7 +112,7 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     @Override
     public PrintWriter getWriter() throws IOException {
         if (writer == null) {
-            Writer targetWriter = characterEncoding != null ?
+            final Writer targetWriter = characterEncoding != null ?
                     new OutputStreamWriter(content, characterEncoding) : new OutputStreamWriter(content);
             writer = new PrintWriter(new DelegatingWriter(super.getWriter(), targetWriter));
         }

@@ -114,7 +114,7 @@ public class CachingRamlLoader {
         }
 
         @Override
-        public InputStream fetchResource(String name, long ifModifiedSince) throws ResourceNotFoundException {
+        public InputStream fetchResource(String name, long ifModifiedSince) {
             if (name.equals(this.name)) {
                 return new ByteArrayInputStream(data);
             }

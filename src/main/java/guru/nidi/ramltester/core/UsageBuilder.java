@@ -46,27 +46,27 @@ public final class UsageBuilder {
     public static Usage usage(Raml raml, List<RamlReport> reports) {
         final Usage usage = new Usage();
         createTotalUsage(usage, raml.getResources());
-        for (RamlReport report : reports) {
+        for (final RamlReport report : reports) {
             usage.add(report.getUsage());
         }
         return usage;
     }
 
     private static void createTotalUsage(Usage usage, Map<String, Resource> resources) {
-        for (Map.Entry<String, Resource> resourceEntry : resources.entrySet()) {
+        for (final Map.Entry<String, Resource> resourceEntry : resources.entrySet()) {
             resourceUsage(usage, resourceEntry.getValue());
-            for (Action action : resourceEntry.getValue().getActions().values()) {
+            for (final Action action : resourceEntry.getValue().getActions().values()) {
                 actionUsage(usage, action).initQueryParameters(action.getQueryParameters().keySet());
                 actionUsage(usage, action).initResponseCodes(action.getResponses().keySet());
                 actionUsage(usage, action).initRequestHeaders(action.getHeaders().keySet());
                 if (action.getBody() != null) {
-                    for (MimeType mimeType : action.getBody().values()) {
+                    for (final MimeType mimeType : action.getBody().values()) {
                         if (mimeType.getFormParameters() != null) {
                             UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(mimeType.getFormParameters().keySet());
                         }
                     }
                 }
-                for (Map.Entry<String, Response> responseEntry : action.getResponses().entrySet()) {
+                for (final Map.Entry<String, Response> responseEntry : action.getResponses().entrySet()) {
                     responseUsage(usage, action, responseEntry.getKey()).initResponseHeaders(responseEntry.getValue().getHeaders().keySet());
                 }
             }

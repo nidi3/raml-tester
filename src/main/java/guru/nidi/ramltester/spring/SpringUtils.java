@@ -36,7 +36,7 @@ final class SpringUtils {
 
     static Values headerValuesOf(HttpHeaders headers) {
         final Values values = new Values();
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+        for (final Map.Entry<String, List<String>> entry : headers.entrySet()) {
             values.addValues(entry.getKey(), entry.getValue());
         }
         return values;

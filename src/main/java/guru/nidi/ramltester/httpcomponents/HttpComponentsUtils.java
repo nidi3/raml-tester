@@ -39,8 +39,8 @@ final class HttpComponentsUtils {
     }
 
     static Values headerValuesOf(HttpMessage message) {
-        Values headers = new Values();
-        for (Header header : message.getAllHeaders()) {
+        final Values headers = new Values();
+        for (final Header header : message.getAllHeaders()) {
             headers.addValue(header.getName(), header.getValue());
         }
         return headers;

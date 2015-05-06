@@ -41,7 +41,7 @@ public class ExpectedUsage extends Verifier {
     @Override
     protected void verify() throws Throwable {
         final Usage usage = usageProvider.getUsage();
-        for (UsageItem item : items) {
+        for (final UsageItem item : items) {
             assertThat(item.get(usage), new EmptyMatcher(new Message("usage." + item.name()).toString()));
         }
     }

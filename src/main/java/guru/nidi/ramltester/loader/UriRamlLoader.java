@@ -45,7 +45,7 @@ public class UriRamlLoader implements RamlLoader {
     }
 
     @Override
-    public InputStream fetchResource(String name, long ifModifiedSince) throws ResourceNotFoundException {
+    public InputStream fetchResource(String name, long ifModifiedSince) {
         name = normalizeResourceName(name);
         final Matcher matcher = ABSOLUTE_URI_PATTERN.matcher(name);
         if (matcher.matches()) {
