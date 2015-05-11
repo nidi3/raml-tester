@@ -82,17 +82,20 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
 
         @Override
         public void warning(SAXParseException e) throws SAXException {
-            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.warn", e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
+            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.warn",
+                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
         }
 
         @Override
         public void error(SAXParseException e) throws SAXException {
-            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.error", e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
+            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.error",
+                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
         }
 
         @Override
         public void fatalError(SAXParseException e) throws SAXException {
-            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.fatal", e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
+            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.fatal",
+                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
         }
     }
 

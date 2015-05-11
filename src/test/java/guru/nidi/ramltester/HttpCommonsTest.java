@@ -46,7 +46,7 @@ public class HttpCommonsTest extends ServerTest {
     private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     private static RamlHttpClient client = RamlLoaders
-            .fromClasspath(SimpleTest.class).load("template.raml")
+            .fromClasspath(SimpleTest.class).load("httpCommons.raml")
             .assumingBaseUri("http://nidi.guru/raml/v1")
             .createHttpClient()
             .aggregating(aggregator);

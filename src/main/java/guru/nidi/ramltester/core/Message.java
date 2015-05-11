@@ -32,7 +32,8 @@ public class Message {
     static {
         MESSAGES = new Properties();
         try {
-            MESSAGES.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("guru/nidi/ramltester/messages.properties"));
+            MESSAGES.load(Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("guru/nidi/ramltester/messages.properties"));
         } catch (IOException e) {
             throw new RuntimeException("Could not load messages", e);
         }
