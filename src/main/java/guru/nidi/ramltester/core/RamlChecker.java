@@ -363,7 +363,7 @@ public class RamlChecker {
             violations.add("schemaValidator.missing", type.media, action, detail);
             return;
         }
-        if (body.length == 0) {
+        if (body == null || body.length == 0) {
             violations.add("body.empty", type.media, action, detail);
             return;
         }

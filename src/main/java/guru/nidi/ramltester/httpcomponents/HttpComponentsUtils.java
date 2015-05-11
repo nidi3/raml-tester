@@ -56,7 +56,7 @@ final class HttpComponentsUtils {
 
     static HttpResponse buffered(HttpResponse response) {
         final HttpEntity entity = response.getEntity();
-        if (!entity.isRepeatable()) {
+        if (entity != null && !entity.isRepeatable()) {
             response.setEntity(buffered(entity));
         }
         return response;
@@ -72,7 +72,7 @@ final class HttpComponentsUtils {
 
     static byte[] contentOf(HttpEntity entity) {
         try {
-            return IoUtils.readIntoByteArray(entity.getContent());
+            return entity == null ? null : IoUtils.readIntoByteArray(entity.getContent());
         } catch (IOException e) {
             throw new RuntimeException("Could not get response content", e);
         }

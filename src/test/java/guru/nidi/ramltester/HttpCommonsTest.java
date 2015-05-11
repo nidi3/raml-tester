@@ -95,13 +95,26 @@ public class HttpCommonsTest extends ServerTest {
         assertTrue(client.getLastReport().isEmpty());
     }
 
+    @Test
+    public void emptyResponse() throws IOException {
+        final HttpGet get = new HttpGet(url("data?empty"));
+        final HttpResponse response = client.execute(get);
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
+        assertEquals(null, response.getEntity());
+        assertTrue(client.getLastReport().isEmpty());
+    }
+
     private static class TestServlet extends HttpServlet {
         @Override
-        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-            resp.setContentType("application/json");
-            final PrintWriter out = resp.getWriter();
-            out.write(req.getParameter("param") == null ? "\"json string\"" : "illegal json");
-            out.flush();
+        protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+            if (req.getParameter("empty") != null) {
+                res.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            } else {
+                res.setContentType("application/json");
+                final PrintWriter out = res.getWriter();
+                out.write(req.getParameter("param") == null ? "\"json string\"" : "illegal json");
+                out.flush();
+            }
         }
     }
 
