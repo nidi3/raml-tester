@@ -20,6 +20,7 @@ import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBui
 import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.jayway.restassured.module.jsv.JsonSchemaValidationException;
+import com.jayway.restassured.module.jsv.JsonSchemaValidator;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
 import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.loader.RamlLoaderUriDownloader;
@@ -27,8 +28,6 @@ import guru.nidi.ramltester.util.MediaType;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
-
-import static com.jayway.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 
 /**
  *
@@ -79,12 +78,12 @@ public class RestassuredSchemaValidator implements SchemaValidator {
     @SuppressWarnings("unchecked")
     private Matcher<String> getMatcher(String data) {
         if (factory != null) {
-            return (Matcher<String>) matchesJsonSchema(data).using(factory);
+            return (Matcher<String>) JsonSchemaValidator.matchesJsonSchema(data).using(factory);
         }
         if (settings != null) {
-            return (Matcher<String>) matchesJsonSchema(data).using(settings);
+            return (Matcher<String>) JsonSchemaValidator.matchesJsonSchema(data).using(settings);
         }
-        return matchesJsonSchema(data);
+        return JsonSchemaValidator.matchesJsonSchema(data);
     }
 
     @Override
