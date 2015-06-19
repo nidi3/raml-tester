@@ -18,6 +18,7 @@ package guru.nidi.ramltester.apidesigner;
 import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.loader.RamlLoaderRamlParserResourceLoader;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 
@@ -38,6 +39,7 @@ public class ApiRamlLoaderTest {
     }
 
     @Test
+    @Ignore
     public void fromApiPortalOk() throws IOException {
         assertNotNull(new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(loader)).build("test.raml"));
     }

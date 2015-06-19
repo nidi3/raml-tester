@@ -80,6 +80,7 @@ public class UriLoaderTest extends ServerTest {
     }
 
     @Test
+    @Ignore
     public void apiPortal() {
         assertNotNull(RamlLoaders.absolutely().load(getEnv("API_PORTAL_USER") + ":" + getEnv("API_PORTAL_PASS") + "@apiportal://test.raml"));
     }

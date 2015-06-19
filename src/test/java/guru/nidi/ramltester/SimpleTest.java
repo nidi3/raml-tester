@@ -18,6 +18,7 @@ package guru.nidi.ramltester;
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.loader.RamlLoader;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
@@ -119,6 +120,7 @@ public class SimpleTest extends HighlevelTestBase {
     }
 
     @Test
+    @Ignore
     public void apiPortalReferenced() throws IOException {
         final RamlLoaders ramlLoader = RamlLoaders.fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
         final RamlDefinition ramlDefinition = ramlLoader.load("test.raml");
