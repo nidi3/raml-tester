@@ -17,6 +17,8 @@ package guru.nidi.ramltester;
 
 import org.junit.Test;
 
+import java.util.Locale;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -103,6 +105,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void numberNok() throws Exception {
+        Locale.setDefault(Locale.ENGLISH); //to ensure . as decimal separator
         for (String value : new String[]{"", "-0", "1.", "1.123w"}) {
             assertOneRequestViolationThat(
                     type,
