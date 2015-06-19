@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
  *
@@ -27,7 +28,8 @@ public class SecurityTest extends HighlevelTestBase {
     private static RamlLoaders base = RamlLoaders.fromClasspath(SecurityTest.class);
     private static RamlDefinition
             global = base.load("global-security.raml"),
-            local = base.load("local-security.raml");
+            local = base.load("local-security.raml"),
+            undef = base.load("undefined-security.raml");
 
     @Test
     public void allowSecurityElementsInGlobalSecured() throws Exception {
@@ -88,6 +90,33 @@ public class SecurityTest extends HighlevelTestBase {
                 global,
                 get("/type"),
                 jsonResponse(200, "", null)));
+    }
+
+    @Test
+    public void undefinedGlobalSecuritySchema() throws Exception {
+        assertOneRequestViolationThat(test(
+                        undef,
+                        get("/unsec"),
+                        jsonResponse(200, "", null)),
+                equalTo("Globally used security Scheme 'b' is not defined"));
+    }
+
+    @Test
+    public void undefinedResourceSecuritySchema() throws Exception {
+        assertOneRequestViolationThat(test(
+                        undef,
+                        get("/sec"),
+                        jsonResponse(200, "", null)),
+                equalTo("Security Scheme 'c' on resource(/sec) is not defined"));
+    }
+
+    @Test
+    public void undefinedActionSecuritySchema() throws Exception {
+        assertOneRequestViolationThat(test(
+                        undef,
+                        post("/sec"),
+                        jsonResponse(200, "", null)),
+                equalTo("Security Scheme 'd' on action(POST /sec) is not defined"));
     }
 
 }

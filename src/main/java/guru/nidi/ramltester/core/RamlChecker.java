@@ -64,7 +64,7 @@ public class RamlChecker {
         try {
             checkSecurity(raml.getSecuritySchemes());
             final Action action = findAction(request);
-            final SecurityExtractor security = new SecurityExtractor(raml, action);
+            final SecurityExtractor security = new SecurityExtractor(raml, action, requestViolations);
             checkRequest(request, action, security);
             if (response != null) {
                 checkResponse(response, action, security);

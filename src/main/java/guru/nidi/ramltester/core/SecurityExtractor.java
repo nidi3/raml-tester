@@ -19,7 +19,9 @@ import org.raml.model.*;
 import org.raml.model.parameter.Header;
 import org.raml.model.parameter.QueryParameter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -27,8 +29,8 @@ import java.util.*;
 class SecurityExtractor {
     private final List<SecurityScheme> schemes;
 
-    public SecurityExtractor(Raml raml, Action action) {
-        schemes = securedBy(raml, action);
+    public SecurityExtractor(Raml raml, Action action, RamlViolations violations) {
+        schemes = new SchemeFinder(raml, violations).securedBy(action);
     }
 
     private class RemovePropagatingList<T> extends ArrayList<T> {
@@ -70,34 +72,48 @@ class SecurityExtractor {
         return res;
     }
 
-    private List<SecurityScheme> securedBy(Raml raml, Action action) {
-        final List<SecurityScheme> res = new ArrayList<>();
-        final Set<String> names = new HashSet<>();
-        res.addAll(securitySchemes(raml, action.getSecuredBy(), names));
-        res.addAll(securitySchemes(raml, action.getResource().getSecuredBy(), names));
-        res.addAll(securitySchemes(raml, raml.getSecuredBy(), names));
-        return res;
-    }
+    private static final class SchemeFinder {
+        private final Raml raml;
+        private final RamlViolations violations;
 
-    private List<SecurityScheme> securitySchemes(Raml raml, List<SecurityReference> refs, Set<String> ignore) {
-        final List<SecurityScheme> res = new ArrayList<>();
-        for (final SecurityReference ref : refs) {
-            final String name = ref.getName();
-            if (!ignore.contains(name)) {
-                ignore.add(name);
-                res.add(securityScheme(raml, name));
-            }
+        public SchemeFinder(Raml raml, RamlViolations violations) {
+            this.raml = raml;
+            this.violations = violations;
         }
-        return res;
-    }
 
-    private SecurityScheme securityScheme(Raml raml, String name) {
-        for (final Map<String, SecurityScheme> map : raml.getSecuritySchemes()) {
-            if (map.containsKey(name)) {
-                return map.get(name);
+        public List<SecurityScheme> securedBy(Action action) {
+            final List<SecurityScheme> res = new ArrayList<>();
+            if (!action.getSecuredBy().isEmpty()) {
+                res.addAll(securitySchemes(action.getSecuredBy(), new Message("securityScheme.local.undefined", action)));
+            } else if (!action.getResource().getSecuredBy().isEmpty()) {
+                res.addAll(securitySchemes(action.getResource().getSecuredBy(), new Message("securityScheme.local.undefined", action.getResource())));
+            } else if (!raml.getSecuredBy().isEmpty()) {
+                res.addAll(securitySchemes(raml.getSecuredBy(), new Message("securityScheme.global.undefined")));
             }
+            return res;
         }
-        return null;
-    }
 
+        private List<SecurityScheme> securitySchemes(List<SecurityReference> refs, Message message) {
+            final List<SecurityScheme> res = new ArrayList<>();
+            for (final SecurityReference ref : refs) {
+                final String name = ref.getName();
+                    final SecurityScheme ss = securityScheme(name);
+                    if (ss == null) {
+                        violations.addIf(!name.equals("null"), message.withParam(name));
+                    } else {
+                        res.add(ss);
+                    }
+            }
+            return res;
+        }
+
+        private SecurityScheme securityScheme(String name) {
+            for (final Map<String, SecurityScheme> map : raml.getSecuritySchemes()) {
+                if (map.containsKey(name)) {
+                    return map.get(name);
+                }
+            }
+            return null;
+        }
+    }
 }

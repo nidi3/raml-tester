@@ -1,0 +1,21 @@
+#%RAML 0.8
+---
+title: undefined-security
+baseUri: http://nidi.guru/raml/{version}
+version: v1
+securedBy: [b]
+
+/sec:
+  securedBy: [c]
+  post:
+    securedBy: [d]
+    responses:
+      200:
+  get:
+    responses:
+      200:
+
+/unsec:
+  get:
+    responses:
+      200:
