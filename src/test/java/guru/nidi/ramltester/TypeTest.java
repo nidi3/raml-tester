@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -28,6 +29,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 public class TypeTest extends HighlevelTestBase {
     private RamlDefinition type = RamlLoaders.fromClasspath(getClass()).load("type.raml");
+
+    @BeforeClass
+    public static void init() {
+        Locale.setDefault(Locale.ENGLISH); //to ensure . as decimal separator
+    }
 
     @Test
     public void booleanOk() throws Exception {
@@ -105,7 +111,6 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void numberNok() throws Exception {
-        Locale.setDefault(Locale.ENGLISH); //to ensure . as decimal separator
         for (String value : new String[]{"", "-0", "1.", "1.123w"}) {
             assertOneRequestViolationThat(
                     type,

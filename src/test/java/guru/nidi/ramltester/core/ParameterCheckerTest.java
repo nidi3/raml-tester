@@ -17,6 +17,7 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.Values;
 import org.hamcrest.Matcher;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.raml.model.ParamType;
 import org.raml.model.parameter.AbstractParam;
@@ -24,6 +25,7 @@ import org.raml.model.parameter.QueryParameter;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 
 import static guru.nidi.ramltester.util.TestUtils.stringArrayMapOf;
@@ -33,6 +35,12 @@ import static org.hamcrest.CoreMatchers.equalTo;
  *
  */
 public class ParameterCheckerTest extends CoreTestBase {
+
+    @BeforeClass
+    public static void init() {
+        Locale.setDefault(Locale.ENGLISH); //to ensure . as decimal separator
+    }
+
     @Test
     public void booleanType() throws Exception {
         final QueryParameter p = new QueryParameter();
