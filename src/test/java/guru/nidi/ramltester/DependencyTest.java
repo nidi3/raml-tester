@@ -56,6 +56,7 @@ public class DependencyTest {
                 model = constraint.addPackage(BASE + ".model"),
                 servlet = constraint.addPackage(BASE + ".servlet"),
                 spring = constraint.addPackage(BASE + ".spring"),
+                jaxrs = constraint.addPackage(BASE + ".jaxrs"),
                 util = constraint.addPackage(BASE + ".util");
 
         base.dependsUpon(model);
@@ -63,6 +64,7 @@ public class DependencyTest {
         base.dependsUpon(servlet);
         base.dependsUpon(httpcomponents);
         base.dependsUpon(spring);
+        base.dependsUpon(jaxrs);
         base.dependsUpon(loader);
         base.dependsUpon(apidesigner);
 
@@ -81,6 +83,10 @@ public class DependencyTest {
         spring.dependsUpon(model);
         spring.dependsUpon(util);
         spring.dependsUpon(core);
+
+        jaxrs.dependsUpon(model);
+        jaxrs.dependsUpon(util);
+        jaxrs.dependsUpon(core);
 
         assertTrue("Dependency mismatch", depend.dependencyMatch(constraint));
     }
