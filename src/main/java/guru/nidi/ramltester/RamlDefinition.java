@@ -18,6 +18,8 @@ package guru.nidi.ramltester;
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
+import guru.nidi.ramltester.jaxrs.CheckingClientFilter;
+import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.servlet.ServletTester;
@@ -33,6 +35,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.ws.rs.client.WebTarget;
 import java.io.IOException;
 
 /**
@@ -107,5 +110,11 @@ public class RamlDefinition {
         return new RamlChecker(raml, schemaValidators.getValidators(), baseUri, ignoreXheaders);
     }
 
+    public CheckingWebTarget checking(WebTarget target) {
+        final CheckingWebTarget checkingWebTarget = new CheckingWebTarget(createTester(), target);
+        target.register(new CheckingClientFilter(checkingWebTarget));
+
+        return checkingWebTarget;
+    }
 }
 
