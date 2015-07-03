@@ -15,8 +15,10 @@
  */
 package guru.nidi.ramltester.jaxrs;
 
+import guru.nidi.ramltester.core.DummyReportAggragator;
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.ReportAggregator;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 
@@ -35,6 +37,7 @@ public class CheckingWebTarget implements WebTarget {
     private final RamlChecker checker;
     private final WebTarget target;
     private RamlReport report;
+    private ReportAggregator aggregator = new DummyReportAggragator();
 
     public CheckingWebTarget(RamlChecker checker, WebTarget target) {
         this.checker = checker;
@@ -43,14 +46,21 @@ public class CheckingWebTarget implements WebTarget {
             throw new IllegalStateException("This WebTarget is already checking");
         }
         target.property("checked", true);
+        target.register(new CheckingClientFilter(this));
     }
 
     void check(RamlRequest request, RamlResponse response) {
         report = checker.check(request, response);
+        aggregator.addReport(report);
     }
 
     public RamlReport getReport() {
         return report;
+    }
+
+    public CheckingWebTarget aggregating(ReportAggregator aggregator) {
+        this.aggregator = aggregator;
+        return this;
     }
 
     @Override

@@ -15,8 +15,10 @@
  */
 package guru.nidi.ramltester.jaxrs;
 
+import guru.nidi.ramltester.MultiReportAggregator;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.util.ServerTest;
@@ -24,6 +26,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -47,15 +50,20 @@ import static org.junit.Assert.*;
  */
 @RunWith(Parameterized.class)
 public class JaxrsTest extends ServerTest {
-    private final RamlDefinition raml = RamlLoaders.fromClasspath(JaxrsTest.class).load("jaxrs.raml");
+    private static final RamlDefinition raml = RamlLoaders.fromClasspath(JaxrsTest.class).load("jaxrs.raml");
     private final String uri = "http://localhost:" + port();
     private final Client client;
+
+    private static MultiReportAggregator aggregator = new MultiReportAggregator();
+
+    @ClassRule
+    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(raml));
 
     public JaxrsTest(Client client) {
         this.client = client;
     }
 
-    @Parameterized.Parameters(name="{0}")
+    @Parameterized.Parameters(name = "{0}")
     public static List<Client> clients() {
         return Arrays.asList(
                 JerseyClientBuilder.createClient(),
@@ -72,7 +80,7 @@ public class JaxrsTest extends ServerTest {
         final RamlRequest[] request = new RamlRequest[1];
         final RamlResponse[] response = new RamlResponse[1];
 
-        final CheckingWebTarget checking = raml.checking(client.target(uri));
+        final CheckingWebTarget checking = raml.checking(client.target(uri)).aggregating(aggregator);
 
         checking.register(new ClientResponseFilter() {
             @Override
