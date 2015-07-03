@@ -41,6 +41,45 @@ defined in the RAML are at least used once.
 
 See also the [raml-tester-uc-spring](https://github.com/nidi3/raml-tester-uc-spring) project.
 
+Use in a Java EE / JAX-RS environment
+-------------------------------------
+```
+@RunWith(Arquillian.class)
+public class SimpleTest {
+
+    private static RamlDefinition api = RamlLoaders.fromClasspath(SimpleTest.class).load("api.raml")
+        .assumingBaseUri("http://nidi.guru/raml/simple/v1");
+    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
+    private static WebTarget target;
+
+    @ClassRule
+    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
+
+    @Deployment(testable = false)
+    public static WebArchive createDeployment() {
+        return ShrinkWrap.create(WebArchive.class).addClass(MyApplication.class);
+    }
+    
+    @ArquillianResource
+    private URL base;
+    
+    @Before
+    public void setup() throws MalformedURLException {
+        Client client = ClientBuilder.newClient();
+        target = client.target(URI.create(new URL(base, "app/path").toExternalForm()));
+    }
+
+    @Test
+    public void greeting() throws Exception {
+        final CheckingWebTarget webTarget = api.createWebTarget(target).aggregating(aggregator);
+        webTarget.request().post(Entity.text("apple"));
+
+        assertTrue(webTarget.getReport().getRequestViolations().isEmpty());
+        assertTrue(webTarget.getReport().getResponseViolations().isEmpty());
+    }
+
+}
+```
 
 Use in a pure servlet environment
 ---------------------------------

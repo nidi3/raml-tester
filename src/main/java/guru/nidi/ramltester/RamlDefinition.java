@@ -109,7 +109,7 @@ public class RamlDefinition {
         return new RamlChecker(raml, schemaValidators.getValidators(), baseUri, ignoreXheaders);
     }
 
-    public CheckingWebTarget checking(WebTarget target) {
+    public CheckingWebTarget createWebTarget(WebTarget target) {
         return new CheckingWebTarget(createTester(), target);
     }
 }

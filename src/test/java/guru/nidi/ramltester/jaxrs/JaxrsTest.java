@@ -80,7 +80,7 @@ public class JaxrsTest extends ServerTest {
         final RamlRequest[] request = new RamlRequest[1];
         final RamlResponse[] response = new RamlResponse[1];
 
-        final CheckingWebTarget checking = raml.checking(client.target(uri)).aggregating(aggregator);
+        final CheckingWebTarget checking = raml.createWebTarget(client.target(uri)).aggregating(aggregator);
 
         checking.register(new ClientResponseFilter() {
             @Override
@@ -112,7 +112,7 @@ public class JaxrsTest extends ServerTest {
 
     @Test
     public void client() {
-        final CheckingWebTarget checking = raml.checking(client.target(uri));
+        final CheckingWebTarget checking = raml.createWebTarget(client.target(uri));
         checking.path("/app/path").queryParam("qp", "true")
                 .request().header("h", "h2")
                 .post(Entity.entity("data", "text/plain"));
