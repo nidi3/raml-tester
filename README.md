@@ -116,7 +116,7 @@ public void testRequest(){
     RamlHttpClient client = api.createHttpClient();
     HttpGet get = new HttpGet("http://test.server/path");
     HttpResponse response = client.execute(get);
-    Assert.assertTrue(client.getLastResport().isEmpty());
+    Assert.assertTrue(client.getLastReport().isEmpty());
 }
 
 ```
