@@ -25,12 +25,12 @@ import javax.ws.rs.client.ClientRequestContext;
 /**
  *
  */
-public class RequestContextRamlRequest implements RamlRequest {
+public class JaxrsRequestContextRamlRequest implements RamlRequest {
     private final ClientRequestContext context;
     private final UriComponents uriComponents;
 
 
-    public RequestContextRamlRequest(ClientRequestContext context) {
+    public JaxrsRequestContextRamlRequest(ClientRequestContext context) {
         this.context = context;
         this.uriComponents = UriComponents.fromHttpUrl(context.getUri().toString());
     }

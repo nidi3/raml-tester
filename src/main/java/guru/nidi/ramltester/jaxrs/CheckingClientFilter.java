@@ -40,6 +40,6 @@ public class CheckingClientFilter implements ClientRequestFilter, ClientResponse
 
     @Override
     public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-        target.check(new RequestContextRamlRequest(requestContext), new ResponseContextRamlResponse(responseContext));
+        target.check(new JaxrsRequestContextRamlRequest(requestContext), new JaxrsResponseContextRamlResponse(responseContext));
     }
 }

@@ -85,8 +85,8 @@ public class JaxrsTest extends ServerTest {
         checking.register(new ClientResponseFilter() {
             @Override
             public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-                request[0] = new RequestContextRamlRequest(requestContext);
-                response[0] = new ResponseContextRamlResponse(responseContext);
+                request[0] = new JaxrsRequestContextRamlRequest(requestContext);
+                response[0] = new JaxrsResponseContextRamlResponse(responseContext);
             }
         });
 
