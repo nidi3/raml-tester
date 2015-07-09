@@ -92,19 +92,30 @@ public class RamlChecker {
 
     public Action findAction(RamlRequest request) {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(baseUri));
+        if (raml.getBaseUri() == null) {
+            final UriComponents ramlUri = UriComponents.fromHttpUrl("http://server"); //dummy url as we only match paths
+            final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
+            return findAction(pathMatch.getSuffix(), request.getMethod());
+        }
+
         final UriComponents ramlUri = UriComponents.fromHttpUrl(raml.getBaseUri());
 
         final VariableMatcher hostMatch = getHostMatch(requestUri, ramlUri);
         final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
 
-        final Resource resource = findResource(pathMatch.getSuffix());
-        resourceUsage(usage, resource).incUses(1);
-        final Action action = findAction(resource, request.getMethod());
-        actionUsage(usage, action).incUses(1);
-
+        final Action action = findAction(pathMatch.getSuffix(), request.getMethod());
         checkProtocol(action, requestUri, ramlUri);
         checkBaseUriParameters(hostMatch, pathMatch, action);
 
+        return action;
+    }
+
+    private Action findAction(String path, String method) {
+        final Resource resource = findResource(path);
+        resourceUsage(usage, resource).incUses(1);
+        final Action action = resource.getAction(method);
+        requestViolations.addAndThrowIf(action == null, "action.undefined", method, resource);
+        actionUsage(usage, action).incUses(1);
         return action;
     }
 
@@ -164,12 +175,6 @@ public class RamlChecker {
         final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(action);
         paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", action));
         paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", action));
-    }
-
-    private Action findAction(Resource resource, String method) {
-        final Action action = resource.getAction(method);
-        requestViolations.addAndThrowIf(action == null, "action.undefined", method, resource);
-        return action;
     }
 
     private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {

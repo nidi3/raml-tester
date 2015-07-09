@@ -17,10 +17,13 @@ package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.loader.RamlLoader;
+import guru.nidi.ramltester.spring.SpringMockRamlRequest;
+import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockServletContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class SimpleTest extends HighlevelTestBase {
 
     private static RamlDefinition simple = RamlLoaders.fromClasspath(SimpleTest.class).load("simple.raml");
+    private static RamlDefinition noBaseUri = RamlLoaders.fromClasspath(SimpleTest.class).load("noBaseUri.raml");
     private static MultiReportAggregator aggregator = new MultiReportAggregator();
 
     @ClassRule
@@ -179,6 +183,20 @@ public class SimpleTest extends HighlevelTestBase {
                         get("/mediaType"),
                         jsonResponse(201, "\"hula\"")),
                 equalTo("Ambiguous definition: mime-type('application/json') and also mime-type('abc/xyz+json') used on action(GET /mediaType) response(201)"));
+    }
+
+    @Test
+    public void acceptNoBaseUri() throws Exception {
+        assertNoViolations(noBaseUri.testAgainst(
+                new SpringMockRamlRequest(get("/base/path").buildRequest(new MockServletContext())),
+                new SpringMockRamlResponse(jsonResponse(200))));
+    }
+
+    @Test
+    public void acceptNoBaseUriAssumingBaseUri() throws Exception {
+        assertNoViolations(noBaseUri.assumingBaseUri("http://server/base").testAgainst(
+                new SpringMockRamlRequest(get("/path").buildRequest(new MockServletContext())),
+                new SpringMockRamlResponse(jsonResponse(200))));
     }
 
 }
