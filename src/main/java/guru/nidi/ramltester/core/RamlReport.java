@@ -17,6 +17,9 @@ package guru.nidi.ramltester.core;
 
 import org.raml.model.Raml;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  *
  */
@@ -28,6 +31,14 @@ public class RamlReport {
 
     public RamlReport(Raml raml) {
         this.raml = raml;
+    }
+
+    public static RamlReport fromException(Raml raml, Exception cause) {
+        final RamlReport report = new RamlReport(raml);
+        final StringWriter out = new StringWriter();
+        cause.printStackTrace(new PrintWriter(out));
+        report.getRequestViolations().add("checking.exception", out.toString());
+        return report;
     }
 
     public boolean isEmpty() {
