@@ -12,4 +12,3 @@ deploy:
   skip_cleanup: true
   on:
     repo: nidi3/raml-tester
-    tags: true
