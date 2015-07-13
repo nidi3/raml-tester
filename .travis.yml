@@ -1,4 +1,5 @@
 language: java
+sudo: false
 env:
   global:
   - secure: CCX2OY3V7bM/uW2PuFAXEyj9A9wQrjBBmGKI7n9W1P80o02FipikJUB+4uzFE3ihvpuYYJu4GaBWbWaRR+XVDZZmLoH5n6ABThh9N5MHA1Upd/93CFt4h4Q0XHP2YIpTlOhFz8LucSguUH1A3+QfAPzf/E4tAeFQbiRZ4a0VzPc=
@@ -8,5 +9,7 @@ deploy:
   api_key:
     secure: nMz8qMjaIHHUoN32Fk0U2NmQPUyMQvxDnShYmwruGsduNNG4XMJfauPisoxNJqLU/Wdi0qxlPPzjUQjG3/vwowZZNvFJ5cIpQg8C/3JGNcYCcaYSCCy9+53h5jQMwqBMZ22IubIM5RL1pLSymuwC809MXs6EfkmLO65uC8ixkCM=
   file: target/raml-tester-0.8.2-SNAPSHOT.jar
+  skip_cleanup: true
   on:
     repo: nidi3/raml-tester
+    tags: true
