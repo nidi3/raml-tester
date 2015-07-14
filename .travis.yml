@@ -14,5 +14,3 @@ deploy:
     repo: nidi3/raml-tester
     tags: true
     all_branches: true
-
-
