@@ -18,10 +18,7 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.MediaType;
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Protocol;
-import org.raml.model.Resource;
+import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.UriParameter;
 
@@ -146,4 +143,21 @@ final class CheckerHelper {
             addNotSetBaseUriParams(resource.getParentResource(), params);
         }
     }
+
+    public static Response findResponse(Action action, int status, SecurityExtractor security) {
+        Response res = action.getResponses().get("" + status);
+        if (res == null) {
+            final Iterator<Map<String, Response>> iter = security.responses().iterator();
+            //there could be more that 1 matching response, problem?
+            while (iter.hasNext()) {
+                final Map<String, Response> resMap = iter.next();
+                res = resMap.get("" + status);
+                if (res == null) {
+                    iter.remove();
+                }
+            }
+        }
+        return res;
+    }
+
 }

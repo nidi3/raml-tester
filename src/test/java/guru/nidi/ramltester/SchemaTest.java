@@ -36,7 +36,7 @@ public class SchemaTest extends HighlevelTestBase {
 
     @Test
     public void matchingXmlSchema() throws UnsupportedEncodingException {
-        assertNoViolations(simple, get("/schema"), jsonResponse(208, "<api-request><input>str</input></api-request>", "text/xml"));
+        assertNoViolations(simple, get("/schema"), response(208, "<api-request><input>str</input></api-request>", "text/xml"));
     }
 
     @Test
@@ -47,8 +47,8 @@ public class SchemaTest extends HighlevelTestBase {
 
     @Test
     public void matchingReferencedXmlSchema() throws UnsupportedEncodingException {
-        assertNoViolations(simple, get("/schema"), jsonResponse(206, "<api-request><input>str</input></api-request>", "application/xml"));
-        assertNoViolations(simple, get("/schema"), jsonResponse(207, "<api-request><input>str</input></api-request>", "application/xml"));
+        assertNoViolations(simple, get("/schema"), response(206, "<api-request><input>str</input></api-request>", "application/xml"));
+        assertNoViolations(simple, get("/schema"), response(207, "<api-request><input>str</input></api-request>", "application/xml"));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class SchemaTest extends HighlevelTestBase {
         assertResponseViolationsThat(
                 simple,
                 get("/schema"),
-                jsonResponse(208, "<api-request>str</api-request>", "text/xml"),
+                response(208, "<api-request>str</api-request>", "text/xml"),
                 startsWith("Body does not match schema for action(GET /schema) response(208) mime-type('text/xml')\n" +
                         "Content: <api-request>str</api-request>\n" +
                         "Message: ")
@@ -104,7 +104,7 @@ public class SchemaTest extends HighlevelTestBase {
         assertResponseViolationsThat(
                 simple,
                 get("/schema"),
-                jsonResponse(206, "5", "application/xml"),
+                response(206, "5", "application/xml"),
                 startsWith("Body does not match schema for action(GET /schema) response(206) mime-type('application/xml')\n" +
                         "Content: 5\n" +
                         "Message: ")
@@ -116,7 +116,7 @@ public class SchemaTest extends HighlevelTestBase {
         assertResponseViolationsThat(
                 simple,
                 get("/schema"),
-                jsonResponse(207, "5", "application/xml"),
+                response(207, "5", "application/xml"),
                 startsWith("Body does not match schema for action(GET /schema) response(207) mime-type('application/xml')\n" +
                         "Content: 5\n" +
                         "Message: ")
@@ -128,7 +128,7 @@ public class SchemaTest extends HighlevelTestBase {
         assertOneResponseViolationThat(
                 simple,
                 get("/schema"),
-                jsonResponse(209, "5", "text/bla"),
+                response(209, "5", "text/bla"),
                 equalTo("No SchemaValidator found for media type 'text/bla' on action(GET /schema) response(209)")
         );
     }

@@ -15,11 +15,15 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.*;
+import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.core.ReportAggregator;
+import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -36,20 +40,20 @@ import static org.junit.Assert.assertTrue;
  *
  */
 public class HighlevelTestBase {
-    protected MockHttpServletResponse jsonResponse(int code, String json, String contentType) throws UnsupportedEncodingException {
+    protected MockHttpServletResponse response(int code, String body, String contentType) throws UnsupportedEncodingException {
         final MockHttpServletResponse response = new MockHttpServletResponse();
         response.setStatus(code);
         response.setContentType(contentType);
-        response.getWriter().print(json);
+        response.getWriter().print(body);
         return response;
     }
 
     protected MockHttpServletResponse jsonResponse(int code, String json) throws UnsupportedEncodingException {
-        return jsonResponse(code, json, "application/json");
+        return response(code, json, "application/json");
     }
 
     protected MockHttpServletResponse jsonResponse(int code) throws UnsupportedEncodingException {
-        return jsonResponse(code, "", "application/json");
+        return response(code, "", "application/json");
     }
 
     protected void assertNoViolations(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {

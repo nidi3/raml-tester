@@ -49,7 +49,12 @@ public class FormDecoder {
         if (request.getContentType() == null) {
             return new Values();
         }
-        final MediaType type = MediaType.valueOf(request.getContentType());
+        final MediaType type;
+        try {
+            type = MediaType.valueOf(request.getContentType());
+        } catch (InvalidMediaTypeException e) {
+            return new Values();
+        }
         if (type.isCompatibleWith(URL_ENCODED)) {
             final String charset = type.getCharset(DEFAULT_CHARSET);
             try {
@@ -68,7 +73,14 @@ public class FormDecoder {
     }
 
     private static String charset(String contentType) {
-        return contentType == null ? DEFAULT_CHARSET : MediaType.valueOf(contentType).getCharset(DEFAULT_CHARSET);
+        if (contentType == null) {
+            return DEFAULT_CHARSET;
+        }
+        try {
+            return MediaType.valueOf(contentType).getCharset(DEFAULT_CHARSET);
+        } catch (InvalidMediaTypeException e) {
+            return DEFAULT_CHARSET;
+        }
     }
 
     private Values decodeMultipart(RamlRequest request) {

@@ -43,7 +43,7 @@ final class CheckerType {
         return media;
     }
 
-    public String getCharset(){
+    public String getCharset() {
         return media.getCharset("iso-8859-1");
     }
 
@@ -57,7 +57,13 @@ final class CheckerType {
             violations.addIf(CheckerHelper.hasContent(message) || !CheckerHelper.existSchemalessBody(bodies), "contentType.missing");
             return null;
         }
-        final MediaType targetType = MediaType.valueOf(message.getContentType());
+        final MediaType targetType;
+        try {
+            targetType = MediaType.valueOf(message.getContentType());
+        } catch (InvalidMediaTypeException e) {
+            violations.add("mediaType.illegal", message.getContentType(),e.getMessage(),detail);
+            return null;
+        }
         final MimeType mimeType = findMatchingMimeType(violations, action, bodies, targetType, detail);
         if (mimeType == null) {
             violations.add("mediaType.undefined", message.getContentType(), action, detail);
@@ -79,7 +85,7 @@ final class CheckerType {
                 }
             }
         } catch (InvalidMediaTypeException e) {
-            violations.add("mediaType.illegal", e.getMimeType());
+            violations.add("mediaType.illegal", e.getMimeType(),e.getMessage(),detail);
         }
         return res;
     }

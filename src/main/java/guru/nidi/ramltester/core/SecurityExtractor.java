@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.util.Message;
 import org.raml.model.*;
 import org.raml.model.parameter.Header;
 import org.raml.model.parameter.QueryParameter;

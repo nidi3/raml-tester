@@ -39,7 +39,7 @@ public class FormTest extends HighlevelTestBase {
         assertNoViolations(test(aggregator,
                 form,
                 post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("param", "a+b"),
-                jsonResponse(200, "", null)));
+                response(200, "", null)));
     }
 
     @Test
@@ -47,7 +47,7 @@ public class FormTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(aggregator,
                         form,
                         post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("hula", "a+b"),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("Form parameter 'hula' on action(POST /form) is not defined")
         );
     }
@@ -57,7 +57,7 @@ public class FormTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(aggregator,
                         form,
                         post("/form").content("param=a+b"),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("No Content-Type header given")
         );
     }
@@ -67,7 +67,7 @@ public class FormTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(aggregator,
                         form,
                         post("/form/parameterless").contentType(MediaType.APPLICATION_FORM_URLENCODED),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("No formParameters given on action(POST /form/parameterless) mime-type('application/x-www-form-urlencoded')")
         );
     }
@@ -82,7 +82,7 @@ public class FormTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(aggregator,
                         form,
                         post("/form/schema").contentType(MediaType.APPLICATION_FORM_URLENCODED),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("No schema allowed on action(POST /form/schema) mime-type('application/x-www-form-urlencoded')")
         );
     }
@@ -93,7 +93,7 @@ public class FormTest extends HighlevelTestBase {
                 form,
                 fileUpload("/form/multi").file("file", new byte[]{1, 2, 3})
                         .contentType(MediaType.MULTIPART_FORM_DATA).param("param", "a +b"),
-                jsonResponse(200, "", null)
+                response(200, "", null)
         ));
     }
 

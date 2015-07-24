@@ -19,6 +19,7 @@ import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
+import guru.nidi.ramltester.util.Message;
 import guru.nidi.ramltester.util.UriComponents;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
@@ -63,12 +64,12 @@ public class RamlChecker {
         responseViolations = report.getResponseViolations();
         try {
             final Action action = findAction(request);
-            new ContentNegotiationChecker().check(request, response, action);
             final SecurityExtractor security = new SecurityExtractor(raml, action, requestViolations);
             security.check(requestViolations);
             checkRequest(request, action, security);
             if (response != null) {
-                checkResponse(response, action, security);
+                final Response responseModel = checkResponse(response, action, security);
+                new ContentNegotiationChecker(requestViolations, responseViolations).check(request, response, action,responseModel);
             }
         } catch (RamlViolationException e) {
             //ignore, results are in report
@@ -216,14 +217,17 @@ public class RamlChecker {
         }
     }
 
-    public void checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
-        final Response res = findResponse(action, response.getStatus(), security);
+    public Response checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
+        final Response res = CheckerHelper.findResponse(action, response.getStatus(), security);
+        responseViolations.addAndThrowIf(res == null, "responseCode.undefined", response.getStatus(), action);
+
         actionUsage(usage, action).addResponseCode("" + response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 
         final String detail = new Message("response", response.getStatus()).toString();
         final CheckerType type = CheckerType.find(responseViolations, action, response, res.getBody(), detail);
         checkSchema(responseViolations, action, response.getContent(), type, detail);
+        return res;
     }
 
     private void checkSchema(RamlViolations violations, Action action, byte[] body, CheckerType type, String detail) {
@@ -263,23 +267,6 @@ public class RamlChecker {
                         .predefined(DefaultHeaders.RESPONSE)
                         .checkParameters(response.getHeaders(), values, new Message("headerParam", action))
         );
-    }
-
-    private Response findResponse(Action action, int status, SecurityExtractor security) {
-        Response res = action.getResponses().get("" + status);
-        if (res == null) {
-            final Iterator<Map<String, Response>> iter = security.responses().iterator();
-            //there could be more that 1 matching response, problem?
-            while (iter.hasNext()) {
-                final Map<String, Response> resMap = iter.next();
-                res = resMap.get("" + status);
-                if (res == null) {
-                    iter.remove();
-                }
-            }
-        }
-        responseViolations.addAndThrowIf(res == null, "responseCode.undefined", status, action);
-        return res;
     }
 }
 

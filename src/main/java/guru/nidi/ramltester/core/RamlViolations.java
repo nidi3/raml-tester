@@ -15,6 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.util.Message;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

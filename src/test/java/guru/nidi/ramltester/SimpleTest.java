@@ -93,7 +93,7 @@ public class SimpleTest extends HighlevelTestBase {
     @Test
     public void noMediaType() throws Exception {
         assertOneResponseViolationThat(
-                test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"", null)),
+                test(aggregator, simple, get("/data"), response(200, "\"hula\"", null)),
                 equalTo("No Content-Type header given")
         );
     }
@@ -103,7 +103,7 @@ public class SimpleTest extends HighlevelTestBase {
         assertOneResponseViolationThat(test(aggregator,
                         simple,
                         get("/data"),
-                        jsonResponse(200, "\"hula\"", "text/plain")),
+                        response(200, "\"hula\"", "text/plain")),
                 equalTo("Media type 'text/plain' is not defined on action(GET /data) response(200)")
         );
     }
@@ -119,7 +119,7 @@ public class SimpleTest extends HighlevelTestBase {
     @Test
     public void compatibleMediaType() throws Exception {
         assertNoViolations(
-                test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"", "application/json;charset=utf-8")));
+                test(aggregator, simple, get("/data"), response(200, "\"hula\"", "application/json;charset=utf-8")));
     }
 
     @Test
@@ -157,7 +157,7 @@ public class SimpleTest extends HighlevelTestBase {
         assertOneResponseViolationThat(test(aggregator,
                         RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DefaultOkSchemaValidator()).load("simple.raml"),
                         get("/mediaType"),
-                        jsonResponse(200, "\"hula\"", "application/default")),
+                        response(200, "\"hula\"", "application/default")),
                 equalTo("Body does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n" +
                         "Content: \"hula\"\n" +
                         "Message: ok")

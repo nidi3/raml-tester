@@ -21,6 +21,13 @@ import java.util.*;
  *
  */
 public final class MediaType {
+    public static Comparator<MediaType> QUALITY_COMPARATOR = new Comparator<MediaType>() {
+        @Override
+        public int compare(MediaType m1, MediaType m2) {
+            final double diff = m2.getQualityParameter() - m1.getQualityParameter();
+            return diff < 0 ? -1 : (diff > 0 ? 1 : 0);
+        }
+    };
     public static final MediaType JSON = valueOf("application/json");
 
     private static final String CHARSET = "charset";
@@ -33,7 +40,7 @@ public final class MediaType {
     private final String subtype;
     private final Map<String, String> parameters;
 
-    public MediaType(String type, String subtype, Map<String, String> parameters) {
+    private MediaType(String type, String subtype, Map<String, String> parameters) {
         this.type = type;
         this.subtype = subtype;
         this.parameters = parameters;
@@ -41,7 +48,7 @@ public final class MediaType {
 
     public static MediaType valueOf(String mimeType) {
         if (mimeType == null || mimeType.length() == 0) {
-            throw new InvalidMediaTypeException(mimeType, "'mimeType' must not be empty");
+            throw new InvalidMediaTypeException(mimeType, new Message("mediaType.empty"));
         }
         final String[] parts = tokenizeToStringArray(mimeType, ";");
 
@@ -52,15 +59,15 @@ public final class MediaType {
         }
         final int subIndex = fullType.indexOf('/');
         if (subIndex == -1) {
-            throw new InvalidMediaTypeException(mimeType, "does not contain '/'");
+            throw new InvalidMediaTypeException(mimeType, new Message("mediaType.noSlash"));
         }
         if (subIndex == fullType.length() - 1) {
-            throw new InvalidMediaTypeException(mimeType, "does not contain subtype after '/'");
+            throw new InvalidMediaTypeException(mimeType, new Message("mediaType.noSubtype"));
         }
         final String type = fullType.substring(0, subIndex);
         final String subtype = fullType.substring(subIndex + 1, fullType.length());
         if (WILDCARD_TYPE.equals(type) && !WILDCARD_TYPE.equals(subtype)) {
-            throw new InvalidMediaTypeException(mimeType, "wildcard type is legal only in '*/*' (all mime types)");
+            throw new InvalidMediaTypeException(mimeType, new Message("mediaType.wildcard.illegal"));
         }
 
         final Map<String, String> parameters = new LinkedHashMap<>(parts.length);
@@ -76,7 +83,44 @@ public final class MediaType {
             }
         }
 
+        for (final Map.Entry<String, String> entry : parameters.entrySet()) {
+            checkParameter(mimeType, entry.getKey(), entry.getValue());
+        }
+
         return new MediaType(type, subtype, parameters);
+    }
+
+    public double getQualityParameter() {
+        final String q = getParameter("q");
+        return q == null ? 1 : Double.parseDouble(q);
+    }
+
+    private static void checkParameter(String mimeType, String key, String value) {
+        if ("q".equals(key)) {
+            value = unquote(value);
+            try {
+                double d = Double.parseDouble(value);
+                if (d < 0 || d > 1) {
+                    throw new InvalidMediaTypeException(mimeType, new Message("mediaType.quality.illegal", value));
+                }
+            } catch (NumberFormatException e) {
+                throw new InvalidMediaTypeException(mimeType, new Message("mediaType.quality.illegal", value));
+            }
+        }
+    }
+
+    private static boolean isQuotedString(String s) {
+        if (s.length() < 2) {
+            return false;
+        }
+        return ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")));
+    }
+
+    private static String unquote(String s) {
+        if (s == null) {
+            return null;
+        }
+        return isQuotedString(s) ? s.substring(1, s.length() - 1) : s;
     }
 
     public boolean isWildcardType() {
@@ -143,7 +187,11 @@ public final class MediaType {
     }
 
     public Map<String, String> getParameters() {
-        return parameters;
+        return Collections.unmodifiableMap(parameters);
+    }
+
+    public String getParameter(String name) {
+        return parameters.get(name);
     }
 
     public String getCharset(String defaultCharset) {

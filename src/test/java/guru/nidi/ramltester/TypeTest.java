@@ -213,7 +213,7 @@ public class TypeTest extends HighlevelTestBase {
 //            assertNoViolation(
 //                    type,
 //                    get("/type?multi=" + value),
-//                    jsonResponse(200, "\"hula\""));
+//                    response(200, "\"hula\""));
 //        }
 //    }
 //
@@ -223,7 +223,7 @@ public class TypeTest extends HighlevelTestBase {
 //            assertOneRequestViolationThat(
 //                    type,
 //                    get("/type?multi=" + value),
-//                    jsonResponse(200, "\"hula\""),
+//                    response(200, "\"hula\""),
 //                    startsWith("Query parameter 'enum' : Value '" + value + "' is not a member of enum '[a, b]'"));
 //        }
 //    }
@@ -290,7 +290,7 @@ public class TypeTest extends HighlevelTestBase {
         assertOneResponseViolationThat(
                 type,
                 post("/empty"),
-                jsonResponse(200, "", null),
+                response(200, "", null),
                 equalTo("No Content-Type header given"));
     }
 
@@ -299,11 +299,11 @@ public class TypeTest extends HighlevelTestBase {
         assertNoViolations(
                 type,
                 post("/empty"),
-                jsonResponse(201, "", null));
+                response(201, "", null));
         assertNoViolations(
                 type,
                 post("/empty"),
-                jsonResponse(202, "", "a/b"));
+                response(202, "", "a/b"));
     }
 
     @Test

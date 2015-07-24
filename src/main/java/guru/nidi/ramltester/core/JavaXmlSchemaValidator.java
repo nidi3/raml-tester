@@ -18,6 +18,7 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.loader.RamlLoaderLSResourceResolver;
 import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.util.Message;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;

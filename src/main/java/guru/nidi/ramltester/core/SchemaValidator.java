@@ -17,6 +17,7 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.loader.RamlLoader;
 import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.util.Message;
 
 /**
  *

@@ -36,7 +36,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertNoViolations(test(
                 global,
                 get("/sec2").param("access_token", "bla").header("Authorization2", "blu"),
-                jsonResponse(401, "", null)));
+                response(401, "", null)));
     }
 
     @Test
@@ -44,7 +44,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertNoViolations(test(
                 global,
                 get("/sec12").header("Authorization1", "blu"),
-                jsonResponse(200, "", null)));
+                response(200, "", null)));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertRequestViolationsThat(test(
                         global,
                         get("/sec12").header("Authorization1", "1").header("Authorization2", "2"),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("Header 'Authorization2' on action(GET /sec12) is not defined"),
                 equalTo("Header 'Authorization1' on action(GET /sec12) is not defined")
         );
@@ -63,7 +63,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertNoViolations(test(
                 local,
                 get("/sec").param("access_token", "bla").header("Authorization2", "blu"),
-                jsonResponse(401, "", null)));
+                response(401, "", null)));
     }
 
     @Test
@@ -71,7 +71,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(
                         local,
                         get("/unsec").param("access_token", "bla").header("Authorization2", "blu"),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("Header 'Authorization2' on action(GET /unsec) is not defined"));
     }
 
@@ -80,7 +80,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertNoViolations(test(
                 global,
                 get("/undesc"),
-                jsonResponse(200, "", null)));
+                response(200, "", null)));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertNoViolations(test(
                 global,
                 get("/type"),
-                jsonResponse(200, "", null)));
+                response(200, "", null)));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(
                         undef,
                         get("/unsec"),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("Globally used security Scheme 'b' is not defined"));
     }
 
@@ -106,7 +106,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(
                         undef,
                         get("/sec"),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("Security Scheme 'c' on resource(/sec) is not defined"));
     }
 
@@ -115,7 +115,7 @@ public class SecurityTest extends HighlevelTestBase {
         assertOneRequestViolationThat(test(
                         undef,
                         post("/sec"),
-                        jsonResponse(200, "", null)),
+                        response(200, "", null)),
                 equalTo("Security Scheme 'd' on action(POST /sec) is not defined"));
     }
 

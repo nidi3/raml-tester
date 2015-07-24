@@ -17,6 +17,7 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FileValue;
+import guru.nidi.ramltester.util.Message;
 import org.raml.model.ParamType;
 import org.raml.model.parameter.AbstractParam;
 import org.slf4j.Logger;

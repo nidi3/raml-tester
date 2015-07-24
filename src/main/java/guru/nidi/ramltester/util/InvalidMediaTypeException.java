@@ -21,8 +21,8 @@ package guru.nidi.ramltester.util;
 public class InvalidMediaTypeException extends RuntimeException {
     private final String mimeType;
 
-    public InvalidMediaTypeException(String mimeType, String message) {
-        super(message);
+    public InvalidMediaTypeException(String mimeType, Message message) {
+        super(message.toString());
         this.mimeType = mimeType;
     }
 
