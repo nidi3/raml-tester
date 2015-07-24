@@ -1,9 +1,5 @@
 language: java
 sudo: false
-env:
-  global:
-  - secure: CCX2OY3V7bM/uW2PuFAXEyj9A9wQrjBBmGKI7n9W1P80o02FipikJUB+4uzFE3ihvpuYYJu4GaBWbWaRR+XVDZZmLoH5n6ABThh9N5MHA1Upd/93CFt4h4Q0XHP2YIpTlOhFz8LucSguUH1A3+QfAPzf/E4tAeFQbiRZ4a0VzPc=
-  - secure: qUWWVHHBClY0h+T8eNPQLejczmUlsbytrHri1I+0Ia12uRIO/+MhkJy+0NyXYyw+g64jyONb4gWocvSQFIJeagt2KKFgfDD1md7Y1C54rv1RzUcl/1/KSn4iTQ+49DySXn7l89M8wQRYQ4A9hJLtAVpC1Tvi94XFAL/bXJXp05w=
 deploy:
   provider: releases
   api_key:

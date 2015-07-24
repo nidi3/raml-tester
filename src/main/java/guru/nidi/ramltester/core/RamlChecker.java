@@ -15,12 +15,10 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.RamlRequest;
-import guru.nidi.ramltester.model.RamlResponse;
-import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.FormDecoder;
-import guru.nidi.ramltester.util.Message;
 import guru.nidi.ramltester.util.UriComponents;
+import guru.nidi.ramltester.validator.SchemaValidator;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 
@@ -69,7 +67,7 @@ public class RamlChecker {
             checkRequest(request, action, security);
             if (response != null) {
                 final Response responseModel = checkResponse(response, action, security);
-                new ContentNegotiationChecker(requestViolations, responseViolations).check(request, response, action,responseModel);
+                new ContentNegotiationChecker(requestViolations, responseViolations).check(request, response, action, responseModel);
             }
         } catch (RamlViolationException e) {
             //ignore, results are in report
@@ -101,7 +99,10 @@ public class RamlChecker {
         final Resource resource = findResource(path);
         resourceUsage(usage, resource).incUses(1);
         final Action action = resource.getAction(method);
-        requestViolations.addAndThrowIf(action == null, "action.undefined", method, resource);
+        if (action == null) {
+            requestViolations.add("action.undefined", method, resource);
+            throw new RamlViolationException();
+        }
         actionUsage(usage, action).incUses(1);
         return action;
     }
@@ -167,7 +168,8 @@ public class RamlChecker {
     private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
         final VariableMatcher pathMatch = VariableMatcher.match(ramlUri.getPath(), requestUri.getPath());
         if (!pathMatch.isMatch()) {
-            requestViolations.addAndThrow("baseUri.unmatched", requestUri.getUri(), raml.getBaseUri());
+            requestViolations.add("baseUri.unmatched", requestUri.getUri(), raml.getBaseUri());
+            throw new RamlViolationException();
         }
         return pathMatch;
     }
@@ -175,7 +177,8 @@ public class RamlChecker {
     private VariableMatcher getHostMatch(UriComponents requestUri, UriComponents ramlUri) {
         final VariableMatcher hostMatch = VariableMatcher.match(ramlUri.getHost(), requestUri.getHost());
         if (!hostMatch.isCompleteMatch()) {
-            requestViolations.addAndThrow("baseUri.unmatched", requestUri.getUri(), raml.getBaseUri());
+            requestViolations.add("baseUri.unmatched", requestUri.getUri(), raml.getBaseUri());
+            throw new RamlViolationException();
         }
         return hostMatch;
     }
@@ -200,7 +203,8 @@ public class RamlChecker {
         final Values values = new Values();
         final Resource resource = CheckerHelper.findResource(resourcePath, raml.getResources(), values);
         if (resource == null) {
-            requestViolations.addAndThrow("resource.undefined", resourcePath);
+            requestViolations.add("resource.undefined", resourcePath);
+            throw new RamlViolationException();
         }
         checkUriParams(values, resource);
         return resource;
@@ -219,8 +223,10 @@ public class RamlChecker {
 
     public Response checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
         final Response res = CheckerHelper.findResponse(action, response.getStatus(), security);
-        responseViolations.addAndThrowIf(res == null, "responseCode.undefined", response.getStatus(), action);
-
+        if (res == null) {
+            responseViolations.add("responseCode.undefined", response.getStatus(), action);
+            throw new RamlViolationException();
+        }
         actionUsage(usage, action).addResponseCode("" + response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 

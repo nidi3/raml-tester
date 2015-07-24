@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.junit.ExpectedUsage;
+import guru.nidi.ramltester.model.RamlViolations;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;

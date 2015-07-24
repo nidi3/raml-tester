@@ -13,24 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.loader;
+package guru.nidi.ramltester.validator;
 
-import org.raml.parser.loader.ResourceLoader;
-
-import java.io.InputStream;
+import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.ramltester.model.Message;
+import guru.nidi.ramltester.model.RamlViolations;
+import guru.nidi.ramltester.util.MediaType;
 
 /**
  *
  */
-public class RamlLoaderRamlParserResourceLoader implements ResourceLoader {
-    private final RamlLoader delegate;
+public interface SchemaValidator {
+    boolean supports(MediaType mediaType);
 
-    public RamlLoaderRamlParserResourceLoader(RamlLoader delegate) {
-        this.delegate = delegate;
-    }
+    SchemaValidator withResourceLoader(RamlLoader resourceLoader);
 
-    @Override
-    public InputStream fetchResource(String resourceName) {
-        return delegate.fetchResource(resourceName, -1);
-    }
+    void validate(String content, String schema, RamlViolations violations, Message message);
 }

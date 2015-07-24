@@ -15,11 +15,10 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.raml.loader.impl.RamlLoaderRamlParserResourceLoader;
+import guru.nidi.raml.loader.impl.UriRamlLoader;
+import guru.nidi.raml.loader.impl.UrlRamlLoader;
 import guru.nidi.ramltester.junit.ExpectedUsage;
-import guru.nidi.ramltester.loader.RamlLoader;
-import guru.nidi.ramltester.loader.RamlLoaderRamlParserResourceLoader;
-import guru.nidi.ramltester.loader.UriRamlLoader;
-import guru.nidi.ramltester.loader.UrlRamlLoader;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.junit.ClassRule;
@@ -30,11 +29,7 @@ import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
 
-import java.io.File;
-import java.io.IOException;
-
 import static guru.nidi.ramltester.core.UsageItem.RESOURCE;
-import static guru.nidi.ramltester.util.TestUtils.getEnv;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -120,26 +115,6 @@ public class SimpleTest extends HighlevelTestBase {
     public void compatibleMediaType() throws Exception {
         assertNoViolations(
                 test(aggregator, simple, get("/data"), response(200, "\"hula\"", "application/json;charset=utf-8")));
-    }
-
-    @Test
-    @Ignore
-    public void apiPortalReferenced() throws IOException {
-        final RamlLoaders ramlLoader = RamlLoaders.fromApiPortal(getEnv("API_PORTAL_USER"), getEnv("API_PORTAL_PASS"));
-        final RamlDefinition ramlDefinition = ramlLoader.load("test.raml");
-        assertNoViolations(ramlDefinition, get("/test"), jsonResponse(200, "\"hula\""));
-    }
-
-    @Test(expected = RamlLoader.ResourceNotFoundException.class)
-    public void loadFileWithUnfindableReference() {
-        RamlLoaders.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub")).load("simple.raml");
-    }
-
-    @Test
-    public void loadFileWithSecondLoader() {
-        RamlLoaders.fromFile(new File("src/test/resources/guru/nidi/ramltester/sub"))
-                .andFromClasspath("guru/nidi/ramltester")
-                .load("simple.raml");
     }
 
     @Test

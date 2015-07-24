@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.util;
+package guru.nidi.ramltester.model;
 
 import org.raml.model.Action;
 import org.raml.model.MimeType;

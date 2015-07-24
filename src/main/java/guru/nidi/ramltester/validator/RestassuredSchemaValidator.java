@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
+package guru.nidi.ramltester.validator;
 
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBuilder;
@@ -22,10 +22,10 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.jayway.restassured.module.jsv.JsonSchemaValidationException;
 import com.jayway.restassured.module.jsv.JsonSchemaValidator;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
-import guru.nidi.ramltester.loader.RamlLoader;
-import guru.nidi.ramltester.loader.RamlLoaderUriDownloader;
+import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.ramltester.model.Message;
+import guru.nidi.ramltester.model.RamlViolations;
 import guru.nidi.ramltester.util.MediaType;
-import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;

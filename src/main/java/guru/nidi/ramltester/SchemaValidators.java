@@ -15,10 +15,10 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.JavaXmlSchemaValidator;
-import guru.nidi.ramltester.core.RestassuredSchemaValidator;
-import guru.nidi.ramltester.core.SchemaValidator;
-import guru.nidi.ramltester.loader.RamlLoader;
+import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.ramltester.validator.JavaXmlSchemaValidator;
+import guru.nidi.ramltester.validator.RestassuredSchemaValidator;
+import guru.nidi.ramltester.validator.SchemaValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;

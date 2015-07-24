@@ -37,7 +37,7 @@ public class DependencyTest {
 
     @BeforeClass
     public static void init() throws IOException {
-        depend = new JDepend(new PackageFilter(Arrays.asList("org.", "java.", "com.", "javax.")));
+        depend = new JDepend(new PackageFilter(Arrays.asList("org.", "java.", "com.", "javax.","guru.nidi.raml.")));
         depend.addDirectory("target/classes");
         depend.analyze();
     }
@@ -48,11 +48,10 @@ public class DependencyTest {
 
         final JavaPackage
                 base = constraint.addPackage(BASE),
-                apidesigner = constraint.addPackage(BASE + ".apidesigner"),
                 core = constraint.addPackage(BASE + ".core"),
                 httpcomponents = constraint.addPackage(BASE + ".httpcomponents"),
                 junit = constraint.addPackage(BASE + ".junit"),
-                loader = constraint.addPackage(BASE + ".loader"),
+                validator = constraint.addPackage(BASE + ".validator"),
                 model = constraint.addPackage(BASE + ".model"),
                 servlet = constraint.addPackage(BASE + ".servlet"),
                 spring = constraint.addPackage(BASE + ".spring"),
@@ -65,10 +64,7 @@ public class DependencyTest {
         base.dependsUpon(httpcomponents);
         base.dependsUpon(spring);
         base.dependsUpon(jaxrs);
-        base.dependsUpon(loader);
-        base.dependsUpon(apidesigner);
-
-        apidesigner.dependsUpon(loader);
+        base.dependsUpon(validator);
 
         util.dependsUpon(model);
 
@@ -104,7 +100,7 @@ public class DependencyTest {
         System.out.println("Name                                      abst  inst  dist");
         System.out.println("----------------------------------------------------------");
         for (JavaPackage pack : packages) {
-            if (pack.getName().startsWith("guru.")) {
+            if (pack.getName().startsWith("guru.nidi.ramltester")) {
                 System.out.printf("%-40s: %-1.2f  %-1.2f  %-1.2f%n", pack.getName(), pack.abstractness(), pack.instability(), pack.distance());
                 assertEquals("Distance exceeded: " + pack.getName(), 0, pack.distance(), .86f);
             }

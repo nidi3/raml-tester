@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
-
-import guru.nidi.ramltester.util.Message;
+package guru.nidi.ramltester.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +26,7 @@ import java.util.List;
 public class RamlViolations implements Iterable<String> {
     private final List<String> violations;
 
-    RamlViolations() {
+    public RamlViolations() {
         this.violations = new ArrayList<>();
     }
 
@@ -36,13 +34,8 @@ public class RamlViolations implements Iterable<String> {
         violations.add(message.toString());
     }
 
-    void add(String key, Object... params) {
+    public void add(String key, Object... params) {
         add(new Message(key, params));
-    }
-
-    void addAndThrow(String key, Object... params) {
-        add(key, params);
-        throw new RamlViolationException();
     }
 
     public void addIf(boolean condition, Message message) {
@@ -51,14 +44,8 @@ public class RamlViolations implements Iterable<String> {
         }
     }
 
-    void addIf(boolean condition, String key, Object... params) {
+    public void addIf(boolean condition, String key, Object... params) {
         addIf(condition, new Message(key, params));
-    }
-
-    void addAndThrowIf(boolean condition, String key, Object... params) {
-        if (condition) {
-            addAndThrow(key, params);
-        }
     }
 
     public int size() {

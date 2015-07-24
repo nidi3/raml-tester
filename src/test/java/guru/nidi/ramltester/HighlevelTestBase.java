@@ -15,15 +15,15 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.raml.loader.impl.RamlLoader;
 import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.ReportAggregator;
-import guru.nidi.ramltester.core.SchemaValidator;
-import guru.nidi.ramltester.loader.RamlLoader;
+import guru.nidi.ramltester.model.Message;
+import guru.nidi.ramltester.model.RamlViolations;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import guru.nidi.ramltester.util.MediaType;
-import guru.nidi.ramltester.util.Message;
+import guru.nidi.ramltester.validator.SchemaValidator;
 import org.hamcrest.Matcher;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;

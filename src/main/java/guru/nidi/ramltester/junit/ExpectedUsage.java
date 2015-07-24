@@ -18,7 +18,7 @@ package guru.nidi.ramltester.junit;
 import guru.nidi.ramltester.core.Usage;
 import guru.nidi.ramltester.core.UsageItem;
 import guru.nidi.ramltester.core.UsageProvider;
-import guru.nidi.ramltester.util.Message;
+import guru.nidi.ramltester.model.Message;
 import org.junit.rules.Verifier;
 
 import java.util.Arrays;

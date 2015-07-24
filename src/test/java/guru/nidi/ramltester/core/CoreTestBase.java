@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.RamlViolations;
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
 import org.raml.model.parameter.QueryParameter;

@@ -18,6 +18,7 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.validator.SchemaValidator;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.UriParameter;

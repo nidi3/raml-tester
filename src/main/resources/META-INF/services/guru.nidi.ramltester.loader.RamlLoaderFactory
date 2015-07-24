@@ -1,8 +1,0 @@
-guru.nidi.ramltester.loader.ClassPathRamlLoader$Factory
-guru.nidi.ramltester.loader.FileRamlLoader$Factory
-guru.nidi.ramltester.loader.UrlRamlLoader$HttpFactory
-guru.nidi.ramltester.loader.UrlRamlLoader$HttpsFactory
-guru.nidi.ramltester.loader.GithubRamlLoader$Factory
-guru.nidi.ramltester.apidesigner.ApiRamlLoader$PortalFactory
-guru.nidi.ramltester.apidesigner.ApiRamlLoader$DesignerFactory
-

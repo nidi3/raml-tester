@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.RamlViolations;
 import org.raml.model.SecurityScheme;
 import org.raml.model.SecuritySettings;
 

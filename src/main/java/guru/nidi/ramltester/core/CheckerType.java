@@ -16,6 +16,7 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlMessage;
+import guru.nidi.ramltester.model.RamlViolations;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import org.raml.model.Action;
