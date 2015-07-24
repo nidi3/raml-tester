@@ -17,7 +17,6 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.Values;
-import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
@@ -26,10 +25,7 @@ import org.raml.model.Resource;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.UriParameter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -63,24 +59,6 @@ final class CheckerHelper {
             }
         }
         return false;
-    }
-
-    public static MimeType findMatchingMimeType(RamlViolations violations, Action action, Map<String, MimeType> bodies, MediaType targetType, String detail) {
-        MimeType res = null;
-        try {
-            for (final Map.Entry<String, MimeType> entry : bodies.entrySet()) {
-                if (targetType.isCompatibleWith(MediaType.valueOf(entry.getKey()))) {
-                    if (res == null) {
-                        res = entry.getValue();
-                    } else {
-                        violations.add("mediaType.ambiguous", res, entry.getValue(), action, detail);
-                    }
-                }
-            }
-        } catch (InvalidMediaTypeException e) {
-            violations.add("mediaType.illegal", e.getMimeType());
-        }
-        return res;
     }
 
     public static AbstractParam findUriParam(String uriParam, Resource resource) {
@@ -131,4 +109,41 @@ final class CheckerHelper {
         }
     }
 
+    public static SchemaValidator findSchemaValidator(List<SchemaValidator> validators, MediaType mediaType) {
+        for (final SchemaValidator validator : validators) {
+            if (validator.supports(mediaType)) {
+                return validator;
+            }
+        }
+        return null;
+    }
+
+    public static Map<String, List<? extends AbstractParam>> getEffectiveBaseUriParams(Map<String, UriParameter> baseUriParams, Action action) {
+        final Map<String, List<? extends AbstractParam>> params = new HashMap<>();
+        if (action.getBaseUriParameters() != null) {
+            params.putAll(action.getBaseUriParameters());
+        }
+        addNotSetBaseUriParams(action.getResource(), params);
+        if (baseUriParams != null) {
+            for (final Map.Entry<String, UriParameter> entry : baseUriParams.entrySet()) {
+                if (!params.containsKey(entry.getKey())) {
+                    params.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+                }
+            }
+        }
+        return params;
+    }
+
+    private static void addNotSetBaseUriParams(Resource resource, Map<String, List<? extends AbstractParam>> params) {
+        if (resource.getBaseUriParameters() != null) {
+            for (final Map.Entry<String, List<UriParameter>> entry : resource.getBaseUriParameters().entrySet()) {
+                if (!params.containsKey(entry.getKey())) {
+                    params.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        if (resource.getParentResource() != null) {
+            addNotSetBaseUriParams(resource.getParentResource(), params);
+        }
+    }
 }

@@ -17,11 +17,16 @@ package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.loader.RamlLoader;
+import guru.nidi.ramltester.loader.RamlLoaderRamlParserResourceLoader;
+import guru.nidi.ramltester.loader.UriRamlLoader;
+import guru.nidi.ramltester.loader.UrlRamlLoader;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.raml.model.Raml;
+import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
 
@@ -55,21 +60,23 @@ public class SimpleTest extends HighlevelTestBase {
     }
 
     @Test
+    @Ignore
+    public void includeHandlerNotClosingStream() {
+        Raml raml = new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(new UriRamlLoader(new UrlRamlLoader("http://deadleg.github.io/bugs")))).build("test.raml");
+    }
+
+    @Test
     public void undefinedResource() throws Exception {
-        assertOneRequestViolationThat(test(aggregator,
-                        simple,
-                        get("/data2"),
-                        jsonResponse(200, "\"hula\"")),
+        assertOneRequestViolationThat(
+                test(aggregator, simple, get("/data2"), jsonResponse(200, "\"hula\"")),
                 equalTo("Resource '/data2' is not defined")
         );
     }
 
     @Test
     public void undefinedAction() throws Exception {
-        assertOneRequestViolationThat(test(aggregator,
-                        simple,
-                        post("/data"),
-                        jsonResponse(200, "\"hula\"")),
+        assertOneRequestViolationThat(
+                test(aggregator, simple, post("/data"), jsonResponse(200, "\"hula\"")),
                 equalTo("Action POST is not defined on resource(/data)")
         );
     }
@@ -77,20 +84,16 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void undefinedResponseCode() throws Exception {
-        assertOneResponseViolationThat(test(aggregator,
-                        simple,
-                        get("/data"),
-                        jsonResponse(201, "\"hula\"")),
+        assertOneResponseViolationThat(
+                test(aggregator, simple, get("/data"), jsonResponse(201, "\"hula\"")),
                 equalTo("Response(201) is not defined on action(GET /data)")
         );
     }
 
     @Test
     public void noMediaType() throws Exception {
-        assertOneResponseViolationThat(test(aggregator,
-                        simple,
-                        get("/data"),
-                        jsonResponse(200, "\"hula\"", null)),
+        assertOneResponseViolationThat(
+                test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"", null)),
                 equalTo("No Content-Type header given")
         );
     }
@@ -107,20 +110,16 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void emptyResponseBody() throws Exception {
-        assertOneResponseViolationThat(test(aggregator,
-                        simple,
-                        get("/data"),
-                        jsonResponse(200)),
+        assertOneResponseViolationThat(
+                test(aggregator, simple, get("/data"), jsonResponse(200)),
                 equalTo("Schema defined but empty body for media type 'application/json' on action(GET /data) response(200)")
         );
     }
 
     @Test
     public void compatibleMediaType() throws Exception {
-        assertNoViolations(test(aggregator,
-                simple,
-                get("/data"),
-                jsonResponse(200, "\"hula\"", "application/json;charset=utf-8")));
+        assertNoViolations(
+                test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"", "application/json;charset=utf-8")));
     }
 
     @Test
@@ -145,10 +144,8 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void undefinedSchema() throws Exception {
-        assertOneResponseViolationThat(test(aggregator,
-                        simple,
-                        get("/schema"),
-                        jsonResponse(203, "5")),
+        assertOneResponseViolationThat(
+                test(aggregator, simple, get("/schema"), jsonResponse(203, "5")),
                 startsWith("Body does not match schema for action(GET /schema) response(203) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: Schema invalid:")
@@ -178,10 +175,8 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void ambiguousMediaTypesInResponse() throws Exception {
-        assertOneResponseViolationThat(test(aggregator,
-                        simple,
-                        get("/mediaType"),
-                        jsonResponse(201, "\"hula\"")),
+        assertOneResponseViolationThat(
+                test(aggregator, simple, get("/mediaType"), jsonResponse(201, "\"hula\"")),
                 equalTo("Ambiguous definition: mime-type('application/json') and also mime-type('abc/xyz+json') used on action(GET /mediaType) response(201)"));
     }
 
@@ -198,5 +193,4 @@ public class SimpleTest extends HighlevelTestBase {
                 new SpringMockRamlRequest(get("/path").buildRequest(new MockServletContext())),
                 new SpringMockRamlResponse(jsonResponse(200))));
     }
-
 }

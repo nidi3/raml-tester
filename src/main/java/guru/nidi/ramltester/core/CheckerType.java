@@ -16,6 +16,7 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlMessage;
+import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
@@ -57,11 +58,29 @@ final class CheckerType {
             return null;
         }
         final MediaType targetType = MediaType.valueOf(message.getContentType());
-        final MimeType mimeType = CheckerHelper.findMatchingMimeType(violations, action, bodies, targetType, detail);
+        final MimeType mimeType = findMatchingMimeType(violations, action, bodies, targetType, detail);
         if (mimeType == null) {
             violations.add("mediaType.undefined", message.getContentType(), action, detail);
             return null;
         }
         return new CheckerType(mimeType, targetType);
+    }
+
+    private static MimeType findMatchingMimeType(RamlViolations violations, Action action, Map<String, MimeType> bodies, MediaType targetType, String detail) {
+        MimeType res = null;
+        try {
+            for (final Map.Entry<String, MimeType> entry : bodies.entrySet()) {
+                if (targetType.isCompatibleWith(MediaType.valueOf(entry.getKey()))) {
+                    if (res == null) {
+                        res = entry.getValue();
+                    } else {
+                        violations.add("mediaType.ambiguous", res, entry.getValue(), action, detail);
+                    }
+                }
+            }
+        } catch (InvalidMediaTypeException e) {
+            violations.add("mediaType.illegal", e.getMimeType());
+        }
+        return res;
     }
 }

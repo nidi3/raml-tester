@@ -19,11 +19,9 @@ import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
-import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.UriComponents;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
-import org.raml.model.parameter.UriParameter;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -54,15 +52,20 @@ public class RamlChecker {
         this.ignoreXheaders = ignoreXheaders;
     }
 
+    public RamlReport check(RamlRequest request) {
+        return check(request, null);
+    }
+
     public RamlReport check(RamlRequest request, RamlResponse response) {
         final RamlReport report = new RamlReport(raml);
         usage = report.getUsage();
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
         try {
-            checkSecurity(raml.getSecuritySchemes());
             final Action action = findAction(request);
+            new ContentNegotiationChecker().check(request, response, action);
             final SecurityExtractor security = new SecurityExtractor(raml, action, requestViolations);
+            security.check(requestViolations);
             checkRequest(request, action, security);
             if (response != null) {
                 checkResponse(response, action, security);
@@ -71,21 +74,6 @@ public class RamlChecker {
             //ignore, results are in report
         }
         return report;
-    }
-
-    private void checkSecurity(List<Map<String, SecurityScheme>> schemes) {
-        for (final Map<String, SecurityScheme> schemeMap : schemes) {
-            for (final SecurityScheme scheme : schemeMap.values()) {
-                final SecuritySchemeType type = SecuritySchemeType.byName(scheme.getType());
-                if (type != null) {
-                    type.check(scheme, requestViolations);
-                }
-            }
-        }
-    }
-
-    public RamlReport check(RamlRequest request) {
-        return check(request, null);
     }
 
     public Action findAction(RamlRequest request) {
@@ -170,7 +158,7 @@ public class RamlChecker {
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
-        final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(action);
+        final Map<String, List<? extends AbstractParam>> baseUriParams = CheckerHelper.getEffectiveBaseUriParams(raml.getBaseUriParameters(), action);
         paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", action));
         paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", action));
     }
@@ -228,34 +216,6 @@ public class RamlChecker {
         }
     }
 
-    private Map<String, List<? extends AbstractParam>> getEffectiveBaseUriParams(Action action) {
-        final Map<String, List<? extends AbstractParam>> params = new HashMap<>();
-        if (action.getBaseUriParameters() != null) {
-            params.putAll(action.getBaseUriParameters());
-        }
-        addNotSetBaseUriParams(action.getResource(), params);
-        return params;
-    }
-
-    private void addNotSetBaseUriParams(Resource resource, Map<String, List<? extends AbstractParam>> params) {
-        if (resource.getBaseUriParameters() != null) {
-            for (final Map.Entry<String, List<UriParameter>> entry : resource.getBaseUriParameters().entrySet()) {
-                if (!params.containsKey(entry.getKey())) {
-                    params.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        if (resource.getParentResource() != null) {
-            addNotSetBaseUriParams(resource.getParentResource(), params);
-        } else if (raml.getBaseUriParameters() != null) {
-            for (final Map.Entry<String, UriParameter> entry : raml.getBaseUriParameters().entrySet()) {
-                if (!params.containsKey(entry.getKey())) {
-                    params.put(entry.getKey(), Collections.singletonList(entry.getValue()));
-                }
-            }
-        }
-    }
-
     public void checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
         final Response res = findResponse(action, response.getStatus(), security);
         actionUsage(usage, action).addResponseCode("" + response.getStatus());
@@ -274,7 +234,7 @@ public class RamlChecker {
         if (schema == null) {
             return;
         }
-        final SchemaValidator validator = findSchemaValidator(type.getMedia());
+        final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, type.getMedia());
         if (validator == null) {
             violations.add("schemaValidator.missing", type.getMedia(), action, detail);
             return;
@@ -321,16 +281,6 @@ public class RamlChecker {
         responseViolations.addAndThrowIf(res == null, "responseCode.undefined", status, action);
         return res;
     }
-
-    private SchemaValidator findSchemaValidator(MediaType mediaType) {
-        for (final SchemaValidator validator : schemaValidators) {
-            if (validator.supports(mediaType)) {
-                return validator;
-            }
-        }
-        return null;
-    }
-
 }
 
 

@@ -27,10 +27,23 @@ import java.util.Map;
  *
  */
 class SecurityExtractor {
+    private final Raml raml;
     private final List<SecurityScheme> schemes;
 
     public SecurityExtractor(Raml raml, Action action, RamlViolations violations) {
+        this.raml = raml;
         schemes = new SchemeFinder(raml, violations).securedBy(action);
+    }
+
+    public void check(RamlViolations violations) {
+        for (final Map<String, SecurityScheme> schemeMap : raml.getSecuritySchemes()) {
+            for (final SecurityScheme scheme : schemeMap.values()) {
+                final SecuritySchemeType type = SecuritySchemeType.byName(scheme.getType());
+                if (type != null) {
+                    type.check(scheme, violations);
+                }
+            }
+        }
     }
 
     private class RemovePropagatingList<T> extends ArrayList<T> {
@@ -97,12 +110,12 @@ class SecurityExtractor {
             final List<SecurityScheme> res = new ArrayList<>();
             for (final SecurityReference ref : refs) {
                 final String name = ref.getName();
-                    final SecurityScheme ss = securityScheme(name);
-                    if (ss == null) {
-                        violations.addIf(!name.equals("null"), message.withParam(name));
-                    } else {
-                        res.add(ss);
-                    }
+                final SecurityScheme ss = securityScheme(name);
+                if (ss == null) {
+                    violations.addIf(!name.equals("null"), message.withParam(name));
+                } else {
+                    res.add(ss);
+                }
             }
             return res;
         }
