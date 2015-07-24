@@ -15,12 +15,10 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
-import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.UriComponents;
 import org.raml.model.*;
@@ -123,10 +121,10 @@ public class RamlChecker {
         checkQueryParameters(request.getQueryValues(), action, security);
         checkRequestHeaderParameters(request.getHeaderValues(), action, security);
 
-        final Type type = findType(requestViolations, action, request, action.getBody(), "");
+        final CheckerType type = CheckerType.find(requestViolations, action, request, action.getBody(), "");
         if (type != null) {
-            if (FormDecoder.supportsFormParameters(type.media)) {
-                checkFormParameters(action, request.getFormValues(), type.mime);
+            if (FormDecoder.supportsFormParameters(type.getMedia())) {
+                checkFormParameters(action, request.getFormValues(), type.getMime());
             } else {
                 checkSchema(requestViolations, action, request.getContent(), type, "");
             }
@@ -195,7 +193,7 @@ public class RamlChecker {
 
     private void checkProtocol(Action action, UriComponents requestUri, UriComponents ramlUri) {
         final List<Protocol> protocols = findProtocols(action, ramlUri.getScheme());
-        requestViolations.addIf(!protocols.contains(protocolOf(requestUri.getScheme())), "protocol.undefined", requestUri.getScheme(), action);
+        requestViolations.addIf(!protocols.contains(CheckerHelper.protocolOf(requestUri.getScheme())), "protocol.undefined", requestUri.getScheme(), action);
     }
 
     private List<Protocol> findProtocols(Action action, String fallback) {
@@ -209,19 +207,9 @@ public class RamlChecker {
         return protocols;
     }
 
-    private Protocol protocolOf(String s) {
-        if (s.equalsIgnoreCase("http")) {
-            return Protocol.HTTP;
-        }
-        if (s.equalsIgnoreCase("https")) {
-            return Protocol.HTTPS;
-        }
-        return null;
-    }
-
     private Resource findResource(String resourcePath) {
         final Values values = new Values();
-        final Resource resource = findResource(resourcePath, raml.getResources(), values);
+        final Resource resource = CheckerHelper.findResource(resourcePath, raml.getResources(), values);
         if (resource == null) {
             requestViolations.addAndThrow("resource.undefined", resourcePath);
         }
@@ -232,23 +220,12 @@ public class RamlChecker {
     private void checkUriParams(Values values, Resource resource) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
         for (final Map.Entry<String, List<Object>> entry : values) {
-            final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
+            final AbstractParam uriParam = CheckerHelper.findUriParam(entry.getKey(), resource);
             final Message message = new Message("uriParam", entry.getKey(), resource);
             if (uriParam != null) {
                 paramChecker.checkParameter(uriParam, entry.getValue().get(0), message);
             }
         }
-    }
-
-    private AbstractParam findUriParam(String uriParam, Resource resource) {
-        final UriParameter param = resource.getUriParameters().get(uriParam);
-        if (param != null) {
-            return param;
-        }
-        if (resource.getParentResource() != null) {
-            return findUriParam(uriParam, resource.getParentResource());
-        }
-        return null;
     }
 
     private Map<String, List<? extends AbstractParam>> getEffectiveBaseUriParams(Action action) {
@@ -279,106 +256,40 @@ public class RamlChecker {
         }
     }
 
-    private Resource findResource(String resourcePath, Map<String, Resource> resources, Values values) {
-        final List<ResourceMatch> matches = new ArrayList<>();
-        for (final Map.Entry<String, Resource> entry : resources.entrySet()) {
-            final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
-            if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
-                matches.add(new ResourceMatch(pathMatch, entry.getValue()));
-            }
-        }
-        Collections.sort(matches);
-        for (final ResourceMatch match : matches) {
-            if (match.match.isCompleteMatch()) {
-                values.addValues(match.match.getVariables());
-                return match.resource;
-            }
-            if (match.match.isMatch()) {
-                values.addValues(match.match.getVariables());
-                return findResource(match.match.getSuffix(), match.resource.getResources(), values);
-            }
-        }
-        return null;
-    }
-
-    private static final class ResourceMatch implements Comparable<ResourceMatch> {
-        private final VariableMatcher match;
-        private final Resource resource;
-
-        private ResourceMatch(VariableMatcher match, Resource resource) {
-            this.match = match;
-            this.resource = resource;
-        }
-
-        @Override
-        public int compareTo(ResourceMatch o) {
-            return match.getVariables().size() - o.match.getVariables().size();
-        }
-    }
-
     public void checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
         final Response res = findResponse(action, response.getStatus(), security);
         actionUsage(usage, action).addResponseCode("" + response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 
         final String detail = new Message("response", response.getStatus()).toString();
-        final Type type = findType(responseViolations, action, response, res.getBody(), detail);
+        final CheckerType type = CheckerType.find(responseViolations, action, response, res.getBody(), detail);
         checkSchema(responseViolations, action, response.getContent(), type, detail);
     }
 
-    private Type findType(RamlViolations violations, Action action, RamlMessage message, Map<String, MimeType> bodies, String detail) {
-        if (isNoOrEmptyBodies(bodies)) {
-            violations.addIf(hasContent(message), "body.superfluous", action, detail);
-            return null;
-        }
-
-        if (message.getContentType() == null) {
-            violations.addIf(hasContent(message) || !existSchemalessBody(bodies), "contentType.missing");
-            return null;
-        }
-        final MediaType targetType = MediaType.valueOf(message.getContentType());
-        final MimeType mimeType = findMatchingMimeType(violations, action, bodies, targetType, detail);
-        if (mimeType == null) {
-            violations.add("mediaType.undefined", message.getContentType(), action, detail);
-            return null;
-        }
-        return new Type(mimeType, targetType);
-    }
-
-    private static final class Type {
-        private final MimeType mime;
-        private final MediaType media;
-
-        private Type(MimeType mime, MediaType media) {
-            this.mime = mime;
-            this.media = media;
-        }
-    }
-
-    private void checkSchema(RamlViolations violations, Action action, byte[] body, Type type, String detail) {
+    private void checkSchema(RamlViolations violations, Action action, byte[] body, CheckerType type, String detail) {
         if (type == null) {
             return;
         }
-        final String schema = type.mime.getSchema();
+        final String schema = type.getMime().getSchema();
         if (schema == null) {
             return;
         }
-        final SchemaValidator validator = findSchemaValidator(type.media);
+        final SchemaValidator validator = findSchemaValidator(type.getMedia());
         if (validator == null) {
-            violations.add("schemaValidator.missing", type.media, action, detail);
+            violations.add("schemaValidator.missing", type.getMedia(), action, detail);
             return;
         }
         if (body == null || body.length == 0) {
-            violations.add("body.empty", type.media, action, detail);
+            violations.add("body.empty", type.getMedia(), action, detail);
             return;
         }
 
-        final String charset = type.media.getCharset("iso-8859-1");
+        final String charset = type.getCharset();
         try {
             final String content = new String(body, charset);
             final String refSchema = raml.getConsolidatedSchemas().get(schema);
             final String schemaToUse = refSchema == null ? schema : refSchema;
-            validator.validate(content, schemaToUse, violations, new Message("schema.mismatch", action, detail, type.mime, content));
+            validator.validate(content, schemaToUse, violations, new Message("schema.mismatch", action, detail, type.getMime(), content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
         }
@@ -420,39 +331,6 @@ public class RamlChecker {
         return null;
     }
 
-    private boolean isNoOrEmptyBodies(Map<String, MimeType> bodies) {
-        return bodies == null || bodies.isEmpty() || (bodies.size() == 1 && bodies.containsKey(null));
-    }
-
-    private boolean hasContent(RamlMessage message) {
-        return message.getContent() != null && message.getContent().length > 0;
-    }
-
-    private boolean existSchemalessBody(Map<String, MimeType> bodies) {
-        for (final MimeType mimeType : bodies.values()) {
-            if (mimeType.getSchema() == null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private MimeType findMatchingMimeType(RamlViolations violations, Action action, Map<String, MimeType> bodies, MediaType targetType, String detail) {
-        MimeType res = null;
-        try {
-            for (final Map.Entry<String, MimeType> entry : bodies.entrySet()) {
-                if (targetType.isCompatibleWith(MediaType.valueOf(entry.getKey()))) {
-                    if (res == null) {
-                        res = entry.getValue();
-                    } else {
-                        violations.add("mediaType.ambiguous", res, entry.getValue(), action, detail);
-                    }
-                }
-            }
-        } catch (InvalidMediaTypeException e) {
-            violations.add("mediaType.illegal", e.getMimeType());
-        }
-        return res;
-    }
-
 }
+
+
