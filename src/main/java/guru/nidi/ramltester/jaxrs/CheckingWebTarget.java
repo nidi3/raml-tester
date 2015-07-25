@@ -54,7 +54,7 @@ public class CheckingWebTarget implements WebTarget {
         aggregator.addReport(report);
     }
 
-    public RamlReport getReport() {
+    public RamlReport getLastReport() {
         return report;
     }
 

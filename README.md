@@ -74,8 +74,7 @@ public class SimpleTest {
         final CheckingWebTarget webTarget = api.createWebTarget(target).aggregating(aggregator);
         webTarget.request().post(Entity.text("apple"));
 
-        assertTrue(webTarget.getReport().getRequestViolations().isEmpty());
-        assertTrue(webTarget.getReport().getResponseViolations().isEmpty());
+        assertTrue(webTarget.getLastReport().isEmpty());
     }
 
 }

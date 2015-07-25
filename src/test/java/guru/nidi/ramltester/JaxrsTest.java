@@ -116,8 +116,7 @@ public class JaxrsTest extends ServerTest {
         checking.path("/app/path").queryParam("qp", "true")
                 .request().header("h", "h2")
                 .post(Entity.entity("data", "text/plain"));
-        assertTrue(checking.getReport().getRequestViolations().isEmpty());
-        assertTrue(checking.getReport().getResponseViolations().isEmpty());
+        assertTrue(checking.getLastReport().isEmpty());
     }
 
     @Override
