@@ -1,13 +1,13 @@
 language: java
 sudo: false
-deploy:
-  provider: releases
-  api_key:
-    secure: nMz8qMjaIHHUoN32Fk0U2NmQPUyMQvxDnShYmwruGsduNNG4XMJfauPisoxNJqLU/Wdi0qxlPPzjUQjG3/vwowZZNvFJ5cIpQg8C/3JGNcYCcaYSCCy9+53h5jQMwqBMZ22IubIM5RL1pLSymuwC809MXs6EfkmLO65uC8ixkCM=
-  file: target/raml-tester-0.8.2-SNAPSHOT.jar
-  skip_cleanup: true
-  on:
-    repo: nidi3/raml-tester
-    tags: true
-    all_branches: true
-
+#deploy:
+#  provider: releases
+#  api_key:
+#    secure: nMz8qMjaIHHUoN32Fk0U2NmQPUyMQvxDnShYmwruGsduNNG4XMJfauPisoxNJqLU/Wdi0qxlPPzjUQjG3/vwowZZNvFJ5cIpQg8C/3JGNcYCcaYSCCy9+53h5jQMwqBMZ22IubIM5RL1pLSymuwC809MXs6EfkmLO65uC8ixkCM=
+#  file: target/raml-tester-0.8.2-SNAPSHOT.jar
+#  skip_cleanup: true
+#  on:
+#    repo: nidi3/raml-tester
+#    tags: true
+#    all_branches: true
+#
