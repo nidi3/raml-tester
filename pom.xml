@@ -33,17 +33,7 @@
         <dependency>
             <groupId>guru.nidi.raml</groupId>
             <artifactId>raml-loader</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
+            <version>0.0.2</version>
         </dependency>
 
         <dependency>

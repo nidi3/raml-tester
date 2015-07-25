@@ -15,17 +15,11 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.raml.loader.impl.RamlLoaderRamlParserResourceLoader;
-import guru.nidi.raml.loader.impl.UriRamlLoader;
-import guru.nidi.raml.loader.impl.UrlRamlLoader;
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.raml.model.Raml;
-import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
 
@@ -52,12 +46,6 @@ public class SimpleTest extends HighlevelTestBase {
         assertNoViolations(test(aggregator, simple, get("/"), jsonResponse(200)));
         assertNoViolations(test(aggregator, simple, get("/d"), jsonResponse(200)));
         assertNoViolations(test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"")));
-    }
-
-    @Test
-    @Ignore
-    public void includeHandlerNotClosingStream() {
-        Raml raml = new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(new UriRamlLoader(new UrlRamlLoader("http://deadleg.github.io/bugs")))).build("test.raml");
     }
 
     @Test
