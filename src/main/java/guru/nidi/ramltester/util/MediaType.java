@@ -15,7 +15,6 @@
  */
 package guru.nidi.ramltester.util;
 
-import guru.nidi.ramltester.model.Message;
 
 import java.util.*;
 

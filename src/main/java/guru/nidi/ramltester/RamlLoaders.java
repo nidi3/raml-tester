@@ -17,7 +17,7 @@ package guru.nidi.ramltester;
 
 import guru.nidi.raml.loader.apidesigner.ApiRamlLoader;
 import guru.nidi.raml.loader.impl.*;
-import guru.nidi.ramltester.validator.SchemaValidator;
+import guru.nidi.ramltester.core.SchemaValidator;
 import org.raml.model.Raml;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 

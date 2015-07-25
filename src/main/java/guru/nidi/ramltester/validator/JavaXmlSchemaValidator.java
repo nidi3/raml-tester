@@ -16,9 +16,10 @@
 package guru.nidi.ramltester.validator;
 
 import guru.nidi.raml.loader.impl.RamlLoader;
-import guru.nidi.ramltester.model.Message;
-import guru.nidi.ramltester.model.RamlViolations;
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.util.Message;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;

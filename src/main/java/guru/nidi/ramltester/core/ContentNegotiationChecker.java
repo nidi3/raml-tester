@@ -15,12 +15,11 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.Message;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
-import guru.nidi.ramltester.model.RamlViolations;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.util.Message;
 import org.raml.model.Action;
 import org.raml.model.Response;
 

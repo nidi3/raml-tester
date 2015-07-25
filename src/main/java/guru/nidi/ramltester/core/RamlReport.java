@@ -15,7 +15,6 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.RamlViolations;
 import org.raml.model.Raml;
 
 import java.io.PrintWriter;

@@ -15,10 +15,12 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.*;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
+import guru.nidi.ramltester.util.Message;
 import guru.nidi.ramltester.util.UriComponents;
-import guru.nidi.ramltester.validator.SchemaValidator;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 

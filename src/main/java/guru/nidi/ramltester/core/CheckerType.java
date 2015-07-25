@@ -16,7 +16,6 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlMessage;
-import guru.nidi.ramltester.model.RamlViolations;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import org.raml.model.Action;
@@ -62,7 +61,7 @@ final class CheckerType {
         try {
             targetType = MediaType.valueOf(message.getContentType());
         } catch (InvalidMediaTypeException e) {
-            violations.add("mediaType.illegal", message.getContentType(),e.getMessage(),detail);
+            violations.add("mediaType.illegal", message.getContentType(), e.getMessage(), detail);
             return null;
         }
         final MimeType mimeType = findMatchingMimeType(violations, action, bodies, targetType, detail);
@@ -86,7 +85,7 @@ final class CheckerType {
                 }
             }
         } catch (InvalidMediaTypeException e) {
-            violations.add("mediaType.illegal", e.getMimeType(),e.getMessage(),detail);
+            violations.add("mediaType.illegal", e.getMimeType(), e.getMessage(), detail);
         }
         return res;
     }

@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.util;
+package guru.nidi.ramltester.core;
 
+import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.util.Message;
 
 /**
  *
  */
-public class InvalidMediaTypeException extends RuntimeException {
-    private final String mimeType;
+public interface SchemaValidator {
+    boolean supports(MediaType mediaType);
 
-    public InvalidMediaTypeException(String mimeType, Message message) {
-        super(message.toString());
-        this.mimeType = mimeType;
-    }
+    SchemaValidator withResourceLoader(RamlLoader resourceLoader);
 
-    public String getMimeType() {
-        return mimeType;
-    }
+    void validate(String content, String schema, RamlViolations violations, Message message);
 }

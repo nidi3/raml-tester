@@ -15,9 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.Message;
-import guru.nidi.ramltester.model.RamlViolations;
 import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
