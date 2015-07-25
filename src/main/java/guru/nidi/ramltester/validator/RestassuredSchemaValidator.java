@@ -22,7 +22,7 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.jayway.restassured.module.jsv.JsonSchemaValidationException;
 import com.jayway.restassured.module.jsv.JsonSchemaValidator;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
-import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.raml.loader.model.RamlLoader;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.util.MediaType;

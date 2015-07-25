@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.validator;
 
-import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.raml.loader.model.RamlLoader;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSInput;

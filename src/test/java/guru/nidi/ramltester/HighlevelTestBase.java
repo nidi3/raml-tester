@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.raml.loader.model.RamlLoader;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.ReportAggregator;

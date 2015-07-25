@@ -16,7 +16,7 @@
 package guru.nidi.ramltester.validator;
 
 import com.github.fge.jsonschema.core.load.download.URIDownloader;
-import guru.nidi.raml.loader.impl.RamlLoader;
+import guru.nidi.raml.loader.model.RamlLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
