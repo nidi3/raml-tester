@@ -89,4 +89,31 @@ public class MediaTypeTest {
         assertTrue(MediaType.JSON.isCompatibleWith(valueOf("a/b+json")));
         assertTrue(valueOf("a/b+json").isCompatibleWith(MediaType.JSON));
     }
+
+    @Test
+    public void similarity() {
+        similarity(valueOf("application/json"));
+        similarity(valueOf("a/b+json"));
+    }
+
+    @Test
+    public void suffixWildcardSimilarity() {
+        final MediaType complete = valueOf("a/b+c");
+        final MediaType wildcard = valueOf("a/*+c");
+        assertTrue(complete.similarity(wildcard) > 0);
+        assertTrue(complete.similarity(complete) > complete.similarity(wildcard));
+        assertTrue(complete.similarity(valueOf("a/*+d")) == 0);
+    }
+
+    private void similarity(MediaType complete) {
+        final MediaType withParams = valueOf("application/json;c=d"),
+                differentSub = valueOf("application/c"),
+                subwild = valueOf("application/*"),
+                wild = valueOf("*/*");
+        assertTrue(withParams.similarity(withParams) > withParams.similarity(complete));
+        assertTrue(complete.similarity(complete) > complete.similarity(subwild));
+        assertTrue(complete.similarity(subwild) > complete.similarity(wild));
+        assertTrue(complete.similarity(differentSub) == 0);
+        assertTrue(complete.similarity(subwild) == differentSub.similarity(subwild));
+    }
 }

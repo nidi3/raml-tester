@@ -132,6 +132,32 @@ public final class MediaType {
         return WILDCARD_TYPE.equals(getSubtype()) || getSubtype().startsWith("*+");
     }
 
+    public int similarity(MediaType other) {
+        if (getType().equals(other.getType())) {
+            if (getSubtype().equals(other.getSubtype())) {
+                return getParameters().equals(other.getParameters()) ? 4 : 3;
+            }
+            if (isWildcardSubtype() || other.isWildcardSubtype()) {
+                final String thisSuffix = findSuffix();
+                final String otherSuffix = other.findSuffix();
+                if ((thisSuffix == null && otherSuffix == null) ||
+                        (thisSuffix != null && thisSuffix.equals(otherSuffix))) {
+                    return 2;
+                }
+                return 0;
+            }
+        }
+        if (isWildcardType() || other.isWildcardType()) {
+            return 1;
+        }
+        final MediaType thisKnown = applyKnownSuffices();
+        final MediaType otherKnown = other.applyKnownSuffices();
+        if (thisKnown != this || otherKnown != other) {
+            return thisKnown.similarity(otherKnown);
+        }
+        return 0;
+    }
+
     public boolean isCompatibleWith(MediaType other) {
         if (other == null) {
             return false;
@@ -152,31 +178,24 @@ public final class MediaType {
         }
         // wildcard with suffix? e.g. application/*+xml
         if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
-            final String[] thisSubtypeParts = findSuffix();
-            final String[] otherSubtypeParts = other.findSuffix();
-            if (thisSubtypeParts[1] == null && otherSubtypeParts[1] == null) {
+            final String thisSuffix = findSuffix();
+            final String otherSuffix = other.findSuffix();
+            if ((thisSuffix == null && otherSuffix == null) ||
+                    (thisSuffix != null && thisSuffix.equals(otherSuffix))) {
                 return true;
-            }
-            if (thisSubtypeParts[1] != null && otherSubtypeParts[1] != null) {
-                if (thisSubtypeParts[1].equals(otherSubtypeParts[1]) &&
-                        (WILDCARD_TYPE.equals(thisSubtypeParts[0]) || WILDCARD_TYPE.equals(otherSubtypeParts[0]))) {
-                    return true;
-                }
             }
         }
         return false;
     }
 
     private MediaType applyKnownSuffices() {
-        final MediaType known = KNOWN_SUFFICES.get(findSuffix()[1]);
+        final MediaType known = KNOWN_SUFFICES.get(findSuffix());
         return known == null ? this : known;
     }
 
-    private String[] findSuffix() {
+    private String findSuffix() {
         final int pos = getSubtype().indexOf('+');
-        return pos == -1
-                ? new String[]{getSubtype(), null}
-                : new String[]{getSubtype().substring(0, pos), getSubtype().substring(pos + 1)};
+        return pos == -1 ? null : getSubtype().substring(pos + 1);
     }
 
     public String getType() {
