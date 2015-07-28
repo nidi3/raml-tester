@@ -21,7 +21,6 @@ import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 import org.raml.model.Action;
-import org.raml.model.Response;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,8 +37,8 @@ class ContentNegotiationChecker {
         this.responseViolations = responseViolations;
     }
 
-    public void check(RamlRequest request, RamlResponse response, Action action, Response responseModel) {
-        if (response.getContentType() == null || response.getContentType().isEmpty()) {
+    public void check(RamlRequest request, RamlResponse response, Action action, MediaTypeMatch typeMatch) {
+        if (typeMatch == null || response.getContentType() == null || response.getContentType().isEmpty()) {
             return;
         }
         final List<Object> header = request.getHeaderValues().get("Accept");
@@ -50,21 +49,15 @@ class ContentNegotiationChecker {
         if (accept.length() == 0) {
             return;
         }
-        final MediaType responseType;
-        try {
-            responseType = MediaType.valueOf(response.getContentType());
-        } catch (InvalidMediaTypeException e) {
-            return;  //violation is already created in RamlChecker
-        }
 
         MediaType bestMatch = null;
         for (final MediaType acceptType : acceptMediaTypes(accept)) {
-            for (final MediaType modelType : responseMediaTypes(responseModel)) {
+            for (final MediaType modelType : typeMatch.getDefinedTypes()) {
                 if (acceptType.isCompatibleWith(modelType)) {
                     if (bestMatch == null) {
                         bestMatch = acceptType;
                     }
-                    if (responseType.equals(modelType)) {
+                    if (typeMatch.getMatchingMedia().equals(modelType)) {
                         if (acceptType.getQualityParameter() < bestMatch.getQualityParameter()) {
                             responseViolations.add(new Message("mediaType.better", accept, action, response.getStatus(), bestMatch, response.getContentType()));
                         }
@@ -88,18 +81,6 @@ class ContentNegotiationChecker {
         }
         Collections.sort(acceptTypes, MediaType.QUALITY_COMPARATOR);
         return acceptTypes;
-    }
-
-    private List<MediaType> responseMediaTypes(Response responseModel) {
-        final List<MediaType> modelTypes = new ArrayList<>();
-        for (final String model : responseModel.getBody().keySet()) {
-            try {
-                modelTypes.add(MediaType.valueOf(model));
-            } catch (InvalidMediaTypeException e) {
-                requestViolations.add(new Message("mediaType.illegal", model, e.getMessage(), responseModel));
-            }
-        }
-        return modelTypes;
     }
 
 }

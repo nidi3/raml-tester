@@ -38,6 +38,18 @@ public class ContentNegotiationTest extends HighlevelTestBase {
     }
 
     @Test
+    public void emptyBodyIsOk() throws Exception {
+        assertNoViolations(
+                test(simple, get("/").accept("*/*"), jsonResponse(200)));
+    }
+
+    @Test
+    public void wildcardAcceptHeaderIsOk() throws Exception {
+        assertNoViolations(
+                test(simple, get("/mediaType").accept("*/*"), response(201, "", "text/xml;bla=blu")));
+    }
+
+    @Test
     public void noResponseContentTypeIsOk() throws Exception {
         assertNoViolations(
                 test(simple, get("/mediaType").accept("bla/blu"), response(201, "", null)));
@@ -55,10 +67,25 @@ public class ContentNegotiationTest extends HighlevelTestBase {
     }
 
     @Test
+    public void wildcardMatchingResponseHeader() throws Exception {
+        assertNoViolations(test(simple, get("/mediaType").accept("text/xml;a=b"), response(202, "", "text/xml;a=b")));
+        assertNoViolations(test(simple, get("/mediaType").accept("text/xml"), response(202, "", "text/xml")));
+        assertNoViolations(test(simple, get("/mediaType").accept("text/*"), response(202, "", "text/bla")));
+        assertNoViolations(test(simple, get("/mediaType").accept("*/*"), response(202, "", "bla/blu")));
+    }
+
+    @Test
     public void nonMatchingResponse() throws Exception {
         assertOneResponseViolationThat(
                 test(simple, get("/schema").accept("application/bla", "x/y"), jsonResponse(200, "\"x\"")),
                 equalTo("Response Content-Type 'application/json' is not compatible with Accept header 'application/bla, x/y'"));
+    }
+
+    @Test
+    public void responseWithNoMatchingRamlMimeType() throws Exception {
+        assertOneResponseViolationThat(
+                test(simple, get("/mediaType").accept("*/*"), response(201, "", "bla/blu")),
+                equalTo("Media type 'bla/blu' is not defined on action(GET /mediaType) response(201)"));
     }
 
     @Test
@@ -81,7 +108,7 @@ public class ContentNegotiationTest extends HighlevelTestBase {
     public void invalidQ() throws Exception {
         assertOneRequestViolationThat(
                 test(simple, get("/mediaType").header("Accept", "text/xml;q=b,text/plain"), response(201, "", "text/plain")),
-                equalTo("Illegal media type 'text/xml;q=b' in Accept header: Invalid quality value 'b': Should be between 0.0 and 1.0"));
+                equalTo("Illegal media type 'text/xml;q=b' in Accept header: Invalid quality value 'b': Should be a number between 0.0 and 1.0"));
     }
 
 }

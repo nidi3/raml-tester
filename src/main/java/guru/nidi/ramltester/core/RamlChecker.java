@@ -68,8 +68,9 @@ public class RamlChecker {
             security.check(requestViolations);
             checkRequest(request, action, security);
             if (response != null) {
-                final Response responseModel = checkResponse(response, action, security);
-                new ContentNegotiationChecker(requestViolations, responseViolations).check(request, response, action, responseModel);
+                final MediaTypeMatch typeMatch = checkResponse(response, action, security);
+                new ContentNegotiationChecker(requestViolations, responseViolations)
+                        .check(request, response, action, typeMatch);
             }
         } catch (RamlViolationException e) {
             //ignore, results are in report
@@ -113,12 +114,12 @@ public class RamlChecker {
         checkQueryParameters(request.getQueryValues(), action, security);
         checkRequestHeaderParameters(request.getHeaderValues(), action, security);
 
-        final CheckerType type = CheckerType.find(requestViolations, action, request, action.getBody(), "");
-        if (type != null) {
-            if (FormDecoder.supportsFormParameters(type.getMedia())) {
-                checkFormParameters(action, request.getFormValues(), type.getMime());
+        final MediaTypeMatch typeMatch = MediaTypeMatch.find(requestViolations, action, request, action.getBody(), "");
+        if (typeMatch != null) {
+            if (FormDecoder.supportsFormParameters(typeMatch.getTargetType())) {
+                checkFormParameters(action, request.getFormValues(), typeMatch.getMatchingMime());
             } else {
-                checkSchema(requestViolations, action, request.getContent(), type, "");
+                checkSchema(requestViolations, action, request.getContent(), typeMatch, "");
             }
         }
     }
@@ -223,7 +224,7 @@ public class RamlChecker {
         }
     }
 
-    public Response checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
+    public MediaTypeMatch checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
         final Response res = CheckerHelper.findResponse(action, response.getStatus(), security);
         if (res == null) {
             responseViolations.add("responseCode.undefined", response.getStatus(), action);
@@ -233,35 +234,35 @@ public class RamlChecker {
         checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 
         final String detail = new Message("response", response.getStatus()).toString();
-        final CheckerType type = CheckerType.find(responseViolations, action, response, res.getBody(), detail);
-        checkSchema(responseViolations, action, response.getContent(), type, detail);
-        return res;
+        final MediaTypeMatch typeMatch = MediaTypeMatch.find(responseViolations, action, response, res.getBody(), detail);
+        checkSchema(responseViolations, action, response.getContent(), typeMatch, detail);
+        return typeMatch;
     }
 
-    private void checkSchema(RamlViolations violations, Action action, byte[] body, CheckerType type, String detail) {
-        if (type == null) {
+    private void checkSchema(RamlViolations violations, Action action, byte[] body, MediaTypeMatch typeMatch, String detail) {
+        if (typeMatch == null) {
             return;
         }
-        final String schema = type.getMime().getSchema();
+        final String schema = typeMatch.getMatchingMime().getSchema();
         if (schema == null) {
             return;
         }
-        final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, type.getMedia());
+        final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, typeMatch.getTargetType());
         if (validator == null) {
-            violations.add("schemaValidator.missing", type.getMedia(), action, detail);
+            violations.add("schemaValidator.missing", typeMatch.getTargetType(), action, detail);
             return;
         }
         if (body == null || body.length == 0) {
-            violations.add("body.empty", type.getMedia(), action, detail);
+            violations.add("body.empty", typeMatch.getTargetType(), action, detail);
             return;
         }
 
-        final String charset = type.getCharset();
+        final String charset = typeMatch.getTargetCharset();
         try {
             final String content = new String(body, charset);
             final String refSchema = raml.getConsolidatedSchemas().get(schema);
             final String schemaToUse = refSchema == null ? schema : refSchema;
-            validator.validate(content, schemaToUse, violations, new Message("schema.mismatch", action, detail, type.getMime(), content));
+            validator.validate(content, schemaToUse, violations, new Message("schema.mismatch", action, detail, typeMatch.getMatchingMime(), content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
         }
