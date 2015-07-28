@@ -50,6 +50,12 @@ public class ContentNegotiationTest extends HighlevelTestBase {
     }
 
     @Test
+    public void responseMayHaveParametersThatAreNotInRamlNeitherInAccept() throws Exception {
+        assertNoViolations(
+                test(simple, get("/mediaType").accept("text/xml"), response(201, "", "text/xml;bla=blu")));
+    }
+
+    @Test
     public void noResponseContentTypeIsOk() throws Exception {
         assertNoViolations(
                 test(simple, get("/mediaType").accept("bla/blu"), response(201, "", null)));
