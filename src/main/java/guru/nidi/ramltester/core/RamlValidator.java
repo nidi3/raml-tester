@@ -28,19 +28,20 @@ import java.util.Map;
 public class RamlValidator {
     private final Raml raml;
     private final List<SchemaValidator> schemaValidators;
-    private final RamlViolations violations;
+    private RamlViolations violations;
 
     public RamlValidator(Raml raml, List<SchemaValidator> schemaValidators) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
-        violations = new RamlViolations();
     }
 
-    public RamlViolations validate() {
+    public RamlReport validate() {
+        final RamlReport report = new RamlReport(raml);
+        violations = report.getValidationViolations();
         for (Resource resource : raml.getResources().values()) {
             checkResource(resource);
         }
-        return violations;
+        return report;
     }
 
     private void checkResource(Resource resource) {

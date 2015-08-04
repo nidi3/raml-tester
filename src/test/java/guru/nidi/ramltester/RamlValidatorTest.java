@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.core.RamlReport;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -33,9 +33,9 @@ public class RamlValidatorTest extends HighlevelTestBase {
 
     @Test
     public void simple() throws Exception {
-        final RamlViolations violations = example.validate();
-        assertEquals(2, violations.size());
-        final Iterator<String> it = violations.iterator();
+        final RamlReport report = example.validate();
+        assertEquals(2, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok)  mime-type('application/json')\n" +
                 "Content: 42\n" +
                 "Message: The content to match the given JSON schema."));

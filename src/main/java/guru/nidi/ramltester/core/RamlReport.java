@@ -28,6 +28,7 @@ public class RamlReport {
     private final Usage usage = new Usage();
     private final RamlViolations requestViolations = new RamlViolations();
     private final RamlViolations responseViolations = new RamlViolations();
+    private final RamlViolations validationViolations = new RamlViolations();
 
     public RamlReport(Raml raml) {
         this.raml = raml;
@@ -42,14 +43,15 @@ public class RamlReport {
     }
 
     public boolean isEmpty() {
-        return requestViolations.isEmpty() && responseViolations.isEmpty();
+        return requestViolations.isEmpty() && responseViolations.isEmpty() && validationViolations.isEmpty();
     }
 
     @Override
     public String toString() {
         return "RamlReport{" +
-                "\n  requestViolations =" + requestViolations +
-                "\n  responseViolations=" + responseViolations +
+                "requestViolations=" + requestViolations +
+                ", responseViolations=" + responseViolations +
+                ", validationViolations=" + validationViolations +
                 '}';
     }
 
@@ -67,5 +69,9 @@ public class RamlReport {
 
     public RamlViolations getResponseViolations() {
         return responseViolations;
+    }
+
+    public RamlViolations getValidationViolations() {
+        return validationViolations;
     }
 }

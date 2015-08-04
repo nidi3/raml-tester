@@ -18,7 +18,6 @@ package guru.nidi.ramltester;
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlValidator;
-import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.model.RamlRequest;
@@ -115,7 +114,7 @@ public class RamlDefinition {
         return new CheckingWebTarget(createTester(), target);
     }
 
-    public RamlViolations validate(){
+    public RamlReport validate(){
         return new RamlValidator(raml, schemaValidators.getValidators()).validate();
     }
 
