@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.raml.loader.model.RamlLoader;
+import guru.nidi.loader.Loader;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 
@@ -25,7 +25,7 @@ import guru.nidi.ramltester.util.Message;
 public interface SchemaValidator {
     boolean supports(MediaType mediaType);
 
-    SchemaValidator withResourceLoader(RamlLoader resourceLoader);
+    SchemaValidator withLoader(Loader loader);
 
     void validate(String content, String schema, RamlViolations violations, Message message);
 }

@@ -15,12 +15,16 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.raml.loader.apidesigner.ApiRamlLoader;
-import guru.nidi.raml.loader.model.RamlLoader;
-import guru.nidi.raml.loader.model.RamlLoaderRamlParserResourceLoader;
-import guru.nidi.raml.loader.std.*;
-import guru.nidi.raml.loader.url.GithubRamlLoader;
-import guru.nidi.raml.loader.url.UrlRamlLoader;
+import guru.nidi.loader.Loader;
+import guru.nidi.loader.apidesigner.ApiLoader;
+import guru.nidi.loader.basic.ClassPathLoader;
+import guru.nidi.loader.basic.CompositeLoader;
+import guru.nidi.loader.basic.FileLoader;
+import guru.nidi.loader.basic.UriLoader;
+import guru.nidi.loader.url.GithubLoader;
+import guru.nidi.loader.url.UrlLoader;
+import guru.nidi.loader.use.raml.LoaderRamlResourceLoader;
+import guru.nidi.loader.use.raml.RamlCache;
 import guru.nidi.ramltester.core.SchemaValidator;
 import org.raml.model.Raml;
 import org.raml.parser.visitor.RamlDocumentBuilder;
@@ -31,42 +35,46 @@ import java.io.File;
  *
  */
 public class RamlLoaders {
-    private final RamlLoader loader;
+    private final Loader loader;
     private final SchemaValidators schemaValidators;
     private final boolean caching;
 
-    public RamlLoaders(RamlLoader loader, SchemaValidators schemaValidators, boolean caching) {
+    public RamlLoaders(Loader loader, SchemaValidators schemaValidators, boolean caching) {
         this.loader = loader;
         this.schemaValidators = schemaValidators;
         this.caching = caching;
     }
 
-    private static RamlLoader classpathLoader(Class<?> basePackage) {
+    private static Loader classpathLoader(Class<?> basePackage) {
         return classpathLoader(basePackage.getPackage().getName().replace('.', '/'));
     }
 
-    private static RamlLoader classpathLoader(String basePackage) {
-        return new ClassPathRamlLoader(basePackage);
+    private static Loader classpathLoader(String basePackage) {
+        return new ClassPathLoader(basePackage);
     }
 
-    private static RamlLoader fileLoader(File baseDirectory) {
-        return new FileRamlLoader(baseDirectory);
+    private static Loader fileLoader(File baseDirectory) {
+        return new FileLoader(baseDirectory);
     }
 
-    private static RamlLoader urlLoader(String baseUrl) {
-        return new UrlRamlLoader(baseUrl);
+    private static Loader fileLoader(String baseDirectory) {
+        return new FileLoader(new File(baseDirectory));
     }
 
-    private static RamlLoader githubLoader(String token, String project) {
-        return new GithubRamlLoader(token, project);
+    private static Loader urlLoader(String baseUrl) {
+        return new UrlLoader(baseUrl);
     }
 
-    private static RamlLoader apiPortalLoader(String user, String password) {
-        return new ApiRamlLoader(user, password);
+    private static Loader githubLoader(String token, String project) {
+        return new GithubLoader(token, project);
     }
 
-    private static RamlLoader apiDesignerLoader(String url) {
-        return new ApiRamlLoader(url);
+    private static Loader apiPortalLoader(String user, String password) {
+        return new ApiLoader(user, password);
+    }
+
+    private static Loader apiDesignerLoader(String url) {
+        return new ApiLoader(url);
     }
 
     public static RamlLoaders fromClasspath(Class<?> basePackage) {
@@ -82,6 +90,10 @@ public class RamlLoaders {
     }
 
     public static RamlLoaders fromFile(File baseDirectory) {
+        return using(fileLoader(baseDirectory));
+    }
+
+    public static RamlLoaders fromFile(String baseDirectory) {
         return using(fileLoader(baseDirectory));
     }
 
@@ -123,7 +135,7 @@ public class RamlLoaders {
         return using(null);
     }
 
-    public static RamlLoaders using(RamlLoader loader) {
+    public static RamlLoaders using(Loader loader) {
         return new RamlLoaders(loader, SchemaValidators.standard(), false);
     }
 
@@ -137,6 +149,10 @@ public class RamlLoaders {
     }
 
     public RamlLoaders andFromFile(File baseDirectory) {
+        return andUsing(fileLoader(baseDirectory));
+    }
+
+    public RamlLoaders andFromFile(String baseDirectory) {
         return andUsing(fileLoader(baseDirectory));
     }
 
@@ -160,8 +176,8 @@ public class RamlLoaders {
         return andUsing(apiDesignerLoader(url));
     }
 
-    public RamlLoaders andUsing(RamlLoader loader) {
-        return new RamlLoaders(new CompositeRamlLoader(this.loader, loader), schemaValidators, caching);
+    public RamlLoaders andUsing(Loader loader) {
+        return new RamlLoaders(new CompositeLoader(this.loader, loader), schemaValidators, caching);
     }
 
     public RamlLoaders addSchemaValidator(SchemaValidator schemaValidator) {
@@ -169,11 +185,11 @@ public class RamlLoaders {
     }
 
     public RamlDefinition load(String name) {
-        final RamlLoader decorated = new UriRamlLoader(loader);
+        final Loader decorated = new UriLoader(loader);
         final Raml raml = caching
-                ? new CachingRamlLoader(decorated).loadRaml(name)
-                : new RamlDocumentBuilder(new RamlLoaderRamlParserResourceLoader(decorated)).build(name);
-        final SchemaValidators validators = schemaValidators.withResourceLoader(decorated);
+                ? new RamlCache(decorated).loadRaml(name)
+                : new RamlDocumentBuilder(new LoaderRamlResourceLoader(decorated)).build(name);
+        final SchemaValidators validators = schemaValidators.withloader(decorated);
         return new RamlDefinition(raml, validators);
     }
 }

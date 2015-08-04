@@ -15,7 +15,8 @@
  */
 package guru.nidi.ramltester.validator;
 
-import guru.nidi.raml.loader.model.RamlLoader;
+import guru.nidi.loader.Loader;
+import guru.nidi.loader.use.xml.LoaderLSResourceResolver;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.util.MediaType;
@@ -39,10 +40,10 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
     private static final MediaType APPLICATION_XML = MediaType.valueOf("application/xml");
     private static final MediaType TEXT_XML = MediaType.valueOf("text/xml");
 
-    private final RamlLoader resourceLoader;
+    private final Loader loader;
 
-    private JavaXmlSchemaValidator(RamlLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
+    private JavaXmlSchemaValidator(Loader loader) {
+        this.loader = loader;
     }
 
     public JavaXmlSchemaValidator() {
@@ -50,8 +51,8 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
-        return new JavaXmlSchemaValidator(resourceLoader);
+    public SchemaValidator withLoader(Loader loader) {
+        return new JavaXmlSchemaValidator(loader);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
     public void validate(String content, String schema, RamlViolations violations, Message message) {
         final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
-            schemaFactory.setResourceResolver(new RamlLoaderLSResourceResolver(resourceLoader));
+            schemaFactory.setResourceResolver(new LoaderLSResourceResolver(loader));
             final Schema s = schemaFactory.newSchema(new StreamSource(new StringReader(schema)));
             final Validator validator = s.newValidator();
             validator.setErrorHandler(new ViolationsWritingErrorHandler(violations, message));

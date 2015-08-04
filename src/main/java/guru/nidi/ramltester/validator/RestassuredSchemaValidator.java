@@ -22,7 +22,8 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.jayway.restassured.module.jsv.JsonSchemaValidationException;
 import com.jayway.restassured.module.jsv.JsonSchemaValidator;
 import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
-import guru.nidi.raml.loader.model.RamlLoader;
+import guru.nidi.loader.Loader;
+import guru.nidi.loader.use.jsonschema.LoaderUriDownloader;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.util.MediaType;
@@ -37,9 +38,9 @@ import org.hamcrest.StringDescription;
 public class RestassuredSchemaValidator implements SchemaValidator {
     private JsonSchemaFactory factory;
     private final JsonSchemaValidatorSettings settings;
-    private final RamlLoader loader;
+    private final Loader loader;
 
-    private RestassuredSchemaValidator(JsonSchemaFactory factory, JsonSchemaValidatorSettings settings, RamlLoader loader) {
+    private RestassuredSchemaValidator(JsonSchemaFactory factory, JsonSchemaValidatorSettings settings, Loader loader) {
         this.factory = factory;
         this.settings = settings;
         this.loader = loader;
@@ -63,7 +64,7 @@ public class RestassuredSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public SchemaValidator withResourceLoader(RamlLoader loader) {
+    public SchemaValidator withLoader(Loader loader) {
         return new RestassuredSchemaValidator(factory, settings, loader);
     }
 
@@ -71,7 +72,7 @@ public class RestassuredSchemaValidator implements SchemaValidator {
         if (loader != null && factory == null) {
             final LoadingConfigurationBuilder loadingConfig = LoadingConfiguration.newBuilder();
             final String simpleName = loader.getClass().getSimpleName();
-            loadingConfig.addScheme(simpleName, new RamlLoaderUriDownloader(loader));
+            loadingConfig.addScheme(simpleName, new LoaderUriDownloader(loader));
             loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(simpleName + ":///").freeze());
             factory = JsonSchemaFactory.newBuilder().setLoadingConfiguration(loadingConfig.freeze()).freeze();
         }

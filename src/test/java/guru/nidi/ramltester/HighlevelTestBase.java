@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.raml.loader.model.RamlLoader;
+import guru.nidi.loader.Loader;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.ReportAggregator;
@@ -136,7 +136,7 @@ public class HighlevelTestBase {
         }
 
         @Override
-        public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
+        public SchemaValidator withLoader(Loader loader) {
             return this;
         }
 
@@ -153,7 +153,7 @@ public class HighlevelTestBase {
         }
 
         @Override
-        public SchemaValidator withResourceLoader(RamlLoader resourceLoader) {
+        public SchemaValidator withLoader(Loader loader) {
             return this;
         }
 
