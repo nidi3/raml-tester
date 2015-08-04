@@ -27,17 +27,24 @@ public class SimpleTest {
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
-
+    
     @Test
     public void greeting() throws Exception {
+        Assert.assertTrue(api.validate().isEmpty());
+        
         mockMvc.perform(get("/greeting").accept(MediaType.parseMediaType("application/json")))
                 .andExpect(api.matches().aggregating(aggregator));
     }
 
 }
 ```
-The ExpectedUsage rule additionally checks if all resources, query parameters, form parameters, headers and response codes
+
+The `ExpectedUsage` rule checks if all resources, query parameters, form parameters, headers and response codes
 defined in the RAML are at least used once.
+
+The `validate()` method validates the RAML itself.
+ 
+`api.matches()` checks that the request/response match the RAML definition.
 
 See also the [raml-tester-uc-spring](https://github.com/nidi3/raml-tester-uc-spring) project.
 
@@ -71,6 +78,8 @@ public class SimpleTest {
 
     @Test
     public void greeting() throws Exception {
+        Assert.assertTrue(api.validate().isEmpty());
+
         final CheckingWebTarget webTarget = api.createWebTarget(target).aggregating(aggregator);
         webTarget.request().post(Entity.text("apple"));
 
@@ -90,6 +99,7 @@ public class RamlFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+        log.info(api.validate());
     }
 
     @Override
@@ -112,9 +122,12 @@ Use together with Apache HttpComponents
 @Test
 public void testRequest(){
     RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+    Assert.assertTrue(api.validate().isEmpty());
+
     RamlHttpClient client = api.createHttpClient();
     HttpGet get = new HttpGet("http://test.server/path");
     HttpResponse response = client.execute(get);
+
     Assert.assertTrue(client.getLastReport().isEmpty());
 }
 

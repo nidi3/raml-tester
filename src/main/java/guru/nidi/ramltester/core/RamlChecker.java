@@ -262,7 +262,7 @@ public class RamlChecker {
             final String content = new String(body, charset);
             final String refSchema = raml.getConsolidatedSchemas().get(schema);
             final String schemaToUse = refSchema == null ? schema : refSchema;
-            validator.validate(content, schemaToUse, violations, new Message("schema.mismatch", action, detail, typeMatch.getMatchingMime(), content));
+            validator.validate(content, schemaToUse, violations, new Message("schema.body.mismatch", action, detail, typeMatch.getMatchingMime(), content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
         }
