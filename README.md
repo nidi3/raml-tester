@@ -30,7 +30,7 @@ public class SimpleTest {
     
     @Test
     public void greeting() throws Exception {
-        Assert.assertTrue(api.validate().isEmpty());
+        Assert.assertThat(api.validate(), validates());
         
         mockMvc.perform(get("/greeting").accept(MediaType.parseMediaType("application/json")))
                 .andExpect(api.matches().aggregating(aggregator));
@@ -42,7 +42,7 @@ public class SimpleTest {
 The `ExpectedUsage` rule checks if all resources, query parameters, form parameters, headers and response codes
 defined in the RAML are at least used once.
 
-The `validate()` method validates the RAML itself.
+The `RamlMatchers.validates()` matcher validates the RAML itself.
  
 `api.matches()` checks that the request/response match the RAML definition.
 
@@ -78,16 +78,19 @@ public class SimpleTest {
 
     @Test
     public void greeting() throws Exception {
-        Assert.assertTrue(api.validate().isEmpty());
+        Assert.assertThat(api.validate(), validates());
 
         final CheckingWebTarget webTarget = api.createWebTarget(target).aggregating(aggregator);
         webTarget.request().post(Entity.text("apple"));
 
-        assertTrue(webTarget.getLastReport().isEmpty());
+        assertThat(webTarget.getLastReport(), checks());
     }
 
 }
 ```
+
+The `RamlMatchers.checks()` matcher validates that the request and response conform to the RAML.
+
 
 Use in a pure servlet environment
 ---------------------------------
@@ -122,13 +125,13 @@ Use together with Apache HttpComponents
 @Test
 public void testRequest(){
     RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
-    Assert.assertTrue(api.validate().isEmpty());
+    Assert.assertThat(api.validate(), validates());
 
     RamlHttpClient client = api.createHttpClient();
     HttpGet get = new HttpGet("http://test.server/path");
     HttpResponse response = client.execute(get);
 
-    Assert.assertTrue(client.getLastReport().isEmpty());
+    Assert.assertThat(client.getLastReport(), checks());
 }
 
 ```
