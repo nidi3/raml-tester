@@ -16,6 +16,7 @@
 package guru.nidi.ramltester.junit;
 
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
@@ -28,7 +29,7 @@ import static org.junit.Assert.*;
  */
 public class MatcherTest {
     private final RamlReport reportNix = report(null, null, null);
-    private final RamlReport reportVal = report("bla", null, null);
+    private final RamlReport reportVal = report("bla\nblu", null, null);
     private final RamlReport reportReq = report(null, "bla", null);
     private final RamlReport reportRes = report(null, null, "bla");
 
@@ -41,15 +42,15 @@ public class MatcherTest {
     @Test
     public void allNok() {
         final Matcher<RamlReport> matcher = RamlMatchers.hasNoViolations();
-        assertNoMatch(matcher, reportVal, "\nValidation violations:\n  \"bla\"");
-        assertNoMatch(matcher, reportReq, "\nRequest    violations:\n  \"bla\"");
-        assertNoMatch(matcher, reportRes, "\nResponse   violations:\n  \"bla\"");
+        assertNoMatch(matcher, reportVal, "\nValidation violations:\n  - bla\n    blu\n  - bla\n    blu");
+        assertNoMatch(matcher, reportReq, "\nRequest violations:\n  - bla");
+        assertNoMatch(matcher, reportRes, "\nResponse violations:\n  - bla");
     }
 
     @Test
     public void validation() {
         final Matcher<RamlReport> matcher = RamlMatchers.validates();
-        assertNoMatch(matcher, reportVal, "\nValidation violations:\n  \"bla\"");
+        assertNoMatch(matcher, reportVal, "\nValidation violations:\n  - bla\n    blu\n  - bla\n    blu");
         assertMatch(matcher, reportReq);
         assertMatch(matcher, reportRes);
     }
@@ -58,15 +59,15 @@ public class MatcherTest {
     public void checks() {
         final Matcher<RamlReport> matcher = RamlMatchers.checks();
         assertMatch(matcher, reportVal);
-        assertNoMatch(matcher, reportReq, "\nRequest    violations:\n  \"bla\"");
-        assertNoMatch(matcher, reportRes, "\nResponse   violations:\n  \"bla\"");
+        assertNoMatch(matcher, reportReq, "\nRequest violations:\n  - bla");
+        assertNoMatch(matcher, reportRes, "\nResponse violations:\n  - bla");
     }
 
     @Test
     public void request() {
         final Matcher<RamlReport> matcher = RamlMatchers.requestChecks();
         assertMatch(matcher, reportVal);
-        assertNoMatch(matcher, reportReq, "\nRequest    violations:\n  \"bla\"");
+        assertNoMatch(matcher, reportReq, "\nRequest violations:\n  - bla");
         assertMatch(matcher, reportRes);
     }
 
@@ -75,7 +76,7 @@ public class MatcherTest {
         final Matcher<RamlReport> matcher = RamlMatchers.responseChecks();
         assertMatch(matcher, reportVal);
         assertMatch(matcher, reportReq);
-        assertNoMatch(matcher, reportRes, "\nResponse   violations:\n  \"bla\"");
+        assertNoMatch(matcher, reportRes, "\nResponse violations:\n  - bla");
     }
 
     private void assertMatch(Matcher<RamlReport> matcher, RamlReport report) {
@@ -93,7 +94,9 @@ public class MatcherTest {
     private RamlReport report(String validation, String request, String response) {
         final RamlReport report = new RamlReport(null);
         if (validation != null) {
-            report.getValidationViolations().add(new Message(validation));
+            final RamlViolations req = report.getValidationViolations();
+            req.add(new Message(validation));
+            req.add(new Message(validation));
         }
         if (request != null) {
             report.getRequestViolations().add(new Message(request));

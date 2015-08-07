@@ -48,23 +48,22 @@ class NoViolationsMatcher extends TypeSafeMatcher<RamlReport> {
     @Override
     protected void describeMismatchSafely(RamlReport item, Description description) {
         if (validation) {
-            describeList(description, "\nValidation violations:", "\n  ", "", item.getValidationViolations().asList());
+            describeList(description, "\nValidation violations:", item.getValidationViolations().asList());
         }
         if (request) {
-            describeList(description, "\nRequest    violations:", "\n  ", "", item.getRequestViolations().asList());
+            describeList(description, "\nRequest violations:", item.getRequestViolations().asList());
         }
         if (response) {
-            describeList(description, "\nResponse   violations:", "\n  ", "", item.getResponseViolations().asList());
+            describeList(description, "\nResponse violations:", item.getResponseViolations().asList());
         }
     }
 
-    private void describeList(Description description, String start, String delim, String end, List<String> list) {
+    private void describeList(Description description, String start, List<String> list) {
         if (!list.isEmpty()) {
             description.appendText(start);
             for (final String s : list) {
-                description.appendText(delim).appendValue(s);
+                description.appendText("\n  - ").appendText(s.replace("\n", "\n    "));
             }
-            description.appendText(end);
         }
     }
 }
