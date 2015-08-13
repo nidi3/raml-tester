@@ -30,9 +30,10 @@ import static org.junit.Assert.assertThat;
 public class RamlValidatorTest extends HighlevelTestBase {
 
     private static RamlDefinition example = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("example.raml");
+    private static RamlDefinition uriParams = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("uriParameters.raml");
 
     @Test
-    public void simple() throws Exception {
+    public void exampleSchemaMatch() throws Exception {
         final RamlReport report = example.validate();
         assertEquals(2, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
@@ -44,4 +45,45 @@ public class RamlValidatorTest extends HighlevelTestBase {
                 "Message: The content to match the given JSON schema."));
     }
 
+    @Test
+    public void validUriParameters() throws Exception {
+        final RamlReport report = uriParams.validate();
+        assertEquals(7, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("The baseUri has no variable 'invalid' in Root definition", it.next());
+        assertEquals("baseUriParameter with name 'version' is not allowed in Root definition", it.next());
+        assertEquals("The baseUri has no variable 'subInvalid' in resource(/bla/{param})", it.next());
+        assertEquals("The uri has no variable 'uriInvalid' in resource(/bla/{param})", it.next());
+        assertEquals("uriParameter with name 'version' is not allowed in resource(/bla/{param})", it.next());
+        assertEquals("The uri has no variable 'subinvalid' in resource(/bla/{param}/subA/{p})", it.next());
+        assertEquals("The baseUri has no variable 'actioninvalid' in action(GET /bla/{param})", it.next());
+    }
+
+    @Test
+    public void resourcePattern() {
+        final RamlReport report = uriParams.validator().withChecks().withResourcePattern("[a-z]+").validate();
+        assertEquals(1, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("resource(/bla/{param}/subA/{p}) does not match pattern [a-z]+", it.next());
+
+    }
+
+    @Test
+    public void parameterPattern() {
+        final RamlReport report = uriParams.validator().withChecks().withParameterPattern("[a-z]+").validate();
+        assertEquals(4, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("baseUriParameter name 'subInvalid' in resource(/bla/{param}) does not match pattern [a-z]+", it.next());
+        assertEquals("uriParameter name 'uriInvalid' in resource(/bla/{param}) does not match pattern [a-z]+", it.next());
+        assertEquals("queryParameter name 'Nok' in action(GET /bla/{param}) does not match pattern [a-z]+", it.next());
+        assertEquals("formParameter name 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded')  does not match pattern [a-z]+", it.next());
+    }
+    @Test
+    public void headerPattern() {
+        final RamlReport report = uriParams.validator().withChecks().withHeaderPattern("[a-z]+").validate();
+        assertEquals(2, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("header name 'Hok' in action(GET /bla/{param})  does not match pattern [a-z]+", it.next());
+        assertEquals("header name 'Rok' in action(GET /bla/{param}) response(200) does not match pattern [a-z]+", it.next());
+    }
 }

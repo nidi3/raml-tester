@@ -114,9 +114,12 @@ public class RamlDefinition {
         return new CheckingWebTarget(createTester(), target);
     }
 
-    public RamlReport validate(){
-        return new RamlValidator(raml, schemaValidators.getValidators()).validate();
+    public RamlValidator validator() {
+        return new RamlValidator(raml, schemaValidators.getValidators());
     }
 
+    public RamlReport validate() {
+        return validator().validate();
+    }
 }
 
