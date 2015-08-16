@@ -48,7 +48,7 @@ public class FormTest extends HighlevelTestBase {
                         form,
                         post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("hula", "a+b"),
                         response(200, "", null)),
-                equalTo("Form parameter 'hula' on action(POST /form) is not defined")
+                equalTo("Form parameter 'hula' on action(POST /form) mime-type('application/x-www-form-urlencoded') is not defined")
         );
     }
 

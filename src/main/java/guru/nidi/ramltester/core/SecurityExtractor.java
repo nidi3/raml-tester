@@ -98,11 +98,11 @@ class SecurityExtractor {
         public List<SecurityScheme> securedBy(Action action) {
             final List<SecurityScheme> res = new ArrayList<>();
             if (!action.getSecuredBy().isEmpty()) {
-                res.addAll(securitySchemes(action.getSecuredBy(), new Message("securityScheme.local.undefined", action)));
+                res.addAll(securitySchemes(action.getSecuredBy(), new Message("securityScheme.undefined", new Locator(action))));
             } else if (!action.getResource().getSecuredBy().isEmpty()) {
-                res.addAll(securitySchemes(action.getResource().getSecuredBy(), new Message("securityScheme.local.undefined", action.getResource())));
+                res.addAll(securitySchemes(action.getResource().getSecuredBy(), new Message("securityScheme.undefined", new Locator(action.getResource()))));
             } else if (!raml.getSecuredBy().isEmpty()) {
-                res.addAll(securitySchemes(raml.getSecuredBy(), new Message("securityScheme.global.undefined")));
+                res.addAll(securitySchemes(raml.getSecuredBy(), new Message("securityScheme.undefined", new Locator())));
             }
             return res;
         }

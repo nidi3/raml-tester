@@ -19,7 +19,6 @@ import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.model.Action;
 import org.raml.model.MimeType;
 
 import java.util.*;
@@ -60,9 +59,9 @@ final class MediaTypeMatch {
         return targetType.getCharset("iso-8859-1");
     }
 
-    public static MediaTypeMatch find(RamlViolations violations, Action action, RamlMessage message, Map<String, MimeType> bodies, String detail) {
+    public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, Map<String, MimeType> bodies, Locator locator) {
         if (CheckerHelper.isNoOrEmptyBodies(bodies)) {
-            violations.addIf(CheckerHelper.hasContent(message), "body.superfluous", action, detail);
+            violations.addIf(CheckerHelper.hasContent(message), "body.superfluous", locator);
             return null;
         }
 
@@ -74,29 +73,29 @@ final class MediaTypeMatch {
         try {
             targetType = MediaType.valueOf(message.getContentType());
         } catch (InvalidMediaTypeException e) {
-            violations.add("mediaType.illegal", message.getContentType(), e.getMessage(), detail);
+            violations.add("mediaType.illegal", locator, message.getContentType(), e.getMessage());
             return null;
         }
-        final Map<MediaType, MimeType> mediaTypes = mediaTypes(violations, bodies, detail);
+        final Map<MediaType, MimeType> mediaTypes = mediaTypes(violations, bodies, locator);
         final List<Map.Entry<MediaType, MimeType>> bestMatches = findBestMatches(mediaTypes, targetType);
         if (bestMatches.isEmpty()) {
-            violations.add("mediaType.undefined", message.getContentType(), action, detail);
+            violations.add("mediaType.undefined", locator, message.getContentType());
             return null;
         }
         if (bestMatches.size() > 1) {
-            violations.add("mediaType.ambiguous", bestMatches.get(0).getValue(), bestMatches.get(1).getValue(), action, detail);
+            violations.add("mediaType.ambiguous", locator, new Locator(bestMatches.get(0).getValue()), new Locator(bestMatches.get(1).getValue()));
             return null;
         }
         return new MediaTypeMatch(targetType, mediaTypes.keySet(), bestMatches.get(0).getKey(), bestMatches.get(0).getValue());
     }
 
-    private static Map<MediaType, MimeType> mediaTypes(RamlViolations violations, Map<String, MimeType> bodies, String detail) {
+    private static Map<MediaType, MimeType> mediaTypes(RamlViolations violations, Map<String, MimeType> bodies, Locator locator) {
         final Map<MediaType, MimeType> types = new LinkedHashMap<>();
         for (final Map.Entry<String, MimeType> entry : bodies.entrySet()) {
             try {
                 types.put(MediaType.valueOf(entry.getKey()), entry.getValue());
             } catch (InvalidMediaTypeException e) {
-                violations.add(new Message("mediaType.illegal", entry.getKey(), e.getMessage(), detail));
+                violations.add(new Message("mediaType.illegal", locator, entry.getKey(), e.getMessage()));
             }
         }
         return types;

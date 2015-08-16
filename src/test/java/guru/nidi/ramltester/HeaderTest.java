@@ -105,7 +105,7 @@ public class HeaderTest extends HighlevelTestBase {
                         header,
                         get("/data"),
                         response),
-                equalTo("Header 'a' on action(GET /data) is not defined")
+                equalTo("Header 'a' on action(GET /data) response(200) is not defined")
         );
     }
 
@@ -118,7 +118,7 @@ public class HeaderTest extends HighlevelTestBase {
                         header,
                         get("/resheader"),
                         response),
-                equalTo("Header 'req' on action(GET /resheader) is not repeat but found repeatedly")
+                equalTo("Header 'req' on action(GET /resheader) response(200) is not repeat but found repeatedly")
         );
     }
 
@@ -140,7 +140,7 @@ public class HeaderTest extends HighlevelTestBase {
                         header,
                         get("/resheader"),
                         jsonResponse(200, "\"hula\"")),
-                equalTo("Header 'req' on action(GET /resheader) is required but not found")
+                equalTo("Header 'req' on action(GET /resheader) response(200) is required but not found")
         );
     }
 
@@ -162,7 +162,7 @@ public class HeaderTest extends HighlevelTestBase {
                         header,
                         get("/resheader/reqwild"),
                         jsonResponse(200)),
-                equalTo("Header 'x-{?}' on action(GET /resheader/reqwild) is required but not found")
+                equalTo("Header 'x-{?}' on action(GET /resheader/reqwild) response(200) is required but not found")
         );
     }
 
@@ -204,7 +204,7 @@ public class HeaderTest extends HighlevelTestBase {
                         header.ignoringXheaders(),
                         get("/header/xint"),
                         response),
-                equalTo("Header 'x-int' on action(GET /header/xint) : Value 'blu' is not a valid integer"));
+                equalTo("Header 'x-int' on action(GET /header/xint) response(200) : Value 'blu' is not a valid integer"));
     }
 
 }

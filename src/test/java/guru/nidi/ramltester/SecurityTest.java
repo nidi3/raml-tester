@@ -98,7 +98,7 @@ public class SecurityTest extends HighlevelTestBase {
                         undef,
                         get("/unsec"),
                         response(200, "", null)),
-                equalTo("Globally used security Scheme 'b' is not defined"));
+                equalTo("Security Scheme 'b' on Root definition is not defined"));
     }
 
     @Test

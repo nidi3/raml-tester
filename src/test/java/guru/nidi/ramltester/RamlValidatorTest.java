@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
+import static guru.nidi.ramltester.core.RamlValidator.Validation.*;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -28,16 +29,16 @@ import static org.junit.Assert.assertThat;
  *
  */
 public class RamlValidatorTest extends HighlevelTestBase {
-
     private static RamlDefinition example = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("example.raml");
     private static RamlDefinition uriParams = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("uriParameters.raml");
+    private static RamlDefinition description = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("description.raml");
 
     @Test
     public void exampleSchemaMatch() throws Exception {
-        final RamlReport report = example.validate();
+        final RamlReport report = example.validator().withChecks(EXAMPLE_SCHEMA).validate();
         assertEquals(2, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok)  mime-type('application/json')\n" +
+        assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
                 "Content: 42\n" +
                 "Message: The content to match the given JSON schema."));
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) response(200) mime-type('application/json')\n" +
@@ -47,7 +48,7 @@ public class RamlValidatorTest extends HighlevelTestBase {
 
     @Test
     public void validUriParameters() throws Exception {
-        final RamlReport report = uriParams.validate();
+        final RamlReport report = uriParams.validator().withChecks(URI_PARAMETER).validate();
         assertEquals(7, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
         assertEquals("The baseUri has no variable 'invalid' in Root definition", it.next());
@@ -76,14 +77,34 @@ public class RamlValidatorTest extends HighlevelTestBase {
         assertEquals("baseUriParameter name 'subInvalid' in resource(/bla/{param}) does not match pattern [a-z]+", it.next());
         assertEquals("uriParameter name 'uriInvalid' in resource(/bla/{param}) does not match pattern [a-z]+", it.next());
         assertEquals("queryParameter name 'Nok' in action(GET /bla/{param}) does not match pattern [a-z]+", it.next());
-        assertEquals("formParameter name 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded')  does not match pattern [a-z]+", it.next());
+        assertEquals("formParameter name 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') does not match pattern [a-z]+", it.next());
     }
+
     @Test
     public void headerPattern() {
         final RamlReport report = uriParams.validator().withChecks().withHeaderPattern("[a-z]+").validate();
         assertEquals(2, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("header name 'Hok' in action(GET /bla/{param})  does not match pattern [a-z]+", it.next());
+        assertEquals("header name 'Hok' in action(GET /bla/{param}) does not match pattern [a-z]+", it.next());
         assertEquals("header name 'Rok' in action(GET /bla/{param}) response(200) does not match pattern [a-z]+", it.next());
+    }
+
+    @Test
+    public void description() {
+        final RamlReport report = description.validator().withChecks(DESCRIPTION).validate();
+        assertEquals(12, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("Root definition has no description", it.next());
+        assertEquals("baseUriParameter 'path' in Root definition has no description",it.next());
+        assertEquals("resource(/bla/{param}) has no description",it.next());
+        assertEquals("baseUriParameter 'path' in resource(/bla/{param}) has no description",it.next());
+        assertEquals("uriParameter 'param' in resource(/bla/{param}) has no description",it.next());
+        assertEquals("action(GET /bla/{param}) has no description",it.next());
+        assertEquals("baseUriParameter 'actioninvalid' in action(GET /bla/{param}) has no description",it.next());
+        assertEquals("queryParameter 'ok' in action(GET /bla/{param}) has no description",it.next());
+        assertEquals("header 'ok' in action(GET /bla/{param}) has no description",it.next());
+        assertEquals("formParameter 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') has no description",it.next());
+        assertEquals("action(GET /bla/{param}) response(200) has no description",it.next());
+        assertEquals("header 'ok' in action(GET /bla/{param}) response(200) has no description",it.next());
     }
 }

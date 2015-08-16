@@ -15,10 +15,6 @@
  */
 package guru.nidi.ramltester.util;
 
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Resource;
-
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Properties;
@@ -44,10 +40,7 @@ public class Message {
 
     public Message(String key, Object... params) {
         this.key = key;
-        this.params = new Object[params.length];
-        for (int i = 0; i < params.length; i++) {
-            this.params[i] = transformParam(params[i]);
-        }
+        this.params = params;
     }
 
     public Message withMessageParam(String key, Object... params) {
@@ -63,28 +56,10 @@ public class Message {
     }
 
     private Object[] addParam(Object param) {
-        param = transformParam(param);
         final Object[] newParams = new Object[params.length + 1];
         System.arraycopy(params, 0, newParams, 0, params.length);
         newParams[newParams.length - 1] = param;
         return newParams;
-    }
-
-    private Object transformParam(Object param) {
-        if (param instanceof Resource) {
-            final Resource resource = (Resource) param;
-            return new Message("resource", resource.getUri()).toString();
-        }
-        if (param instanceof Action) {
-            final Action action = (Action) param;
-            return new Message("action", action.getType(), action.getResource().getUri()).toString();
-        }
-        if (param instanceof MimeType) {
-            final MimeType mimeType = (MimeType) param;
-            return new Message("mimeType", mimeType.getType()).toString();
-        }
-
-        return param;
     }
 
     @Override

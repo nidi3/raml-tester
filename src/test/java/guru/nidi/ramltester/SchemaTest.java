@@ -129,7 +129,7 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 response(209, "5", "text/bla"),
-                equalTo("No SchemaValidator found for media type 'text/bla' on action(GET /schema) response(209)")
+                equalTo("No SchemaValidator found for media type 'text/bla' on action(GET /schema) response(209) mime-type('text/bla')")
         );
     }
 

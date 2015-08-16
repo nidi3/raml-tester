@@ -98,7 +98,7 @@ public class ContentNegotiationTest extends HighlevelTestBase {
     public void invalidResponseMimeType() throws Exception {
         assertOneResponseViolationThat(
                 test(simple, get("/mediaType").header("Accept", "text/xml"), response(201, "", "text")),
-                equalTo("Illegal media type 'text' in response(201): Does not contain '/'"));
+                equalTo("Illegal media type 'text' in action(GET /mediaType) response(201): Does not contain '/'"));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class ContentNegotiationTest extends HighlevelTestBase {
                 test(simple, get("/mediaType").accept("text/plain;q=.5", "text/xml"), response(201, "", "text/xml")));
         assertOneResponseViolationThat(
                 test(simple, get("/mediaType").accept("text/plain;q=.5", "text/xml"), response(201, "", "text/plain")),
-                equalTo("Given the Accept header 'text/plain;q=.5, text/xml', the response to action(GET /mediaType) with code 201 should have media type 'text/xml', not 'text/plain'"));
+                equalTo("Given the Accept header 'text/plain;q=.5, text/xml', the response to action(GET /mediaType) response(201) should have media type 'text/xml', not 'text/plain'"));
     }
 
     @Test

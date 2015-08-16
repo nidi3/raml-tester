@@ -95,7 +95,7 @@ public class SimpleTest extends HighlevelTestBase {
     public void emptyResponseBody() throws Exception {
         assertOneResponseViolationThat(
                 test(aggregator, simple, get("/data"), jsonResponse(200)),
-                equalTo("Schema defined but empty body for media type 'application/json' on action(GET /data) response(200)")
+                equalTo("Schema defined but empty body for media type 'application/json' on action(GET /data) response(200) mime-type('abc/xyz+json')")
         );
     }
 
@@ -133,7 +133,7 @@ public class SimpleTest extends HighlevelTestBase {
                         simple,
                         post("/mediaType").content("\"hula\"").contentType(MediaType.APPLICATION_JSON),
                         jsonResponse(201)),
-                equalTo("Ambiguous definition: mime-type('application/json') and also mime-type('abc/xyz+json') used on action(POST /mediaType) "));
+                equalTo("Ambiguous definition: mime-type('application/json') and also mime-type('abc/xyz+json') used on action(POST /mediaType)"));
     }
 
     @Test

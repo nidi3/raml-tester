@@ -44,6 +44,7 @@ public class RamlChecker {
     private final String baseUri;
     private final boolean ignoreXheaders;
     private RamlViolations requestViolations, responseViolations;
+    private Locator locator;
     private Usage usage;
 
     public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String baseUri, boolean ignoreXheaders) {
@@ -62,6 +63,7 @@ public class RamlChecker {
         usage = report.getUsage();
         requestViolations = report.getRequestViolations();
         responseViolations = report.getResponseViolations();
+        locator = new Locator();
         try {
             final Action action = findAction(request);
             final SecurityExtractor security = new SecurityExtractor(raml, action, requestViolations);
@@ -103,10 +105,11 @@ public class RamlChecker {
         resourceUsage(usage, resource).incUses(1);
         final Action action = resource.getAction(method);
         if (action == null) {
-            requestViolations.add("action.undefined", method, resource);
+            requestViolations.add("action.undefined", locator, method);
             throw new RamlViolationException();
         }
         actionUsage(usage, action).incUses(1);
+        locator.action(action);
         return action;
     }
 
@@ -114,24 +117,25 @@ public class RamlChecker {
         checkQueryParameters(request.getQueryValues(), action, security);
         checkRequestHeaderParameters(request.getHeaderValues(), action, security);
 
-        final MediaTypeMatch typeMatch = MediaTypeMatch.find(requestViolations, action, request, action.getBody(), "");
+        final MediaTypeMatch typeMatch = MediaTypeMatch.find(requestViolations, request, action.getBody(), locator);
         if (typeMatch != null) {
+            locator.requestMime(typeMatch.getMatchingMime());
             if (FormDecoder.supportsFormParameters(typeMatch.getTargetType())) {
                 checkFormParameters(action, request.getFormValues(), typeMatch.getMatchingMime());
             } else {
-                checkSchema(requestViolations, action, request.getContent(), typeMatch, "");
+                checkSchema(requestViolations, action, request.getContent(), typeMatch);
             }
         }
     }
 
     private void checkFormParameters(Action action, Values values, MimeType mimeType) {
         if (mimeType.getSchema() != null) {
-            requestViolations.add("schema.superfluous", action, mimeType);
+            requestViolations.add("schema.superfluous", locator);
         }
         @SuppressWarnings("unchecked")
         final Map<String, List<? extends AbstractParam>> formParameters = (Map) mimeType.getFormParameters();
         if (formParameters == null) {
-            requestViolations.add("formParameters.missing", action, mimeType);
+            requestViolations.add("formParameters.missing", locator);
         } else {
             checkFormParametersValues(action, mimeType, values, formParameters);
         }
@@ -140,14 +144,14 @@ public class RamlChecker {
     private void checkFormParametersValues(Action action, MimeType mimeType, Values values, Map<String, List<? extends AbstractParam>> formParameters) {
         mimeTypeUsage(usage, action, mimeType).addFormParameters(
                 new ParameterChecker(requestViolations)
-                        .checkListParameters(formParameters, values, new Message("formParam", action))
+                        .checkListParameters(formParameters, values, new Message("formParam", locator))
         );
     }
 
     private void checkQueryParameters(Values values, Action action, SecurityExtractor security) {
         actionUsage(usage, action).addQueryParameters(
                 new ParameterChecker(requestViolations)
-                        .checkParameters(action.getQueryParameters(), security.queryParameters(), values, new Message("queryParam", action))
+                        .checkParameters(action.getQueryParameters(), security.queryParameters(), values, new Message("queryParam", locator))
         );
     }
 
@@ -157,15 +161,15 @@ public class RamlChecker {
                         .acceptWildcard()
                         .ignoreX(ignoreXheaders)
                         .predefined(DefaultHeaders.REQUEST)
-                        .checkParameters(action.getHeaders(), security.headers(), values, new Message("headerParam", action))
+                        .checkParameters(action.getHeaders(), security.headers(), values, new Message("headerParam", locator))
         );
     }
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
         final Map<String, List<? extends AbstractParam>> baseUriParams = CheckerHelper.getEffectiveBaseUriParams(raml.getBaseUriParameters(), action);
-        paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", action));
-        paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", action));
+        paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", locator));
+        paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", locator));
     }
 
     private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
@@ -188,7 +192,7 @@ public class RamlChecker {
 
     private void checkProtocol(Action action, UriComponents requestUri, UriComponents ramlUri) {
         final List<Protocol> protocols = findProtocols(action, ramlUri.getScheme());
-        requestViolations.addIf(!protocols.contains(CheckerHelper.protocolOf(requestUri.getScheme())), "protocol.undefined", requestUri.getScheme(), action);
+        requestViolations.addIf(!protocols.contains(CheckerHelper.protocolOf(requestUri.getScheme())), "protocol.undefined", locator, requestUri.getScheme());
     }
 
     private List<Protocol> findProtocols(Action action, String fallback) {
@@ -209,6 +213,7 @@ public class RamlChecker {
             requestViolations.add("resource.undefined", resourcePath);
             throw new RamlViolationException();
         }
+        locator.resource(resource);
         checkUriParams(values, resource);
         return resource;
     }
@@ -217,7 +222,7 @@ public class RamlChecker {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
         for (final Map.Entry<String, List<Object>> entry : values) {
             final AbstractParam uriParam = CheckerHelper.findUriParam(entry.getKey(), resource);
-            final Message message = new Message("uriParam", entry.getKey(), resource);
+            final Message message = new Message("uriParam", locator, entry.getKey());
             if (uriParam != null) {
                 paramChecker.checkParameter(uriParam, entry.getValue().get(0), message);
             }
@@ -227,33 +232,33 @@ public class RamlChecker {
     public MediaTypeMatch checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
         final Response res = CheckerHelper.findResponse(action, response.getStatus(), security);
         if (res == null) {
-            responseViolations.add("responseCode.undefined", response.getStatus(), action);
+            responseViolations.add("responseCode.undefined", locator, response.getStatus());
             throw new RamlViolationException();
         }
         actionUsage(usage, action).addResponseCode("" + response.getStatus());
+        locator.responseCode("" + response.getStatus());
         checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
 
-        final String detail = new Message("response", response.getStatus()).toString();
-        final MediaTypeMatch typeMatch = MediaTypeMatch.find(responseViolations, action, response, res.getBody(), detail);
-        checkSchema(responseViolations, action, response.getContent(), typeMatch, detail);
+        final MediaTypeMatch typeMatch = MediaTypeMatch.find(responseViolations, response, res.getBody(), locator);
+        if (typeMatch != null) {
+            locator.responseMime(typeMatch.getMatchingMime());
+            checkSchema(responseViolations, action, response.getContent(), typeMatch);
+        }
         return typeMatch;
     }
 
-    private void checkSchema(RamlViolations violations, Action action, byte[] body, MediaTypeMatch typeMatch, String detail) {
-        if (typeMatch == null) {
-            return;
-        }
+    private void checkSchema(RamlViolations violations, Action action, byte[] body, MediaTypeMatch typeMatch) {
         final String schema = typeMatch.getMatchingMime().getSchema();
         if (schema == null) {
             return;
         }
         final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, typeMatch.getTargetType());
         if (validator == null) {
-            violations.add("schemaValidator.missing", typeMatch.getTargetType(), action, detail);
+            violations.add("schemaValidator.missing", locator, typeMatch.getTargetType());
             return;
         }
         if (body == null || body.length == 0) {
-            violations.add("body.empty", typeMatch.getTargetType(), action, detail);
+            violations.add("body.empty", locator, typeMatch.getTargetType());
             return;
         }
 
@@ -262,7 +267,7 @@ public class RamlChecker {
             final String content = new String(body, charset);
             final String refSchema = raml.getConsolidatedSchemas().get(schema);
             final String schemaToUse = refSchema == null ? schema : refSchema;
-            validator.validate(content, schemaToUse, violations, new Message("schema.body.mismatch", action, detail, typeMatch.getMatchingMime(), content));
+            validator.validate(content, schemaToUse, violations, new Message("schema.body.mismatch", locator, content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
         }
@@ -274,7 +279,7 @@ public class RamlChecker {
                         .acceptWildcard()
                         .ignoreX(ignoreXheaders)
                         .predefined(DefaultHeaders.RESPONSE)
-                        .checkParameters(response.getHeaders(), values, new Message("headerParam", action))
+                        .checkParameters(response.getHeaders(), values, new Message("headerParam", locator))
         );
     }
 }

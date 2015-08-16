@@ -18,6 +18,7 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 import org.raml.model.*;
+import org.raml.model.parameter.AbstractParam;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -27,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class RamlValidator {
     public enum Validation {
-        URI_PARAMETER, EXAMPLE_SCHEMA
+        URI_PARAMETER, EXAMPLE_SCHEMA, DESCRIPTION
     }
 
     private final Raml raml;
@@ -37,6 +38,7 @@ public class RamlValidator {
     private final Pattern parameterPattern;
     private final Pattern headerPattern;
     private RamlViolations violations;
+    private Locator locator;
 
     private RamlValidator(Raml raml, List<SchemaValidator> schemaValidators, EnumSet<Validation> validations, Pattern resourcePattern, Pattern parameterPattern, Pattern headerPattern) {
         this.raml = raml;
@@ -71,8 +73,11 @@ public class RamlValidator {
     public RamlReport validate() {
         final RamlReport report = new RamlReport(raml);
         violations = report.getValidationViolations();
-        checkBaseUriParameters(raml.getBaseUriParameters().keySet(), new Message("root").toString());
-        checkParameterPattern(raml.getBaseUriParameters().keySet(), new Message("root").toString(), "baseUriParameter");
+        locator = new Locator();
+        checkBaseUriParameters(raml.getBaseUriParameters().keySet());
+        checkParameterPattern(raml.getBaseUriParameters().keySet(), "baseUriParameter");
+        checkDescription(raml.getDocumentation());
+        checkDescription(raml.getBaseUriParameters(), "baseUriParameter");
         for (Resource resource : raml.getResources().values()) {
             validateResource(resource);
         }
@@ -80,11 +85,15 @@ public class RamlValidator {
     }
 
     private void validateResource(Resource resource) {
+        locator.resource(resource);
         checkResourcePattern(resource);
-        checkBaseUriParameters(resource.getBaseUriParameters().keySet(), resource);
+        checkBaseUriParameters(resource.getBaseUriParameters().keySet());
         checkUriParameters(resource.getUriParameters().keySet(), resource);
-        checkParameterPattern(resource.getBaseUriParameters().keySet(), resource, "baseUriParameter");
-        checkParameterPattern(resource.getUriParameters().keySet(), resource, "uriParameter");
+        checkParameterPattern(resource.getBaseUriParameters().keySet(), "baseUriParameter");
+        checkParameterPattern(resource.getUriParameters().keySet(), "uriParameter");
+        checkDescription(resource.getDescription());
+        checkDescription(resource.getBaseUriParameters(), "baseUriParameter");
+        checkDescription(resource.getUriParameters(), "uriParameter");
         for (Resource res : resource.getResources().values()) {
             validateResource(res);
         }
@@ -94,49 +103,98 @@ public class RamlValidator {
     }
 
     private void validateAction(Action action) {
-        checkBaseUriParameters(action.getBaseUriParameters().keySet(), action);
-        checkParameterPattern(action.getBaseUriParameters().keySet(), action, "baseUriParameter");
-        checkParameterPattern(action.getQueryParameters().keySet(), action, "queryParameter");
-        checkHeaderPattern(action.getHeaders().keySet(), action, "");
+        locator.action(action);
+        checkBaseUriParameters(action.getBaseUriParameters().keySet());
+        checkParameterPattern(action.getBaseUriParameters().keySet(), "baseUriParameter");
+        checkParameterPattern(action.getQueryParameters().keySet(), "queryParameter");
+        checkHeaderPattern(action.getHeaders().keySet());
+        checkDescription(action.getDescription());
+        checkDescription(action.getBaseUriParameters(), "baseUriParameter");
+        checkDescription(action.getQueryParameters(), "queryParameter");
+        checkDescription(action.getHeaders(), "header");
         if (action.getBody() != null) {
             for (MimeType mimeType : action.getBody().values()) {
-                validateMimeType(action, mimeType, "");
+                locator.requestMime(mimeType);
+                validateMimeType(mimeType);
             }
         }
         for (Map.Entry<String, Response> entry : action.getResponses().entrySet()) {
-            validateResponse(action, entry.getKey(), entry.getValue());
+            locator.responseCode(entry.getKey());
+            validateResponse(entry.getValue());
         }
     }
 
-    private void validateMimeType(Action action, MimeType mimeType, String detail) {
+    private void validateMimeType(MimeType mimeType) {
         if (mimeType.getFormParameters() != null) {
-            checkParameterPattern(mimeType.getFormParameters().keySet(), new Message("triple", action, mimeType, detail), "formParameter");
+            checkParameterPattern(mimeType.getFormParameters().keySet(), "formParameter");
+            checkDescription(mimeType.getFormParameters(), "formParameter");
         }
-        checkExampleSchema(action, mimeType, detail);
+        checkExampleSchema(mimeType);
     }
 
-    private void validateResponse(Action action, String code, Response response) {
-        checkHeaderPattern(response.getHeaders().keySet(), action, new Message("response", code).toString());
+    private void validateResponse(Response response) {
+        checkHeaderPattern(response.getHeaders().keySet());
+        checkDescription(response.getDescription());
+        checkDescription(response.getHeaders(), "header");
         if (response.getBody() != null) {
-            final String detail = new Message("response", code).toString();
             for (MimeType mimeType : response.getBody().values()) {
-                validateMimeType(action, mimeType, detail);
+                locator.responseMime(mimeType);
+                validateMimeType(mimeType);
             }
         }
     }
 
-    private void checkBaseUriParameters(Collection<String> names, Object detail) {
+    private void checkDescription(Map<String, ?> params, String paramType) {
+        if (!validations.contains(Validation.DESCRIPTION)) {
+            return;
+        }
+        for (final Map.Entry<String, ?> param : params.entrySet()) {
+            if (param.getValue() instanceof List) {
+                for (final AbstractParam elem : (List<AbstractParam>) param.getValue()) {
+                    checkDescription(param.getKey(), elem, paramType);
+                }
+            } else {
+                checkDescription(param.getKey(), (AbstractParam) param.getValue(), paramType);
+            }
+        }
+    }
+
+    private void checkDescription(String name, AbstractParam param, String paramType) {
+        if (param.getDescription() == null || param.getDescription().isEmpty()) {
+            violations.add(new Message("parameter.description.missing", locator, name, paramType));
+        }
+    }
+
+    private void checkDescription(String desc) {
+        if (!validations.contains(Validation.DESCRIPTION)) {
+            return;
+        }
+        if (desc == null || desc.isEmpty()) {
+            violations.add(new Message("description.missing", locator));
+        }
+    }
+
+    private void checkDescription(List<DocumentationItem> docs) {
+        if (!validations.contains(Validation.DESCRIPTION)) {
+            return;
+        }
+        if (docs == null || docs.isEmpty()) {
+            violations.add(new Message("description.missing", locator));
+        }
+    }
+
+    private void checkBaseUriParameters(Collection<String> names) {
         if (!validations.contains(Validation.URI_PARAMETER)) {
             return;
         }
         if (raml.getBaseUri() == null && !names.isEmpty()) {
-            violations.add(new Message("baseUriParameters.illegal", detail));
+            violations.add(new Message("baseUriParameters.illegal", locator));
         } else {
             for (String name : names) {
                 if (name.equals("version")) {
-                    violations.add(new Message("baseUriParameter.illegal", name, detail));
+                    violations.add(new Message("baseUriParameter.illegal", locator, name));
                 } else {
-                    violations.addIf(!raml.getBaseUri().contains("{" + name + "}"), new Message("baseUriParameter.invalid", name, detail));
+                    violations.addIf(!raml.getBaseUri().contains("{" + name + "}"), new Message("baseUriParameter.invalid", locator, name));
                 }
             }
         }
@@ -148,9 +206,9 @@ public class RamlValidator {
         }
         for (String name : names) {
             if (name.equals("version")) {
-                violations.add(new Message("uriParameter.illegal", name, resource));
+                violations.add(new Message("uriParameter.illegal", locator, name));
             } else {
-                violations.addIf(!resource.getUri().contains("{" + name + "}"), new Message("uriParameter.invalid", name, resource));
+                violations.addIf(!resource.getUri().contains("{" + name + "}"), new Message("uriParameter.invalid", locator, name));
             }
         }
     }
@@ -162,34 +220,34 @@ public class RamlValidator {
         final String uri = resource.getRelativeUri().replaceAll("\\{[^}/]+\\}", "");
         for (final String part : uri.split("/")) {
             if (part != null && part.length() > 0 && !resourcePattern.matcher(part).matches()) {
-                violations.add(new Message("resource.name.invalid", resource, resourcePattern.pattern()));
+                violations.add(new Message("resource.name.invalid", locator, resourcePattern.pattern()));
             }
         }
     }
 
-    private void checkParameterPattern(Collection<String> names, Object where, String what) {
+    private void checkParameterPattern(Collection<String> names, String what) {
         if (parameterPattern == null) {
             return;
         }
         for (final String name : names) {
             if (!parameterPattern.matcher(name).matches()) {
-                violations.add(new Message("parameter.name.invalid", name, where, what, parameterPattern.pattern()));
+                violations.add(new Message("parameter.name.invalid", locator, name, what, parameterPattern.pattern()));
             }
         }
     }
 
-    private void checkHeaderPattern(Collection<String> names, Object where, String detail) {
+    private void checkHeaderPattern(Collection<String> names) {
         if (headerPattern == null) {
             return;
         }
         for (final String name : names) {
             if (!headerPattern.matcher(name).matches()) {
-                violations.add(new Message("header.name.invalid", name, where, detail, headerPattern.pattern()));
+                violations.add(new Message("header.name.invalid", locator, name, headerPattern.pattern()));
             }
         }
     }
 
-    private void checkExampleSchema(Action action, MimeType mimeType, String detail) {
+    private void checkExampleSchema(MimeType mimeType) {
         if (!validations.contains(Validation.EXAMPLE_SCHEMA)) {
             return;
         }
@@ -198,7 +256,7 @@ public class RamlValidator {
             final String schema = mimeType.getSchema();
             final String refSchema = raml.getConsolidatedSchemas().get(schema);
             validator.validate(mimeType.getExample(), refSchema != null ? refSchema : schema, violations,
-                    new Message("schema.example.mismatch", action, detail, mimeType, mimeType.getExample()));
+                    new Message("schema.example.mismatch", locator, mimeType.getExample()));
         }
     }
 }

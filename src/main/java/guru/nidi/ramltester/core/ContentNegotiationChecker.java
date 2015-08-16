@@ -59,7 +59,9 @@ class ContentNegotiationChecker {
                     }
                     if (typeMatch.getMatchingMedia().equals(modelType)) {
                         if (acceptType.getQualityParameter() < bestMatch.getQualityParameter()) {
-                            responseViolations.add(new Message("mediaType.better", accept, action, response.getStatus(), bestMatch, response.getContentType()));
+                            final Locator locator = new Locator(action);
+                            locator.responseCode("" + response.getStatus());
+                            responseViolations.add(new Message("mediaType.better", locator, accept, bestMatch, response.getContentType()));
                         }
                         return;
                     }
@@ -76,7 +78,7 @@ class ContentNegotiationChecker {
                 final MediaType acceptType = MediaType.valueOf(type);
                 acceptTypes.add(acceptType);
             } catch (InvalidMediaTypeException e) {
-                requestViolations.add(new Message("mediaType.illegal", type, e.getMessage()).withMessageParam("accept.header"));
+                requestViolations.add(new Message("mediaType.illegal", new Message("accept.header"), type, e.getMessage()));
             }
         }
         Collections.sort(acceptTypes, MediaType.QUALITY_COMPARATOR);
