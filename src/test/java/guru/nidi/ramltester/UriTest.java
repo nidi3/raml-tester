@@ -94,7 +94,7 @@ public class UriTest extends HighlevelTestBase {
                 api,
                 get("/undefined/type/other"),
                 jsonResponse(202),
-                equalTo("URI parameter 'undefined' on resource(/type/{undefined}) : Value 'other' is not a valid integer"));
+                equalTo("URI parameter 'undefined' on resource(/type/{undefined}) - Value 'other' is not a valid integer"));
         assertNoViolations(
                 api,
                 get("/undefined/type/other/sub"),
@@ -106,7 +106,7 @@ public class UriTest extends HighlevelTestBase {
         final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/bu")).andReturn();
         assertOneViolationThat(
                 api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult).getRequestViolations(),
-                equalTo("BaseUri parameter 'host' on action(GET /bu) : Value 'nidi.guru' is not a member of enum '[bu-host]'"));
+                equalTo("BaseUri parameter 'host' on action(GET /bu) - Value 'nidi.guru' is not a member of enum '[bu-host]'"));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class UriTest extends HighlevelTestBase {
         final MvcResult result = mockMvc.perform(get("/sub-raml/v1/undefd/bu/sub")).andReturn();
         assertOneViolationThat(
                 api.assumingBaseUri("http://sub-host").testAgainst(result).getRequestViolations(),
-                equalTo("BaseUri parameter 'host' on action(GET /bu/sub) : Value 'sub-host' is not a member of enum '[sub-host-get]'"));
+                equalTo("BaseUri parameter 'host' on action(GET /bu/sub) - Value 'sub-host' is not a member of enum '[sub-host-get]'"));
     }
 
     @Test

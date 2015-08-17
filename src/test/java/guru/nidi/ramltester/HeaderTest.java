@@ -192,7 +192,7 @@ public class HeaderTest extends HighlevelTestBase {
                         header.ignoringXheaders(),
                         get("/header/xint").header("x-int", "blu").header("x-ig", "nix"),
                         jsonResponse(200)),
-                equalTo("Header 'x-int' on action(GET /header/xint) : Value 'blu' is not a valid integer"));
+                equalTo("Header 'x-int' on action(GET /header/xint) - Value 'blu' is not a valid integer"));
     }
 
     @Test
@@ -204,7 +204,7 @@ public class HeaderTest extends HighlevelTestBase {
                         header.ignoringXheaders(),
                         get("/header/xint"),
                         response),
-                equalTo("Header 'x-int' on action(GET /header/xint) response(200) : Value 'blu' is not a valid integer"));
+                equalTo("Header 'x-int' on action(GET /header/xint) response(200) - Value 'blu' is not a valid integer"));
     }
 
 }

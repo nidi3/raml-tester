@@ -23,12 +23,14 @@ import org.raml.model.parameter.AbstractParam;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static guru.nidi.ramltester.core.CheckerHelper.paramEntries;
+
 /**
  *
  */
 public class RamlValidator {
     public enum Validation {
-        URI_PARAMETER, EXAMPLE_SCHEMA, DESCRIPTION
+        URI_PARAMETER, EXAMPLE, DESCRIPTION
     }
 
     private final Raml raml;
@@ -75,7 +77,7 @@ public class RamlValidator {
         violations = report.getValidationViolations();
         locator = new Locator();
         checkBaseUriParameters(raml.getBaseUriParameters().keySet());
-        checkParameterPattern(raml.getBaseUriParameters().keySet(), "baseUriParameter");
+        checkParameters(raml.getBaseUriParameters(), "baseUriParameter");
         checkDescription(raml.getDocumentation());
         checkDescription(raml.getBaseUriParameters(), "baseUriParameter");
         for (Resource resource : raml.getResources().values()) {
@@ -89,8 +91,8 @@ public class RamlValidator {
         checkResourcePattern(resource);
         checkBaseUriParameters(resource.getBaseUriParameters().keySet());
         checkUriParameters(resource.getUriParameters().keySet(), resource);
-        checkParameterPattern(resource.getBaseUriParameters().keySet(), "baseUriParameter");
-        checkParameterPattern(resource.getUriParameters().keySet(), "uriParameter");
+        checkParameters(resource.getBaseUriParameters(), "baseUriParameter");
+        checkParameters(resource.getUriParameters(), "uriParameter");
         checkDescription(resource.getDescription());
         checkDescription(resource.getBaseUriParameters(), "baseUriParameter");
         checkDescription(resource.getUriParameters(), "uriParameter");
@@ -105,8 +107,8 @@ public class RamlValidator {
     private void validateAction(Action action) {
         locator.action(action);
         checkBaseUriParameters(action.getBaseUriParameters().keySet());
-        checkParameterPattern(action.getBaseUriParameters().keySet(), "baseUriParameter");
-        checkParameterPattern(action.getQueryParameters().keySet(), "queryParameter");
+        checkParameters(action.getBaseUriParameters(), "baseUriParameter");
+        checkParameters(action.getQueryParameters(), "queryParameter");
         checkHeaderPattern(action.getHeaders().keySet());
         checkDescription(action.getDescription());
         checkDescription(action.getBaseUriParameters(), "baseUriParameter");
@@ -126,7 +128,7 @@ public class RamlValidator {
 
     private void validateMimeType(MimeType mimeType) {
         if (mimeType.getFormParameters() != null) {
-            checkParameterPattern(mimeType.getFormParameters().keySet(), "formParameter");
+            checkParameters(mimeType.getFormParameters(), "formParameter");
             checkDescription(mimeType.getFormParameters(), "formParameter");
         }
         checkExampleSchema(mimeType);
@@ -145,16 +147,9 @@ public class RamlValidator {
     }
 
     private void checkDescription(Map<String, ?> params, String paramType) {
-        if (!validations.contains(Validation.DESCRIPTION)) {
-            return;
-        }
-        for (final Map.Entry<String, ?> param : params.entrySet()) {
-            if (param.getValue() instanceof List) {
-                for (final AbstractParam elem : (List<AbstractParam>) param.getValue()) {
-                    checkDescription(param.getKey(), elem, paramType);
-                }
-            } else {
-                checkDescription(param.getKey(), (AbstractParam) param.getValue(), paramType);
+        if (validations.contains(Validation.DESCRIPTION)) {
+            for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
+                checkDescription(param.getKey(), param.getValue(), paramType);
             }
         }
     }
@@ -166,97 +161,126 @@ public class RamlValidator {
     }
 
     private void checkDescription(String desc) {
-        if (!validations.contains(Validation.DESCRIPTION)) {
-            return;
-        }
-        if (desc == null || desc.isEmpty()) {
-            violations.add(new Message("description.missing", locator));
+        if (validations.contains(Validation.DESCRIPTION)) {
+            if (desc == null || desc.isEmpty()) {
+                violations.add(new Message("description.missing", locator));
+            }
         }
     }
 
     private void checkDescription(List<DocumentationItem> docs) {
-        if (!validations.contains(Validation.DESCRIPTION)) {
-            return;
-        }
-        if (docs == null || docs.isEmpty()) {
-            violations.add(new Message("description.missing", locator));
+        if (validations.contains(Validation.DESCRIPTION)) {
+            if (docs == null || docs.isEmpty()) {
+                violations.add(new Message("description.missing", locator));
+            }
         }
     }
 
     private void checkBaseUriParameters(Collection<String> names) {
-        if (!validations.contains(Validation.URI_PARAMETER)) {
-            return;
-        }
-        if (raml.getBaseUri() == null && !names.isEmpty()) {
-            violations.add(new Message("baseUriParameters.illegal", locator));
-        } else {
-            for (String name : names) {
-                if (name.equals("version")) {
-                    violations.add(new Message("baseUriParameter.illegal", locator, name));
-                } else {
-                    violations.addIf(!raml.getBaseUri().contains("{" + name + "}"), new Message("baseUriParameter.invalid", locator, name));
+        if (validations.contains(Validation.URI_PARAMETER)) {
+            if (raml.getBaseUri() == null && !names.isEmpty()) {
+                violations.add(new Message("baseUriParameters.illegal", locator));
+            } else {
+                for (String name : names) {
+                    if (name.equals("version")) {
+                        violations.add(new Message("baseUriParameter.illegal", locator, name));
+                    } else {
+                        violations.addIf(!raml.getBaseUri().contains("{" + name + "}"), new Message("baseUriParameter.invalid", locator, name));
+                    }
                 }
             }
         }
     }
 
     private void checkUriParameters(Collection<String> names, Resource resource) {
-        if (!validations.contains(Validation.URI_PARAMETER)) {
-            return;
-        }
-        for (String name : names) {
-            if (name.equals("version")) {
-                violations.add(new Message("uriParameter.illegal", locator, name));
-            } else {
-                violations.addIf(!resource.getUri().contains("{" + name + "}"), new Message("uriParameter.invalid", locator, name));
+        if (validations.contains(Validation.URI_PARAMETER)) {
+            for (String name : names) {
+                if (name.equals("version")) {
+                    violations.add(new Message("uriParameter.illegal", locator, name));
+                } else {
+                    violations.addIf(!resource.getUri().contains("{" + name + "}"), new Message("uriParameter.invalid", locator, name));
+                }
             }
         }
     }
 
     private void checkResourcePattern(Resource resource) {
-        if (resourcePattern == null) {
-            return;
-        }
-        final String uri = resource.getRelativeUri().replaceAll("\\{[^}/]+\\}", "");
-        for (final String part : uri.split("/")) {
-            if (part != null && part.length() > 0 && !resourcePattern.matcher(part).matches()) {
-                violations.add(new Message("resource.name.invalid", locator, resourcePattern.pattern()));
+        if (resourcePattern != null) {
+            final String uri = resource.getRelativeUri().replaceAll("\\{[^}/]+\\}", "");
+            for (final String part : uri.split("/")) {
+                if (part != null && part.length() > 0 && !resourcePattern.matcher(part).matches()) {
+                    violations.add(new Message("resource.name.invalid", locator, resourcePattern.pattern()));
+                }
             }
         }
     }
 
-    private void checkParameterPattern(Collection<String> names, String what) {
-        if (parameterPattern == null) {
-            return;
-        }
-        for (final String name : names) {
-            if (!parameterPattern.matcher(name).matches()) {
-                violations.add(new Message("parameter.name.invalid", locator, name, what, parameterPattern.pattern()));
+    private void checkParameters(Map<String, ?> params, String paramType) {
+        if (parameterPattern != null) {
+            for (final String name : params.keySet()) {
+                if (!parameterPattern.matcher(name).matches()) {
+                    violations.add(new Message("parameter.name.invalid", locator, name, paramType, parameterPattern.pattern()));
+                }
             }
+        }
+        checkParameterDef(params, paramType);
+        if (validations.contains(Validation.EXAMPLE)) {
+            final ParameterChecker checker = new ParameterChecker(violations, false, false, false, null);
+            for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
+                checkParameterValues(param.getValue(), checker, new Message("parameter.condition", locator, param.getKey(), paramType));
+            }
+        }
+    }
+
+    private void checkParameterDef(Map<String, ?> params, String paramType) {
+        for (final Map.Entry<String, AbstractParam> entry : paramEntries(params)) {
+            final String name = entry.getKey();
+            final AbstractParam param = entry.getValue();
+            final ParamType type = param.getType() == null ? ParamType.STRING : param.getType();
+            if (type == ParamType.STRING) {
+                violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "minimum"));
+                violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "maximum"));
+            } else {
+                violations.addIf(param.getEnumeration() != null, new Message("parameter.condition.illegal", locator, name, paramType, "enum"));
+                violations.addIf(param.getPattern() != null, new Message("parameter.condition.illegal", locator, name, paramType, "pattern"));
+                violations.addIf(param.getMinLength() != null, new Message("parameter.condition.illegal", locator, name, paramType, "minLength"));
+                violations.addIf(param.getMaxLength() != null, new Message("parameter.condition.illegal", locator, name, paramType, "maxLength"));
+                if (type != ParamType.INTEGER && type != ParamType.NUMBER) {
+                    violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "minimum"));
+                    violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "maximum"));
+                }
+            }
+        }
+    }
+
+    private void checkParameterValues(AbstractParam param, ParameterChecker checker, Message message) {
+        if (param.getExample() != null) {
+            checker.checkParameter(param, param.getExample(), message.withParam("example"));
+        }
+        if (param.getDefaultValue() != null) {
+            checker.checkParameter(param, param.getDefaultValue(), message.withParam("default value"));
         }
     }
 
     private void checkHeaderPattern(Collection<String> names) {
-        if (headerPattern == null) {
-            return;
-        }
-        for (final String name : names) {
-            if (!headerPattern.matcher(name).matches()) {
-                violations.add(new Message("header.name.invalid", locator, name, headerPattern.pattern()));
+        if (headerPattern != null) {
+            for (final String name : names) {
+                if (!headerPattern.matcher(name).matches()) {
+                    violations.add(new Message("header.name.invalid", locator, name, headerPattern.pattern()));
+                }
             }
         }
     }
 
     private void checkExampleSchema(MimeType mimeType) {
-        if (!validations.contains(Validation.EXAMPLE_SCHEMA)) {
-            return;
-        }
-        final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
-        if (mimeType.getExample() != null && validator != null) {
-            final String schema = mimeType.getSchema();
-            final String refSchema = raml.getConsolidatedSchemas().get(schema);
-            validator.validate(mimeType.getExample(), refSchema != null ? refSchema : schema, violations,
-                    new Message("schema.example.mismatch", locator, mimeType.getExample()));
+        if (validations.contains(Validation.EXAMPLE)) {
+            final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
+            if (mimeType.getExample() != null && validator != null) {
+                final String schema = mimeType.getSchema();
+                final String refSchema = raml.getConsolidatedSchemas().get(schema);
+                validator.validate(mimeType.getExample(), refSchema != null ? refSchema : schema, violations,
+                        new Message("schema.example.mismatch", locator, mimeType.getExample()));
+            }
         }
     }
 }

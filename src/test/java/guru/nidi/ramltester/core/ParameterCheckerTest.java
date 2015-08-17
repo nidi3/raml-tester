@@ -51,7 +51,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid boolean"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid boolean"));
         }
     }
 
@@ -64,7 +64,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid integer"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid integer"));
         }
     }
 
@@ -77,8 +77,8 @@ public class ParameterCheckerTest extends CoreTestBase {
         for (String value : new String[]{"-5", "0", "666"}) {
             assertNoViolation(p, value);
         }
-        assertOneViolationThat(p, "-6", equalTo("BaseUri parameter 'xxx' on action : Value '-6' is smaller than minimum -5"));
-        assertOneViolationThat(p, "667", equalTo("BaseUri parameter 'xxx' on action : Value '667' is bigger than maximum 666"));
+        assertOneViolationThat(p, "-6", equalTo("BaseUri parameter 'xxx' on action - Value '-6' is smaller than minimum -5"));
+        assertOneViolationThat(p, "667", equalTo("BaseUri parameter 'xxx' on action - Value '667' is bigger than maximum 666"));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "-0", "1.", "1.123w"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid number"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid number"));
         }
     }
 
@@ -105,15 +105,15 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"4.9e-2", "0.0049999"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is smaller than minimum 0.05"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is smaller than minimum 0.05"));
         }
         for (String value : new String[]{"666.60001"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is bigger than maximum 666.6"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is bigger than maximum 666.6"));
         }
         for (String value : new String[]{"inf", "-inf", "nan"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not inside any minimum/maximum"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not inside any minimum/maximum"));
         }
     }
 
@@ -126,7 +126,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a valid date"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid date"));
         }
     }
 
@@ -145,8 +145,8 @@ public class ParameterCheckerTest extends CoreTestBase {
         p.setType(ParamType.STRING);
         p.setMinLength(2);
         p.setMaxLength(5);
-        assertOneViolationThat(p, "a", equalTo("BaseUri parameter 'xxx' on action : Value 'a' is shorter than minimum length 2"));
-        assertOneViolationThat(p, "123456", equalTo("BaseUri parameter 'xxx' on action : Value '123456' is longer than maximum length 5"));
+        assertOneViolationThat(p, "a", equalTo("BaseUri parameter 'xxx' on action - Value 'a' is shorter than minimum length 2"));
+        assertOneViolationThat(p, "123456", equalTo("BaseUri parameter 'xxx' on action - Value '123456' is longer than maximum length 5"));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "ab", "c"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' is not a member of enum '[a, b]'"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a member of enum '[a, b]'"));
         }
     }
 
@@ -180,7 +180,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "12/z", "1/a", "99/A"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' does not match pattern '" + pattern + "'"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' does not match pattern '" + pattern + "'"));
         }
     }
 
@@ -194,7 +194,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
         for (String value : new String[]{"", "12/z", "1/a"}) {
             assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action : Value '" + value + "' does not match pattern '/\\d{2}/[a-y]/i'"));
+                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' does not match pattern '/\\d{2}/[a-y]/i'"));
         }
     }
 

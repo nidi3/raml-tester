@@ -35,9 +35,15 @@ public class RamlValidatorTest extends HighlevelTestBase {
 
     @Test
     public void exampleSchemaMatch() throws Exception {
-        final RamlReport report = example.validator().withChecks(EXAMPLE_SCHEMA).validate();
-        assertEquals(2, report.getValidationViolations().size());
+        final RamlReport report = example.validator().withChecks(EXAMPLE).validate();
+        assertEquals(8, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("queryParameter 'a' in action(POST /ok) has illegal condition 'minimum'", it.next());
+        assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'pattern'", it.next());
+        assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'minimum'", it.next());
+        assertEquals("queryParameter 'c' in action(POST /ok) has illegal condition 'pattern'", it.next());
+        assertEquals("example of queryParameter 'q' in action(POST /ok) - Value '10' is bigger than maximum 8", it.next());
+        assertEquals("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4", it.next());
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
                 "Content: 42\n" +
                 "Message: The content to match the given JSON schema."));
@@ -95,16 +101,16 @@ public class RamlValidatorTest extends HighlevelTestBase {
         assertEquals(12, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
         assertEquals("Root definition has no description", it.next());
-        assertEquals("baseUriParameter 'path' in Root definition has no description",it.next());
-        assertEquals("resource(/bla/{param}) has no description",it.next());
-        assertEquals("baseUriParameter 'path' in resource(/bla/{param}) has no description",it.next());
-        assertEquals("uriParameter 'param' in resource(/bla/{param}) has no description",it.next());
-        assertEquals("action(GET /bla/{param}) has no description",it.next());
-        assertEquals("baseUriParameter 'actioninvalid' in action(GET /bla/{param}) has no description",it.next());
-        assertEquals("queryParameter 'ok' in action(GET /bla/{param}) has no description",it.next());
-        assertEquals("header 'ok' in action(GET /bla/{param}) has no description",it.next());
-        assertEquals("formParameter 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') has no description",it.next());
-        assertEquals("action(GET /bla/{param}) response(200) has no description",it.next());
-        assertEquals("header 'ok' in action(GET /bla/{param}) response(200) has no description",it.next());
+        assertEquals("baseUriParameter 'path' in Root definition has no description", it.next());
+        assertEquals("resource(/bla/{param}) has no description", it.next());
+        assertEquals("baseUriParameter 'path' in resource(/bla/{param}) has no description", it.next());
+        assertEquals("uriParameter 'param' in resource(/bla/{param}) has no description", it.next());
+        assertEquals("action(GET /bla/{param}) has no description", it.next());
+        assertEquals("baseUriParameter 'actioninvalid' in action(GET /bla/{param}) has no description", it.next());
+        assertEquals("queryParameter 'ok' in action(GET /bla/{param}) has no description", it.next());
+        assertEquals("header 'ok' in action(GET /bla/{param}) has no description", it.next());
+        assertEquals("formParameter 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') has no description", it.next());
+        assertEquals("action(GET /bla/{param}) response(200) has no description", it.next());
+        assertEquals("header 'ok' in action(GET /bla/{param}) response(200) has no description", it.next());
     }
 }

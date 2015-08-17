@@ -86,7 +86,7 @@ public class QueryParameterTest extends HighlevelTestBase {
                         query,
                         get("/query?req&int"),
                         jsonResponse(200, "\"hula\"")),
-                equalTo("Query parameter 'int' on action(GET /query) : Value 'empty' is only allowed with type string")
+                equalTo("Query parameter 'int' on action(GET /query) - Value 'empty' is only allowed with type string")
         );
     }
 
