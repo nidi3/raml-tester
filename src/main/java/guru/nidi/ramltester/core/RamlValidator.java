@@ -29,6 +29,24 @@ import static guru.nidi.ramltester.core.CheckerHelper.paramEntries;
  *
  */
 public class RamlValidator {
+    private enum ParamName {
+        BASE_URI("baseUriParameter"),
+        URI("uriParameter"),
+        QUERY("queryParameter"),
+        HEADER("header"),
+        FORM("formParameter");
+        private final String value;
+
+        ParamName(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
     public enum Validation {
         URI_PARAMETER, EXAMPLE, DESCRIPTION
     }
@@ -77,9 +95,9 @@ public class RamlValidator {
         violations = report.getValidationViolations();
         locator = new Locator();
         checkBaseUriParameters(raml.getBaseUriParameters().keySet());
-        checkParameters(raml.getBaseUriParameters(), "baseUriParameter");
+        checkParameters(raml.getBaseUriParameters(), ParamName.BASE_URI);
         checkDescription(raml.getDocumentation());
-        checkDescription(raml.getBaseUriParameters(), "baseUriParameter");
+        checkDescription(raml.getBaseUriParameters(), ParamName.BASE_URI);
         for (Resource resource : raml.getResources().values()) {
             validateResource(resource);
         }
@@ -91,11 +109,11 @@ public class RamlValidator {
         checkResourcePattern(resource);
         checkBaseUriParameters(resource.getBaseUriParameters().keySet());
         checkUriParameters(resource.getUriParameters().keySet(), resource);
-        checkParameters(resource.getBaseUriParameters(), "baseUriParameter");
-        checkParameters(resource.getUriParameters(), "uriParameter");
+        checkParameters(resource.getBaseUriParameters(), ParamName.BASE_URI);
+        checkParameters(resource.getUriParameters(), ParamName.URI);
         checkDescription(resource.getDescription());
-        checkDescription(resource.getBaseUriParameters(), "baseUriParameter");
-        checkDescription(resource.getUriParameters(), "uriParameter");
+        checkDescription(resource.getBaseUriParameters(), ParamName.BASE_URI);
+        checkDescription(resource.getUriParameters(), ParamName.URI);
         for (Resource res : resource.getResources().values()) {
             validateResource(res);
         }
@@ -107,13 +125,13 @@ public class RamlValidator {
     private void validateAction(Action action) {
         locator.action(action);
         checkBaseUriParameters(action.getBaseUriParameters().keySet());
-        checkParameters(action.getBaseUriParameters(), "baseUriParameter");
-        checkParameters(action.getQueryParameters(), "queryParameter");
+        checkParameters(action.getBaseUriParameters(), ParamName.BASE_URI);
+        checkParameters(action.getQueryParameters(), ParamName.QUERY);
         checkHeaderPattern(action.getHeaders().keySet());
         checkDescription(action.getDescription());
-        checkDescription(action.getBaseUriParameters(), "baseUriParameter");
-        checkDescription(action.getQueryParameters(), "queryParameter");
-        checkDescription(action.getHeaders(), "header");
+        checkDescription(action.getBaseUriParameters(), ParamName.BASE_URI);
+        checkDescription(action.getQueryParameters(), ParamName.QUERY);
+        checkDescription(action.getHeaders(), ParamName.HEADER);
         if (action.getBody() != null) {
             for (MimeType mimeType : action.getBody().values()) {
                 locator.requestMime(mimeType);
@@ -128,8 +146,12 @@ public class RamlValidator {
 
     private void validateMimeType(MimeType mimeType) {
         if (mimeType.getFormParameters() != null) {
-            checkParameters(mimeType.getFormParameters(), "formParameter");
-            checkDescription(mimeType.getFormParameters(), "formParameter");
+            if (!MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
+                    !MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.MULTIPART)) {
+                violations.add(new Message("formParameter.illegal", locator));
+            }
+            checkParameters(mimeType.getFormParameters(), ParamName.FORM);
+            checkDescription(mimeType.getFormParameters(), ParamName.FORM);
         }
         checkExampleSchema(mimeType);
     }
@@ -137,7 +159,7 @@ public class RamlValidator {
     private void validateResponse(Response response) {
         checkHeaderPattern(response.getHeaders().keySet());
         checkDescription(response.getDescription());
-        checkDescription(response.getHeaders(), "header");
+        checkDescription(response.getHeaders(), ParamName.HEADER);
         if (response.getBody() != null) {
             for (MimeType mimeType : response.getBody().values()) {
                 locator.responseMime(mimeType);
@@ -146,17 +168,17 @@ public class RamlValidator {
         }
     }
 
-    private void checkDescription(Map<String, ?> params, String paramType) {
+    private void checkDescription(Map<String, ?> params, ParamName paramName) {
         if (validations.contains(Validation.DESCRIPTION)) {
             for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
-                checkDescription(param.getKey(), param.getValue(), paramType);
+                checkDescription(param.getKey(), param.getValue(), paramName);
             }
         }
     }
 
-    private void checkDescription(String name, AbstractParam param, String paramType) {
+    private void checkDescription(String name, AbstractParam param, ParamName paramName) {
         if (param.getDescription() == null || param.getDescription().isEmpty()) {
-            violations.add(new Message("parameter.description.missing", locator, name, paramType));
+            violations.add(new Message("parameter.description.missing", locator, name, paramName));
         }
     }
 
@@ -215,39 +237,42 @@ public class RamlValidator {
         }
     }
 
-    private void checkParameters(Map<String, ?> params, String paramType) {
+    private void checkParameters(Map<String, ?> params, ParamName paramName) {
         if (parameterPattern != null) {
             for (final String name : params.keySet()) {
                 if (!parameterPattern.matcher(name).matches()) {
-                    violations.add(new Message("parameter.name.invalid", locator, name, paramType, parameterPattern.pattern()));
+                    violations.add(new Message("parameter.name.invalid", locator, name, paramName, parameterPattern.pattern()));
                 }
             }
         }
-        checkParameterDef(params, paramType);
+        checkParameterDef(params, paramName);
         if (validations.contains(Validation.EXAMPLE)) {
             final ParameterChecker checker = new ParameterChecker(violations, false, false, false, null);
             for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
-                checkParameterValues(param.getValue(), checker, new Message("parameter.condition", locator, param.getKey(), paramType));
+                checkParameterValues(param.getValue(), checker, new Message("parameter.condition", locator, param.getKey(), paramName));
             }
         }
     }
 
-    private void checkParameterDef(Map<String, ?> params, String paramType) {
+    private void checkParameterDef(Map<String, ?> params, ParamName paramName) {
         for (final Map.Entry<String, AbstractParam> entry : paramEntries(params)) {
             final String name = entry.getKey();
             final AbstractParam param = entry.getValue();
             final ParamType type = param.getType() == null ? ParamType.STRING : param.getType();
             if (type == ParamType.STRING) {
-                violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "minimum"));
-                violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "maximum"));
+                violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "minimum"));
+                violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "maximum"));
             } else {
-                violations.addIf(param.getEnumeration() != null, new Message("parameter.condition.illegal", locator, name, paramType, "enum"));
-                violations.addIf(param.getPattern() != null, new Message("parameter.condition.illegal", locator, name, paramType, "pattern"));
-                violations.addIf(param.getMinLength() != null, new Message("parameter.condition.illegal", locator, name, paramType, "minLength"));
-                violations.addIf(param.getMaxLength() != null, new Message("parameter.condition.illegal", locator, name, paramType, "maxLength"));
+                violations.addIf(param.getEnumeration() != null, new Message("parameter.condition.illegal", locator, name, paramName, "enum"));
+                violations.addIf(param.getPattern() != null, new Message("parameter.condition.illegal", locator, name, paramName, "pattern"));
+                violations.addIf(param.getMinLength() != null, new Message("parameter.condition.illegal", locator, name, paramName, "minLength"));
+                violations.addIf(param.getMaxLength() != null, new Message("parameter.condition.illegal", locator, name, paramName, "maxLength"));
                 if (type != ParamType.INTEGER && type != ParamType.NUMBER) {
-                    violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "minimum"));
-                    violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramType, "maximum"));
+                    violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "minimum"));
+                    violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "maximum"));
+                }
+                if (type == ParamType.FILE) {
+                    violations.addIf(paramName != ParamName.FORM, new Message("parameter.file.illegal", locator, name, paramName));
                 }
             }
         }

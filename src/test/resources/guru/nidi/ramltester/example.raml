@@ -19,6 +19,8 @@ schemas:
         type: integer
         minimum: 5
         pattern: a
+      d:
+        type: file
       q:
         type: number
         example: 10
@@ -27,6 +29,9 @@ schemas:
         maximum: 8
     body:
       application/json:
+        formParameters:
+          f:
+            type: file
         schema: |
           {"type":"string"}
         example: |

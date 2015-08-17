@@ -30,6 +30,8 @@ public final class MediaType {
         }
     };
     public static final MediaType JSON = valueOf("application/json");
+    public static final MediaType FORM_URL_ENCODED = valueOf("application/x-www-form-urlencoded");
+    public static final MediaType MULTIPART = valueOf("multipart/form-data");
 
     private static final String CHARSET = "charset";
     private static final String WILDCARD_TYPE = "*";

@@ -36,14 +36,16 @@ public class RamlValidatorTest extends HighlevelTestBase {
     @Test
     public void exampleSchemaMatch() throws Exception {
         final RamlReport report = example.validator().withChecks(EXAMPLE).validate();
-        assertEquals(8, report.getValidationViolations().size());
+        assertEquals(10, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
         assertEquals("queryParameter 'a' in action(POST /ok) has illegal condition 'minimum'", it.next());
         assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'pattern'", it.next());
         assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'minimum'", it.next());
         assertEquals("queryParameter 'c' in action(POST /ok) has illegal condition 'pattern'", it.next());
+        assertEquals("queryParameter 'd' in action(POST /ok): File type is only allowed in formParameter", it.next());
         assertEquals("example of queryParameter 'q' in action(POST /ok) - Value '10' is bigger than maximum 8", it.next());
         assertEquals("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4", it.next());
+        assertEquals("No formParameter allowed in action(POST /ok) mime-type('application/json') (only allowed with 'application/x-www-form-urlencoded' or 'multipart/form-data')", it.next());
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
                 "Content: 42\n" +
                 "Message: The content to match the given JSON schema."));
