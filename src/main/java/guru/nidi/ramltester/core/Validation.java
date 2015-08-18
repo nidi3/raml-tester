@@ -19,5 +19,5 @@ package guru.nidi.ramltester.core;
  *
  */
 public enum Validation {
-    URI_PARAMETER, EXAMPLE, DESCRIPTION
+    URI_PARAMETER, EXAMPLE, DESCRIPTION, EMPTY, PARAMETER
 }

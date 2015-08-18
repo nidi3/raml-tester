@@ -99,8 +99,16 @@ class RamlValidatorChecker {
         return report;
     }
 
+    private boolean has(Validation validation) {
+        return validations.contains(validation);
+    }
+
+    private void violation(String key, Object... params) {
+        violations.add(new Message(key, params));
+    }
+
     public void description(Map<String, ?> params, ParamName paramName) {
-        if (validations.contains(Validation.DESCRIPTION)) {
+        if (has(Validation.DESCRIPTION)) {
             for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
                 description(param.getKey(), param.getValue(), paramName);
             }
@@ -109,36 +117,52 @@ class RamlValidatorChecker {
 
     private void description(String name, AbstractParam param, ParamName paramName) {
         if (param.getDescription() == null || param.getDescription().isEmpty()) {
-            violations.add(new Message("parameter.description.missing", locator, name, paramName));
+            violation("parameter.description.missing", locator, name, paramName);
         }
     }
 
     public void description(String desc) {
-        if (validations.contains(Validation.DESCRIPTION)) {
+        if (has(Validation.DESCRIPTION)) {
             if (desc == null || desc.isEmpty()) {
-                violations.add(new Message("description.missing", locator));
+                violation("description.missing", locator);
             }
         }
     }
 
     public void description(List<DocumentationItem> docs) {
-        if (validations.contains(Validation.DESCRIPTION)) {
+        if (has(Validation.DESCRIPTION)) {
             if (docs == null || docs.isEmpty()) {
-                violations.add(new Message("description.missing", locator));
+                violation("description.missing", locator);
+            }
+        }
+    }
+
+    public void empty(Resource resource) {
+        if (has(Validation.EMPTY)) {
+            if (resource.getActions().isEmpty() && resource.getResources().isEmpty()) {
+                violation("empty", locator);
+            }
+        }
+    }
+
+    public void empty(Action action) {
+        if (has(Validation.EMPTY)) {
+            if (action.getResponses().isEmpty()) {
+                violation("empty", locator);
             }
         }
     }
 
     private void baseUriParameters(Collection<String> names) {
-        if (validations.contains(Validation.URI_PARAMETER)) {
+        if (has(Validation.URI_PARAMETER)) {
             if (raml.getBaseUri() == null && !names.isEmpty()) {
-                violations.add(new Message("baseUriParameters.illegal", locator));
+                violation("baseUriParameters.illegal", locator);
             } else {
                 for (String name : names) {
                     if (name.equals("version")) {
-                        violations.add(new Message("baseUriParameter.illegal", locator, name));
-                    } else {
-                        violations.addIf(!raml.getBaseUri().contains("{" + name + "}"), new Message("baseUriParameter.invalid", locator, name));
+                        violation("baseUriParameter.illegal", locator, name);
+                    } else if (!raml.getBaseUri().contains("{" + name + "}")) {
+                        violation("baseUriParameter.invalid", locator, name);
                     }
                 }
             }
@@ -146,12 +170,12 @@ class RamlValidatorChecker {
     }
 
     public void uriParameters(Collection<String> names, Resource resource) {
-        if (validations.contains(Validation.URI_PARAMETER)) {
+        if (has(Validation.URI_PARAMETER)) {
             for (String name : names) {
                 if (name.equals("version")) {
-                    violations.add(new Message("uriParameter.illegal", locator, name));
-                } else {
-                    violations.addIf(!resource.getUri().contains("{" + name + "}"), new Message("uriParameter.invalid", locator, name));
+                    violation("uriParameter.illegal", locator, name);
+                } else if (!resource.getUri().contains("{" + name + "}")) {
+                    violation("uriParameter.invalid", locator, name);
                 }
             }
         }
@@ -162,7 +186,7 @@ class RamlValidatorChecker {
             final String uri = resource.getRelativeUri().replaceAll("\\{[^}/]+\\}", "");
             for (final String part : uri.split("/")) {
                 if (part != null && part.length() > 0 && !resourcePattern.matcher(part).matches()) {
-                    violations.add(new Message("resource.name.invalid", locator, resourcePattern.pattern()));
+                    violation("resource.name.invalid", locator, resourcePattern.pattern());
                 }
             }
         }
@@ -175,12 +199,14 @@ class RamlValidatorChecker {
         if (parameterPattern != null) {
             for (final String name : params.keySet()) {
                 if (!parameterPattern.matcher(name).matches()) {
-                    violations.add(new Message("parameter.name.invalid", locator, name, paramName, parameterPattern.pattern()));
+                    violation("parameter.name.invalid", locator, name, paramName, parameterPattern.pattern());
                 }
             }
         }
-        parameterDef(params, paramName);
-        if (validations.contains(Validation.EXAMPLE)) {
+        if (has(Validation.PARAMETER)) {
+            parameterDef(params, paramName);
+        }
+        if (has(Validation.EXAMPLE)) {
             final ParameterChecker checker = new ParameterChecker(violations, false, false, false, null);
             for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
                 parameterValues(param.getValue(), checker, new Message("parameter.condition", locator, param.getKey(), paramName));
@@ -189,9 +215,11 @@ class RamlValidatorChecker {
     }
 
     public void formParameters(MimeType mimeType) {
-        if (!MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
-                !MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.MULTIPART)) {
-            violations.add(new Message("formParameter.illegal", locator));
+        if (has(Validation.PARAMETER)) {
+            if (!MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
+                    !MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.MULTIPART)) {
+                violation("formParameter.illegal", locator);
+            }
         }
     }
 
@@ -232,14 +260,14 @@ class RamlValidatorChecker {
         if (headerPattern != null) {
             for (final String name : names) {
                 if (!headerPattern.matcher(name).matches()) {
-                    violations.add(new Message("header.name.invalid", locator, name, headerPattern.pattern()));
+                    violation("header.name.invalid", locator, name, headerPattern.pattern());
                 }
             }
         }
     }
 
     public void exampleSchema(MimeType mimeType) {
-        if (validations.contains(Validation.EXAMPLE)) {
+        if (has(Validation.EXAMPLE)) {
             final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
             if (mimeType.getExample() != null && validator != null) {
                 final String schema = mimeType.getSchema();

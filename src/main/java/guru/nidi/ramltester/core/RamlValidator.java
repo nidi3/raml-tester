@@ -77,6 +77,7 @@ public class RamlValidator {
         checker.description(resource.getDescription());
         checker.description(resource.getBaseUriParameters(), BASE_URI);
         checker.description(resource.getUriParameters(), URI);
+        checker.empty(resource);
         for (Resource res : resource.getResources().values()) {
             resource(res);
         }
@@ -94,6 +95,7 @@ public class RamlValidator {
         checker.description(action.getBaseUriParameters(), BASE_URI);
         checker.description(action.getQueryParameters(), QUERY);
         checker.description(action.getHeaders(), HEADER);
+        checker.empty(action);
         if (action.getBody() != null) {
             for (MimeType mimeType : action.getBody().values()) {
                 locator.requestMime(mimeType);

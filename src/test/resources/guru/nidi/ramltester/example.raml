@@ -6,6 +6,12 @@ version: v1
 schemas:
   - string: !include string.json
 
+/empty:
+/nonEmpty:
+  get:
+/nonEmpty:
+  /sub:
+    get:
 /ok:
   post:
     queryParameters:
@@ -36,6 +42,8 @@ schemas:
           {"type":"string"}
         example: |
           "42"
+    responses:
+      200:
 /okref:
   post:
     body:
@@ -43,6 +51,8 @@ schemas:
         schema: string
         example: |
           "42"
+    responses:
+      200:
 
 /nok:
   post:
