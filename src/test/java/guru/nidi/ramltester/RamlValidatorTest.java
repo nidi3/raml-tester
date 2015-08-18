@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static guru.nidi.ramltester.core.RamlValidator.Validation.*;
+import static guru.nidi.ramltester.core.Validation.*;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -61,9 +61,9 @@ public class RamlValidatorTest extends HighlevelTestBase {
         final Iterator<String> it = report.getValidationViolations().iterator();
         assertEquals("The baseUri has no variable 'invalid' in Root definition", it.next());
         assertEquals("baseUriParameter with name 'version' is not allowed in Root definition", it.next());
-        assertEquals("The baseUri has no variable 'subInvalid' in resource(/bla/{param})", it.next());
         assertEquals("The uri has no variable 'uriInvalid' in resource(/bla/{param})", it.next());
         assertEquals("uriParameter with name 'version' is not allowed in resource(/bla/{param})", it.next());
+        assertEquals("The baseUri has no variable 'subInvalid' in resource(/bla/{param})", it.next());
         assertEquals("The uri has no variable 'subinvalid' in resource(/bla/{param}/subA/{p})", it.next());
         assertEquals("The baseUri has no variable 'actioninvalid' in action(GET /bla/{param})", it.next());
     }
