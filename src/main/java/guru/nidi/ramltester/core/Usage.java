@@ -76,7 +76,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     public Set<String> getUnusedResources() {
         final Set<String> res = new HashSet<>();
         for (final Map.Entry<String, Resource> resourceEntry : this) {
-            if (resourceEntry.getValue().getUses() == 0) {
+            if (resourceEntry.getValue().getUses() == 0 && !resourceEntry.getValue().actions.isEmpty()) {
                 res.add(resourceEntry.getKey());
             }
         }
@@ -120,7 +120,6 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             }
         });
     }
-
 
     public Set<String> getUnusedFormParameters() {
         return collect(new ActionCollector() {

@@ -4,14 +4,15 @@ title: http commons
 baseUri: http://nidi.guru/raml/{version}
 version: v1
 
-/data:
-  get:
-    queryParameters:
-      empty:
-    responses:
-      200:
-        body:
-          application/json:
-            schema: |
-              {"type":"string"}
-      204:
+/base:
+  /data:
+    get:
+      queryParameters:
+        empty:
+      responses:
+        200:
+          body:
+            application/json:
+              schema: |
+                {"type":"string"}
+        204:

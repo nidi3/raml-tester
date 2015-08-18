@@ -40,8 +40,8 @@ public class UsageTest extends HighlevelTestBase {
                 jsonResponse(200, "\"hula\"")));
 
         final Usage usage = aggregator.getUsage();
-        assertEquals(set("/uuRes"), usage.getUnusedResources());
-        assertEquals(set("POST /data"), usage.getUnusedActions());
+        assertEquals(set("/uuWithAction"), usage.getUnusedResources());
+        assertEquals(set("POST /data","GET /uuWithAction"), usage.getUnusedActions());
         assertEquals(set("uuQuery in GET /data"), usage.getUnusedQueryParameters());
         assertEquals(set("uuReqHeader in GET /data"), usage.getUnusedRequestHeaders());
         assertEquals(set("uuFormParam in POST /data (application/x-www-form-urlencoded)"), usage.getUnusedFormParameters());

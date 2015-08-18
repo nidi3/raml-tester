@@ -61,7 +61,7 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void testServletOk() throws IOException {
-        final HttpGet get = new HttpGet(url("data"));
+        final HttpGet get = new HttpGet(url("base/data"));
         final HttpResponse response = client.execute(get);
         assertEquals("\"json string\"", EntityUtils.toString(response.getEntity()));
         assertTrue(client.getLastReport().isEmpty());
@@ -69,18 +69,18 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void testServletNok() throws IOException {
-        final HttpGet get = new HttpGet(url("data?param=bu"));
+        final HttpGet get = new HttpGet(url("base/data?param=bu"));
         final HttpResponse response = client.execute(get);
         assertEquals("illegal json", EntityUtils.toString(response.getEntity()));
 
         final RamlViolations requestViolations = client.getLastReport().getRequestViolations();
         assertEquals(1, requestViolations.size());
-        assertThat(requestViolations.iterator().next(), equalTo("Query parameter 'param' on action(GET /data) is not defined"));
+        assertThat(requestViolations.iterator().next(), equalTo("Query parameter 'param' on action(GET /base/data) is not defined"));
 
         final RamlViolations responseViolations = client.getLastReport().getResponseViolations();
         assertEquals(1, responseViolations.size());
         assertThat(responseViolations.iterator().next(),
-                startsWith("Body does not match schema for action(GET /data) response(200) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /base/data) response(200) mime-type('application/json')\n" +
                         "Content: illegal json\n" +
                         "Message: Schema invalid: ")
         );
@@ -88,7 +88,7 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void notSending() throws IOException {
-        final HttpGet get = new HttpGet(url("data"));
+        final HttpGet get = new HttpGet(url("base/data"));
         final HttpResponse response = client.notSending().execute(get);
         assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
         assertEquals(null, response.getEntity());
@@ -97,7 +97,7 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void emptyResponse() throws IOException {
-        final HttpGet get = new HttpGet(url("data?empty"));
+        final HttpGet get = new HttpGet(url("base/data?empty"));
         final HttpResponse response = client.execute(get);
         assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
         assertEquals(null, response.getEntity());
