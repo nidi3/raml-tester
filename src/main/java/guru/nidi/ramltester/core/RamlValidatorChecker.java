@@ -80,15 +80,15 @@ class RamlValidatorChecker {
     }
 
     public RamlValidatorChecker withResourcePattern(String regex) {
-        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, Pattern.compile(regex), parameterPattern, headerPattern);
+        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, regex == null ? null : Pattern.compile(regex), parameterPattern, headerPattern);
     }
 
     public RamlValidatorChecker withParameterPattern(String regex) {
-        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern, Pattern.compile(regex), headerPattern);
+        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern, regex == null ? null : Pattern.compile(regex), headerPattern);
     }
 
     public RamlValidatorChecker withHeaderPattern(String regex) {
-        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern, parameterPattern, Pattern.compile(regex));
+        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern, parameterPattern, regex == null ? null : Pattern.compile(regex));
     }
 
     public Locator getLocator() {

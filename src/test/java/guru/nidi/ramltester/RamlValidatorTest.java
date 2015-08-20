@@ -80,7 +80,7 @@ public class RamlValidatorTest extends HighlevelTestBase {
         final RamlReport report = uriParams.validator().withChecks().withResourcePattern("[a-z]+").validate();
         assertEquals(1, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("resource(/bla/{param}/subA/{p}) does not match pattern [a-z]+", it.next());
+        assertEquals("Name of resource(/bla/{param}/subA/{p}) does not match pattern '[a-z]+'", it.next());
 
     }
 
@@ -89,10 +89,10 @@ public class RamlValidatorTest extends HighlevelTestBase {
         final RamlReport report = uriParams.validator().withChecks().withParameterPattern("[a-z]+").validate();
         assertEquals(4, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("baseUriParameter name 'subInvalid' in resource(/bla/{param}) does not match pattern [a-z]+", it.next());
-        assertEquals("uriParameter name 'uriInvalid' in resource(/bla/{param}) does not match pattern [a-z]+", it.next());
-        assertEquals("queryParameter name 'Nok' in action(GET /bla/{param}) does not match pattern [a-z]+", it.next());
-        assertEquals("formParameter name 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') does not match pattern [a-z]+", it.next());
+        assertEquals("baseUriParameter name 'subInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'", it.next());
+        assertEquals("uriParameter name 'uriInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'", it.next());
+        assertEquals("queryParameter name 'Nok' in action(GET /bla/{param}) does not match pattern '[a-z]+'", it.next());
+        assertEquals("formParameter name 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') does not match pattern '[a-z]+'", it.next());
     }
 
     @Test
@@ -100,8 +100,8 @@ public class RamlValidatorTest extends HighlevelTestBase {
         final RamlReport report = uriParams.validator().withChecks().withHeaderPattern("[a-z]+").validate();
         assertEquals(2, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("header name 'Hok' in action(GET /bla/{param}) does not match pattern [a-z]+", it.next());
-        assertEquals("header name 'Rok' in action(GET /bla/{param}) response(200) does not match pattern [a-z]+", it.next());
+        assertEquals("header name 'Hok' in action(GET /bla/{param}) does not match pattern '[a-z]+'", it.next());
+        assertEquals("header name 'Rok' in action(GET /bla/{param}) response(200) does not match pattern '[a-z]+'", it.next());
     }
 
     @Test
