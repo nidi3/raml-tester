@@ -48,7 +48,7 @@ public class VariableMatcherTest extends CoreTestBase {
 
     @Test
     public void multiValues() {
-        assertMatch(VariableMatcher.match("abc{var}/{var}", "abc123/xyz"), true, true, "", "var", new String[]{"123", "xyz"});
+        assertMatch(VariableMatcher.match("abc{var}/{var}", "abc123/xyz"), true, true, "", "var", new String[]{"123", "xyz" });
     }
 
     @Test(expected = IllegalVariablePatternException.class)

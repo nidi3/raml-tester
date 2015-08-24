@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 
 /**
@@ -85,9 +84,10 @@ public class ServletTest extends ServerTest {
         final RamlViolations responseViolations = testFilter.report.getResponseViolations();
         assertEquals(1, responseViolations.size());
         assertThat(responseViolations.iterator().next(),
-                startsWith("Body does not match schema for action(GET /data) response(200) mime-type('abc/xyz+json')\n" +
+                equalTo("Body does not match schema for action(GET /data) response(200) mime-type('abc/xyz+json')\n" +
                         "Content: illegal json\n" +
-                        "Message: Schema invalid: ")
+                        "Message: Schema invalid: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n" +
+                        " at [Source: Body; line: 1, column: 8]")
         );
     }
 

@@ -23,7 +23,7 @@ import org.raml.model.parameter.AbstractParam;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static guru.nidi.ramltester.core.CheckerHelper.paramEntries;
+import static guru.nidi.ramltester.core.CheckerHelper.*;
 
 /**
  *
@@ -268,11 +268,10 @@ class RamlValidatorChecker {
 
     public void exampleSchema(MimeType mimeType) {
         if (has(Validation.EXAMPLE)) {
-            final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
+            final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
             if (mimeType.getExample() != null && validator != null) {
                 final String schema = mimeType.getSchema();
-                final String refSchema = raml.getConsolidatedSchemas().get(schema);
-                validator.validate(mimeType.getExample(), refSchema != null ? refSchema : schema, violations,
+                validator.validate(new NamedReader(mimeType.getExample(),new Message("example").toString()), resolveSchema(raml, schema), violations,
                         new Message("schema.example.mismatch", locator, mimeType.getExample()));
             }
         }

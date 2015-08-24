@@ -15,19 +15,21 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.loader.Loader;
-import guru.nidi.ramltester.util.MediaType;
-import guru.nidi.ramltester.util.Message;
-
-import java.io.Reader;
+import java.io.StringReader;
 
 /**
  *
  */
-public interface SchemaValidator {
-    boolean supports(MediaType mediaType);
+final class NamedReader extends StringReader {
+    private final String source;
 
-    SchemaValidator withLoader(Loader loader);
+    public NamedReader(String data, String source) {
+        super(data);
+        this.source = source;
+    }
 
-    void validate(Reader content, Reader schema, RamlViolations violations, Message message);
+    @Override
+    public String toString() {
+        return source;
+    }
 }

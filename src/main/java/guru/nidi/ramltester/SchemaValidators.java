@@ -18,7 +18,7 @@ package guru.nidi.ramltester;
 import guru.nidi.loader.Loader;
 import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.validator.JavaXmlSchemaValidator;
-import guru.nidi.ramltester.validator.RestassuredSchemaValidator;
+import guru.nidi.ramltester.validator.JsonSchemaValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public final class SchemaValidators {
     }
 
     public static SchemaValidators standard() {
-        return new SchemaValidators(Arrays.asList(new RestassuredSchemaValidator(), new JavaXmlSchemaValidator()));
+        return new SchemaValidators(Arrays.asList(new JsonSchemaValidator(), new JavaXmlSchemaValidator()));
     }
 
     public SchemaValidators addSchemaValidator(SchemaValidator schemaValidator) {

@@ -43,7 +43,7 @@ public class DependencyTest {
     }
 
     @Test
-    public void dependencies(){
+    public void dependencies() {
         DependencyConstraint constraint = new DependencyConstraint();
 
         final JavaPackage

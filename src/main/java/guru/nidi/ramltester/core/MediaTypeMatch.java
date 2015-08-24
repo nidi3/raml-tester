@@ -23,6 +23,8 @@ import org.raml.model.MimeType;
 
 import java.util.*;
 
+import static guru.nidi.ramltester.core.CheckerHelper.*;
+
 /**
  *
  */
@@ -60,13 +62,13 @@ final class MediaTypeMatch {
     }
 
     public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, Map<String, MimeType> bodies, Locator locator) {
-        if (CheckerHelper.isNoOrEmptyBodies(bodies)) {
-            violations.addIf(CheckerHelper.hasContent(message), "body.superfluous", locator);
+        if (isNoOrEmptyBodies(bodies)) {
+            violations.addIf(hasContent(message), "body.superfluous", locator);
             return null;
         }
 
         if (message.getContentType() == null) {
-            violations.addIf(CheckerHelper.hasContent(message) || !CheckerHelper.existSchemalessBody(bodies), "contentType.missing");
+            violations.addIf(hasContent(message) || !existSchemalessBody(bodies), "contentType.missing");
             return null;
         }
         final MediaType targetType;

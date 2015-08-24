@@ -6,6 +6,7 @@ version: v1
 mediaType: application/default
 schemas:
   - string: !include string.json
+  - invalid: xxx
 /:
   get:
     responses:
@@ -77,6 +78,10 @@ schemas:
         body:
           text/bla:
             schema: text/bla
+      210:
+        body:
+          application/json:
+            schema: invalid
 /mediaType:
   get:
     responses:

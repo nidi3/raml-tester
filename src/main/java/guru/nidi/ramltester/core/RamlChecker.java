@@ -27,6 +27,7 @@ import org.raml.model.parameter.AbstractParam;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import static guru.nidi.ramltester.core.CheckerHelper.*;
 import static guru.nidi.ramltester.core.UsageBuilder.*;
 
 /**
@@ -101,7 +102,7 @@ public class RamlChecker {
     }
 
     private Action findAction(String path, String method) {
-        final Resource resource = findResource(path);
+        final Resource resource = findResourceByPath(path);
         resourceUsage(usage, resource).incUses(1);
         final Action action = resource.getAction(method);
         if (action == null) {
@@ -111,6 +112,18 @@ public class RamlChecker {
         actionUsage(usage, action).incUses(1);
         locator.action(action);
         return action;
+    }
+
+    private Resource findResourceByPath(String resourcePath) {
+        final Values values = new Values();
+        final Resource resource = findResource(resourcePath, raml.getResources(), values);
+        if (resource == null) {
+            requestViolations.add("resource.undefined", resourcePath);
+            throw new RamlViolationException();
+        }
+        locator.resource(resource);
+        checkUriParams(values, resource);
+        return resource;
     }
 
     public void checkRequest(RamlRequest request, Action action, SecurityExtractor security) {
@@ -167,7 +180,7 @@ public class RamlChecker {
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
-        final Map<String, List<? extends AbstractParam>> baseUriParams = CheckerHelper.getEffectiveBaseUriParams(raml.getBaseUriParameters(), action);
+        final Map<String, List<? extends AbstractParam>> baseUriParams = getEffectiveBaseUriParams(raml.getBaseUriParameters(), action);
         paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", locator));
         paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", locator));
     }
@@ -192,7 +205,7 @@ public class RamlChecker {
 
     private void checkProtocol(Action action, UriComponents requestUri, UriComponents ramlUri) {
         final List<Protocol> protocols = findProtocols(action, ramlUri.getScheme());
-        requestViolations.addIf(!protocols.contains(CheckerHelper.protocolOf(requestUri.getScheme())), "protocol.undefined", locator, requestUri.getScheme());
+        requestViolations.addIf(!protocols.contains(protocolOf(requestUri.getScheme())), "protocol.undefined", locator, requestUri.getScheme());
     }
 
     private List<Protocol> findProtocols(Action action, String fallback) {
@@ -206,22 +219,10 @@ public class RamlChecker {
         return protocols;
     }
 
-    private Resource findResource(String resourcePath) {
-        final Values values = new Values();
-        final Resource resource = CheckerHelper.findResource(resourcePath, raml.getResources(), values);
-        if (resource == null) {
-            requestViolations.add("resource.undefined", resourcePath);
-            throw new RamlViolationException();
-        }
-        locator.resource(resource);
-        checkUriParams(values, resource);
-        return resource;
-    }
-
     private void checkUriParams(Values values, Resource resource) {
         final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
         for (final Map.Entry<String, List<Object>> entry : values) {
-            final AbstractParam uriParam = CheckerHelper.findUriParam(entry.getKey(), resource);
+            final AbstractParam uriParam = findUriParam(entry.getKey(), resource);
             final Message message = new Message("uriParam", locator, entry.getKey());
             if (uriParam != null) {
                 paramChecker.checkParameter(uriParam, entry.getValue().get(0), message);
@@ -230,7 +231,7 @@ public class RamlChecker {
     }
 
     public MediaTypeMatch checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
-        final Response res = CheckerHelper.findResponse(action, response.getStatus(), security);
+        final Response res = findResponse(action, response.getStatus(), security);
         if (res == null) {
             responseViolations.add("responseCode.undefined", locator, response.getStatus());
             throw new RamlViolationException();
@@ -252,7 +253,7 @@ public class RamlChecker {
         if (schema == null) {
             return;
         }
-        final SchemaValidator validator = CheckerHelper.findSchemaValidator(schemaValidators, typeMatch.getTargetType());
+        final SchemaValidator validator = findSchemaValidator(schemaValidators, typeMatch.getTargetType());
         if (validator == null) {
             violations.add("schemaValidator.missing", locator, typeMatch.getTargetType());
             return;
@@ -265,9 +266,7 @@ public class RamlChecker {
         final String charset = typeMatch.getTargetCharset();
         try {
             final String content = new String(body, charset);
-            final String refSchema = raml.getConsolidatedSchemas().get(schema);
-            final String schemaToUse = refSchema == null ? schema : refSchema;
-            validator.validate(content, schemaToUse, violations, new Message("schema.body.mismatch", locator, content));
+            validator.validate(new NamedReader(content, new Message("body").toString()), resolveSchema(raml, schema), violations, new Message("schema.body.mismatch", locator, content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
         }

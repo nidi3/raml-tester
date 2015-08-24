@@ -30,6 +30,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -141,7 +142,7 @@ public class HighlevelTestBase {
         }
 
         @Override
-        public void validate(String content, String schema, RamlViolations violations, Message message) {
+        public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
             violations.add(message.withParam("ok"));
         }
     }
@@ -158,7 +159,7 @@ public class HighlevelTestBase {
         }
 
         @Override
-        public void validate(String content, String schema, RamlViolations violations, Message message) {
+        public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
         }
     }
 }

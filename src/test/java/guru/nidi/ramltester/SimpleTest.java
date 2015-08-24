@@ -25,7 +25,6 @@ import org.springframework.mock.web.MockServletContext;
 
 import static guru.nidi.ramltester.core.UsageItem.RESOURCE;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -109,9 +108,10 @@ public class SimpleTest extends HighlevelTestBase {
     public void undefinedSchema() throws Exception {
         assertOneResponseViolationThat(
                 test(aggregator, simple, get("/schema"), jsonResponse(203, "5")),
-                startsWith("Body does not match schema for action(GET /schema) response(203) mime-type('application/json')\n" +
+                equalTo("Body does not match schema for action(GET /schema) response(203) mime-type('application/json')\n" +
                         "Content: 5\n" +
-                        "Message: Schema invalid:")
+                        "Message: Schema invalid: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'undefined': was expecting ('true', 'false' or 'null')\n" +
+                        " at [Source: Inline schema definition; line: 1, column: 19]")
         );
     }
 

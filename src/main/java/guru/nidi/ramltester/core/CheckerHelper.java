@@ -18,10 +18,12 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.MediaType;
+import guru.nidi.ramltester.util.Message;
 import org.raml.model.*;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.UriParameter;
 
+import java.io.Reader;
 import java.util.*;
 
 /**
@@ -174,4 +176,12 @@ final class CheckerHelper {
         }
         return res;
     }
+
+    public static Reader resolveSchema(Raml raml, String schema) {
+        final String refSchema = raml.getConsolidatedSchemas().get(schema);
+        return refSchema == null
+                ? new NamedReader(schema, new Message("schema.inline").toString())
+                : new NamedReader(refSchema, new Message("schema", schema).toString());
+    }
+
 }

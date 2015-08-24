@@ -19,9 +19,6 @@ import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBuilder;
 import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.jayway.restassured.module.jsv.JsonSchemaValidationException;
-import com.jayway.restassured.module.jsv.JsonSchemaValidator;
-import com.jayway.restassured.module.jsv.JsonSchemaValidatorSettings;
 import guru.nidi.loader.Loader;
 import guru.nidi.loader.use.jsonschema.LoaderUriDownloader;
 import guru.nidi.ramltester.core.RamlViolations;
@@ -32,40 +29,36 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 
+import java.io.Reader;
+
 /**
  *
  */
-public class RestassuredSchemaValidator implements SchemaValidator {
+public class JsonSchemaValidator implements SchemaValidator {
     private JsonSchemaFactory factory;
-    private final JsonSchemaValidatorSettings settings;
     private final Loader loader;
 
-    private RestassuredSchemaValidator(JsonSchemaFactory factory, JsonSchemaValidatorSettings settings, Loader loader) {
+    private JsonSchemaValidator(JsonSchemaFactory factory, Loader loader) {
         this.factory = factory;
-        this.settings = settings;
         this.loader = loader;
     }
 
-    public RestassuredSchemaValidator() {
-        this(null, null, null);
+    public JsonSchemaValidator() {
+        this(null, null);
     }
 
-    public RestassuredSchemaValidator using(JsonSchemaFactory factory) {
-        return new RestassuredSchemaValidator(factory, settings, loader);
+    public JsonSchemaValidator using(JsonSchemaFactory factory) {
+        return new JsonSchemaValidator(factory, loader);
     }
 
-    public RestassuredSchemaValidator using(JsonSchemaValidatorSettings settings) {
-        return new RestassuredSchemaValidator(factory, settings, loader);
+    @Override
+    public SchemaValidator withLoader(Loader loader) {
+        return new JsonSchemaValidator(factory, loader);
     }
 
     @Override
     public boolean supports(MediaType mediaType) {
         return mediaType.isCompatibleWith(MediaType.JSON);
-    }
-
-    @Override
-    public SchemaValidator withLoader(Loader loader) {
-        return new RestassuredSchemaValidator(factory, settings, loader);
     }
 
     private synchronized void init() {
@@ -78,28 +71,17 @@ public class RestassuredSchemaValidator implements SchemaValidator {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Matcher<String> getMatcher(String data) {
-        if (factory != null) {
-            return (Matcher<String>) JsonSchemaValidator.matchesJsonSchema(data).using(factory);
-        }
-        if (settings != null) {
-            return (Matcher<String>) JsonSchemaValidator.matchesJsonSchema(data).using(settings);
-        }
-        return JsonSchemaValidator.matchesJsonSchema(data);
-    }
-
     @Override
-    public void validate(String content, String schema, RamlViolations violations, Message message) {
+    public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
         init();
-        try {
-            final Matcher<String> matcher = getMatcher(schema);
+        try (final Reader s = schema) {
+            final Matcher<Reader> matcher = new JsonSchemaMatcher(s, factory);
             if (!matcher.matches(content)) {
                 final Description description = new StringDescription().appendDescriptionOf(matcher);
                 violations.add(message.withParam(description.toString()));
             }
-        } catch (JsonSchemaValidationException e) {
-            violations.add(message.withMessageParam("restassuredSchemaValidator.schema.invalid", e.getMessage()));
+        } catch (Exception e) {
+            violations.add(message.withMessageParam("jsonSchemaValidator.schema.invalid", e.getMessage()));
         }
     }
 }

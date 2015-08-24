@@ -31,7 +31,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.Reader;
 
 /**
  *
@@ -61,14 +61,14 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
     }
 
     @Override
-    public void validate(String content, String schema, RamlViolations violations, Message message) {
+    public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
         final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
             schemaFactory.setResourceResolver(new LoaderLSResourceResolver(loader));
-            final Schema s = schemaFactory.newSchema(new StreamSource(new StringReader(schema)));
+            final Schema s = schemaFactory.newSchema(new StreamSource(schema));
             final Validator validator = s.newValidator();
             validator.setErrorHandler(new ViolationsWritingErrorHandler(violations, message));
-            validator.validate(new StreamSource(new StringReader(content)));
+            validator.validate(new StreamSource(content));
         } catch (SAXException | IOException e) {
             violations.add(message.withParam(e.getMessage()));
         }
