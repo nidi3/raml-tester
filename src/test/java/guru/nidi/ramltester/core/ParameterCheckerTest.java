@@ -43,7 +43,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void booleanType() throws Exception {
+    public void booleanType(){
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.BOOLEAN);
         for (String value : new String[]{"true", "false"}) {
@@ -56,7 +56,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void integerType() throws Exception {
+    public void integerType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.INTEGER);
         for (String value : new String[]{"0", "-1", "123456789"}) {
@@ -82,7 +82,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void numberType() throws Exception {
+    public void numberType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.NUMBER);
         for (String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
@@ -95,7 +95,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void limitedNumberType() throws Exception {
+    public void limitedNumberType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.NUMBER);
         p.setMinimum(BigDecimal.valueOf(.05));
@@ -118,7 +118,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void dateType() throws Exception {
+    public void dateType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.DATE);
         for (String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
@@ -131,7 +131,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void stringType() throws Exception {
+    public void stringType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         for (String value : new String[]{"aa", "12345"}) {
@@ -140,7 +140,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void lengthLimitedStringType() throws Exception {
+    public void lengthLimitedStringType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         p.setMinLength(2);
@@ -150,7 +150,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void enumLimitedStringType() throws Exception {
+    public void enumLimitedStringType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         p.setEnumeration(Arrays.asList("a", "b"));
@@ -164,7 +164,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void patternLimitedStringType() throws Exception {
+    public void patternLimitedStringType() {
         doPatternLimitedStringType("\\d{2}/[a-y]");
         doPatternLimitedStringType("'\\d{2}/[a-y]'");
         doPatternLimitedStringType("\"\\d{2}/[a-y]\"");
@@ -185,7 +185,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void caseInsensitivePatternLimitedStringType() throws Exception {
+    public void caseInsensitivePatternLimitedStringType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         p.setPattern("/\\d{2}/[a-y]/i");
@@ -199,26 +199,26 @@ public class ParameterCheckerTest extends CoreTestBase {
     }
 
     @Test
-    public void undefinedParameter() throws Exception {
+    public void undefinedParameter() {
         assertOneViolationThat(queryParameterMapOf(), stringArrayMapOf("a", "b"),
                 equalTo("BaseUri parameter 'a' on action is not defined"));
     }
 
     @Test
-    public void illegallyRepeatedParameter() throws Exception {
+    public void illegallyRepeatedParameter() {
         assertOneViolationThat(queryParameterMapOf("req", new QueryParameter()), stringArrayMapOf("req", new String[]{"a", "b"}),
                 equalTo("BaseUri parameter 'req' on action is not repeat but found repeatedly"));
     }
 
     @Test
-    public void allowedRepeatParameter() throws Exception {
+    public void allowedRepeatParameter() {
         final QueryParameter p = new QueryParameter();
         p.setRepeat(true);
         assertNoViolation(queryParameterMapOf("rep", p), stringArrayMapOf("rep", new String[]{"a", "b"}));
     }
 
     @Test
-    public void missingRequiredParameter() throws Exception {
+    public void missingRequiredParameter() {
         final QueryParameter p = new QueryParameter();
         p.setRequired(true);
         assertOneViolationThat(queryParameterMapOf("req", p), stringArrayMapOf(),

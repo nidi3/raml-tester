@@ -43,7 +43,7 @@ public class DependencyTest {
     }
 
     @Test
-    public void dependencies() throws IOException {
+    public void dependencies(){
         DependencyConstraint constraint = new DependencyConstraint();
 
         final JavaPackage
@@ -88,12 +88,12 @@ public class DependencyTest {
     }
 
     @Test
-    public void noCircularDependencies() throws IOException {
+    public void noCircularDependencies() {
         assertFalse("Cyclic dependencies", depend.containsCycles());
     }
 
     @Test
-    public void maxDistance() throws IOException {
+    public void maxDistance() {
         @SuppressWarnings("unchecked")
         final Collection<JavaPackage> packages = depend.getPackages();
 

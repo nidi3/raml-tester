@@ -34,7 +34,7 @@ public class RamlValidatorTest extends HighlevelTestBase {
     private static RamlDefinition description = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("description.raml");
 
     @Test
-    public void example() throws Exception {
+    public void example() {
         final RamlReport report = example.validator().withChecks(EXAMPLE).validate();
         assertEquals(4, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
@@ -49,7 +49,7 @@ public class RamlValidatorTest extends HighlevelTestBase {
     }
 
     @Test
-    public void parameter() throws Exception {
+    public void parameter() {
         final RamlReport report = example.validator().withChecks(PARAMETER).validate();
         assertEquals(6, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
@@ -62,7 +62,7 @@ public class RamlValidatorTest extends HighlevelTestBase {
     }
 
     @Test
-    public void validUriParameters() throws Exception {
+    public void validUriParameters() {
         final RamlReport report = uriParams.validator().withChecks(URI_PARAMETER).validate();
         assertEquals(7, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
