@@ -33,8 +33,6 @@ import java.util.Set;
  */
 public abstract class ServerTest {
     private static Tomcat tomcat;
-    private static Server server;
-    private static Context ctx;
     private static Set<Class<?>> inited = new HashSet<>();
     private final static JarScanner NO_SCAN = new JarScanner() {
         @Override
@@ -52,14 +50,14 @@ public abstract class ServerTest {
             tomcat = new Tomcat();
             tomcat.setPort(port());
             tomcat.setBaseDir(".");
-            ctx = tomcat.addWebapp("/", "src/test");
+            final Context ctx = tomcat.addWebapp("/", "src/test");
             ctx.setJarScanner(NO_SCAN);
             ((Host) ctx.getParent()).setAppBase("");
 
             init(ctx);
 
             tomcat.start();
-            server = tomcat.getServer();
+            final Server server = tomcat.getServer();
             server.start();
         }
     }

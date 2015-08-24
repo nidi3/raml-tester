@@ -22,7 +22,7 @@ import java.util.*;
  *
  */
 public final class MediaType {
-    public static Comparator<MediaType> QUALITY_COMPARATOR = new Comparator<MediaType>() {
+    public static final Comparator<MediaType> QUALITY_COMPARATOR = new Comparator<MediaType>() {
         @Override
         public int compare(MediaType m1, MediaType m2) {
             final double diff = m2.getQualityParameter() - m1.getQualityParameter();

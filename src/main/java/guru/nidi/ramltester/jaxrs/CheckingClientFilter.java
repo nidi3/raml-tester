@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  *
  */
-public class CheckingClientFilter implements ClientRequestFilter, ClientResponseFilter {
+class CheckingClientFilter implements ClientRequestFilter, ClientResponseFilter {
     private final CheckingWebTarget target;
 
     public CheckingClientFilter(CheckingWebTarget target) {

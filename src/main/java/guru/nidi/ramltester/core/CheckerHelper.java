@@ -160,12 +160,13 @@ final class CheckerHelper {
         return res;
     }
 
+    @SuppressWarnings("unchecked")
     public static Collection<Map.Entry<String, AbstractParam>> paramEntries(Map<String, ?> params) {
         final List<Map.Entry<String, AbstractParam>> res = new ArrayList<>();
         for (final Map.Entry<String, ?> param : params.entrySet()) {
             if (param.getValue() instanceof List) {
                 for (final AbstractParam p : (List<AbstractParam>) param.getValue()) {
-                    res.add(new AbstractMap.SimpleEntry<String, AbstractParam>(param.getKey(), p));
+                    res.add(new AbstractMap.SimpleEntry<>(param.getKey(), p));
                 }
             } else {
                 res.add((Map.Entry<String, AbstractParam>) param);

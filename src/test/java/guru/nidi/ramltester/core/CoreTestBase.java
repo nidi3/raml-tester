@@ -48,6 +48,7 @@ public class CoreTestBase {
         return mapOf(keysAndValues);
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> Map<String, T> mapOf(Object... keysAndValues) {
         Map<String, T> v = new HashMap<>();
         for (int i = 0; i < keysAndValues.length; i += 2) {

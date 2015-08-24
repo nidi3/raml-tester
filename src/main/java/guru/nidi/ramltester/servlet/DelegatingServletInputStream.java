@@ -36,7 +36,7 @@ class DelegatingServletInputStream extends ServletInputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        return super.read(b, off, len);
+        return delegate.read(b, off, len);
     }
 
     @Override

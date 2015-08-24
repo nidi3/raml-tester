@@ -123,7 +123,7 @@ public class RamlChecker {
             if (FormDecoder.supportsFormParameters(typeMatch.getTargetType())) {
                 checkFormParameters(action, request.getFormValues(), typeMatch.getMatchingMime());
             } else {
-                checkSchema(requestViolations, action, request.getContent(), typeMatch);
+                checkSchema(requestViolations, request.getContent(), typeMatch);
             }
         }
     }
@@ -242,12 +242,12 @@ public class RamlChecker {
         final MediaTypeMatch typeMatch = MediaTypeMatch.find(responseViolations, response, res.getBody(), locator);
         if (typeMatch != null) {
             locator.responseMime(typeMatch.getMatchingMime());
-            checkSchema(responseViolations, action, response.getContent(), typeMatch);
+            checkSchema(responseViolations, response.getContent(), typeMatch);
         }
         return typeMatch;
     }
 
-    private void checkSchema(RamlViolations violations, Action action, byte[] body, MediaTypeMatch typeMatch) {
+    private void checkSchema(RamlViolations violations, byte[] body, MediaTypeMatch typeMatch) {
         final String schema = typeMatch.getMatchingMime().getSchema();
         if (schema == null) {
             return;
