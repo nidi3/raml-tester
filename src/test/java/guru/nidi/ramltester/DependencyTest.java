@@ -24,9 +24,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static jdepend.framework.DependencyMatchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  *
@@ -66,6 +66,9 @@ public class DependencyTest {
         base.dependsUpon(jaxrs);
         base.dependsUpon(validator);
 
+        core.dependsUpon(model);
+        core.dependsUpon(util);
+
         util.dependsUpon(model);
 
         servlet.dependsUpon(model);
@@ -76,6 +79,12 @@ public class DependencyTest {
         httpcomponents.dependsUpon(util);
         httpcomponents.dependsUpon(core);
 
+        junit.dependsUpon(util);
+        junit.dependsUpon(core);
+
+        validator.dependsUpon(util);
+        validator.dependsUpon(core);
+
         spring.dependsUpon(model);
         spring.dependsUpon(util);
         spring.dependsUpon(core);
@@ -84,27 +93,18 @@ public class DependencyTest {
         jaxrs.dependsUpon(util);
         jaxrs.dependsUpon(core);
 
-        assertTrue("Dependency mismatch", depend.dependencyMatch(constraint));
+        assertThat(depend, matches(constraint));
     }
 
     @Test
     public void noCircularDependencies() {
-        assertFalse("Cyclic dependencies", depend.containsCycles());
+        assertThat(depend, hasNoCycles());
     }
 
     @Test
     public void maxDistance() {
-        @SuppressWarnings("unchecked")
-        final Collection<JavaPackage> packages = depend.getPackages();
-
-        System.out.println("Name                                      abst  inst  dist");
-        System.out.println("----------------------------------------------------------");
-        for (JavaPackage pack : packages) {
-            if (pack.getName().startsWith("guru.nidi.ramltester")) {
-                System.out.printf("%-40s: %-1.2f  %-1.2f  %-1.2f%n", pack.getName(), pack.abstractness(), pack.instability(), pack.distance());
-                assertEquals("Distance exceeded: " + pack.getName(), 0, pack.distance(), .88f);
-            }
-        }
+        System.out.println(distances(depend, "guru.nidi.ramltester"));
+        assertThat(depend, hasMaxDistance("guru.nidi.ramltester", .9));
     }
 
 }

@@ -21,13 +21,11 @@ import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.google.common.collect.Lists;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
 
 public class JsonSchemaMatcher extends TypeSafeMatcher<Reader> {
     private final JsonNode schema;
@@ -58,11 +56,8 @@ public class JsonSchemaMatcher extends TypeSafeMatcher<Reader> {
     public void describeTo(Description description) {
         if (report != null) {
             description.appendText("The content to match the given JSON schema.\n");
-            List<ProcessingMessage> messages = Lists.newArrayList(report);
-            if (!messages.isEmpty()) {
-                for (final ProcessingMessage message : messages) {
-                    description.appendText(message.toString());
-                }
+            for (final ProcessingMessage message : report) {
+                description.appendText(message.toString());
             }
         }
     }

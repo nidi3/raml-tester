@@ -5,7 +5,7 @@
     <parent>
         <groupId>guru.nidi</groupId>
         <artifactId>guru-nidi-parent-pom</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
     </parent>
 
     <groupId>guru.nidi.raml</groupId>
@@ -65,6 +65,12 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.7.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -75,13 +81,13 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>[14.0,)</version>
+            <version>[16.0,)</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>[2.3.1,)</version>
+            <version>[2.4.4,)</version>
         </dependency>
 
         <dependency>
@@ -158,7 +164,7 @@
         </dependency>
 
         <dependency>
-            <groupId>jdepend</groupId>
+            <groupId>guru.nidi</groupId>
             <artifactId>jdepend</artifactId>
         </dependency>
 
