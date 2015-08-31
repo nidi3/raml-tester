@@ -187,6 +187,16 @@ public class HeaderTest extends HighlevelTestBase {
     }
 
     @Test
+    public void caseInsensitiveNames() throws Exception {
+        final MockHttpServletResponse response = jsonResponse(200);
+        response.addHeader("x-INT", "6");
+        assertNoViolations(test(aggregator,
+                header,
+                get("/header/xint").header("x-INT", "5"),
+                response));
+    }
+
+    @Test
     public void notIgnoreXrequestHeadersIfGiven() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
                         header.ignoringXheaders(),

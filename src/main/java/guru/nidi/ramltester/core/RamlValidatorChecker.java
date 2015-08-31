@@ -207,7 +207,7 @@ class RamlValidatorChecker {
             parameterDef(params, paramName);
         }
         if (has(Validation.EXAMPLE)) {
-            final ParameterChecker checker = new ParameterChecker(violations, false, false, false, null);
+            final ParameterChecker checker = new ParameterChecker(violations);
             for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
                 parameterValues(param.getValue(), checker, new Message("parameter.condition", locator, param.getKey(), paramName));
             }

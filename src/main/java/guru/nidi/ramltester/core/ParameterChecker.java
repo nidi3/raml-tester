@@ -45,34 +45,40 @@ class ParameterChecker {
     private final boolean acceptUndefined;
     private final boolean acceptWildcard;
     private final boolean ignoreX;
+    private final boolean caseSensitive;
     private final Set<String> predefined;
 
-    ParameterChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, Set<String> predefined) {
+    ParameterChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, boolean caseSensitive, Set<String> predefined) {
         this.violations = violations;
         this.acceptUndefined = acceptUndefined;
         this.acceptWildcard = acceptWildcard;
         this.ignoreX = ignoreX;
+        this.caseSensitive = caseSensitive;
         this.predefined = predefined;
     }
 
     ParameterChecker(RamlViolations violations) {
-        this(violations, false, false, false, Collections.<String>emptySet());
+        this(violations, false, false, false, true, Collections.<String>emptySet());
     }
 
     ParameterChecker acceptUndefined() {
-        return new ParameterChecker(violations, true, acceptWildcard, ignoreX, predefined);
+        return new ParameterChecker(violations, true, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
     ParameterChecker acceptWildcard() {
-        return new ParameterChecker(violations, acceptUndefined, true, ignoreX, predefined);
+        return new ParameterChecker(violations, acceptUndefined, true, ignoreX, caseSensitive, predefined);
     }
 
     ParameterChecker ignoreX(boolean ignoreX) {
-        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, predefined);
+        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
+    }
+
+    ParameterChecker caseSensitive(boolean caseSensitive) {
+        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
     ParameterChecker predefined(Set<String> predefined) {
-        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, predefined);
+        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
     public Set<String> checkParameters(Map<String, ? extends AbstractParam> params, Values values, Message message) {
@@ -111,7 +117,7 @@ class ParameterChecker {
         for (final Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
-        final ParameterChecker checker = new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, predefined);
+        final ParameterChecker checker = new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
         return checker.checkListParameters(listParams, values, message);
     }
 
@@ -147,16 +153,15 @@ class ParameterChecker {
     }
 
     private String findMatchingParamName(Collection<String> paramNames, String name) {
-        if (!acceptWildcard) {
-            return name;
-        }
+        final String normalName = caseSensitive ? name : name.toLowerCase();
         for (final String key : paramNames) {
-            final int pos = key.indexOf(WILDCARD);
-            if (pos >= 0) {
-                if (nameMatchesKeyStart(name, key, pos) && nameMatchesKeyEnd(name, key, pos)) {
+            final String normalKey = caseSensitive ? key : key.toLowerCase();
+            final int pos = normalKey.indexOf(WILDCARD);
+            if (acceptWildcard && pos >= 0) {
+                if (nameMatchesKeyStart(normalName, normalKey, pos) && nameMatchesKeyEnd(normalName, normalKey, pos)) {
                     return key;
                 }
-            } else if (key.equals(name)) {
+            } else if (normalKey.equals(normalName)) {
                 return key;
             }
         }

@@ -173,6 +173,7 @@ public class RamlChecker {
                 new ParameterChecker(requestViolations)
                         .acceptWildcard()
                         .ignoreX(ignoreXheaders)
+                        .caseSensitive(false)
                         .predefined(DefaultHeaders.REQUEST)
                         .checkParameters(action.getHeaders(), security.headers(), values, new Message("headerParam", locator))
         );
@@ -277,6 +278,7 @@ public class RamlChecker {
                 new ParameterChecker(responseViolations)
                         .acceptWildcard()
                         .ignoreX(ignoreXheaders)
+                        .caseSensitive(false)
                         .predefined(DefaultHeaders.RESPONSE)
                         .checkParameters(response.getHeaders(), values, new Message("headerParam", locator))
         );
