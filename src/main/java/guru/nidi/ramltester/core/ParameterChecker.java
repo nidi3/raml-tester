@@ -153,19 +153,20 @@ class ParameterChecker {
     }
 
     private String findMatchingParamName(Collection<String> paramNames, String name) {
-        final String normalName = caseSensitive ? name : name.toLowerCase();
-        for (final String key : paramNames) {
-            final String normalKey = caseSensitive ? key : key.toLowerCase();
-            final int pos = normalKey.indexOf(WILDCARD);
-            if (acceptWildcard && pos >= 0) {
-                if (nameMatchesKeyStart(normalName, normalKey, pos) && nameMatchesKeyEnd(normalName, normalKey, pos)) {
-                    return key;
-                }
-            } else if (normalKey.equals(normalName)) {
-                return key;
+        final String normalName = normalizeName(name);
+        for (final String param : paramNames) {
+            final String normalParam = normalizeName(param);
+            final int pos = normalParam.indexOf(WILDCARD);
+            if (normalParam.equals(normalName) || (acceptWildcard && pos >= 0 &&
+                    nameMatchesKeyStart(normalName, normalParam, pos) && nameMatchesKeyEnd(normalName, normalParam, pos))) {
+                return param;
             }
         }
         return null;
+    }
+
+    private String normalizeName(String name) {
+        return caseSensitive ? name : name.toLowerCase();
     }
 
     private boolean nameMatchesKeyStart(String name, String key, int wildcardPos) {
