@@ -113,10 +113,7 @@ public final class MediaType {
     }
 
     private static boolean isQuotedString(String s) {
-        if (s.length() < 2) {
-            return false;
-        }
-        return ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")));
+        return s.length() >= 2 && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")));
     }
 
     private static String unquote(String s) {
