@@ -137,6 +137,19 @@ public void testRequest(){
 ```
 Or see the [raml-tester-uc-servlet](https://github.com/nidi3/raml-tester-uc-servlet) project.
 
+Use together with RestAssured
+---------------------------------------
+```
+@Test
+public void testServletOk() throws IOException {
+	RamlDefinition api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("api.raml")
+				.assumingBaseUri("http://my.base.uri/v1");
+	RestAssured.baseURI = "http://my.base.uri/v1";
+	given().filter(new RamlValidationFilter(api)).get("/base/data").andReturn();
+}
+
+```
+
 Use as a standalone proxy
 -------------------------
 When used as a proxy, any service can be tested, regardless of the technology used to implement it.
