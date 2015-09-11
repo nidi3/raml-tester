@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package guru.nidi.ramltester.restassured;
 import com.jayway.restassured.filter.FilterContext;
 import com.jayway.restassured.specification.FilterableRequestSpecification;
@@ -32,20 +47,7 @@ class RestAssuredRamlRequest extends RestAssuredRaml implements RamlRequest {
 
 	@Override
 	public String getRequestUrl(String baseUri) {
-		System.out.println(filterContext.getCompleteRequestPath().replace(requestSpec.getBaseUri(), baseUri));
 		return filterContext.getCompleteRequestPath().replace(requestSpec.getBaseUri(), baseUri);
-//		
-//		System.out.println("BaseUri"+baseUri);
-//		System.out.println(requestSpec.getBasePath());
-//		System.out.println(requestSpec.getBaseUri());
-//		System.out.println("hahah"+filterContext.getRequestPath());
-//		System.out.println("sadas"+filterContext.getCompleteRequestPath());
-//		return baseUri == null ? filterContext.getCompleteRequestPath() : (baseUri + filterContext.getRequestPath());
-		//return filterContext.getRequestPath();
-		//return "http://nidi.guru/raml/v1/base/data?param=bu";
-		//return baseUri;
-		//return baseUri == null ? url : (baseUri + path);
-		//return filterContext.getCompleteRequestPath();
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 
 import static jdepend.framework.DependencyMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -50,6 +51,7 @@ public class DependencyTest {
                 base = constraint.addPackage(BASE),
                 core = constraint.addPackage(BASE + ".core"),
                 httpcomponents = constraint.addPackage(BASE + ".httpcomponents"),
+                restassured = constraint.addPackage(BASE + ".restassured"),                 
                 junit = constraint.addPackage(BASE + ".junit"),
                 validator = constraint.addPackage(BASE + ".validator"),
                 model = constraint.addPackage(BASE + ".model"),
@@ -62,6 +64,7 @@ public class DependencyTest {
         base.dependsUpon(core);
         base.dependsUpon(servlet);
         base.dependsUpon(httpcomponents);
+        base.dependsUpon(restassured);
         base.dependsUpon(spring);
         base.dependsUpon(jaxrs);
         base.dependsUpon(validator);
@@ -78,6 +81,9 @@ public class DependencyTest {
         httpcomponents.dependsUpon(model);
         httpcomponents.dependsUpon(util);
         httpcomponents.dependsUpon(core);
+        
+        restassured.dependsUpon(model);
+        restassured.dependsUpon(core);
 
         junit.dependsUpon(util);
         junit.dependsUpon(core);
@@ -93,6 +99,7 @@ public class DependencyTest {
         jaxrs.dependsUpon(util);
         jaxrs.dependsUpon(core);
 
+        
         assertThat(depend, matches(constraint));
     }
 
