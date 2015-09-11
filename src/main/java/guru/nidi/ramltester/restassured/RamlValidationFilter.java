@@ -42,7 +42,6 @@ public class RamlValidationFilter implements Filter {
 			FilterContext filterContext) {
 		Response response = filterContext.next(requestSpec, responseSpec);
 		RamlReport report = ramlChecker.check(new RestAssuredRamlRequest(requestSpec, filterContext), new RestAssuredRamlResponse(response));
-		System.out.println("INSIDE: "+report);
 		reportStore.storeReport(report);
 		return response;
 
