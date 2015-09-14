@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.util;
 
+import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.model.Values;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -68,6 +69,26 @@ public class TestUtils {
                 description.appendText("A number bigger than ").appendValue(value);
             }
         };
+    }
+
+    public static RamlViolations violations(String... messages) {
+        final RamlViolations violations = new RamlViolations();
+        for (String message : messages) {
+            violations.add(new SimpleMessage(message));
+        }
+        return violations;
+    }
+
+    private static class SimpleMessage extends Message {
+
+        public SimpleMessage(String key, Object... params) {
+            super(key, params);
+        }
+
+        @Override
+        public String toString() {
+            return key;
+        }
     }
 
 }

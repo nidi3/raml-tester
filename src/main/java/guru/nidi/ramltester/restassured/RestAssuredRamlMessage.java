@@ -13,31 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.spring;
+package guru.nidi.ramltester.restassured;
 
+import com.jayway.restassured.response.Header;
+import com.jayway.restassured.response.Headers;
 import guru.nidi.ramltester.model.Values;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
-/**
- *
- */
-final class SpringUtils {
-    private SpringUtils() {
+abstract class RestAssuredRamlMessage {
+
+    protected Values headersToValues(Headers headers) {
+        final Values headerValues = new Values();
+        for (Header header : headers) {
+            headerValues.addValue(header.getName(), header.getValue());
+        }
+        return headerValues;
     }
 
-    static String contentTypeOf(HttpHeaders headers) {
-        final MediaType contentType = headers.getContentType();
-        return contentType == null ? null : contentType.toString();
-    }
-
-    static Values headerValuesOf(HttpHeaders headers) {
+    protected Values mapToValues(Map<String, ?> map) {
         final Values values = new Values();
-        for (final Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            values.addValues(entry.getKey(), entry.getValue());
+        for (Entry<String, ?> param : map.entrySet()) {
+            values.addValue(param.getKey(), param.getValue());
         }
         return values;
     }

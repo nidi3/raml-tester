@@ -16,27 +16,24 @@
 package guru.nidi.ramltester.restassured;
 
 import com.jayway.restassured.specification.RequestSpecification;
-
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.ReportStore;
 
 public class RestAssuredClient {
+    private final RequestSpecification requestSpecification;
+    private final ReportStore reportStore;
 
-	private final RequestSpecification requestSpecification;
-	
-	private final ReportStore reportStore;
+    public RestAssuredClient(RequestSpecification requestSpecification, ReportStore reportStore) {
+        this.requestSpecification = requestSpecification;
+        this.reportStore = reportStore;
+    }
 
-	public RestAssuredClient(RequestSpecification requestSpecification, ReportStore reportStore) {
-		this.requestSpecification = requestSpecification;
-		this.reportStore = reportStore;
-	}
+    public RequestSpecification given() {
+        return requestSpecification.given();
+    }
 
-	public RequestSpecification given() {
-		return requestSpecification.given();
-	}
-
-	public RamlReport getLastReport() {
-		return reportStore.getLastReport();
-	}
+    public RamlReport getLastReport() {
+        return reportStore.getLastReport();
+    }
 
 }

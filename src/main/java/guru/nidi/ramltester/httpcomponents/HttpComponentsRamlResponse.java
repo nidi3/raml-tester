@@ -19,12 +19,10 @@ import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import org.apache.http.HttpResponse;
 
-import static guru.nidi.ramltester.httpcomponents.HttpComponentsUtils.*;
-
 /**
  *
  */
-public class HttpComponentsRamlResponse implements RamlResponse {
+public class HttpComponentsRamlResponse extends HttpComponentsRamlMessage implements RamlResponse {
     private final HttpResponse response;
 
     public HttpComponentsRamlResponse(HttpResponse response) {

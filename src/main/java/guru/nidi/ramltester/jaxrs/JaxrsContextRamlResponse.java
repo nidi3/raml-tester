@@ -26,11 +26,11 @@ import java.io.IOException;
 /**
  *
  */
-public class JaxrsResponseContextRamlResponse implements RamlResponse {
+public class JaxrsContextRamlResponse extends JaxrsContextRamlMessage implements RamlResponse {
     private final ClientResponseContext context;
     private final byte[] content;
 
-    public JaxrsResponseContextRamlResponse(ClientResponseContext context) {
+    public JaxrsContextRamlResponse(ClientResponseContext context) {
         this.context = context;
         try {
             content = IoUtils.readIntoByteArray(context.getEntityStream());
@@ -47,7 +47,7 @@ public class JaxrsResponseContextRamlResponse implements RamlResponse {
 
     @Override
     public Values getHeaderValues() {
-        return JaxrsUtils.headersOf(context.getHeaders());
+        return headersOf(context.getHeaders());
     }
 
     @Override

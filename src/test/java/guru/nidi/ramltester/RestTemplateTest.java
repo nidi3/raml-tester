@@ -15,7 +15,6 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import guru.nidi.ramltester.util.ServerTest;
@@ -38,8 +37,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static guru.nidi.ramltester.util.TestUtils.violations;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -96,18 +96,14 @@ public class RestTemplateTest extends ServerTest {
         final String res = restTemplate.getForObject(url("data?param=bu"), String.class);
         assertEquals("illegal json", res);
 
-        final RamlViolations requestViolations = restTemplate.getLastReport().getRequestViolations();
-        assertEquals(1, requestViolations.size());
-        assertThat(requestViolations.iterator().next(), equalTo("Query parameter 'param' on action(GET /data) is not defined"));
+        assertEquals(violations("Query parameter 'param' on action(GET /data) is not defined"),
+                restTemplate.getLastReport().getRequestViolations());
 
-        final RamlViolations responseViolations = restTemplate.getLastReport().getResponseViolations();
-        assertEquals(1, responseViolations.size());
-        assertThat(responseViolations.iterator().next(),
-                equalTo("Body does not match schema for action(GET /data) response(200) mime-type('application/json')\n" +
+        assertEquals(violations("Body does not match schema for action(GET /data) response(200) mime-type('application/json')\n" +
                         "Content: illegal json\n" +
                         "Message: Schema invalid: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n" +
-                        " at [Source: Body; line: 1, column: 8]")
-        );
+                        " at [Source: Body; line: 1, column: 8]"),
+                restTemplate.getLastReport().getResponseViolations());
     }
 
 }

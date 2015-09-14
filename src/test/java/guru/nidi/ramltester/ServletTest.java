@@ -15,24 +15,8 @@
  */
 package guru.nidi.ramltester;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
 import org.apache.catalina.deploy.FilterDef;
 import org.apache.catalina.deploy.FilterMap;
@@ -46,9 +30,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.util.ServerTest;
+import javax.servlet.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import static guru.nidi.ramltester.util.TestUtils.violations;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -86,18 +77,14 @@ public class ServletTest extends ServerTest {
         final CloseableHttpResponse response = client.execute(get);
         assertEquals("illegal json", EntityUtils.toString(response.getEntity()));
 
-        final RamlViolations requestViolations = testFilter.report.getRequestViolations();
-        assertEquals(1, requestViolations.size());
-        assertThat(requestViolations.iterator().next(), equalTo("Query parameter 'param' on action(GET /data) is not defined"));
+        assertEquals(violations("Query parameter 'param' on action(GET /data) is not defined"),
+                testFilter.report.getRequestViolations());
 
-        final RamlViolations responseViolations = testFilter.report.getResponseViolations();
-        assertEquals(1, responseViolations.size());
-        assertThat(responseViolations.iterator().next(),
-                equalTo("Body does not match schema for action(GET /data) response(200) mime-type('abc/xyz+json')\n" +
+        assertEquals(violations("Body does not match schema for action(GET /data) response(200) mime-type('abc/xyz+json')\n" +
                         "Content: illegal json\n" +
                         "Message: Schema invalid: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n" +
-                        " at [Source: Body; line: 1, column: 8]")
-        );
+                        " at [Source: Body; line: 1, column: 8]"),
+                testFilter.report.getResponseViolations());
     }
 
     private static class TestFilter implements Filter {

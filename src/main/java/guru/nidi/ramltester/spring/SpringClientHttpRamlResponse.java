@@ -25,22 +25,19 @@ import org.springframework.http.client.ClientHttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static guru.nidi.ramltester.spring.SpringUtils.contentTypeOf;
-import static guru.nidi.ramltester.spring.SpringUtils.headerValuesOf;
-
 /**
  *
  */
-public class SpringClientHttpResponseRamlResponse implements ClientHttpResponse, RamlResponse {
+public class SpringClientHttpRamlResponse extends SpringHttpRamlMessage implements ClientHttpResponse, RamlResponse {
     private final ClientHttpResponse response;
     private final String encoding;
 
-    public SpringClientHttpResponseRamlResponse(ClientHttpResponse response, String encoding) {
+    public SpringClientHttpRamlResponse(ClientHttpResponse response, String encoding) {
         this.response = response;
         this.encoding = encoding;
     }
 
-    public SpringClientHttpResponseRamlResponse(ClientHttpResponse response) {
+    public SpringClientHttpRamlResponse(ClientHttpResponse response) {
         this(response, "utf-8");
     }
 

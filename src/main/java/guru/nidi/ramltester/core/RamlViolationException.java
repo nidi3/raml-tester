@@ -19,21 +19,20 @@ package guru.nidi.ramltester.core;
  *
  */
 public class RamlViolationException extends RuntimeException {
-	
-	private RamlReport report;
-	
-	public RamlReport getReport(){
-		return report;
-	}
-	
-	public RamlViolationException(){
-		
-	}
-	
-	public RamlViolationException(RamlReport report) {
-		super(report.toString());
-		this.report = report;
-	}
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
+    private final RamlReport report;
+
+    RamlViolationException() {
+        this(null);
+    }
+
+    public RamlViolationException(RamlReport report) {
+        super(report == null ? "" : report.toString());
+        this.report = report;
+    }
+
+    public RamlReport getReport() {
+        return report;
+    }
 }

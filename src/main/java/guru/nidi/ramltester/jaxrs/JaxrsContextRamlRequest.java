@@ -25,12 +25,11 @@ import javax.ws.rs.client.ClientRequestContext;
 /**
  *
  */
-public class JaxrsRequestContextRamlRequest implements RamlRequest {
+public class JaxrsContextRamlRequest extends JaxrsContextRamlMessage implements RamlRequest {
     private final ClientRequestContext context;
     private final UriComponents uriComponents;
 
-
-    public JaxrsRequestContextRamlRequest(ClientRequestContext context) {
+    public JaxrsContextRamlRequest(ClientRequestContext context) {
         this.context = context;
         this.uriComponents = UriComponents.fromHttpUrl(context.getUri().toString());
     }
@@ -57,7 +56,7 @@ public class JaxrsRequestContextRamlRequest implements RamlRequest {
 
     @Override
     public Values getHeaderValues() {
-        return JaxrsUtils.headersOf(context.getHeaders());
+        return headersOf(context.getHeaders());
     }
 
     @Override

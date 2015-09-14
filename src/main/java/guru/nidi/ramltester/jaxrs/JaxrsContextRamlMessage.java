@@ -13,30 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.restassured;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.Headers;
+package guru.nidi.ramltester.jaxrs;
 
 import guru.nidi.ramltester.model.Values;
 
-abstract class RestAssuredRaml {
+import javax.ws.rs.core.MultivaluedMap;
+import java.util.List;
+import java.util.Map;
 
-	protected Values headersToValues(Headers headers) {
-		Values headerValues = new Values();
-		for (Header header : headers) {
-			headerValues.addValue(header.getName(), header.getValue());
-		}
-		return headerValues;
-	}
-
-	protected Values mapToValues(Map<String, ?> map) {
-		Values values = new Values();
-		for (Entry<String, ?> param : map.entrySet()) {
-			values.addValue(param.getKey(), param.getValue());
-		}
-		return values;
-	}
+/**
+ *
+ */
+abstract class JaxrsContextRamlMessage {
+    protected Values headersOf(MultivaluedMap<String, ?> headers) {
+        final Values values = new Values();
+        for (final Map.Entry<String, ? extends List<?>> entry : headers.entrySet()) {
+            values.addValues(entry.getKey(), entry.getValue());
+        }
+        return values;
+    }
 }

@@ -44,7 +44,7 @@ public class RamlRequestInterceptor implements ClientHttpRequestInterceptor {
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
         reportStore.storeReport(null);
-        final SpringHttpRequestRamlRequest ramlRequest = new SpringHttpRequestRamlRequest(request, body);
+        final SpringHttpRamlRequest ramlRequest = new SpringHttpRamlRequest(request, body);
         final RamlReport report;
         final ClientHttpResponse response;
         if (notSending) {
@@ -52,7 +52,7 @@ public class RamlRequestInterceptor implements ClientHttpRequestInterceptor {
             report = checker.check(ramlRequest);
         } else {
             response = execution.execute(request, body);
-            final SpringClientHttpResponseRamlResponse ramlResponse = new SpringClientHttpResponseRamlResponse(response);
+            final SpringClientHttpRamlResponse ramlResponse = new SpringClientHttpRamlResponse(response);
             report = checker.check(ramlRequest, ramlResponse);
         }
         reportStore.storeReport(report);

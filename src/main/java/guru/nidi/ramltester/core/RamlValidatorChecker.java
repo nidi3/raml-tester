@@ -271,7 +271,7 @@ class RamlValidatorChecker {
             final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
             if (mimeType.getExample() != null && validator != null) {
                 final String schema = mimeType.getSchema();
-                validator.validate(new NamedReader(mimeType.getExample(),new Message("example").toString()), resolveSchema(raml, schema), violations,
+                validator.validate(new NamedReader(mimeType.getExample(), new Message("example").toString()), resolveSchema(raml, schema), violations,
                         new Message("schema.example.mismatch", locator, mimeType.getExample()));
             }
         }

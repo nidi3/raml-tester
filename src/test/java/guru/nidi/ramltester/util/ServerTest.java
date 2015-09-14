@@ -28,7 +28,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
@@ -76,7 +75,7 @@ public abstract class ServerTest {
     protected String url(String path) {
         return baseUrl() + "/" + path;
     }
-    
+
     protected String baseUrl() {
         return "http://localhost:" + port();
     }
@@ -90,12 +89,11 @@ public abstract class ServerTest {
             tomcat.destroy();
         }
     }
-    
+
     public static class TestServlet extends HttpServlet {
+        private static final long serialVersionUID = 1L;
 
-    	private static final long serialVersionUID = 1L;
-
-		@Override
+        @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
             if (req.getParameter("empty") != null) {
                 res.setStatus(HttpServletResponse.SC_NO_CONTENT);

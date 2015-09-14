@@ -28,7 +28,7 @@ import java.util.List;
 public class RamlViolations implements Iterable<String> {
     private final List<String> violations;
 
-    RamlViolations() {
+    public RamlViolations() {
         this.violations = new ArrayList<>();
     }
 
@@ -70,5 +70,25 @@ public class RamlViolations implements Iterable<String> {
     @Override
     public String toString() {
         return violations.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        RamlViolations that = (RamlViolations) o;
+
+        return violations.equals(that.violations);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return violations.hashCode();
     }
 }

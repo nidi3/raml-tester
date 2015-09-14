@@ -44,7 +44,7 @@ public class UriTest extends HighlevelTestBase {
         mockMvc = MockMvcBuilders.standaloneSetup(this).build();
     }
 
-    @RequestMapping(value = {"/raml/v1/{def}/{type}", "/v1/{def}/{type}", "/{def}/{type}", "/sub-raml/{a}/{b}/{c}/{d}" })
+    @RequestMapping(value = {"/raml/v1/{def}/{type}", "/v1/{def}/{type}", "/{def}/{type}", "/sub-raml/{a}/{b}/{c}/{d}"})
     @ResponseBody
     public HttpEntity<String> test() {
         final HttpHeaders headers = new HttpHeaders();

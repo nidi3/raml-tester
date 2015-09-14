@@ -15,40 +15,20 @@
  */
 package guru.nidi.ramltester.core;
 
-import static guru.nidi.ramltester.core.CheckerHelper.findResource;
-import static guru.nidi.ramltester.core.CheckerHelper.findResponse;
-import static guru.nidi.ramltester.core.CheckerHelper.findSchemaValidator;
-import static guru.nidi.ramltester.core.CheckerHelper.findUriParam;
-import static guru.nidi.ramltester.core.CheckerHelper.getEffectiveBaseUriParams;
-import static guru.nidi.ramltester.core.CheckerHelper.protocolOf;
-import static guru.nidi.ramltester.core.CheckerHelper.resolveSchema;
-import static guru.nidi.ramltester.core.UsageBuilder.actionUsage;
-import static guru.nidi.ramltester.core.UsageBuilder.mimeTypeUsage;
-import static guru.nidi.ramltester.core.UsageBuilder.resourceUsage;
-import static guru.nidi.ramltester.core.UsageBuilder.responseUsage;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Protocol;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-import org.raml.model.Response;
-import org.raml.model.parameter.AbstractParam;
-
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.Message;
 import guru.nidi.ramltester.util.UriComponents;
+import org.raml.model.*;
+import org.raml.model.parameter.AbstractParam;
+
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+
+import static guru.nidi.ramltester.core.CheckerHelper.*;
+import static guru.nidi.ramltester.core.UsageBuilder.*;
 
 /**
  *
@@ -64,17 +44,18 @@ public class RamlChecker {
     private final List<SchemaValidator> schemaValidators;
     private final String baseUri;
     private final boolean ignoreXheaders;
+    private final boolean failFast;
+
     private RamlViolations requestViolations, responseViolations;
     private Locator locator;
     private Usage usage;
-	private boolean failFast;
 
     public RamlChecker(Raml raml, List<SchemaValidator> schemaValidators, String baseUri, boolean ignoreXheaders, boolean failFast) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.baseUri = baseUri;
         this.ignoreXheaders = ignoreXheaders;
-		this.failFast = failFast;
+        this.failFast = failFast;
     }
 
     public RamlReport check(RamlRequest request) {
@@ -100,11 +81,11 @@ public class RamlChecker {
         } catch (RamlViolationException e) {
             //ignore, results are in report
         }
-        
-        if(failFast && !report.isEmpty()){
-    		throw new RamlViolationException(report);
-    	}
-        
+
+        if (failFast && !report.isEmpty()) {
+            throw new RamlViolationException(report);
+        }
+
         return report;
     }
 

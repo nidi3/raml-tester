@@ -20,34 +20,31 @@ import com.jayway.restassured.filter.FilterContext;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.FilterableRequestSpecification;
 import com.jayway.restassured.specification.FilterableResponseSpecification;
-
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.ReportStore;
 import guru.nidi.ramltester.core.ThreadLocalReportStore;
 
 public class RamlValidationFilter implements Filter {
+    private final RamlChecker ramlChecker;
+    private final ReportStore reportStore;
 
-	private final RamlChecker ramlChecker;
-	
-	private final ReportStore reportStore;
+    public RamlValidationFilter(RamlChecker ramlChecker) {
+        this.ramlChecker = ramlChecker;
+        this.reportStore = new ThreadLocalReportStore();
+    }
 
-	public RamlValidationFilter(RamlChecker ramlChecker) {
-		this.ramlChecker = ramlChecker;
-		this.reportStore = new ThreadLocalReportStore();
-	}
+    @Override
+    public Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec,
+                           FilterContext filterContext) {
+        Response response = filterContext.next(requestSpec, responseSpec);
+        RamlReport report = ramlChecker.check(new RestAssuredRamlRequest(requestSpec, filterContext), new RestAssuredRamlResponse(response));
+        reportStore.storeReport(report);
+        return response;
 
-	@Override
-	public Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec,
-			FilterContext filterContext) {
-		Response response = filterContext.next(requestSpec, responseSpec);
-		RamlReport report = ramlChecker.check(new RestAssuredRamlRequest(requestSpec, filterContext), new RestAssuredRamlResponse(response));
-		reportStore.storeReport(report);
-		return response;
+    }
 
-	}
-	
-	public ReportStore getReportStore(){
-		return reportStore;
-	}
+    public ReportStore getReportStore() {
+        return reportStore;
+    }
 }

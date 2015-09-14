@@ -21,18 +21,15 @@ import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.http.HttpRequest;
 
-import static guru.nidi.ramltester.spring.SpringUtils.contentTypeOf;
-import static guru.nidi.ramltester.spring.SpringUtils.headerValuesOf;
-
 /**
  *
  */
-public class SpringHttpRequestRamlRequest implements RamlRequest {
+public class SpringHttpRamlRequest extends SpringHttpRamlMessage implements RamlRequest {
     private final HttpRequest request;
     private final byte[] body;
     private final UriComponents uriComponents;
 
-    public SpringHttpRequestRamlRequest(HttpRequest request, byte[] body) {
+    public SpringHttpRamlRequest(HttpRequest request, byte[] body) {
         this.request = request;
         this.body = body;
         this.uriComponents = UriComponents.fromHttpUrl(request.getURI().toString());

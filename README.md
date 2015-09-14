@@ -169,10 +169,10 @@ See [raml-tester-js](https://github.com/nidi3/raml-tester-js) for details and
 
 FailFast
 ---------------------------------------
-Use can configure the RamlDefinition to throw an exception in case a violation is found
+You can configure the RamlDefinition to throw an exception in case a violation is found.
 
 ```
-@Test(expected=RamlViolationException.class)
+@Test(expected = RamlViolationException.class)
 public void testInvalidResource() {
 	RestAssured.baseURI = "http://test.server/path";
 	RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");

@@ -25,20 +25,17 @@ import java.io.IOException;
 /**
  *
  */
-final class HttpComponentsUtils {
-    private HttpComponentsUtils() {
-    }
-
-    static String encodingOf(HttpEntity entity) {
+abstract class HttpComponentsRamlMessage {
+    protected String encodingOf(HttpEntity entity) {
         return entity.getContentEncoding() == null ? "utf-8" : entity.getContentEncoding().getValue();
     }
 
-    static String contentTypeOf(HttpMessage message) {
+    protected String contentTypeOf(HttpMessage message) {
         final Header contentType = message.getFirstHeader("Content-Type");
         return contentType == null ? null : contentType.getValue();
     }
 
-    static Values headerValuesOf(HttpMessage message) {
+    protected Values headerValuesOf(HttpMessage message) {
         final Values headers = new Values();
         for (final Header header : message.getAllHeaders()) {
             headers.addValue(header.getName(), header.getValue());
@@ -46,15 +43,7 @@ final class HttpComponentsUtils {
         return headers;
     }
 
-    static BufferedHttpEntity buffered(HttpEntity entity) {
-        try {
-            return new BufferedHttpEntity(entity);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not read content of entity", e);
-        }
-    }
-
-    static HttpResponse buffered(HttpResponse response) {
+    protected HttpResponse buffered(HttpResponse response) {
         final HttpEntity entity = response.getEntity();
         if (entity != null && !entity.isRepeatable()) {
             response.setEntity(buffered(entity));
@@ -62,7 +51,7 @@ final class HttpComponentsUtils {
         return response;
     }
 
-    static HttpEntityEnclosingRequest buffered(HttpEntityEnclosingRequest request) {
+    protected HttpEntityEnclosingRequest buffered(HttpEntityEnclosingRequest request) {
         final HttpEntity entity = request.getEntity();
         if (!entity.isRepeatable()) {
             request.setEntity(buffered(entity));
@@ -70,7 +59,15 @@ final class HttpComponentsUtils {
         return request;
     }
 
-    static byte[] contentOf(HttpEntity entity) {
+    private BufferedHttpEntity buffered(HttpEntity entity) {
+        try {
+            return new BufferedHttpEntity(entity);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read content of entity", e);
+        }
+    }
+
+    protected byte[] contentOf(HttpEntity entity) {
         try {
             return entity == null ? null : IoUtils.readIntoByteArray(entity.getContent());
         } catch (IOException e) {

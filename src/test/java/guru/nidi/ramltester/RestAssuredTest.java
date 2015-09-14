@@ -15,85 +15,74 @@
  */
 package guru.nidi.ramltester;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.response.Response;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
+import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.response.Response;
+import java.io.IOException;
 
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
-import guru.nidi.ramltester.util.ServerTest;
+import static guru.nidi.ramltester.util.TestUtils.violations;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
  */
 public class RestAssuredTest extends ServerTest {
+    private RestAssuredClient restAssured;
+    private RamlDefinition api;
 
-	private RestAssuredClient restAssured;
-	private RamlDefinition api;
+    @Before
+    public void before() {
+        RestAssured.baseURI = baseUrl();
+        api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("restAssured.raml")
+                .assumingBaseUri("http://nidi.guru/raml/v1");
+        restAssured = api.createRestAssured();
+    }
 
-	@Before
-	public void before() {
-		RestAssured.baseURI = baseUrl();
-		api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("restAssured.raml")
-				.assumingBaseUri("http://nidi.guru/raml/v1");
-		this.restAssured = api.createRestAssured();
+    @Override
+    protected int port() {
+        return 8082;
+    }
 
-	}
+    @Test
+    public void testServletOk() throws IOException {
+        restAssured.given().get("/base/data").andReturn();
+        assertTrue(restAssured.getLastReport().isEmpty());
+    }
 
-	@Override
-	protected int port() {
-		return 8082;
-	}
+    @Test
+    public void testServletNok() throws IOException {
+        restAssured.given().get("/base/data?param=bu").andReturn();
 
-	@Test
-	public void testServletOk() throws IOException {
-		restAssured.given().get("/base/data").andReturn();
-		Assert.assertTrue(restAssured.getLastReport().isEmpty());
-	}
+        assertEquals(violations("Query parameter 'param' on action(GET /base/data) is not defined"),
+                restAssured.getLastReport().getRequestViolations());
 
-	@Test
-	public void testServletNok() throws IOException {
-		restAssured.given().get("/base/data?param=bu").andReturn();
+        assertEquals(violations("Body does not match schema for action(GET /base/data) response(200) mime-type('application/json')\n"
+                        + "Content: illegal json\n"
+                        + "Message: Schema invalid: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n"
+                        + " at [Source: Body; line: 1, column: 8]"),
+                restAssured.getLastReport().getResponseViolations());
 
-		final RamlViolations requestViolations = restAssured.getLastReport().getRequestViolations();
-		assertEquals(1, requestViolations.size());
-		assertThat(requestViolations.iterator().next(),
-				equalTo("Query parameter 'param' on action(GET /base/data) is not defined"));
+    }
 
-		final RamlViolations responseViolations = restAssured.getLastReport().getResponseViolations();
-		assertEquals(1, responseViolations.size());
-		assertThat(responseViolations.iterator().next(),
-				equalTo("Body does not match schema for action(GET /base/data) response(200) mime-type('application/json')\n"
-						+ "Content: illegal json\n"
-						+ "Message: Schema invalid: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n"
-						+ " at [Source: Body; line: 1, column: 8]"));
+    @Test
+    public void emptyResponse() throws IOException {
+        Response response = restAssured.given().get("/base/data?empty=yes").andReturn();
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
+        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+    }
 
-	}
-
-	@Test
-	public void emptyResponse() throws IOException {
-		Response response = restAssured.given().get("/base/data?empty=yes").andReturn();
-		assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
-		assertTrue(StringUtils.isBlank(response.getBody().asString()));
-	}
-
-	@Override
-	protected void init(Context ctx) {
-		Tomcat.addServlet(ctx, "app", new TestServlet());
-		ctx.addServletMapping("/*", "app");
-	}
+    @Override
+    protected void init(Context ctx) {
+        Tomcat.addServlet(ctx, "app", new TestServlet());
+        ctx.addServletMapping("/*", "app");
+    }
 }

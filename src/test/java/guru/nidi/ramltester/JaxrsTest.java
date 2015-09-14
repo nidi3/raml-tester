@@ -16,8 +16,8 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
-import guru.nidi.ramltester.jaxrs.JaxrsRequestContextRamlRequest;
-import guru.nidi.ramltester.jaxrs.JaxrsResponseContextRamlResponse;
+import guru.nidi.ramltester.jaxrs.JaxrsContextRamlRequest;
+import guru.nidi.ramltester.jaxrs.JaxrsContextRamlResponse;
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
@@ -85,8 +85,8 @@ public class JaxrsTest extends ServerTest {
         checking.register(new ClientResponseFilter() {
             @Override
             public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-                request[0] = new JaxrsRequestContextRamlRequest(requestContext);
-                response[0] = new JaxrsResponseContextRamlResponse(responseContext);
+                request[0] = new JaxrsContextRamlRequest(requestContext);
+                response[0] = new JaxrsContextRamlResponse(responseContext);
             }
         });
 

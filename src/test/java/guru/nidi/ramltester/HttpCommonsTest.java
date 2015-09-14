@@ -15,13 +15,9 @@
  */
 package guru.nidi.ramltester;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
+import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
+import guru.nidi.ramltester.junit.ExpectedUsage;
+import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpResponse;
@@ -31,10 +27,11 @@ import org.apache.http.util.EntityUtils;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
-import guru.nidi.ramltester.junit.ExpectedUsage;
-import guru.nidi.ramltester.util.ServerTest;
+import java.io.IOException;
+
+import static guru.nidi.ramltester.util.TestUtils.violations;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -70,18 +67,14 @@ public class HttpCommonsTest extends ServerTest {
         final HttpResponse response = client.execute(get);
         assertEquals("illegal json", EntityUtils.toString(response.getEntity()));
 
-        final RamlViolations requestViolations = client.getLastReport().getRequestViolations();
-        assertEquals(1, requestViolations.size());
-        assertThat(requestViolations.iterator().next(), equalTo("Query parameter 'param' on action(GET /base/data) is not defined"));
+        assertEquals(violations("Query parameter 'param' on action(GET /base/data) is not defined"),
+                client.getLastReport().getRequestViolations());
 
-        final RamlViolations responseViolations = client.getLastReport().getResponseViolations();
-        assertEquals(1, responseViolations.size());
-        assertThat(responseViolations.iterator().next(),
-                equalTo("Body does not match schema for action(GET /base/data) response(200) mime-type('application/json')\n" +
+        assertEquals(violations("Body does not match schema for action(GET /base/data) response(200) mime-type('application/json')\n" +
                         "Content: illegal json\n" +
                         "Message: Schema invalid: com.fasterxml.jackson.core.JsonParseException: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n" +
-                        " at [Source: Body; line: 1, column: 8]")
-        );
+                        " at [Source: Body; line: 1, column: 8]"),
+                client.getLastReport().getResponseViolations());
     }
 
     @Test

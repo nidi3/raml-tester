@@ -15,22 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.ws.rs.client.WebTarget;
-
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.raml.model.Raml;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.client.RestTemplate;
-
 import com.jayway.restassured.RestAssured;
-
 import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlValidator;
@@ -44,6 +29,18 @@ import guru.nidi.ramltester.restassured.RestAssuredClient;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.raml.model.Raml;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.client.RestTemplate;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.ws.rs.client.WebTarget;
+import java.io.IOException;
 
 /**
  *
@@ -55,29 +52,21 @@ public class RamlDefinition {
     private final boolean ignoreXheaders;
     private final boolean failFast;
 
-    public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String baseUri, boolean ignoreXheaders) {
-    	this(raml, schemaValidators, baseUri, ignoreXheaders, false);
-    }
-
-    public Raml getRaml() {
-        return raml;
-    }
-
     public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
-        this(raml, schemaValidators, null, false);
+        this(raml, schemaValidators, null, false, false);
     }
 
     public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String baseUri, boolean ignoreXheaders,
-			boolean failFast) {
+                          boolean failFast) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.baseUri = baseUri;
         this.ignoreXheaders = ignoreXheaders;
         this.failFast = failFast;
-	}
+    }
 
-	public RamlDefinition assumingBaseUri(String baseUri) {
-        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders);
+    public RamlDefinition assumingBaseUri(String baseUri) {
+        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders, failFast);
     }
 
     public RamlDefinition ignoringXheaders() {
@@ -85,7 +74,20 @@ public class RamlDefinition {
     }
 
     public RamlDefinition ignoringXheaders(boolean ignoreXheaders) {
-        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders);
+        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders, failFast);
+    }
+
+    /**
+     * Will throw a {@link RamlViolationException} in case there are errors on the {@link RamlReport}
+     *
+     * @return {@link RamlDefinition}
+     */
+    public RamlDefinition failFast() {
+        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders, true);
+    }
+
+    public Raml getRaml() {
+        return raml;
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
@@ -116,21 +118,21 @@ public class RamlDefinition {
         return new RamlHttpClient(createTester());
     }
 
-    public RestAssuredClient createRestAssured(){
-    	RamlValidationFilter ramlValidationFilter = new RamlValidationFilter(createTester());
-    	return new RestAssuredClient(RestAssured.given().filter(ramlValidationFilter), ramlValidationFilter.getReportStore());
-    }
-    
     public RamlHttpClient createHttpClient(CloseableHttpClient httpClient) {
         return new RamlHttpClient(createTester(), httpClient);
     }
 
-    public RamlChecker createTester() {
-        return new RamlChecker(raml, schemaValidators.getValidators(), baseUri, ignoreXheaders, failFast);
+    public RestAssuredClient createRestAssured() {
+        RamlValidationFilter ramlValidationFilter = new RamlValidationFilter(createTester());
+        return new RestAssuredClient(RestAssured.given().filter(ramlValidationFilter), ramlValidationFilter.getReportStore());
     }
 
     public CheckingWebTarget createWebTarget(WebTarget target) {
         return new CheckingWebTarget(createTester(), target);
+    }
+
+    public RamlChecker createTester() {
+        return new RamlChecker(raml, schemaValidators.getValidators(), baseUri, ignoreXheaders, failFast);
     }
 
     public RamlValidator validator() {
@@ -140,14 +142,5 @@ public class RamlDefinition {
     public RamlReport validate() {
         return validator().validate();
     }
-
-    /**
-     * Will throw a {@link RamlViolationException} in case there are errors on the {@link RamlReport} 
-     * @return {@link RamlDefinition}
-     */
-	public RamlDefinition failFast() {
-		return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders, true);
-	}
-
 }
 

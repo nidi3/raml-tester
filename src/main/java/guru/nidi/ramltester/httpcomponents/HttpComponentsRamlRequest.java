@@ -24,12 +24,10 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 
-import static guru.nidi.ramltester.httpcomponents.HttpComponentsUtils.*;
-
 /**
  *
  */
-public class HttpComponentsRamlRequest implements RamlRequest {
+public class HttpComponentsRamlRequest extends HttpComponentsRamlMessage implements RamlRequest {
     private final String path;
     private final String url;
     private final HttpRequest request;

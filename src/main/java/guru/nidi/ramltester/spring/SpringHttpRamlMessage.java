@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.jaxrs;
+package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.model.Values;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  *
  */
-class JaxrsUtils {
-    private JaxrsUtils() {
+abstract class SpringHttpRamlMessage {
+
+    protected String contentTypeOf(HttpHeaders headers) {
+        final MediaType contentType = headers.getContentType();
+        return contentType == null ? null : contentType.toString();
     }
 
-    static Values headersOf(MultivaluedMap<String, ?> headers) {
+    protected Values headerValuesOf(HttpHeaders headers) {
         final Values values = new Values();
-        for (final Map.Entry<String, ? extends List<?>> entry : headers.entrySet()) {
+        for (final Map.Entry<String, List<String>> entry : headers.entrySet()) {
             values.addValues(entry.getKey(), entry.getValue());
         }
         return values;
