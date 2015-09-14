@@ -15,11 +15,13 @@
  */
 package guru.nidi.ramltester;
 
-import org.junit.Test;
-
+import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import org.junit.Test;
 
 /**
  *
@@ -46,17 +48,20 @@ public class SecurityTest extends HighlevelTestBase {
                 get("/sec12").header("Authorization1", "blu"),
                 response(200, "", null)));
     }
-
     @Test
     public void dontAllowMixSecuritySchemas() throws Exception {
         assertRequestViolationsThat(test(
                         global,
                         get("/sec12").header("Authorization1", "1").header("Authorization2", "2"),
                         response(200, "", null)),
-                equalTo("Header 'Authorization2' on action(GET /sec12) is not defined"),
-                equalTo("Header 'Authorization1' on action(GET /sec12) is not defined")
+        		//Headers from MockHttpServletRequest are build from a Set. No Order (breakes on mac jvm) 
+        		either(is(
+                equalTo("Header 'Authorization1' on action(GET /sec12) is not defined"))).or(is(
+                equalTo("Header 'Authorization2' on action(GET /sec12) is not defined")))
         );
+        
     }
+
 
     @Test
     public void allowSecurityElementsInLocalSecured() throws Exception {

@@ -15,10 +15,13 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
-import guru.nidi.ramltester.junit.ExpectedUsage;
-import guru.nidi.ramltester.util.ServerTest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpResponse;
@@ -28,15 +31,10 @@ import org.apache.http.util.EntityUtils;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
+import guru.nidi.ramltester.junit.ExpectedUsage;
+import guru.nidi.ramltester.util.ServerTest;
 
 /**
  *
@@ -102,20 +100,6 @@ public class HttpCommonsTest extends ServerTest {
         assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
         assertEquals(null, response.getEntity());
         assertTrue(client.getLastReport().isEmpty());
-    }
-
-    private static class TestServlet extends HttpServlet {
-        @Override
-        protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-            if (req.getParameter("empty") != null) {
-                res.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            } else {
-                res.setContentType("application/json");
-                final PrintWriter out = res.getWriter();
-                out.write(req.getParameter("param") == null ? "\"json string\"" : "illegal json");
-                out.flush();
-            }
-        }
     }
 
     @Override

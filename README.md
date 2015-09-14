@@ -137,6 +137,22 @@ public void testRequest(){
 ```
 Or see the [raml-tester-uc-servlet](https://github.com/nidi3/raml-tester-uc-servlet) project.
 
+Use together with RestAssured
+---------------------------------------
+```
+@Test
+public void testWithRestAssured(){
+	RestAssured.baseURI = "http://test.server/path";
+	RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+	Assert.assertThat(api.validate(), validates());
+	
+	RestAssuredClient restAssured = api.createRestAssured();
+	restAssured.given().get("/base/data").andReturn();
+	Assert.assertTrue(restAssured.getLastReport().isEmpty());
+}
+
+```
+
 Use as a standalone proxy
 -------------------------
 When used as a proxy, any service can be tested, regardless of the technology used to implement it.
@@ -148,3 +164,23 @@ There is special support for javascript.
 
 See [raml-tester-js](https://github.com/nidi3/raml-tester-js) for details and
 [raml-tester-uc-js](https://github.com/nidi3/raml-tester-uc-js) for examples.
+
+
+
+FailFast
+---------------------------------------
+Use can configure the RamlDefinition to throw an exception in case a violation is found
+
+```
+@Test(expected=RamlViolationException.class)
+public void testInvalidResource() {
+	RestAssured.baseURI = "http://test.server/path";
+	RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+	Assert.assertThat(api.validate(), validates());
+	
+	RestAssuredClient restAssured = api.failFast().createRestAssured();
+	restAssured.given().get("/wrong/path").andReturn();
+	fail("Should throw RamlViolationException");
+}
+
+```
