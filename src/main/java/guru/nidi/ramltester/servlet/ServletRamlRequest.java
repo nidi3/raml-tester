@@ -46,9 +46,10 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
 
     @Override
     public String getRequestUrl(String baseUri) {
+        final String pathInfo = request().getPathInfo() == null ? "" : request().getPathInfo();
         return baseUri == null
                 ? request().getRequestURL().toString()
-                : (baseUri + request().getPathInfo());
+                : (baseUri + pathInfo);
     }
 
     @Override
