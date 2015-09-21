@@ -203,4 +203,14 @@
 
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>codehaus-snapshots</id>
+            <url>https://nexus.codehaus.org/snapshots</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 </project>
