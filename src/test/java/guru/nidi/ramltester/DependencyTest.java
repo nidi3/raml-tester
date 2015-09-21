@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import jdepend.framework.DependencyConstraint;
+import jdepend.framework.DependencyDefiner;
 import jdepend.framework.JDepend;
 import jdepend.framework.JavaPackage;
 import jdepend.framework.PackageFilter;
@@ -23,7 +23,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static jdepend.framework.DependencyMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -32,73 +31,34 @@ import static org.junit.Assert.assertThat;
  *
  */
 public class DependencyTest {
-    private static final String BASE = "guru.nidi.ramltester";
     private static JDepend depend;
 
     @BeforeClass
     public static void init() throws IOException {
-        depend = new JDepend(new PackageFilter(Arrays.asList("org.", "java.", "com.", "javax.", "guru.nidi.loader")));
+        depend = new JDepend(PackageFilter.empty().excluding("org.", "java.", "com.", "javax.", "guru.nidi.loader"));
         depend.addDirectory("target/classes");
         depend.analyze();
     }
 
     @Test
     public void dependencies() {
-        DependencyConstraint constraint = new DependencyConstraint();
+        class GuruNidiRamltester implements DependencyDefiner {
+            JavaPackage self, core, httpcomponents, restassured, junit, validator, model, servlet, spring, jaxrs, util;
 
-        final JavaPackage
-                base = constraint.addPackage(BASE),
-                core = constraint.addPackage(BASE + ".core"),
-                httpcomponents = constraint.addPackage(BASE + ".httpcomponents"),
-                restassured = constraint.addPackage(BASE + ".restassured"),
-                junit = constraint.addPackage(BASE + ".junit"),
-                validator = constraint.addPackage(BASE + ".validator"),
-                model = constraint.addPackage(BASE + ".model"),
-                servlet = constraint.addPackage(BASE + ".servlet"),
-                spring = constraint.addPackage(BASE + ".spring"),
-                jaxrs = constraint.addPackage(BASE + ".jaxrs"),
-                util = constraint.addPackage(BASE + ".util");
-
-        base.dependsUpon(model);
-        base.dependsUpon(core);
-        base.dependsUpon(servlet);
-        base.dependsUpon(httpcomponents);
-        base.dependsUpon(restassured);
-        base.dependsUpon(spring);
-        base.dependsUpon(jaxrs);
-        base.dependsUpon(validator);
-
-        core.dependsUpon(model);
-        core.dependsUpon(util);
-
-        util.dependsUpon(model);
-
-        servlet.dependsUpon(model);
-        servlet.dependsUpon(util);
-        servlet.dependsUpon(core);
-
-        httpcomponents.dependsUpon(model);
-        httpcomponents.dependsUpon(util);
-        httpcomponents.dependsUpon(core);
-
-        restassured.dependsUpon(model);
-        restassured.dependsUpon(core);
-
-        junit.dependsUpon(util);
-        junit.dependsUpon(core);
-
-        validator.dependsUpon(util);
-        validator.dependsUpon(core);
-
-        spring.dependsUpon(model);
-        spring.dependsUpon(util);
-        spring.dependsUpon(core);
-
-        jaxrs.dependsUpon(model);
-        jaxrs.dependsUpon(util);
-        jaxrs.dependsUpon(core);
-
-        assertThat(depend, matches(constraint));
+            public void dependUpon() {
+                self.dependsUpon(model, core, servlet, httpcomponents, restassured, spring, jaxrs, validator);
+                core.dependsUpon(model, util);
+                util.dependsUpon(model);
+                servlet.dependsUpon(model, util, core);
+                httpcomponents.dependsUpon(model, util, core);
+                restassured.dependsUpon(model, core);
+                junit.dependsUpon(util, core);
+                validator.dependsUpon(util, core);
+                spring.dependsUpon(model, util, core);
+                jaxrs.dependsUpon(model, util, core);
+            }
+        }
+        assertThat(depend, matchesPackages(new GuruNidiRamltester()));
     }
 
     @Test
