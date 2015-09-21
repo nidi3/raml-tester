@@ -1,0 +1,31 @@
+#%RAML 0.8
+---
+title: include
+baseUri: http://nidi.guru/raml/v1
+version: v1
+
+resourceTypes:
+  - myCollection:
+      get:
+        queryParameters:
+          <<param>>:
+        responses:
+          200:
+            body:
+              application/json:
+                schema: !include string.json
+                example: <<exampleCollection>>
+
+
+/site:
+  type:
+    myCollection:
+      param: !include string.json
+      exampleCollection: !include string.json
+  get:
+    responses:
+      201:
+        body:
+          application/json:
+            schema: !include string.json
+            example: !include string.json
