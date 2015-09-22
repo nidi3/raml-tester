@@ -35,7 +35,7 @@ public class DependencyTest {
 
     @BeforeClass
     public static void init() throws IOException {
-        depend = new JDepend(PackageFilter.empty().excluding("org.", "java.", "com.", "javax.", "guru.nidi.loader"));
+        depend = new JDepend(PackageFilter.all().excluding("org.", "java.", "com.", "javax.", "guru.nidi.loader"));
         depend.addDirectory("target/classes");
         depend.analyze();
     }
