@@ -27,7 +27,6 @@ import guru.nidi.loader.use.raml.LoaderRamlResourceLoader;
 import guru.nidi.loader.use.raml.RamlCache;
 import guru.nidi.ramltester.core.SchemaValidator;
 import org.raml.model.Raml;
-import org.raml.parser.visitor.RamlDocumentBuilder;
 
 import java.io.File;
 
@@ -188,7 +187,7 @@ public class RamlLoaders {
         final Loader decorated = new UriLoader(loader);
         final Raml raml = caching
                 ? new RamlCache(decorated).loadRaml(name)
-                : new RamlDocumentBuilder(new LoaderRamlResourceLoader(decorated)).build(name);
+                : new RelativeJsonSchemaRamlDocBuilder(decorated, new LoaderRamlResourceLoader(decorated)).build(name);
         final SchemaValidators validators = schemaValidators.withloader(decorated);
         return new RamlDefinition(raml, validators);
     }

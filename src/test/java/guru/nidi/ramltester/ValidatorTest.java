@@ -28,10 +28,10 @@ import static org.junit.Assert.assertThat;
 /**
  *
  */
-public class RamlValidatorTest extends HighlevelTestBase {
-    private static RamlDefinition example = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("example.raml");
-    private static RamlDefinition uriParams = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("uriParameters.raml");
-    private static RamlDefinition description = RamlLoaders.fromClasspath(RamlValidatorTest.class).load("description.raml");
+public class ValidatorTest extends HighlevelTestBase {
+    private static RamlDefinition example = RamlLoaders.fromClasspath(ValidatorTest.class).load("example.raml");
+    private static RamlDefinition uriParams = RamlLoaders.fromClasspath(ValidatorTest.class).load("uriParameters.raml");
+    private static RamlDefinition description = RamlLoaders.fromClasspath(ValidatorTest.class).load("description.raml");
 
     @Test
     public void example() {
