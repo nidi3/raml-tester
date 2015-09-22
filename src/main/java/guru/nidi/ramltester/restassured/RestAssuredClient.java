@@ -15,13 +15,23 @@
  */
 package guru.nidi.ramltester.restassured;
 
+import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.specification.RequestSpecification;
+import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.ReportStore;
 
 public class RestAssuredClient {
     private final RequestSpecification requestSpecification;
     private final ReportStore reportStore;
+
+    public RestAssuredClient(RamlChecker checker) {
+        this(new RamlValidationFilter(checker));
+    }
+
+    public RestAssuredClient(RamlValidationFilter filter) {
+        this(RestAssured.given().filter(filter), filter.getReportStore());
+    }
 
     public RestAssuredClient(RequestSpecification requestSpecification, ReportStore reportStore) {
         this.requestSpecification = requestSpecification;

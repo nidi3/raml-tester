@@ -15,13 +15,11 @@
  */
 package guru.nidi.ramltester;
 
-import com.jayway.restassured.RestAssured;
 import guru.nidi.ramltester.core.*;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
-import guru.nidi.ramltester.restassured.RamlValidationFilter;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
@@ -119,8 +117,7 @@ public class RamlDefinition {
     }
 
     public RestAssuredClient createRestAssured() {
-        RamlValidationFilter ramlValidationFilter = new RamlValidationFilter(createTester());
-        return new RestAssuredClient(RestAssured.given().filter(ramlValidationFilter), ramlValidationFilter.getReportStore());
+        return new RestAssuredClient(createTester());
     }
 
     public CheckingWebTarget createWebTarget(WebTarget target) {
