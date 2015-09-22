@@ -76,8 +76,8 @@ public class SpringMockRamlMessageTest {
 
         assertEquals("GET", ramlRequest.getMethod());
         assertEquals(new Values().addValue("param", "val"), ramlRequest.getQueryValues());
-        assertEquals("http://test.com/path", ramlRequest.getRequestUrl(null));
-        assertEquals("http://x.y/path", ramlRequest.getRequestUrl("http://x.y"));
+        assertEquals("http://test.com/path", ramlRequest.getRequestUrl(null, false));
+        assertEquals("http://x.y/path", ramlRequest.getRequestUrl("http://x.y", false));
 
         final SpringMockRamlResponse ramlResponse = new SpringMockRamlResponse(result.getResponse());
 
@@ -112,7 +112,7 @@ public class SpringMockRamlMessageTest {
 
         assertEquals("POST", ramlRequest.getMethod());
         assertEquals(new Values().addValue("param", "val"), ramlRequest.getQueryValues());
-        assertEquals("http://test.com/path", ramlRequest.getRequestUrl(null));
-        assertEquals("http://x.y/path", ramlRequest.getRequestUrl("http://x.y"));
+        assertEquals("http://test.com/path", ramlRequest.getRequestUrl(null, false));
+        assertEquals("http://x.y/path", ramlRequest.getRequestUrl("http://x.y", false));
     }
 }

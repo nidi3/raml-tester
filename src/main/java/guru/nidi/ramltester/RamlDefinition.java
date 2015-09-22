@@ -16,10 +16,7 @@
 package guru.nidi.ramltester;
 
 import com.jayway.restassured.RestAssured;
-import guru.nidi.ramltester.core.RamlChecker;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlValidator;
-import guru.nidi.ramltester.core.RamlViolationException;
+import guru.nidi.ramltester.core.*;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.model.RamlRequest;
@@ -46,27 +43,22 @@ import java.io.IOException;
  *
  */
 public class RamlDefinition {
-    private final Raml raml;
-    private final SchemaValidators schemaValidators;
-    private final String baseUri;
-    private final boolean ignoreXheaders;
-    private final boolean failFast;
+    private final CheckerConfig config;
 
     public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
-        this(raml, schemaValidators, null, false, false);
+        this(new CheckerConfig(raml, schemaValidators.getValidators()));
     }
 
-    public RamlDefinition(Raml raml, SchemaValidators schemaValidators, String baseUri, boolean ignoreXheaders,
-                          boolean failFast) {
-        this.raml = raml;
-        this.schemaValidators = schemaValidators;
-        this.baseUri = baseUri;
-        this.ignoreXheaders = ignoreXheaders;
-        this.failFast = failFast;
+    public RamlDefinition(CheckerConfig config) {
+        this.config = config;
     }
 
     public RamlDefinition assumingBaseUri(String baseUri) {
-        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders, failFast);
+        return new RamlDefinition(config.assumingBaseUri(baseUri));
+    }
+
+    public RamlDefinition assumingBaseUri(String baseUri, boolean includeServletPath) {
+        return new RamlDefinition(config.assumingBaseUri(baseUri, includeServletPath));
     }
 
     public RamlDefinition ignoringXheaders() {
@@ -74,7 +66,7 @@ public class RamlDefinition {
     }
 
     public RamlDefinition ignoringXheaders(boolean ignoreXheaders) {
-        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders, failFast);
+        return new RamlDefinition(config.ignoringXheaders(ignoreXheaders));
     }
 
     /**
@@ -83,11 +75,15 @@ public class RamlDefinition {
      * @return {@link RamlDefinition}
      */
     public RamlDefinition failFast() {
-        return new RamlDefinition(raml, schemaValidators, baseUri, ignoreXheaders, true);
+        return failFast(true);
+    }
+
+    public RamlDefinition failFast(boolean failFast) {
+        return new RamlDefinition(config.failFast(failFast));
     }
 
     public Raml getRaml() {
-        return raml;
+        return config.raml;
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
@@ -132,11 +128,11 @@ public class RamlDefinition {
     }
 
     public RamlChecker createTester() {
-        return new RamlChecker(raml, schemaValidators.getValidators(), baseUri, ignoreXheaders, failFast);
+        return new RamlChecker(config);
     }
 
     public RamlValidator validator() {
-        return new RamlValidator(raml, schemaValidators.getValidators());
+        return new RamlValidator(config.raml, config.schemaValidators);
     }
 
     public RamlReport validate() {

@@ -45,7 +45,7 @@ class RestAssuredRamlRequest extends RestAssuredRamlMessage implements RamlReque
     }
 
     @Override
-    public String getRequestUrl(String baseUri) {
+    public String getRequestUrl(String baseUri, boolean includeServletPath) {
         return filterContext.getCompleteRequestPath().replace(requestSpec.getBaseUri(), baseUri);
     }
 

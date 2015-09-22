@@ -36,7 +36,7 @@ public class SpringHttpRamlRequest extends SpringHttpRamlMessage implements Raml
     }
 
     @Override
-    public String getRequestUrl(String baseUri) {
+    public String getRequestUrl(String baseUri, boolean includeServletPath) {
         return (baseUri != null ? baseUri : uriComponents.getServer()) + uriComponents.getPath();
     }
 

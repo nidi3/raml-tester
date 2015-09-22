@@ -102,8 +102,8 @@ public class ServletRamlMessageTest extends ServerTest {
                 assertEquals(Arrays.asList("pedro"), ramlRequest.getHeaderValues().get("header"));
                 assertEquals("GET", ramlRequest.getMethod());
                 assertEquals(new Values().addValue("param", "value").addValue("param", "v2"), ramlRequest.getQueryValues());
-                assertEquals(url("test/more"), ramlRequest.getRequestUrl(null));
-                assertEquals("https://base/more", ramlRequest.getRequestUrl("https://base"));
+                assertEquals(url("test/more"), ramlRequest.getRequestUrl(null, false));
+                assertEquals("https://base/more", ramlRequest.getRequestUrl("https://base", false));
 
                 assertEquals(0, ramlResponse.getContent().length);
                 assertEquals(null, ramlResponse.getContentType());
@@ -170,6 +170,30 @@ public class ServletRamlMessageTest extends ServerTest {
                         .addValue("param", "v2")
                         .addValue("p2", "äöü+$% ");
                 assertEquals(values, ramlRequest.getFormValues());
+            }
+        });
+    }
+
+    @Test
+    public void includeServletPathNoPathInfo() throws Exception {
+        final HttpPost post = new HttpPost(url("test"));
+        execute(post, new MessageTester() {
+            @Override
+            public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
+                assertEquals(baseUrl() + "/test", ramlRequest.getRequestUrl(null, true));
+                assertEquals("http://server/servlet/path/test", ramlRequest.getRequestUrl("http://server/servlet/path", true));
+            }
+        });
+    }
+
+    @Test
+    public void includeServletPathWithPathInfo() throws Exception {
+        final HttpPost post = new HttpPost(url("test/info"));
+        execute(post, new MessageTester() {
+            @Override
+            public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
+                assertEquals(baseUrl() + "/test/info", ramlRequest.getRequestUrl(null, true));
+                assertEquals("http://server/servlet/path/test/info", ramlRequest.getRequestUrl("http://server/servlet/path", true));
             }
         });
     }

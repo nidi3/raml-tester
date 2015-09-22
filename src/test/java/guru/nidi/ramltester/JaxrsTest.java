@@ -100,7 +100,7 @@ public class JaxrsTest extends ServerTest {
         assertEquals("POST", request[0].getMethod());
         assertEquals(stringArrayMapOf("qp", "true"), request[0].getQueryValues());
         assertEquals(Arrays.asList("h2"), request[0].getHeaderValues().get("h"));
-        assertEquals("http://localhost:" + port() + "/app/path", request[0].getRequestUrl(null));
+        assertEquals("http://localhost:" + port() + "/app/path", request[0].getRequestUrl(null,false));
         assertEquals("text/plain", request[0].getContentType());
         assertArrayEquals("data".getBytes(), request[0].getContent());
 

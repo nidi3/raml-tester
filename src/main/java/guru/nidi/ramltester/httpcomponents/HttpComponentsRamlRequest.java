@@ -45,7 +45,7 @@ public class HttpComponentsRamlRequest extends HttpComponentsRamlMessage impleme
     }
 
     @Override
-    public String getRequestUrl(String baseUri) {
+    public String getRequestUrl(String baseUri, boolean includeServletPath) {
         return baseUri == null ? url : (baseUri + path);
     }
 

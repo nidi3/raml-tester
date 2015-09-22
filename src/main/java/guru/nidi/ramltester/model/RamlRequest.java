@@ -19,7 +19,7 @@ package guru.nidi.ramltester.model;
  *
  */
 public interface RamlRequest extends RamlMessage {
-    String getRequestUrl(String baseUri);
+    String getRequestUrl(String baseUri, boolean includeServletPath);
 
     String getMethod();
 

@@ -35,7 +35,7 @@ public class JaxrsContextRamlRequest extends JaxrsContextRamlMessage implements 
     }
 
     @Override
-    public String getRequestUrl(String baseUri) {
+    public String getRequestUrl(String baseUri, boolean includeServletPath) {
         return (baseUri != null ? baseUri : uriComponents.getServer()) + uriComponents.getPath();
     }
 
