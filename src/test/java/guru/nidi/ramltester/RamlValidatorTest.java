@@ -42,10 +42,10 @@ public class RamlValidatorTest extends HighlevelTestBase {
         assertEquals("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4", it.next());
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
                 "Content: 42\n" +
-                "Message: The content to match the given JSON schema."));
+                "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) response(200) mime-type('application/json')\n" +
                 "Content: 42\n" +
-                "Message: The content to match the given JSON schema."));
+                "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
     }
 
     @Test

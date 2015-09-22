@@ -15,9 +15,13 @@
  */
 package guru.nidi.ramltester.validator;
 
+import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBuilder;
 import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
+import com.github.fge.jsonschema.core.report.ProcessingMessage;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import guru.nidi.loader.Loader;
 import guru.nidi.loader.use.jsonschema.LoaderUriDownloader;
@@ -25,9 +29,6 @@ import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.StringDescription;
 
 import java.io.Reader;
 
@@ -75,10 +76,15 @@ public class JsonSchemaValidator implements SchemaValidator {
     public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
         init();
         try (final Reader s = schema) {
-            final Matcher<Reader> matcher = new JsonSchemaMatcher(s, factory);
-            if (!matcher.matches(content)) {
-                final Description description = new StringDescription().appendDescriptionOf(matcher);
-                violations.add(message.withParam(description.toString()));
+            final JsonSchemaFactory factory = this.factory != null ? this.factory : JsonSchemaFactory.byDefault();
+            final JsonSchema jsonSchema = factory.getJsonSchema(JsonLoader.fromReader(schema));
+            final ProcessingReport report = jsonSchema.validate(JsonLoader.fromReader(content));
+            if (!report.isSuccess()) {
+                String msg = "";
+                for (final ProcessingMessage reportLine : report) {
+                    msg += reportLine.toString() + "\n";
+                }
+                violations.add(message.withParam(msg));
             }
         } catch (Exception e) {
             violations.add(message.withMessageParam("jsonSchemaValidator.schema.invalid", e.getMessage()));
