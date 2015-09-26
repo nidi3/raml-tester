@@ -21,7 +21,6 @@ import org.raml.parser.loader.ResourceLoader;
 import org.raml.parser.tagresolver.IncludeResolver;
 import org.raml.parser.tagresolver.TagResolver;
 import org.raml.parser.visitor.RamlDocumentBuilder;
-import org.raml.parser.visitor.TemplateResolver;
 import org.raml.parser.visitor.TupleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,23 +30,16 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * <ul>
- * <li>
- * Allows !includes of json schemas which reference relative files. By setting the id property accordingly.
- * </li>
- * <li>
- * Uses a patched version of TemplateResolver to allow !includes in resource type parameters.
- * </li>
- * </ul>
+ * Allows !includes of json schemas which reference relative files.
+ * By setting the id property accordingly.
  */
-class CustomizedRamlDocumentBuilder extends RamlDocumentBuilder {
-    private static final Logger log = LoggerFactory.getLogger(CustomizedRamlDocumentBuilder.class);
+class RelativeJsonSchemaAwareRamlDocumentBuilder extends RamlDocumentBuilder {
+    private static final Logger log = LoggerFactory.getLogger(RelativeJsonSchemaAwareRamlDocumentBuilder.class);
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final String protocol;
-    private IncludeAwareTemplateResolver templateResolver;
 
-    public CustomizedRamlDocumentBuilder(Loader loader, ResourceLoader resourceLoader, TagResolver... tagResolvers) {
+    public RelativeJsonSchemaAwareRamlDocumentBuilder(Loader loader, ResourceLoader resourceLoader, TagResolver... tagResolvers) {
         super(resourceLoader, tagResolvers);
         //this must match with JsonSchemaFactory.loadingConfiguration
         //see guru.nidi.ramltester.validator.JsonSchemaValidator
@@ -74,13 +66,4 @@ class CustomizedRamlDocumentBuilder extends RamlDocumentBuilder {
         }
         super.onScalar(node, tupleType);
     }
-
-    @Override
-    public TemplateResolver getTemplateResolver() {
-        if (templateResolver == null) {
-            templateResolver = new IncludeAwareTemplateResolver(getResourceLoader(), this);
-        }
-        return templateResolver;
-    }
-
 }
