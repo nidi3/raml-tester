@@ -41,7 +41,7 @@ public class RestAssuredTest extends ServerTest {
 
     @Before
     public void before() {
-        RestAssured.baseURI = baseUrl();
+    	RestAssured.baseURI = baseUrlWithPort();
         api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("restAssured.raml")
                 .assumingBaseUri("http://nidi.guru/raml/v1");
         restAssured = api.createRestAssured();
@@ -55,7 +55,26 @@ public class RestAssuredTest extends ServerTest {
     @Test
     public void testServletOk() throws IOException {
         restAssured.given().get("/base/data").andReturn();
-        assertTrue(restAssured.getLastReport().isEmpty());
+		assertTrue(restAssured.getLastReport().toString(), restAssured.getLastReport().isEmpty());
+    }
+
+    @Test
+    public void testWithoutBaseUri() throws IOException {
+    	RestAssured.baseURI = baseUrlWithPort();
+        api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("restAssuredWithoutBaseUri.raml");
+        restAssured = api.createRestAssured();
+    	
+        restAssured.given().get("/base/data").andReturn();
+        assertTrue(restAssured.getLastReport().toString(), restAssured.getLastReport().isEmpty());
+    }
+    
+    
+    @Test
+    public void testWithPortAndPath() throws IOException {
+    	RestAssured.baseURI = baseUrl();
+    	RestAssured.port = port();
+        restAssured.given().get("/base/data").andReturn();
+        assertTrue(restAssured.getLastReport().toString(), restAssured.getLastReport().isEmpty());
     }
 
     @Test
