@@ -15,11 +15,8 @@
  */
 package guru.nidi.ramltester.restassured;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.jayway.restassured.filter.FilterContext;
 import com.jayway.restassured.specification.FilterableRequestSpecification;
-
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.Values;
 
@@ -44,18 +41,17 @@ class RestAssuredRamlRequest extends RestAssuredRamlMessage implements RamlReque
 
     @Override
     public byte[] getContent() {
-    	String body = requestSpec.getBody();
-    	return body == null ? null : body.getBytes(); 
+        String body = requestSpec.getBody();
+        return body == null ? null : body.getBytes();
     }
 
-	@Override
-	public String getRequestUrl(String baseUri, boolean includeServletPath) {
-		if (StringUtils.isBlank(baseUri)) {
-			return filterContext.getCompleteRequestPath();
-		}
-		return filterContext.getCompleteRequestPath().replace(requestSpec.getBaseUri(), baseUri);
-	}
-	
+    @Override
+    public String getRequestUrl(String baseUri, boolean includeServletPath) {
+        return baseUri == null || baseUri.length() == 0
+                ? filterContext.getCompleteRequestPath()
+                : filterContext.getCompleteRequestPath().replace(requestSpec.getBaseUri(), baseUri);
+    }
+
     @Override
     public String getMethod() {
         return filterContext.getRequestMethod().toString();
