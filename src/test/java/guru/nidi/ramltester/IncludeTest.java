@@ -15,7 +15,6 @@
  */
 package guru.nidi.ramltester;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.raml.model.Action;
 import org.raml.model.ActionType;
@@ -32,7 +31,6 @@ public class IncludeTest extends HighlevelTestBase {
     private RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("include.raml");
 
     @Test
-    @Ignore
     public void load() throws Exception {
         final Raml raml = api.getRaml();
         final Action get = raml.getResource("/site").getAction(ActionType.GET);
