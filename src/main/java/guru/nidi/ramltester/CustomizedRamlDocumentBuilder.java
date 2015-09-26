@@ -23,20 +23,31 @@ import org.raml.parser.tagresolver.TagResolver;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.raml.parser.visitor.TemplateResolver;
 import org.raml.parser.visitor.TupleType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import java.io.IOException;
 import java.util.Map;
 
 /**
- *
+ * <ul>
+ * <li>
+ * Allows !includes of json schemas which reference relative files. By setting the id property accordingly.
+ * </li>
+ * <li>
+ * Uses a patched version of TemplateResolver to allow !includes in resource type parameters.
+ * </li>
+ * </ul>
  */
-class RelativeJsonSchemaRamlDocBuilder extends RamlDocumentBuilder {
+class CustomizedRamlDocumentBuilder extends RamlDocumentBuilder {
+    private static final Logger log = LoggerFactory.getLogger(CustomizedRamlDocumentBuilder.class);
+
     private final ObjectMapper mapper = new ObjectMapper();
     private final String protocol;
     private IncludeAwareTemplateResolver templateResolver;
 
-    public RelativeJsonSchemaRamlDocBuilder(Loader loader, ResourceLoader resourceLoader, TagResolver... tagResolvers) {
+    public CustomizedRamlDocumentBuilder(Loader loader, ResourceLoader resourceLoader, TagResolver... tagResolvers) {
         super(resourceLoader, tagResolvers);
         //this must match with JsonSchemaFactory.loadingConfiguration
         //see guru.nidi.ramltester.validator.JsonSchemaValidator
@@ -57,7 +68,7 @@ class RelativeJsonSchemaRamlDocBuilder extends RamlDocumentBuilder {
                         return;
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.warn("Could not parse json file {}. Relative $refs inside might not work.", includeName, e);
                 }
             }
         }

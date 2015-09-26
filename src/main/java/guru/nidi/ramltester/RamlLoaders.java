@@ -187,7 +187,7 @@ public class RamlLoaders {
         final Loader decorated = new UriLoader(loader);
         final Raml raml = caching
                 ? new RamlCache(decorated).loadRaml(name)
-                : new RelativeJsonSchemaRamlDocBuilder(decorated, new LoaderRamlResourceLoader(decorated)).build(name);
+                : new CustomizedRamlDocumentBuilder(decorated, new LoaderRamlResourceLoader(decorated)).build(name);
         final SchemaValidators validators = schemaValidators.withloader(decorated);
         return new RamlDefinition(raml, validators);
     }
