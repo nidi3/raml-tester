@@ -180,7 +180,7 @@ public class ServletRamlMessageTest extends ServerTest {
         execute(post, new MessageTester() {
             @Override
             public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
-                assertEquals(baseUrl() + "/test", ramlRequest.getRequestUrl(null, true));
+                assertEquals(baseUrlWithPort() + "/test", ramlRequest.getRequestUrl(null, true));
                 assertEquals("http://server/servlet/path/test", ramlRequest.getRequestUrl("http://server/servlet/path", true));
             }
         });
@@ -192,7 +192,7 @@ public class ServletRamlMessageTest extends ServerTest {
         execute(post, new MessageTester() {
             @Override
             public void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException {
-                assertEquals(baseUrl() + "/test/info", ramlRequest.getRequestUrl(null, true));
+                assertEquals(baseUrlWithPort() + "/test/info", ramlRequest.getRequestUrl(null, true));
                 assertEquals("http://server/servlet/path/test/info", ramlRequest.getRequestUrl("http://server/servlet/path", true));
             }
         });

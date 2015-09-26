@@ -73,11 +73,15 @@ public abstract class ServerTest {
     }
 
     protected String url(String path) {
-        return baseUrl() + "/" + path;
+        return baseUrlWithPort() + "/" + path;
     }
 
+    protected String baseUrlWithPort() {
+        return baseUrl() +":" + port();
+    }
+    
     protected String baseUrl() {
-        return "http://localhost:" + port();
+        return "http://localhost";
     }
 
     @AfterClass
