@@ -24,6 +24,8 @@ import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.raml.parser.visitor.TupleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 import java.io.IOException;
@@ -38,6 +40,7 @@ class RelativeJsonSchemaAwareRamlDocumentBuilder extends RamlDocumentBuilder {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final String protocol;
+    private NodeTuple schemaTuple;
 
     public RelativeJsonSchemaAwareRamlDocumentBuilder(Loader loader, ResourceLoader resourceLoader, TagResolver... tagResolvers) {
         super(resourceLoader, tagResolvers);
@@ -47,8 +50,32 @@ class RelativeJsonSchemaAwareRamlDocumentBuilder extends RamlDocumentBuilder {
     }
 
     @Override
+    public boolean onTupleStart(NodeTuple nodeTuple) {
+        final Node keyNode = nodeTuple.getKeyNode();
+        if (keyNode instanceof ScalarNode) {
+            final String name = ((ScalarNode) keyNode).getValue();
+            if (name.equals("schema") || name.equals("schemas")) {
+                if (schemaTuple != null) {
+                    log.warn("Internal error. Nested schema nodes.");
+                } else {
+                    schemaTuple = nodeTuple;
+                }
+            }
+        }
+        return super.onTupleStart(nodeTuple);
+    }
+
+    @Override
+    public void onTupleEnd(NodeTuple nodeTuple) {
+        if (nodeTuple == schemaTuple) {
+            schemaTuple = null;
+        }
+        super.onTupleEnd(nodeTuple);
+    }
+
+    @Override
     public void onScalar(ScalarNode node, TupleType tupleType) {
-        if (node instanceof IncludeResolver.IncludeScalarNode) {
+        if (schemaTuple != null && node instanceof IncludeResolver.IncludeScalarNode) {
             final String includeName = ((IncludeResolver.IncludeScalarNode) node).getIncludeName();
             if (includeName.endsWith(".json")) {
                 try {
@@ -60,7 +87,8 @@ class RelativeJsonSchemaAwareRamlDocumentBuilder extends RamlDocumentBuilder {
                         return;
                     }
                 } catch (IOException e) {
-                    log.warn("Could not parse json file {}. Relative $refs inside might not work.", includeName, e);
+                    log.warn("Line {}: Could not parse json file '{}' as schema. Relative $refs inside might not work: {}",
+                            node.getStartMark().getLine() + 1, includeName, e.getMessage());
                 }
             }
         }
