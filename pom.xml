@@ -202,15 +202,6 @@
             <version>${tomcat.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>mulesoft-releases</id>
-            <name>MuleSoft Releases Repository</name>
-            <url>https://repository-master.mulesoft.org/releases/</url>
-        </repository>
-    </repositories>
 
 </project>
