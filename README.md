@@ -5,7 +5,7 @@ Test if a request/response matches a given raml definition.
 
 Use in a spring MVC test
 ------------------------
-```
+```java
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = Application.class)
@@ -50,7 +50,7 @@ See also the [raml-tester-uc-spring](https://github.com/nidi3/raml-tester-uc-spr
 
 Use in a Java EE / JAX-RS environment
 -------------------------------------
-```
+```java
 @RunWith(Arquillian.class)
 public class SimpleTest {
 
@@ -94,7 +94,7 @@ The `RamlMatchers.checks()` matcher validates that the request and response conf
 
 Use in a pure servlet environment
 ---------------------------------
-```
+```java
 public class RamlFilter implements Filter {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private RamlDefinition api;
@@ -121,7 +121,7 @@ Or see the [raml-tester-uc-sevlet](https://github.com/nidi3/raml-tester-uc-servl
 
 Use together with Apache HttpComponents
 ---------------------------------------
-```
+```java
 @Test
 public void testRequest(){
     RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
@@ -139,7 +139,7 @@ Or see the [raml-tester-uc-servlet](https://github.com/nidi3/raml-tester-uc-serv
 
 Use together with RestAssured
 ---------------------------------------
-```
+```java
 @Test
 public void testWithRestAssured(){
 	RestAssured.baseURI = "http://test.server/path";
@@ -171,7 +171,7 @@ FailFast
 ---------------------------------------
 You can configure the RamlDefinition to throw an exception in case a violation is found.
 
-```
+```java
 @Test(expected = RamlViolationException.class)
 public void testInvalidResource() {
 	RestAssured.baseURI = "http://test.server/path";
