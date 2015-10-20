@@ -268,11 +268,12 @@ class RamlValidatorChecker {
 
     public void exampleSchema(MimeType mimeType) {
         if (has(Validation.EXAMPLE)) {
+            final String schema = mimeType.getSchema();
+            final String example = mimeType.getExample();
             final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
-            if (mimeType.getExample() != null && validator != null) {
-                final String schema = mimeType.getSchema();
-                validator.validate(new NamedReader(mimeType.getExample(), new Message("example").toString()), resolveSchema(raml, schema), violations,
-                        new Message("schema.example.mismatch", locator, mimeType.getExample()));
+            if (schema != null && example != null && validator != null) {
+                validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(raml, schema), violations,
+                        new Message("schema.example.mismatch", locator, example));
             }
         }
     }
