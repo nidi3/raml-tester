@@ -19,6 +19,7 @@ import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Headers;
 import guru.nidi.ramltester.model.Values;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -35,7 +36,11 @@ abstract class RestAssuredRamlMessage {
     protected Values mapToValues(Map<String, ?> map) {
         final Values values = new Values();
         for (Entry<String, ?> param : map.entrySet()) {
-            values.addValue(param.getKey(), param.getValue());
+            if (param.getValue() instanceof Collection) {
+                values.addValues(param.getKey(), (Collection<?>) param.getValue());
+            } else {
+                values.addValue(param.getKey(), param.getValue());
+            }
         }
         return values;
     }

@@ -28,7 +28,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.checks;
+import static guru.nidi.ramltester.junit.RamlMatchers.responseChecks;
 import static guru.nidi.ramltester.util.TestUtils.violations;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -41,7 +44,7 @@ public class RestAssuredTest extends ServerTest {
 
     @Before
     public void before() {
-    	RestAssured.baseURI = baseUrlWithPort();
+        RestAssured.baseURI = baseUrlWithPort();
         api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("restAssured.raml")
                 .assumingBaseUri("http://nidi.guru/raml/v1");
         restAssured = api.createRestAssured();
@@ -55,26 +58,26 @@ public class RestAssuredTest extends ServerTest {
     @Test
     public void testServletOk() throws IOException {
         restAssured.given().get("/base/data").andReturn();
-		assertTrue(restAssured.getLastReport().toString(), restAssured.getLastReport().isEmpty());
+        assertThat(restAssured.getLastReport(), checks());
     }
 
     @Test
     public void testWithoutBaseUri() throws IOException {
-    	RestAssured.baseURI = baseUrlWithPort();
+        RestAssured.baseURI = baseUrlWithPort();
         api = RamlLoaders.fromClasspath(RestAssuredTest.class).load("restAssuredWithoutBaseUri.raml");
         restAssured = api.createRestAssured();
-    	
+
         restAssured.given().get("/base/data").andReturn();
-        assertTrue(restAssured.getLastReport().toString(), restAssured.getLastReport().isEmpty());
+        assertThat(restAssured.getLastReport(), checks());
     }
-    
-    
+
+
     @Test
     public void testWithPortAndPath() throws IOException {
-    	RestAssured.baseURI = baseUrl();
-    	RestAssured.port = port();
+        RestAssured.baseURI = baseUrl();
+        RestAssured.port = port();
         restAssured.given().get("/base/data").andReturn();
-        assertTrue(restAssured.getLastReport().toString(), restAssured.getLastReport().isEmpty());
+        assertThat(restAssured.getLastReport(), checks());
     }
 
     @Test
@@ -89,7 +92,6 @@ public class RestAssuredTest extends ServerTest {
                         + "Message: Schema invalid: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n"
                         + " at [Source: Body; line: 1, column: 8]"),
                 restAssured.getLastReport().getResponseViolations());
-
     }
 
     @Test
@@ -97,6 +99,17 @@ public class RestAssuredTest extends ServerTest {
         Response response = restAssured.given().get("/base/data?empty=yes").andReturn();
         assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
         assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(restAssured.getLastReport(), checks());
+    }
+
+    @Test
+    public void repeatingQueryParameter() throws IOException {
+        Response response = restAssured.given().get("/base/data?empty=yes&empty=ja").andReturn();
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
+        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(restAssured.getLastReport(), responseChecks());
+        assertEquals(violations("Query parameter 'empty' on action(GET /base/data) is not repeat but found repeatedly"),
+                restAssured.getLastReport().getRequestViolations());
     }
 
     @Override
