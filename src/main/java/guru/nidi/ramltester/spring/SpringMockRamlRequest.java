@@ -23,8 +23,10 @@ import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +53,12 @@ public class SpringMockRamlRequest implements RamlRequest {
 
     @Override
     public Values getQueryValues() {
-        return UriComponents.parseQuery(delegate.getQueryString());
+        final String q = delegate.getQueryString();
+        try {
+            return UriComponents.parseQuery(q == null ? null : UriUtils.decode(q, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError("Cannot happen");
+        }
     }
 
     @Override
