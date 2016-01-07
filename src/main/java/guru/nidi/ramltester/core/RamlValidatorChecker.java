@@ -30,6 +30,8 @@ import static guru.nidi.ramltester.core.CheckerHelper.*;
  */
 class RamlValidatorChecker {
 
+    private static final String PARAM_CONDITION_ILLEGAL = "parameter.condition.illegal";
+
     enum ParamName {
         BASE_URI("baseUriParameter"),
         URI("uriParameter"),
@@ -158,8 +160,8 @@ class RamlValidatorChecker {
             if (raml.getBaseUri() == null && !names.isEmpty()) {
                 violation("baseUriParameters.illegal", locator);
             } else {
-                for (String name : names) {
-                    if (name.equals("version")) {
+                for (final String name : names) {
+                    if ("version".equals(name)) {
                         violation("baseUriParameter.illegal", locator, name);
                     } else if (!raml.getBaseUri().contains("{" + name + "}")) {
                         violation("baseUriParameter.invalid", locator, name);
@@ -171,8 +173,8 @@ class RamlValidatorChecker {
 
     public void uriParameters(Collection<String> names, Resource resource) {
         if (has(Validation.URI_PARAMETER)) {
-            for (String name : names) {
-                if (name.equals("version")) {
+            for (final String name : names) {
+                if ("version".equals(name)) {
                     violation("uriParameter.illegal", locator, name);
                 } else if (!resource.getUri().contains("{" + name + "}")) {
                     violation("uriParameter.invalid", locator, name);
@@ -229,22 +231,29 @@ class RamlValidatorChecker {
             final AbstractParam param = entry.getValue();
             final ParamType type = param.getType() == null ? ParamType.STRING : param.getType();
             if (type == ParamType.STRING) {
-                violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "minimum"));
-                violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "maximum"));
+                minMaxNotAllowed(param, name, paramName);
             } else {
-                violations.addIf(param.getEnumeration() != null, new Message("parameter.condition.illegal", locator, name, paramName, "enum"));
-                violations.addIf(param.getPattern() != null, new Message("parameter.condition.illegal", locator, name, paramName, "pattern"));
-                violations.addIf(param.getMinLength() != null, new Message("parameter.condition.illegal", locator, name, paramName, "minLength"));
-                violations.addIf(param.getMaxLength() != null, new Message("parameter.condition.illegal", locator, name, paramName, "maxLength"));
+                stringConstraintsNotAllowed(param, name, paramName);
                 if (type != ParamType.INTEGER && type != ParamType.NUMBER) {
-                    violations.addIf(param.getMinimum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "minimum"));
-                    violations.addIf(param.getMaximum() != null, new Message("parameter.condition.illegal", locator, name, paramName, "maximum"));
+                    minMaxNotAllowed(param, name, paramName);
                 }
                 if (type == ParamType.FILE) {
                     violations.addIf(paramName != ParamName.FORM, new Message("parameter.file.illegal", locator, name, paramName));
                 }
             }
         }
+    }
+
+    private void stringConstraintsNotAllowed(AbstractParam param, String name, ParamName paramName) {
+        violations.addIf(param.getEnumeration() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "enum"));
+        violations.addIf(param.getPattern() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "pattern"));
+        violations.addIf(param.getMinLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minLength"));
+        violations.addIf(param.getMaxLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maxLength"));
+    }
+
+    private void minMaxNotAllowed(AbstractParam param, String name, ParamName paramName) {
+        violations.addIf(param.getMinimum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minimum"));
+        violations.addIf(param.getMaximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
     }
 
     private void parameterValues(AbstractParam param, ParameterChecker checker, Message message) {

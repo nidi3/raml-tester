@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.servlet;
 
+import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FormDecoder;
@@ -47,7 +48,7 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
     @Override
     public String getRequestUrl(String baseUri, boolean includeServletPath) {
         final String servletPath = includeServletPath ? request().getServletPath() : "";
-        final String pathInfo = request().getPathInfo() != null ? request().getPathInfo() : "";
+        final String pathInfo = request().getPathInfo() == null ? "" : request().getPathInfo();
         return baseUri == null
                 ? request().getRequestURL().toString()
                 : (baseUri + servletPath + pathInfo);
@@ -65,11 +66,15 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
 
     @Override
     public Values getHeaderValues() {
+        return getHeaderValues(request());
+    }
+
+    public static Values getHeaderValues(HttpServletRequest request){
         final Values headers = new Values();
-        final Enumeration<String> names = request().getHeaderNames();
+        final Enumeration<String> names = request.getHeaderNames();
         while (names.hasMoreElements()) {
             final String name = names.nextElement();
-            final Enumeration<String> values = request().getHeaders(name);
+            final Enumeration<String> values = request.getHeaders(name);
             while (values.hasMoreElements()) {
                 headers.addValue(name, values.nextElement());
             }
@@ -88,6 +93,7 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
     public BufferedReader getReader() throws IOException {
         readContentIfNeeded();
         final InputStreamReader in = getCharacterEncoding() == null
+                //TODO is default encoding correct?
                 ? new InputStreamReader(new ByteArrayInputStream(content))
                 : new InputStreamReader(new ByteArrayInputStream(content), getCharacterEncoding());
         return new BufferedReader(in);
@@ -99,7 +105,7 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
             readContentIfNeeded();
             return IoUtils.readIntoByteArray(getInputStream());
         } catch (IOException e) {
-            throw new RuntimeException("Could not read content", e);
+            throw new RamlCheckerException("Could not read content", e);
         }
     }
 

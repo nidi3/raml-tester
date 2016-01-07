@@ -28,13 +28,13 @@ final class JsRegex {
             + "    return r.test(input);"
             + "};";
 
+    private static final ScriptEngine ENGINE;
+
     public static class InvalidRegexException extends RuntimeException {
         public InvalidRegexException(String message, Throwable cause) {
             super(message, cause);
         }
     }
-
-    private static final ScriptEngine ENGINE;
 
     private JsRegex() {
     }
@@ -49,18 +49,18 @@ final class JsRegex {
     }
 
     public static boolean matches(String input, String regex) {
-        if (isDoubleQuoted(regex) || isSingleQuoted(regex)) {
-            regex = regex.substring(1, regex.length() - 1);
-        }
-        String flags = null;
-        if (regex.startsWith("/")) {
-            final int pos = regex.lastIndexOf("/");
-            if (pos >= regex.length() - 3) {
-                flags = pos == regex.length() - 1 ? "" : regex.substring(pos + 1);
-                regex = regex.substring(1, pos).replace("\\/", "/");
+        final String unquoted = (isDoubleQuoted(regex) || isSingleQuoted(regex))
+                ? regex.substring(1, regex.length() - 1)
+                : regex;
+        if (unquoted.startsWith("/")) {
+            final int pos = unquoted.lastIndexOf('/');
+            if (pos >= unquoted.length() - 3) {
+                final String flags = pos == unquoted.length() - 1 ? "" : unquoted.substring(pos + 1);
+                final String unslashed = unquoted.substring(1, pos).replace("\\/", "/");
+                return matches(input, unslashed, flags);
             }
         }
-        return matches(input, regex, flags);
+        return matches(input, unquoted, null);
     }
 
     public static boolean matches(String input, String regex, String flags) {

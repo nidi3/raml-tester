@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.spring;
 
+import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.IoUtils;
@@ -30,15 +31,9 @@ import java.io.InputStream;
  */
 public class SpringClientHttpRamlResponse extends SpringHttpRamlMessage implements ClientHttpResponse, RamlResponse {
     private final ClientHttpResponse response;
-    private final String encoding;
-
-    public SpringClientHttpRamlResponse(ClientHttpResponse response, String encoding) {
-        this.response = response;
-        this.encoding = encoding;
-    }
 
     public SpringClientHttpRamlResponse(ClientHttpResponse response) {
-        this(response, "utf-8");
+        this.response = response;
     }
 
     @Override
@@ -46,7 +41,7 @@ public class SpringClientHttpRamlResponse extends SpringHttpRamlMessage implemen
         try {
             return getRawStatusCode();
         } catch (IOException e) {
-            throw new RuntimeException("Problem getting status", e);
+            throw new RamlCheckerException("Problem getting status", e);
         }
     }
 
@@ -60,7 +55,7 @@ public class SpringClientHttpRamlResponse extends SpringHttpRamlMessage implemen
         try {
             return IoUtils.readIntoByteArray(getBody());
         } catch (IOException e) {
-            throw new RuntimeException("Problem getting content", e);
+            throw new RamlCheckerException("Problem getting content", e);
         }
     }
 

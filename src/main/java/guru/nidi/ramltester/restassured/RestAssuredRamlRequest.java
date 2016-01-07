@@ -41,15 +41,16 @@ class RestAssuredRamlRequest extends RestAssuredRamlMessage implements RamlReque
 
     @Override
     public byte[] getContent() {
-        String body = requestSpec.getBody();
+        final String body = requestSpec.getBody();
+        //TODO is default encoding correct?
         return body == null ? null : body.getBytes();
     }
 
     @Override
     public String getRequestUrl(String baseUri, boolean includeServletPath) {
         return baseUri == null || baseUri.length() == 0
-                ? filterContext.getCompleteRequestPath()
-                : filterContext.getCompleteRequestPath().replace(requestSpec.getBaseUri(), baseUri);
+                ? filterContext.getRequestURI()
+                : filterContext.getRequestURI().replace(requestSpec.getBaseUri(), baseUri);
     }
 
     @Override

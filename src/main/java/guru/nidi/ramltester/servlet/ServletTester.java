@@ -37,12 +37,12 @@ public class ServletTester {
     }
 
     public RamlReport testAgainst(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (!(request instanceof HttpServletRequest)) {
-            return null;
+        if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
+            final ServletRamlRequest httpRequest = new ServletRamlRequest((HttpServletRequest) request);
+            final ServletRamlResponse httpResponse = new ServletRamlResponse((HttpServletResponse) response);
+            chain.doFilter(httpRequest, httpResponse);
+            return checker.check(httpRequest, httpResponse);
         }
-        final ServletRamlRequest httpRequest = new ServletRamlRequest((HttpServletRequest) request);
-        final ServletRamlResponse httpResponse = new ServletRamlResponse((HttpServletResponse) response);
-        chain.doFilter(httpRequest, httpResponse);
-        return checker.check(httpRequest, httpResponse);
+        return null;
     }
 }

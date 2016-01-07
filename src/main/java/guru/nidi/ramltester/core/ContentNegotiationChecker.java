@@ -38,15 +38,9 @@ class ContentNegotiationChecker {
     }
 
     public void check(RamlRequest request, RamlResponse response, Action action, MediaTypeMatch typeMatch) {
-        if (typeMatch == null || response.getContentType() == null || response.getContentType().isEmpty()) {
-            return;
-        }
-        final List<Object> header = request.getHeaderValues().get("Accept");
-        if (header == null || header.isEmpty()) {
-            return;
-        }
-        final String accept = header.get(0).toString().trim();
-        if (accept.length() == 0) {
+        //TODO method too complex
+        final String accept = acceptHeader(request, response, typeMatch);
+        if (accept == null) {
             return;
         }
 
@@ -60,7 +54,7 @@ class ContentNegotiationChecker {
                     if (typeMatch.getMatchingMedia().equals(modelType)) {
                         if (acceptType.getQualityParameter() < bestMatch.getQualityParameter()) {
                             final Locator locator = new Locator(action);
-                            locator.responseCode("" + response.getStatus());
+                            locator.responseCode(Integer.toString(response.getStatus()));
                             responseViolations.add(new Message("mediaType.better", locator, accept, bestMatch, response.getContentType()));
                         }
                         return;
@@ -71,9 +65,24 @@ class ContentNegotiationChecker {
         responseViolations.add(new Message("contentType.mismatch", accept, response.getContentType()));
     }
 
+    private String acceptHeader(RamlRequest request, RamlResponse response, MediaTypeMatch typeMatch) {
+        if (typeMatch == null || response.getContentType() == null || response.getContentType().isEmpty()) {
+            return null;
+        }
+        final List<Object> header = request.getHeaderValues().get("Accept");
+        if (header == null || header.isEmpty()) {
+            return null;
+        }
+        final String accept = header.get(0).toString().trim();
+        if (accept.length() == 0) {
+            return null;
+        }
+        return accept;
+    }
+
     private List<MediaType> acceptMediaTypes(String accept) {
         final List<MediaType> acceptTypes = new ArrayList<>();
-        for (String type : accept.split(",")) {
+        for (final String type : accept.split(",")) {
             try {
                 final MediaType acceptType = MediaType.valueOf(type);
                 acceptTypes.add(acceptType);

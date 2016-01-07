@@ -65,8 +65,8 @@ public class ServletRamlMessageTest extends ServerTest {
     private static TestFilter testFilter;
     private static HttpServlet testServlet, gzipTestServlet;
     private static MessageTester tester;
-    private static BlockingQueue<Error> error = new ArrayBlockingQueue<>(1);
-    private static Error OK = new Error() {
+    private static final BlockingQueue<Error> error = new ArrayBlockingQueue<>(1);
+    private static final Error OK = new Error() {
     };
 
     @BeforeClass
@@ -255,7 +255,7 @@ public class ServletRamlMessageTest extends ServerTest {
         protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
             res.addHeader("resHeader", "hula");
             res.setStatus(222);
-            byte[] buf = new byte[1000];
+            final byte[] buf = new byte[1000];
             try (final ServletInputStream in = req.getInputStream();
                  final ServletOutputStream out = res.getOutputStream()) {
                 int read;

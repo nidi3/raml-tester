@@ -88,7 +88,7 @@ public class ServletTest extends ServerTest {
     }
 
     private static class TestFilter implements Filter {
-        private RamlDefinition definition = RamlLoaders
+        private static final RamlDefinition definition = RamlLoaders
                 .fromClasspath(SimpleTest.class).load("simple.raml")
                 .assumingBaseUri("http://nidi.guru/raml/v1");
         private RamlReport report;

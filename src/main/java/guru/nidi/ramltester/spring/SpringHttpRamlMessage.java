@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  *
  */
-abstract class SpringHttpRamlMessage {
+class SpringHttpRamlMessage {
 
     protected String contentTypeOf(HttpHeaders headers) {
         final MediaType contentType = headers.getContentType();

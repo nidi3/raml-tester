@@ -34,16 +34,16 @@ import static guru.nidi.ramltester.core.UsageBuilder.*;
  *
  */
 public class RamlChecker {
+    private final CheckerConfig config;
+    private RamlViolations requestViolations, responseViolations;
+    private Locator locator;
+    private Usage usage;
+
     private static final class DefaultHeaders {
         private static final Set<String>
                 REQUEST = new HashSet<>(Arrays.asList("accept", "accept-charset", "accept-encoding", "accept-language", "accept-datetime", "authorization", "cache-control", "connection", "cookie", "content-length", "content-md5", "content-type", "date", "dnt", "expect", "from", "host", "if-match", "if-modified-since", "if-none-match", "if-range", "if-unmodified-since", "max-forwards", "origin", "pragma", "proxy-authorization", "range", "referer", "te", "user-agent", "upgrade", "via", "warning")),
                 RESPONSE = new HashSet<>(Arrays.asList("access-control-allow-origin", "accept-ranges", "age", "allow", "cache-control", "connection", "content-encoding", "content-language", "content-length", "content-location", "content-md5", "content-disposition", "content-range", "content-type", "date", "etag", "expires", "last-modified", "link", "location", "p3p", "pragma", "proxy-authenticate", "refresh", "retry-after", "server", "set-cookie", "status", "strict-transport-security", "trailer", "transfer-encoding", "upgrade", "vary", "via", "warning", "www-authenticate", "x-frame-options"));
     }
-
-    private final CheckerConfig config;
-    private RamlViolations requestViolations, responseViolations;
-    private Locator locator;
-    private Usage usage;
 
     public RamlChecker(CheckerConfig config) {
         this.config = config;
@@ -214,7 +214,7 @@ public class RamlChecker {
             protocols = config.raml.getProtocols();
         }
         if (protocols == null || protocols.isEmpty()) {
-            protocols = Collections.singletonList(Protocol.valueOf(fallback.toUpperCase()));
+            protocols = Collections.singletonList(Protocol.valueOf(fallback.toUpperCase(Locale.ENGLISH)));
         }
         return protocols;
     }
@@ -236,9 +236,10 @@ public class RamlChecker {
             responseViolations.add("responseCode.undefined", locator, response.getStatus());
             throw new RamlViolationException();
         }
-        actionUsage(usage, action).addResponseCode("" + response.getStatus());
-        locator.responseCode("" + response.getStatus());
-        checkResponseHeaderParameters(response.getHeaderValues(), action, "" + response.getStatus(), res);
+        final String statusStr = Integer.toString(response.getStatus());
+        actionUsage(usage, action).addResponseCode(statusStr);
+        locator.responseCode(statusStr);
+        checkResponseHeaderParameters(response.getHeaderValues(), action, statusStr, res);
 
         final MediaTypeMatch typeMatch = MediaTypeMatch.find(responseViolations, response, res.getBody(), locator);
         if (typeMatch != null) {

@@ -43,7 +43,7 @@ public class RamlMatcher implements ResultMatcher {
     }
 
     @Override
-    public void match(MvcResult result) throws Exception {
+    public void match(MvcResult result) {
         final RamlReport report = testAgainst(result);
         if (!report.isEmpty()) {
             throw new AssertionError(report.toString());

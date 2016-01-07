@@ -17,7 +17,7 @@ package guru.nidi.ramltester.util;
 
 import org.junit.Test;
 
-import java.util.HashMap;
+import java.util.Collections;
 
 import static guru.nidi.ramltester.util.MediaType.valueOf;
 import static org.junit.Assert.*;
@@ -58,9 +58,7 @@ public class MediaTypeTest {
         final MediaType mediaType = valueOf("type/sub;a=b");
         assertEquals("type", mediaType.getType());
         assertEquals("sub", mediaType.getSubtype());
-        assertEquals(new HashMap<String, String>() {{
-            put("a", "b");
-        }}, mediaType.getParameters());
+        assertEquals(Collections.singletonMap("a", "b"), mediaType.getParameters());
     }
 
     @Test
@@ -102,7 +100,7 @@ public class MediaTypeTest {
         final MediaType wildcard = valueOf("a/*+c");
         assertTrue(complete.similarity(wildcard) > 0);
         assertTrue(complete.similarity(complete) > complete.similarity(wildcard));
-        assertTrue(complete.similarity(valueOf("a/*+d")) == 0);
+        assertEquals(0, complete.similarity(valueOf("a/*+d")));
     }
 
     private void similarity(MediaType complete) {
@@ -113,7 +111,7 @@ public class MediaTypeTest {
         assertTrue(withParams.similarity(withParams) > withParams.similarity(complete));
         assertTrue(complete.similarity(complete) > complete.similarity(subwild));
         assertTrue(complete.similarity(subwild) > complete.similarity(wild));
-        assertTrue(complete.similarity(differentSub) == 0);
-        assertTrue(complete.similarity(subwild) == differentSub.similarity(subwild));
+        assertEquals(0, complete.similarity(differentSub));
+        assertEquals(complete.similarity(subwild), differentSub.similarity(subwild));
     }
 }

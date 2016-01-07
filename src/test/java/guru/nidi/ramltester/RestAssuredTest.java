@@ -96,7 +96,7 @@ public class RestAssuredTest extends ServerTest {
 
     @Test
     public void emptyResponse() throws IOException {
-        Response response = restAssured.given().get("/base/data?empty=yes").andReturn();
+        final Response response = restAssured.given().get("/base/data?empty=yes").andReturn();
         assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
         assertTrue(StringUtils.isBlank(response.getBody().asString()));
         assertThat(restAssured.getLastReport(), checks());
@@ -104,7 +104,7 @@ public class RestAssuredTest extends ServerTest {
 
     @Test
     public void repeatingQueryParameter() throws IOException {
-        Response response = restAssured.given().get("/base/data?empty=yes&empty=ja").andReturn();
+        final Response response = restAssured.given().get("/base/data?empty=yes&empty=ja").andReturn();
         assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
         assertTrue(StringUtils.isBlank(response.getBody().asString()));
         assertThat(restAssured.getLastReport(), responseChecks());

@@ -50,7 +50,7 @@ public class CoreTestBase {
 
     @SuppressWarnings("unchecked")
     protected <T> Map<String, T> mapOf(Object... keysAndValues) {
-        Map<String, T> v = new HashMap<>();
+        final Map<String, T> v = new HashMap<>();
         for (int i = 0; i < keysAndValues.length; i += 2) {
             v.put((String) keysAndValues[i], (T) keysAndValues[i + 1]);
         }

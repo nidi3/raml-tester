@@ -62,7 +62,7 @@ public class RamlValidator {
         checker.parameters(raml.getBaseUriParameters(), BASE_URI);
         checker.description(raml.getDocumentation());
         checker.description(raml.getBaseUriParameters(), BASE_URI);
-        for (Resource resource : raml.getResources().values()) {
+        for (final Resource resource : raml.getResources().values()) {
             resource(resource);
         }
         return checker.getReport();
@@ -78,10 +78,10 @@ public class RamlValidator {
         checker.description(resource.getBaseUriParameters(), BASE_URI);
         checker.description(resource.getUriParameters(), URI);
         checker.empty(resource);
-        for (Resource res : resource.getResources().values()) {
+        for (final Resource res : resource.getResources().values()) {
             resource(res);
         }
-        for (Action action : resource.getActions().values()) {
+        for (final Action action : resource.getActions().values()) {
             action(action);
         }
     }
@@ -97,12 +97,12 @@ public class RamlValidator {
         checker.description(action.getHeaders(), HEADER);
         checker.empty(action);
         if (action.getBody() != null) {
-            for (MimeType mimeType : action.getBody().values()) {
+            for (final MimeType mimeType : action.getBody().values()) {
                 locator.requestMime(mimeType);
                 mimeType(mimeType);
             }
         }
-        for (Map.Entry<String, Response> entry : action.getResponses().entrySet()) {
+        for (final Map.Entry<String, Response> entry : action.getResponses().entrySet()) {
             locator.responseCode(entry.getKey());
             response(entry.getValue());
         }
@@ -122,7 +122,7 @@ public class RamlValidator {
         checker.description(response.getDescription());
         checker.description(response.getHeaders(), HEADER);
         if (response.getBody() != null) {
-            for (MimeType mimeType : response.getBody().values()) {
+            for (final MimeType mimeType : response.getBody().values()) {
                 locator.responseMime(mimeType);
                 mimeType(mimeType);
             }

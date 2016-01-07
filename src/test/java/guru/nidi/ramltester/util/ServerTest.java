@@ -77,9 +77,9 @@ public abstract class ServerTest {
     }
 
     protected String baseUrlWithPort() {
-        return baseUrl() +":" + port();
+        return baseUrl() + ":" + port();
     }
-    
+
     protected String baseUrl() {
         return "http://localhost";
     }
@@ -99,13 +99,13 @@ public abstract class ServerTest {
 
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-            if (req.getParameter("empty") != null) {
-                res.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            } else {
+            if (req.getParameter("empty") == null) {
                 res.setContentType("application/json");
                 final PrintWriter out = res.getWriter();
                 out.write(req.getParameter("param") == null ? "\"json string\"" : "illegal json");
                 out.flush();
+            } else {
+                res.setStatus(HttpServletResponse.SC_NO_CONTENT);
             }
         }
     }

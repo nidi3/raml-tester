@@ -61,9 +61,9 @@ public class FormDecoder {
                 final String content = IoUtils.readIntoString(new InputStreamReader(new ByteArrayInputStream(request.getContent()), charset));
                 return decodeUrlEncoded(content, charset);
             } catch (UnsupportedEncodingException e) {
-                throw new IllegalArgumentException("Unknown charset " + charset);
+                throw new IllegalArgumentException("Unknown charset " + charset, e);
             } catch (IOException e) {
-                throw new RuntimeException("Could not read request content", e);
+                throw new AssertionError("Cannot happen", e);
             }
         }
         if (type.isCompatibleWith(MULTIPART)) {
@@ -109,7 +109,7 @@ public class FormDecoder {
     private static class RamlRequestFileUploadContext implements RequestContext {
         private final RamlRequest request;
 
-        private RamlRequestFileUploadContext(RamlRequest request) {
+        public RamlRequestFileUploadContext(RamlRequest request) {
             this.request = request;
         }
 
@@ -142,8 +142,7 @@ public class FormDecoder {
                 final String name = urlDecode(m.group(GROUP_NAME), charset);
                 final String eq = m.group(GROUP_EQUAL);
                 final String value = m.group(GROUP_VALUE);
-                q.addValue(name, (value != null ? urlDecode(value, charset) :
-                        (eq != null && eq.length() > 0 ? "" : null)));
+                q.addValue(name, (value == null ? (eq != null && eq.length() > 0 ? "" : null) : urlDecode(value, charset)));
             }
         }
         return q;
@@ -153,7 +152,7 @@ public class FormDecoder {
         try {
             return URLDecoder.decode(part, charset);
         } catch (UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Unknown charset " + charset);
+            throw new IllegalArgumentException("Unknown charset " + charset, e);
         }
     }
 

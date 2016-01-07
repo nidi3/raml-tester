@@ -17,9 +17,6 @@ package guru.nidi.ramltester.util;
 
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.model.Values;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,15 +38,15 @@ public class TestUtils {
         return env;
     }
 
-    public static void assertStringArrayMapEquals(Object[] expected, Values actual) {
-        Values v = stringArrayMapOf(expected);
+    public static void assertValuesEquals(Object[] expected, Values actual) {
+        final Values v = valuesOf(expected);
         assertEquals(v, actual);
     }
 
-    public static Values stringArrayMapOf(Object... keysAndValues) {
-        Values v = new Values();
+    public static Values valuesOf(Object... keysAndValues) {
+        final Values v = new Values();
         for (int i = 0; i < keysAndValues.length; i += 2) {
-            List<String> value = keysAndValues[i + 1] instanceof String
+            final List<String> value = keysAndValues[i + 1] instanceof String
                     ? Arrays.asList((String) keysAndValues[i + 1])
                     : Arrays.asList((String[]) keysAndValues[i + 1]);
             v.addValues((String) keysAndValues[i], value);
@@ -57,23 +54,9 @@ public class TestUtils {
         return v;
     }
 
-    public static Matcher<Number> biggerThan(final Number value) {
-        return new TypeSafeMatcher<Number>() {
-            @Override
-            protected boolean matchesSafely(Number item) {
-                return item.doubleValue() > value.doubleValue();
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("A number bigger than ").appendValue(value);
-            }
-        };
-    }
-
     public static RamlViolations violations(String... messages) {
         final RamlViolations violations = new RamlViolations();
-        for (String message : messages) {
+        for (final String message : messages) {
             violations.add(new SimpleMessage(message));
         }
         return violations;

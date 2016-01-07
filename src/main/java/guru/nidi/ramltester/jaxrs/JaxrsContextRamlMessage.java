@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  *
  */
-abstract class JaxrsContextRamlMessage {
+class JaxrsContextRamlMessage {
     protected Values headersOf(MultivaluedMap<String, ?> headers) {
         final Values values = new Values();
         for (final Map.Entry<String, ? extends List<?>> entry : headers.entrySet()) {

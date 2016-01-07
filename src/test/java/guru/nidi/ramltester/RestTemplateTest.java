@@ -50,7 +50,7 @@ import static org.junit.Assert.assertTrue;
 @Configuration
 public class RestTemplateTest extends ServerTest {
 
-    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
+    private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     private static RamlRestTemplate restTemplate = RamlLoaders
             .fromClasspath(RestTemplateTest.class)
@@ -60,7 +60,7 @@ public class RestTemplateTest extends ServerTest {
             .aggregating(aggregator);
 
     @ClassRule
-    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
+    public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @RequestMapping(value = "/data")
     @ResponseBody
@@ -77,9 +77,9 @@ public class RestTemplateTest extends ServerTest {
 
     @Override
     protected void init(Context ctx) {
-        AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
+        final AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
         appCtx.register(getClass());
-        DispatcherServlet dispatcher = new DispatcherServlet(appCtx);
+        final DispatcherServlet dispatcher = new DispatcherServlet(appCtx);
         Tomcat.addServlet(ctx, "SpringMVC", dispatcher);
         ctx.addServletMapping("/*", "SpringMVC");
     }

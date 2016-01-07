@@ -23,11 +23,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
-abstract class RestAssuredRamlMessage {
+class RestAssuredRamlMessage {
 
     protected Values headersToValues(Headers headers) {
         final Values headerValues = new Values();
-        for (Header header : headers) {
+        for (final Header header : headers) {
             headerValues.addValue(header.getName(), header.getValue());
         }
         return headerValues;
@@ -35,7 +35,7 @@ abstract class RestAssuredRamlMessage {
 
     protected Values mapToValues(Map<String, ?> map) {
         final Values values = new Values();
-        for (Entry<String, ?> param : map.entrySet()) {
+        for (final Entry<String, ?> param : map.entrySet()) {
             if (param.getValue() instanceof Collection) {
                 values.addValues(param.getKey(), (Collection<?>) param.getValue());
             } else {

@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class TypeTest extends HighlevelTestBase {
-    private RamlDefinition type = RamlLoaders.fromClasspath(getClass()).load("type.raml");
+    private final RamlDefinition type = RamlLoaders.fromClasspath(getClass()).load("type.raml");
 
     @BeforeClass
     public static void init() {
@@ -37,7 +37,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void booleanOk() throws Exception {
-        for (String value : new String[]{"true", "false"}) {
+        for (final String value : new String[]{"true", "false"}) {
             assertNoViolations(
                     type,
                     get("/type?boolean=" + value),
@@ -47,7 +47,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void booleanNok() throws Exception {
-        for (String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
+        for (final String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?boolean=" + value),
@@ -58,13 +58,13 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void integerOk() throws Exception {
-        for (String value : new String[]{"0", "-1", "123456789"}) {
+        for (final String value : new String[]{"0", "-1", "123456789"}) {
             assertNoViolations(
                     type,
                     get("/type?integer=" + value),
                     jsonResponse(200, "\"hula\""));
         }
-        for (String value : new String[]{"-5", "0", "666"}) {
+        for (final String value : new String[]{"-5", "0", "666"}) {
             assertNoViolations(
                     type,
                     get("/type?integerLimit=" + value),
@@ -74,7 +74,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void integerNok() throws Exception {
-        for (String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
+        for (final String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?integer=" + value),
@@ -95,13 +95,13 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void numberOk() throws Exception {
-        for (String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
+        for (final String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
             assertNoViolations(
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""));
         }
-        for (String value : new String[]{"5e-2", "0.05", "666.6"}) {
+        for (final String value : new String[]{"5e-2", "0.05", "666.6"}) {
             assertNoViolations(
                     type,
                     get("/type?numberLimit=" + value),
@@ -111,28 +111,28 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void numberNok() throws Exception {
-        for (String value : new String[]{"", "-0", "1.", "1.123w"}) {
+        for (final String value : new String[]{"", "-0", "1.", "1.123w"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""),
                     equalTo("Query parameter 'number' on action(GET /type) - Value '" + value + "' is not a valid number"));
         }
-        for (String value : new String[]{"4.9e-2", "0.0049999"}) {
+        for (final String value : new String[]{"4.9e-2", "0.0049999"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?numberLimit=" + value),
                     jsonResponse(200, "\"hula\""),
                     equalTo("Query parameter 'numberLimit' on action(GET /type) - Value '" + value + "' is smaller than minimum 0.05"));
         }
-        for (String value : new String[]{"666.60001"}) {
+        for (final String value : new String[]{"666.60001"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?numberLimit=" + value),
                     jsonResponse(200, "\"hula\""),
                     equalTo("Query parameter 'numberLimit' on action(GET /type) - Value '" + value + "' is bigger than maximum 666.6"));
         }
-        for (String value : new String[]{"inf", "-inf", "nan"}) {
+        for (final String value : new String[]{"inf", "-inf", "nan"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?numberLimit=" + value),
@@ -143,7 +143,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void dateOk() throws Exception {
-        for (String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
+        for (final String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
             assertNoViolations(
                     type,
                     get("/type?date=" + value),
@@ -153,7 +153,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void dateNok() throws Exception {
-        for (String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
+        for (final String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?date=" + value),
@@ -164,7 +164,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void stringOk() throws Exception {
-        for (String value : new String[]{"aa", "12345"}) {
+        for (final String value : new String[]{"aa", "12345"}) {
             assertNoViolations(
                     type,
                     get("/type?string=" + value),
@@ -188,7 +188,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void enumOk() throws Exception {
-        for (String value : new String[]{"a", "b"}) {
+        for (final String value : new String[]{"a", "b"}) {
             assertNoViolations(
                     type,
                     get("/type?enum=" + value),
@@ -198,7 +198,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void enumNok() throws Exception {
-        for (String value : new String[]{"", "ab", "c"}) {
+        for (final String value : new String[]{"", "ab", "c"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?enum=" + value),
@@ -230,13 +230,13 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void simplePattern() throws Exception {
-        for (String value : new String[]{"12/a", "00/y"}) {
+        for (final String value : new String[]{"12/a", "00/y"}) {
             assertNoViolations(
                     type,
                     get("/type?pattern1=" + value),
                     jsonResponse(200, "\"hula\""));
         }
-        for (String value : new String[]{"", "12/z", "1/a", "99/A"}) {
+        for (final String value : new String[]{"", "12/z", "1/a", "99/A"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?pattern1=" + value),
@@ -247,13 +247,13 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void slashedPattern() throws Exception {
-        for (String value : new String[]{"12/a", "00/y"}) {
+        for (final String value : new String[]{"12/a", "00/y"}) {
             assertNoViolations(
                     type,
                     get("/type?pattern2=" + value),
                     jsonResponse(200, "\"hula\""));
         }
-        for (String value : new String[]{"", "12/z", "1/a", "99/A"}) {
+        for (final String value : new String[]{"", "12/z", "1/a", "99/A"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?pattern2=" + value),
@@ -270,13 +270,13 @@ public class TypeTest extends HighlevelTestBase {
     }
 
     private void assertModifiedPattern(String param) throws Exception {
-        for (String value : new String[]{"12/a", "00/y", "99/A"}) {
+        for (final String value : new String[]{"12/a", "00/y", "99/A"}) {
             assertNoViolations(
                     type,
                     get("/type?" + param + "=" + value),
                     jsonResponse(200, "\"hula\""));
         }
-        for (String value : new String[]{"", "12/z", "1/a"}) {
+        for (final String value : new String[]{"", "12/z", "1/a"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?" + param + "=" + value),

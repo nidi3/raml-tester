@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class SchemaTest extends HighlevelTestBase {
-    private RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
+    private final RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
 
     @Test
     public void matchingJsonSchema() throws UnsupportedEncodingException {

@@ -113,7 +113,7 @@ class SecurityExtractor {
                 final String name = ref.getName();
                 final SecurityScheme ss = securityScheme(name);
                 if (ss == null) {
-                    violations.addIf(!name.equals("null"), message.withParam(name));
+                    violations.addIf(!"null".equals(name), message.withParam(name));
                 } else {
                     res.add(ss);
                 }

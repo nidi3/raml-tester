@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.jaxrs;
 
+import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.IoUtils;
@@ -36,7 +37,7 @@ public class JaxrsContextRamlResponse extends JaxrsContextRamlMessage implements
             content = IoUtils.readIntoByteArray(context.getEntityStream());
             context.setEntityStream(new ByteArrayInputStream(content));
         } catch (IOException e) {
-            throw new RuntimeException("Could not get response content", e);
+            throw new RamlCheckerException("Could not get response content", e);
         }
     }
 

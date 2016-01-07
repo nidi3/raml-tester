@@ -15,8 +15,10 @@
  */
 package guru.nidi.ramltester.servlet;
 
+import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.util.IoUtils;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -45,10 +47,6 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
         super(delegate);
     }
 
-    private HttpServletResponse response() {
-        return (HttpServletResponse) getResponse();
-    }
-
     @Override
     public void setStatus(int sc) {
         status = sc;
@@ -75,13 +73,13 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
 
     @Override
     public void setIntHeader(String name, int value) {
-        headers.setValue(name, "" + value);
+        headers.setValue(name, Integer.toString(value));
         super.setIntHeader(name, value);
     }
 
     @Override
     public void addIntHeader(String name, int value) {
-        headers.addValue(name, "" + value);
+        headers.addValue(name, Integer.toString(value));
         super.addIntHeader(name, value);
     }
 
@@ -112,8 +110,10 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     @Override
     public PrintWriter getWriter() throws IOException {
         if (writer == null) {
-            final Writer targetWriter = characterEncoding != null ?
-                    new OutputStreamWriter(content, characterEncoding) : new OutputStreamWriter(content);
+            final Writer targetWriter = characterEncoding == null
+                    //TODO is default encoding correct?
+                    ? new OutputStreamWriter(content)
+                    : new OutputStreamWriter(content, characterEncoding);
             writer = new PrintWriter(new DelegatingWriter(super.getWriter(), targetWriter));
         }
         return writer;
@@ -134,19 +134,12 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
             final byte[] data = content.toByteArray();
             return "gzip".equalsIgnoreCase(getHeader("Content-Encoding")) ? gunzip(data) : data;
         } catch (IOException e) {
-            throw new RuntimeException("Problem getting content", e);
+            throw new RamlCheckerException("Problem getting content", e);
         }
     }
 
     private byte[] gunzip(byte[] gzipped) throws IOException {
-        final GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(gzipped));
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final byte[] buf = new byte[1000];
-        int read;
-        while ((read = gzip.read(buf)) > 0) {
-            out.write(buf, 0, read);
-        }
-        return out.toByteArray();
+        return IoUtils.readIntoByteArray(new GZIPInputStream(new ByteArrayInputStream(gzipped)));
     }
 
     @Override

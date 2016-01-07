@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNull;
  * Wait for https://github.com/raml-org/raml-java-parser/issues/80 to be fixed.
  */
 public class IncludeTest extends HighlevelTestBase {
-    private RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("include.raml");
+    private final RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("include.raml");
 
     @Test
     public void load() throws Exception {

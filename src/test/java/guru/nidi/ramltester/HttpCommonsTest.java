@@ -37,7 +37,7 @@ import static org.junit.Assert.assertTrue;
  *
  */
 public class HttpCommonsTest extends ServerTest {
-    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
+    private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     private static RamlHttpClient client = RamlLoaders
             .fromClasspath(SimpleTest.class).load("httpCommons.raml")
@@ -46,7 +46,7 @@ public class HttpCommonsTest extends ServerTest {
             .aggregating(aggregator);
 
     @ClassRule
-    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
+    public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @Override
     protected int port() {

@@ -50,9 +50,9 @@ public class SecurityTest extends HighlevelTestBase {
     @Test
     public void dontAllowMixSecuritySchemas() throws Exception {
         assertRequestViolationsThat(test(
-                        global,
-                        get("/sec12").header("Authorization1", "1").header("Authorization2", "2"),
-                        response(200, "", null)),
+                global,
+                get("/sec12").header("Authorization1", "1").header("Authorization2", "2"),
+                response(200, "", null)),
                 either(is(equalTo("Header 'Authorization1' on action(GET /sec12) is not defined")))
                         .or(is(equalTo("Header 'Authorization2' on action(GET /sec12) is not defined")))
         );
@@ -70,9 +70,9 @@ public class SecurityTest extends HighlevelTestBase {
     @Test
     public void dontAllowSecurityElementsInUnsecured() throws Exception {
         assertOneRequestViolationThat(test(
-                        local,
-                        get("/unsec").param("access_token", "bla").header("Authorization2", "blu"),
-                        response(200, "", null)),
+                local,
+                get("/unsec").param("access_token", "bla").header("Authorization2", "blu"),
+                response(200, "", null)),
                 equalTo("Header 'Authorization2' on action(GET /unsec) is not defined"));
     }
 
@@ -96,27 +96,27 @@ public class SecurityTest extends HighlevelTestBase {
     @Test
     public void undefinedGlobalSecuritySchema() throws Exception {
         assertOneRequestViolationThat(test(
-                        undef,
-                        get("/unsec"),
-                        response(200, "", null)),
+                undef,
+                get("/unsec"),
+                response(200, "", null)),
                 equalTo("Security Scheme 'b' on Root definition is not defined"));
     }
 
     @Test
     public void undefinedResourceSecuritySchema() throws Exception {
         assertOneRequestViolationThat(test(
-                        undef,
-                        get("/sec"),
-                        response(200, "", null)),
+                undef,
+                get("/sec"),
+                response(200, "", null)),
                 equalTo("Security Scheme 'c' on resource(/sec) is not defined"));
     }
 
     @Test
     public void undefinedActionSecuritySchema() throws Exception {
         assertOneRequestViolationThat(test(
-                        undef,
-                        post("/sec"),
-                        response(200, "", null)),
+                undef,
+                post("/sec"),
+                response(200, "", null)),
                 equalTo("Security Scheme 'd' on action(POST /sec) is not defined"));
     }
 

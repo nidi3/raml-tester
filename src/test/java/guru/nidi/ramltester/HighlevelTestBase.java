@@ -124,7 +124,7 @@ public class HighlevelTestBase {
     @SafeVarargs
     protected final void assertViolationsThat(RamlViolations violations, Matcher<String>... matcher) {
         int i = 0;
-        for (String violation : violations) {
+        for (final String violation : violations) {
             assertThat(violation, matcher[i % matcher.length]);
             i++;
         }

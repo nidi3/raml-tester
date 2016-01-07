@@ -37,8 +37,8 @@ public class RamlValidationFilter implements Filter {
     @Override
     public Response filter(FilterableRequestSpecification requestSpec, FilterableResponseSpecification responseSpec,
                            FilterContext filterContext) {
-        Response response = filterContext.next(requestSpec, responseSpec);
-        RamlReport report = ramlChecker.check(new RestAssuredRamlRequest(requestSpec, filterContext), new RestAssuredRamlResponse(response));
+        final Response response = filterContext.next(requestSpec, responseSpec);
+        final RamlReport report = ramlChecker.check(new RestAssuredRamlRequest(requestSpec, filterContext), new RestAssuredRamlResponse(response));
         reportStore.storeReport(report);
         return response;
 

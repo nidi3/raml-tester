@@ -41,7 +41,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import static guru.nidi.ramltester.util.TestUtils.stringArrayMapOf;
+import static guru.nidi.ramltester.util.TestUtils.valuesOf;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 
@@ -54,10 +54,10 @@ public class JaxrsTest extends ServerTest {
     private final String uri = "http://localhost:" + port();
     private final Client client;
 
-    private static MultiReportAggregator aggregator = new MultiReportAggregator();
+    private static final MultiReportAggregator aggregator = new MultiReportAggregator();
 
     @ClassRule
-    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(raml));
+    public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(raml));
 
     public JaxrsTest(Client client) {
         this.client = client;
@@ -98,9 +98,9 @@ public class JaxrsTest extends ServerTest {
         assertEquals("\"json string\"", s);
 
         assertEquals("POST", request[0].getMethod());
-        assertEquals(stringArrayMapOf("qp", "true"), request[0].getQueryValues());
+        assertEquals(valuesOf("qp", "true"), request[0].getQueryValues());
         assertEquals(Arrays.asList("h2"), request[0].getHeaderValues().get("h"));
-        assertEquals("http://localhost:" + port() + "/app/path", request[0].getRequestUrl(null,false));
+        assertEquals("http://localhost:" + port() + "/app/path", request[0].getRequestUrl(null, false));
         assertEquals("text/plain", request[0].getContentType());
         assertArrayEquals("data".getBytes(), request[0].getContent());
 

@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
-import static guru.nidi.ramltester.util.TestUtils.stringArrayMapOf;
+import static guru.nidi.ramltester.util.TestUtils.valuesOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 /**
@@ -46,10 +46,10 @@ public class ParameterCheckerTest extends CoreTestBase {
     public void booleanType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.BOOLEAN);
-        for (String value : new String[]{"true", "false"}) {
+        for (final String value : new String[]{"true", "false"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
+        for (final String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid boolean"));
         }
@@ -59,10 +59,10 @@ public class ParameterCheckerTest extends CoreTestBase {
     public void integerType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.INTEGER);
-        for (String value : new String[]{"0", "-1", "123456789"}) {
+        for (final String value : new String[]{"0", "-1", "123456789"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
+        for (final String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid integer"));
         }
@@ -74,7 +74,7 @@ public class ParameterCheckerTest extends CoreTestBase {
         p.setType(ParamType.INTEGER);
         p.setMinimum(BigDecimal.valueOf(-5));
         p.setMaximum(BigDecimal.valueOf(666));
-        for (String value : new String[]{"-5", "0", "666"}) {
+        for (final String value : new String[]{"-5", "0", "666"}) {
             assertNoViolation(p, value);
         }
         assertOneViolationThat(p, "-6", equalTo("BaseUri parameter 'xxx' on action - Value '-6' is smaller than minimum -5"));
@@ -85,10 +85,10 @@ public class ParameterCheckerTest extends CoreTestBase {
     public void numberType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.NUMBER);
-        for (String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
+        for (final String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"", "-0", "1.", "1.123w"}) {
+        for (final String value : new String[]{"", "-0", "1.", "1.123w"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid number"));
         }
@@ -100,18 +100,18 @@ public class ParameterCheckerTest extends CoreTestBase {
         p.setType(ParamType.NUMBER);
         p.setMinimum(BigDecimal.valueOf(.05));
         p.setMaximum(BigDecimal.valueOf(666.6));
-        for (String value : new String[]{"5e-2", "0.05", "666.6"}) {
+        for (final String value : new String[]{"5e-2", "0.05", "666.6"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"4.9e-2", "0.0049999"}) {
+        for (final String value : new String[]{"4.9e-2", "0.0049999"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is smaller than minimum 0.05"));
         }
-        for (String value : new String[]{"666.60001"}) {
+        for (final String value : new String[]{"666.60001"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is bigger than maximum 666.6"));
         }
-        for (String value : new String[]{"inf", "-inf", "nan"}) {
+        for (final String value : new String[]{"inf", "-inf", "nan"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not inside any minimum/maximum"));
         }
@@ -121,10 +121,10 @@ public class ParameterCheckerTest extends CoreTestBase {
     public void dateType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.DATE);
-        for (String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
+        for (final String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
+        for (final String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a valid date"));
         }
@@ -134,7 +134,7 @@ public class ParameterCheckerTest extends CoreTestBase {
     public void stringType() {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
-        for (String value : new String[]{"aa", "12345"}) {
+        for (final String value : new String[]{"aa", "12345"}) {
             assertNoViolation(p, value);
         }
     }
@@ -154,10 +154,10 @@ public class ParameterCheckerTest extends CoreTestBase {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         p.setEnumeration(Arrays.asList("a", "b"));
-        for (String value : new String[]{"a", "b"}) {
+        for (final String value : new String[]{"a", "b"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"", "ab", "c"}) {
+        for (final String value : new String[]{"", "ab", "c"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not a member of enum '[a, b]'"));
         }
@@ -175,10 +175,10 @@ public class ParameterCheckerTest extends CoreTestBase {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         p.setPattern(pattern);
-        for (String value : new String[]{"12/a", "00/y"}) {
+        for (final String value : new String[]{"12/a", "00/y"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"", "12/z", "1/a", "99/A"}) {
+        for (final String value : new String[]{"", "12/z", "1/a", "99/A"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' does not match pattern '" + pattern + "'"));
         }
@@ -189,10 +189,10 @@ public class ParameterCheckerTest extends CoreTestBase {
         final QueryParameter p = new QueryParameter();
         p.setType(ParamType.STRING);
         p.setPattern("/\\d{2}/[a-y]/i");
-        for (String value : new String[]{"12/a", "00/y", "99/A"}) {
+        for (final String value : new String[]{"12/a", "00/y", "99/A"}) {
             assertNoViolation(p, value);
         }
-        for (String value : new String[]{"", "12/z", "1/a"}) {
+        for (final String value : new String[]{"", "12/z", "1/a"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' does not match pattern '/\\d{2}/[a-y]/i'"));
         }
@@ -200,13 +200,13 @@ public class ParameterCheckerTest extends CoreTestBase {
 
     @Test
     public void undefinedParameter() {
-        assertOneViolationThat(queryParameterMapOf(), stringArrayMapOf("a", "b"),
+        assertOneViolationThat(queryParameterMapOf(), valuesOf("a", "b"),
                 equalTo("BaseUri parameter 'a' on action is not defined"));
     }
 
     @Test
     public void illegallyRepeatedParameter() {
-        assertOneViolationThat(queryParameterMapOf("req", new QueryParameter()), stringArrayMapOf("req", new String[]{"a", "b"}),
+        assertOneViolationThat(queryParameterMapOf("req", new QueryParameter()), valuesOf("req", new String[]{"a", "b"}),
                 equalTo("BaseUri parameter 'req' on action is not repeat but found repeatedly"));
     }
 
@@ -214,14 +214,14 @@ public class ParameterCheckerTest extends CoreTestBase {
     public void allowedRepeatParameter() {
         final QueryParameter p = new QueryParameter();
         p.setRepeat(true);
-        assertNoViolation(queryParameterMapOf("rep", p), stringArrayMapOf("rep", new String[]{"a", "b"}));
+        assertNoViolation(queryParameterMapOf("rep", p), valuesOf("rep", new String[]{"a", "b"}));
     }
 
     @Test
     public void missingRequiredParameter() {
         final QueryParameter p = new QueryParameter();
         p.setRequired(true);
-        assertOneViolationThat(queryParameterMapOf("req", p), stringArrayMapOf(),
+        assertOneViolationThat(queryParameterMapOf("req", p), valuesOf(),
                 equalTo("BaseUri parameter 'req' on action is required but not found"));
     }
 

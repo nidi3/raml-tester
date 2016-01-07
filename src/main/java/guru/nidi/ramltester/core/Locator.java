@@ -23,7 +23,7 @@ import org.raml.model.Resource;
 /**
  *
  */
-class Locator {
+final class Locator {
     private Resource resource;
     private Action action;
     private MimeType requestMime;

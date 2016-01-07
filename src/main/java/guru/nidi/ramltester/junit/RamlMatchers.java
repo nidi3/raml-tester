@@ -21,7 +21,7 @@ import org.hamcrest.Matcher;
 /**
  *
  */
-public class RamlMatchers {
+public final class RamlMatchers {
     private RamlMatchers() {
     }
 

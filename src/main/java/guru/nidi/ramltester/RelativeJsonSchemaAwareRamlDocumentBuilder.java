@@ -54,11 +54,11 @@ class RelativeJsonSchemaAwareRamlDocumentBuilder extends RamlDocumentBuilder {
         final Node keyNode = nodeTuple.getKeyNode();
         if (keyNode instanceof ScalarNode) {
             final String name = ((ScalarNode) keyNode).getValue();
-            if (name.equals("schema") || name.equals("schemas")) {
-                if (schemaTuple != null) {
-                    log.warn("Internal error. Nested schema nodes.");
-                } else {
+            if ("schema".equals(name) || "schemas".equals(name)) {
+                if (schemaTuple == null) {
                     schemaTuple = nodeTuple;
+                } else {
+                    log.warn("Internal error. Nested schema nodes.");
                 }
             }
         }

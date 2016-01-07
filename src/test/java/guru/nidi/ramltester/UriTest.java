@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 @Controller
 public class UriTest extends HighlevelTestBase {
-    private RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("uri.raml");
+    private final RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("uri.raml");
     private MockMvc mockMvc;
 
     @Before

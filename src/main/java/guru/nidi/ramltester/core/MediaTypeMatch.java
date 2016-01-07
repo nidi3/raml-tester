@@ -104,7 +104,7 @@ final class MediaTypeMatch {
     }
 
     private static List<Map.Entry<MediaType, MimeType>> findBestMatches(Map<MediaType, MimeType> types, MediaType targetType) {
-        List<Map.Entry<MediaType, MimeType>> bestMatches = new ArrayList<>();
+        final List<Map.Entry<MediaType, MimeType>> bestMatches = new ArrayList<>();
         for (final Map.Entry<MediaType, MimeType> entry : types.entrySet()) {
             final int similarity = targetType.similarity(entry.getKey());
             if (bestMatches.isEmpty()) {

@@ -17,7 +17,7 @@ package guru.nidi.ramltester.core;
 
 import org.junit.Test;
 
-import static guru.nidi.ramltester.util.TestUtils.assertStringArrayMapEquals;
+import static guru.nidi.ramltester.util.TestUtils.assertValuesEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -60,7 +60,7 @@ public class VariableMatcherTest extends CoreTestBase {
         assertEquals(matches, vm.isMatch());
         assertEquals(completeMatch, vm.isCompleteMatch());
         assertEquals(suffix, vm.getSuffix());
-        assertStringArrayMapEquals(variables, vm.getVariables());
+        assertValuesEquals(variables, vm.getVariables());
     }
 
 

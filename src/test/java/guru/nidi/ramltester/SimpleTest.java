@@ -35,12 +35,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class SimpleTest extends HighlevelTestBase {
-    private static RamlDefinition simple = RamlLoaders.fromClasspath(SimpleTest.class).load("simple.raml");
-    private static RamlDefinition noBaseUri = RamlLoaders.fromClasspath(SimpleTest.class).load("noBaseUri.raml");
-    private static MultiReportAggregator aggregator = new MultiReportAggregator();
+    private static final RamlDefinition simple = RamlLoaders.fromClasspath(SimpleTest.class).load("simple.raml");
+    private static final RamlDefinition noBaseUri = RamlLoaders.fromClasspath(SimpleTest.class).load("noBaseUri.raml");
+    private static final MultiReportAggregator aggregator = new MultiReportAggregator();
 
     @ClassRule
-    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(simple), RESOURCE);
+    public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(simple), RESOURCE);
 
     @Test
     public void simpleOk() throws Exception {

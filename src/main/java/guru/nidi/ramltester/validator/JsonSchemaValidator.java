@@ -16,6 +16,7 @@
 package guru.nidi.ramltester.validator;
 
 import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBuilder;
 import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
@@ -30,6 +31,7 @@ import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 
+import java.io.IOException;
 import java.io.Reader;
 
 /**
@@ -76,7 +78,7 @@ public class JsonSchemaValidator implements SchemaValidator {
     public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
         init();
         try (final Reader s = schema) {
-            final JsonSchemaFactory factory = this.factory != null ? this.factory : JsonSchemaFactory.byDefault();
+            final JsonSchemaFactory factory = this.factory == null ? JsonSchemaFactory.byDefault() : this.factory;
             final JsonSchema jsonSchema = factory.getJsonSchema(JsonLoader.fromReader(schema));
             final ProcessingReport report = jsonSchema.validate(JsonLoader.fromReader(content));
             if (!report.isSuccess()) {
@@ -86,7 +88,7 @@ public class JsonSchemaValidator implements SchemaValidator {
                 }
                 violations.add(message.withParam(msg));
             }
-        } catch (Exception e) {
+        } catch (ProcessingException | IOException e) {
             violations.add(message.withMessageParam("jsonSchemaValidator.schema.invalid", e.getMessage()));
         }
     }

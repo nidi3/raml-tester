@@ -22,22 +22,27 @@ import java.util.*;
  *
  */
 public final class MediaType {
+    //TODO god class?
+
     public static final Comparator<MediaType> QUALITY_COMPARATOR = new Comparator<MediaType>() {
         @Override
         public int compare(MediaType m1, MediaType m2) {
-            final double diff = m2.getQualityParameter() - m1.getQualityParameter();
-            return diff < 0 ? -1 : (diff > 0 ? 1 : 0);
+            return Double.compare(m2.getQualityParameter(), m1.getQualityParameter());
         }
     };
-    public static final MediaType JSON = valueOf("application/json");
-    public static final MediaType FORM_URL_ENCODED = valueOf("application/x-www-form-urlencoded");
-    public static final MediaType MULTIPART = valueOf("multipart/form-data");
+
+    public static final MediaType
+            JSON = valueOf("application/json"),
+            FORM_URL_ENCODED = valueOf("application/x-www-form-urlencoded"),
+            MULTIPART = valueOf("multipart/form-data");
 
     private static final String CHARSET = "charset";
     private static final String WILDCARD_TYPE = "*";
-    private static final Map<String, MediaType> KNOWN_SUFFICES = new HashMap<String, MediaType>() {{
-        put("json", JSON);
-    }};
+    private static final Map<String, MediaType> KNOWN_SUFFICES = new HashMap<>();
+
+    static {
+        KNOWN_SUFFICES.put("json", JSON);
+    }
 
     private final String type;
     private final String subtype;
@@ -73,6 +78,16 @@ public final class MediaType {
             throw new InvalidMediaTypeException(mimeType, new Message("mediaType.wildcard.illegal"));
         }
 
+        final Map<String, String> parameters = parseParameters(parts);
+
+        for (final Map.Entry<String, String> entry : parameters.entrySet()) {
+            checkParameter(mimeType, entry.getKey(), entry.getValue());
+        }
+
+        return new MediaType(type, subtype, parameters);
+    }
+
+    private static Map<String, String> parseParameters(String[] parts) {
         final Map<String, String> parameters = new LinkedHashMap<>(parts.length);
         if (parts.length > 1) {
             for (int i = 1; i < parts.length; i++) {
@@ -85,12 +100,7 @@ public final class MediaType {
                 }
             }
         }
-
-        for (final Map.Entry<String, String> entry : parameters.entrySet()) {
-            checkParameter(mimeType, entry.getKey(), entry.getValue());
-        }
-
-        return new MediaType(type, subtype, parameters);
+        return parameters;
     }
 
     public double getQualityParameter() {
@@ -100,14 +110,14 @@ public final class MediaType {
 
     private static void checkParameter(String mimeType, String key, String value) {
         if ("q".equals(key)) {
-            value = unquote(value);
+            final String unquoted = unquote(value);
             try {
-                double d = Double.parseDouble(value);
+                final double d = Double.parseDouble(unquoted);
                 if (d < 0 || d > 1) {
-                    throw new InvalidMediaTypeException(mimeType, new Message("mediaType.quality.illegal", value));
+                    throw new InvalidMediaTypeException(mimeType, new Message("mediaType.quality.illegal", unquoted));
                 }
             } catch (NumberFormatException e) {
-                throw new InvalidMediaTypeException(mimeType, new Message("mediaType.quality.illegal", value));
+                throw new InvalidMediaTypeException(mimeType, new Message("mediaType.quality.illegal", unquoted));
             }
         }
     }
@@ -132,18 +142,13 @@ public final class MediaType {
     }
 
     public int similarity(MediaType other) {
+        //TODO method too complex
         if (getType().equals(other.getType())) {
             if (getSubtype().equals(other.getSubtype())) {
                 return getParameters().equals(other.getParameters()) ? 4 : 3;
             }
-            if (isWildcardSubtype() || other.isWildcardSubtype()) {
-                final String thisSuffix = findSuffix();
-                final String otherSuffix = other.findSuffix();
-                if ((thisSuffix == null && otherSuffix == null) ||
-                        (thisSuffix != null && thisSuffix.equals(otherSuffix))) {
-                    return 2;
-                }
-                return 0;
+            if (isThisOrOtherWildcardSubtype(other)) {
+                return hasSameSuffix(other) ? 2 : 0;
             }
         }
         if (isWildcardType() || other.isWildcardType()) {
@@ -176,15 +181,17 @@ public final class MediaType {
             return true;
         }
         // wildcard with suffix? e.g. application/*+xml
-        if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
-            final String thisSuffix = findSuffix();
-            final String otherSuffix = other.findSuffix();
-            if ((thisSuffix == null && otherSuffix == null) ||
-                    (thisSuffix != null && thisSuffix.equals(otherSuffix))) {
-                return true;
-            }
-        }
-        return false;
+        return isThisOrOtherWildcardSubtype(other) && hasSameSuffix(other);
+    }
+
+    private boolean isThisOrOtherWildcardSubtype(MediaType other) {
+        return isWildcardSubtype() || other.isWildcardSubtype();
+    }
+
+    private boolean hasSameSuffix(MediaType other) {
+        final String thisSuffix = findSuffix();
+        final String otherSuffix = other.findSuffix();
+        return (thisSuffix == null && otherSuffix == null) || (thisSuffix != null && thisSuffix.equals(otherSuffix));
     }
 
     private MediaType applyKnownSuffices() {

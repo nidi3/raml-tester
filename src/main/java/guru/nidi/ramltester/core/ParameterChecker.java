@@ -34,6 +34,7 @@ import java.util.regex.PatternSyntaxException;
  *
  */
 class ParameterChecker {
+    //TODO god class?
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
     private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
@@ -89,9 +90,7 @@ class ParameterChecker {
                                        Values values, Message message) {
         if (extensions.isEmpty()) {
             final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
-            for (final Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
-                listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
-            }
+            addToMapOfList(params, listParams);
             return checkListParameters(listParams, values, message);
         }
 
@@ -108,15 +107,17 @@ class ParameterChecker {
         return extensions.isEmpty() ? checkParameters(params, extensions, values, message) : ok;
     }
 
-    private Set<String> checkExtendedParameters(Map<String, ? extends AbstractParam> params, Map<String, ? extends AbstractParam> extension,
-                                                Values values, Message message, RamlViolations violations) {
-        final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
-        for (final Map.Entry<String, ? extends AbstractParam> entry : extension.entrySet()) {
-            listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
-        }
+    private void addToMapOfList(Map<String, ? extends AbstractParam> params, Map<String, List<? extends AbstractParam>> listParams) {
         for (final Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
             listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
         }
+    }
+
+    private Set<String> checkExtendedParameters(Map<String, ? extends AbstractParam> params, Map<String, ? extends AbstractParam> extension,
+                                                Values values, Message message, RamlViolations violations) {
+        final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
+        addToMapOfList(extension, listParams);
+        addToMapOfList(params, listParams);
         final ParameterChecker checker = new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
         return checker.checkListParameters(listParams, values, message);
     }
@@ -132,7 +133,7 @@ class ParameterChecker {
             final String paramName = findMatchingParamName(params.keySet(), entry.getKey());
             final List<? extends AbstractParam> parameters = params.get(paramName);
             if (parameters == null || parameters.isEmpty()) {
-                violations.addIf(!acceptUndefined(entry.getKey().toLowerCase()), namedMsg.withMessageParam("undefined"));
+                violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)), namedMsg.withMessageParam("undefined"));
             } else {
                 for (final AbstractParam parameter : parameters) {
                     violations.addIf(!parameter.isRepeat() && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
@@ -166,7 +167,7 @@ class ParameterChecker {
     }
 
     private String normalizeName(String name) {
-        return caseSensitive ? name : name.toLowerCase();
+        return caseSensitive ? name : name.toLowerCase(Locale.ENGLISH);
     }
 
     private boolean nameMatchesKeyStart(String name, String key, int wildcardPos) {
@@ -187,7 +188,7 @@ class ParameterChecker {
             if (value instanceof String) {
                 checkStringParameter(param, (String) value, detail);
             } else if (value instanceof FileValue) {
-                checkFileParameter(param, (FileValue) value, detail);
+                checkFileParameter(param, detail);
             } else {
                 throw new IllegalArgumentException("Unhandled parameter value '" + value + "' of type " + value.getClass());
             }
@@ -202,7 +203,7 @@ class ParameterChecker {
         }
     }
 
-    private void checkFileParameter(AbstractParam param, FileValue value, Message detail) {
+    private void checkFileParameter(AbstractParam param, Message detail) {
         if (param.getType() != ParamType.FILE) {
             violations.add(detail.withMessageParam("file.superfluous", param.getType()));
         }
@@ -211,53 +212,79 @@ class ParameterChecker {
     private void checkStringParameter(AbstractParam param, String value, Message detail) {
         switch (param.getType()) {
             case BOOLEAN:
-                violations.addIf(!value.equals("true") && !value.equals("false"), detail.withMessageParam("boolean.invalid"));
+                checkBoolean(value, detail);
                 break;
             case DATE:
-                try {
-                    final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
-                    dateFormat.setLenient(false);
-                    dateFormat.parse(value);
-                } catch (ParseException e) {
-                    violations.add(detail.withMessageParam("date.invalid"));
-                }
+                checkDate(value, detail);
                 break;
             case FILE:
-                violations.add(detail.withMessageParam("file.invalid"));
+                checkFile(detail);
                 break;
             case INTEGER:
-                if (INTEGER.matcher(value).matches()) {
-                    checkNumericLimits(param, new BigDecimal(value), detail);
-                } else {
-                    violations.add(detail.withMessageParam("integer.invalid"));
-                }
+                checkInteger(param, value, detail);
                 break;
             case NUMBER:
-                if (NUMBER.matcher(value).matches()) {
-                    if ((value.equals("inf") || value.equals("-inf") || value.equals("nan"))) {
-                        violations.addIf(param.getMinimum() != null || param.getMaximum() != null, detail.withMessageParam("unbound"));
-                    } else {
-                        checkNumericLimits(param, new BigDecimal(value), detail);
-                    }
-                } else {
-                    violations.add(detail.withMessageParam("number.invalid"));
-                }
+                checkNumber(param, value, detail);
                 break;
             case STRING:
-                violations.addIf(param.getEnumeration() != null && !param.getEnumeration().contains(value),
-                        detail.withMessageParam("enum.invalid", param.getEnumeration()));
-                try {
-                    violations.addIf(param.getPattern() != null && !JsRegex.matches(value, param.getPattern()),
-                            detail.withMessageParam("pattern.invalid", param.getPattern()));
-                } catch (PatternSyntaxException e) {
-                    log.warn("Could not execute regex '" + param.getPattern(), e);
-                }
-                violations.addIf(param.getMinLength() != null && value.length() < param.getMinLength(),
-                        detail.withMessageParam("length.tooSmall", param.getMinLength()));
-                violations.addIf(param.getMaxLength() != null && value.length() > param.getMaxLength(),
-                        detail.withMessageParam("length.tooBig", param.getMaxLength()));
+                checkString(param, value, detail);
                 break;
+            default:
+                throw new RamlCheckerException("Unhandled parameter type '" + param.getType() + "'");
         }
+    }
+
+    private void checkString(AbstractParam param, String value, Message detail) {
+        violations.addIf(param.getEnumeration() != null && !param.getEnumeration().contains(value),
+                detail.withMessageParam("enum.invalid", param.getEnumeration()));
+        try {
+            violations.addIf(param.getPattern() != null && !JsRegex.matches(value, param.getPattern()),
+                    detail.withMessageParam("pattern.invalid", param.getPattern()));
+        } catch (PatternSyntaxException e) {
+            log.warn("Could not execute regex '" + param.getPattern(), e);
+        }
+        violations.addIf(param.getMinLength() != null && value.length() < param.getMinLength(),
+                detail.withMessageParam("length.tooSmall", param.getMinLength()));
+        violations.addIf(param.getMaxLength() != null && value.length() > param.getMaxLength(),
+                detail.withMessageParam("length.tooBig", param.getMaxLength()));
+    }
+
+    private void checkNumber(AbstractParam param, String value, Message detail) {
+        if (NUMBER.matcher(value).matches()) {
+            if ("inf".equals(value) || "-inf".equals(value) || "nan".equals(value)) {
+                violations.addIf(param.getMinimum() != null || param.getMaximum() != null, detail.withMessageParam("unbound"));
+            } else {
+                checkNumericLimits(param, new BigDecimal(value), detail);
+            }
+        } else {
+            violations.add(detail.withMessageParam("number.invalid"));
+        }
+    }
+
+    private void checkInteger(AbstractParam param, String value, Message detail) {
+        if (INTEGER.matcher(value).matches()) {
+            checkNumericLimits(param, new BigDecimal(value), detail);
+        } else {
+            violations.add(detail.withMessageParam("integer.invalid"));
+        }
+    }
+
+    private void checkFile(Message detail) {
+        violations.add(detail.withMessageParam("file.invalid"));
+    }
+
+    private void checkDate(String value, Message detail) {
+        try {
+            final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
+            dateFormat.setLenient(false);
+            dateFormat.parse(value);
+        } catch (ParseException e) {
+            violations.add(detail.withMessageParam("date.invalid"));
+        }
+    }
+
+    private void checkBoolean(String value, Message detail) {
+        violations.addIf(!"true".equals(value) && !"false".equals(value), detail.withMessageParam("boolean.invalid"));
     }
 
     private void checkNumericLimits(AbstractParam param, BigDecimal value, Message message) {

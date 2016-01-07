@@ -81,8 +81,7 @@ public class RamlViolations implements Iterable<String> {
             return false;
         }
 
-        RamlViolations that = (RamlViolations) o;
-
+        final RamlViolations that = (RamlViolations) o;
         return violations.equals(that.violations);
 
     }

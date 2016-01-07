@@ -21,6 +21,8 @@ import java.util.*;
  *
  */
 public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
+    //TODO god class?
+
     private final Map<String, Resource> resources = new HashMap<>();
 
     private static <T> T getOrCreate(Class<T> clazz, Map<String, T> map, String name) {
@@ -30,7 +32,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
                 res = clazz.newInstance();
                 map.put(name, res);
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw new RamlCheckerException("Could not create instance of " + clazz, e);
             }
         }
         return res;
@@ -83,100 +85,29 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
         return res;
     }
 
-    private interface ActionCollector {
-        void collect(String key, Action action, Set<String> result);
-    }
-
-    private Set<String> collect(ActionCollector actionCollector) {
-        final Set<String> res = new HashSet<>();
-        for (final Map.Entry<String, Resource> resourceEntry : this) {
-            for (final Map.Entry<String, Action> actionEntry : resourceEntry.getValue()) {
-                actionCollector.collect(actionEntry.getKey() + " " + resourceEntry.getKey(), actionEntry.getValue(), res);
-            }
-        }
-        return res;
-    }
-
     public Set<String> getUnusedActions() {
-        return collect(new ActionCollector() {
-            @Override
-            public void collect(String key, Action action, Set<String> result) {
-                if (action.getUses() == 0) {
-                    result.add(key);
-                }
-            }
-        });
+        return UsageCollector.ACTION.collect(this);
     }
 
     public Set<String> getUnusedQueryParameters() {
-        return collect(new ActionCollector() {
-            @Override
-            public void collect(String key, Action action, Set<String> result) {
-                for (final Map.Entry<String, Integer> queryEntry : action.getQueryParameters().values()) {
-                    if (queryEntry.getValue() == 0) {
-                        result.add(queryEntry.getKey() + " in " + key);
-                    }
-                }
-            }
-        });
+        return UsageCollector.QUERY_PARAM.collect(this);
     }
 
     public Set<String> getUnusedFormParameters() {
-        return collect(new ActionCollector() {
-            @Override
-            public void collect(String key, Action action, Set<String> result) {
-                for (final Map.Entry<String, MimeType> mimeTypeEntry : action.mimeTypes()) {
-                    for (final Map.Entry<String, Integer> formEntry : mimeTypeEntry.getValue().getFormParameters().values()) {
-                        if (formEntry.getValue() == 0) {
-                            result.add(formEntry.getKey() + " in " + key + " (" + mimeTypeEntry.getKey() + ")");
-                        }
-                    }
-                }
-            }
-        });
+        return UsageCollector.FORM_PARAM.collect(this);
     }
 
     public Set<String> getUnusedRequestHeaders() {
-        return collect(new ActionCollector() {
-            @Override
-            public void collect(String key, Action action, Set<String> result) {
-                for (final Map.Entry<String, Integer> requestEntry : action.getRequestHeaders().values()) {
-                    if (requestEntry.getValue() == 0) {
-                        result.add(requestEntry.getKey() + " in " + key);
-                    }
-                }
-            }
-        });
+        return UsageCollector.REQUEST_HEADER.collect(this);
     }
 
     public Set<String> getUnusedResponseHeaders() {
-        return collect(new ActionCollector() {
-            @Override
-            public void collect(String key, Action action, Set<String> result) {
-                for (final Map.Entry<String, Response> responseEntry : action.responses()) {
-                    for (final Map.Entry<String, Integer> headerEntry : responseEntry.getValue().getResponseHeaders().values()) {
-                        if (headerEntry.getValue() == 0) {
-                            result.add(headerEntry.getKey() + " in " + key + " -> " + responseEntry.getKey());
-                        }
-                    }
-                }
-            }
-        });
+        return UsageCollector.RESPONSE_HEADER.collect(this);
     }
 
     public Set<String> getUnusedResponseCodes() {
-        return collect(new ActionCollector() {
-            @Override
-            public void collect(String key, Action action, Set<String> result) {
-                for (final Map.Entry<String, Integer> responseCodeEntry : action.getResponseCodes().values()) {
-                    if (responseCodeEntry.getValue() == 0) {
-                        result.add(responseCodeEntry.getKey() + " in " + key);
-                    }
-                }
-            }
-        });
+        return UsageCollector.RESPONSE_CODE.collect(this);
     }
-
 
     static class UsageBase {
         private int uses;

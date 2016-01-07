@@ -34,10 +34,10 @@ final class CheckerHelper {
     }
 
     public static Protocol protocolOf(String s) {
-        if (s.equalsIgnoreCase("http")) {
+        if ("http".equalsIgnoreCase(s)) {
             return Protocol.HTTP;
         }
-        if (s.equalsIgnoreCase("https")) {
+        if ("https".equalsIgnoreCase(s)) {
             return Protocol.HTTPS;
         }
         return null;
@@ -97,7 +97,7 @@ final class CheckerHelper {
         private final VariableMatcher match;
         private final Resource resource;
 
-        private ResourceMatch(VariableMatcher match, Resource resource) {
+        public ResourceMatch(VariableMatcher match, Resource resource) {
             this.match = match;
             this.resource = resource;
         }
@@ -147,13 +147,13 @@ final class CheckerHelper {
     }
 
     public static Response findResponse(Action action, int status, SecurityExtractor security) {
-        Response res = action.getResponses().get("" + status);
+        Response res = action.getResponses().get(Integer.toString(status));
         if (res == null) {
             final Iterator<Map<String, Response>> iter = security.responses().iterator();
             //there could be more that 1 matching response, problem?
             while (iter.hasNext()) {
                 final Map<String, Response> resMap = iter.next();
-                res = resMap.get("" + status);
+                res = resMap.get(Integer.toString(status));
                 if (res == null) {
                     iter.remove();
                 }

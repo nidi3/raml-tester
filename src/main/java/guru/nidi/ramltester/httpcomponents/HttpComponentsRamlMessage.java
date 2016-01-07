@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.httpcomponents;
 
+import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.IoUtils;
 import org.apache.http.*;
@@ -25,11 +26,7 @@ import java.io.IOException;
 /**
  *
  */
-abstract class HttpComponentsRamlMessage {
-    protected String encodingOf(HttpEntity entity) {
-        return entity.getContentEncoding() == null ? "utf-8" : entity.getContentEncoding().getValue();
-    }
-
+class HttpComponentsRamlMessage {
     protected String contentTypeOf(HttpMessage message) {
         final Header contentType = message.getFirstHeader("Content-Type");
         return contentType == null ? null : contentType.getValue();
@@ -63,7 +60,7 @@ abstract class HttpComponentsRamlMessage {
         try {
             return new BufferedHttpEntity(entity);
         } catch (IOException e) {
-            throw new RuntimeException("Could not read content of entity", e);
+            throw new RamlCheckerException("Could not read content of entity", e);
         }
     }
 
@@ -71,7 +68,7 @@ abstract class HttpComponentsRamlMessage {
         try {
             return entity == null ? null : IoUtils.readIntoByteArray(entity.getContent());
         } catch (IOException e) {
-            throw new RuntimeException("Could not get response content", e);
+            throw new RamlCheckerException("Could not get response content", e);
         }
     }
 }

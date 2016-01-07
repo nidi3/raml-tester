@@ -28,11 +28,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class FormTest extends HighlevelTestBase {
-    private static RamlDefinition form = RamlLoaders.fromClasspath(QueryParameterTest.class).load("form.raml");
-    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
+    private static final RamlDefinition form = RamlLoaders.fromClasspath(QueryParameterTest.class).load("form.raml");
+    private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     @ClassRule
-    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
+    public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @Test
     public void formTest() throws Exception {
@@ -45,9 +45,9 @@ public class FormTest extends HighlevelTestBase {
     @Test
     public void undefinedParam() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        form,
-                        post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("hula", "a+b"),
-                        response(200, "", null)),
+                form,
+                post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("hula", "a+b"),
+                response(200, "", null)),
                 equalTo("Form parameter 'hula' on action(POST /form) mime-type('application/x-www-form-urlencoded') is not defined")
         );
     }
@@ -55,9 +55,9 @@ public class FormTest extends HighlevelTestBase {
     @Test
     public void noContentType() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        form,
-                        post("/form").content("param=a+b"),
-                        response(200, "", null)),
+                form,
+                post("/form").content("param=a+b"),
+                response(200, "", null)),
                 equalTo("No Content-Type header given")
         );
     }
@@ -65,9 +65,9 @@ public class FormTest extends HighlevelTestBase {
     @Test
     public void formWithoutFormParameters() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        form,
-                        post("/form/parameterless").contentType(MediaType.APPLICATION_FORM_URLENCODED),
-                        response(200, "", null)),
+                form,
+                post("/form/parameterless").contentType(MediaType.APPLICATION_FORM_URLENCODED),
+                response(200, "", null)),
                 equalTo("No formParameters given on action(POST /form/parameterless) mime-type('application/x-www-form-urlencoded')")
         );
     }
@@ -80,9 +80,9 @@ public class FormTest extends HighlevelTestBase {
                 .load("form.raml");
 
         assertOneRequestViolationThat(test(aggregator,
-                        form,
-                        post("/form/schema").contentType(MediaType.APPLICATION_FORM_URLENCODED),
-                        response(200, "", null)),
+                form,
+                post("/form/schema").contentType(MediaType.APPLICATION_FORM_URLENCODED),
+                response(200, "", null)),
                 equalTo("No schema allowed on action(POST /form/schema) mime-type('application/x-www-form-urlencoded')")
         );
     }

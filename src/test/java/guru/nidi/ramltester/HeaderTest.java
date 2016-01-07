@@ -27,18 +27,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  *
  */
 public class HeaderTest extends HighlevelTestBase {
-    private static RamlDefinition header = RamlLoaders.fromClasspath(HeaderTest.class).load("header.raml");
-    private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
+    private static final RamlDefinition header = RamlLoaders.fromClasspath(HeaderTest.class).load("header.raml");
+    private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     @ClassRule
-    public static ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
+    public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
     @Test
     public void undefinedRequestHeader() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        header,
-                        get("/data").header("a", "b"),
-                        jsonResponse(200, "\"hula\"")),
+                header,
+                get("/data").header("a", "b"),
+                jsonResponse(200, "\"hula\"")),
                 equalTo("Header 'a' on action(GET /data) is not defined")
         );
     }
@@ -46,9 +46,9 @@ public class HeaderTest extends HighlevelTestBase {
     @Test
     public void illegallyRepeatRequestHeader() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        header,
-                        get("/header").header("req", "1").header("req", "2"),
-                        jsonResponse(200, "\"hula\"")),
+                header,
+                get("/header").header("req", "1").header("req", "2"),
+                jsonResponse(200, "\"hula\"")),
                 equalTo("Header 'req' on action(GET /header) is not repeat but found repeatedly")
         );
     }
@@ -64,9 +64,9 @@ public class HeaderTest extends HighlevelTestBase {
     @Test
     public void missingRequiredRequestHeader() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        header,
-                        get("/header"),
-                        jsonResponse(200, "\"hula\"")),
+                header,
+                get("/header"),
+                jsonResponse(200, "\"hula\"")),
                 equalTo("Header 'req' on action(GET /header) is required but not found")
         );
     }
@@ -82,9 +82,9 @@ public class HeaderTest extends HighlevelTestBase {
     @Test
     public void missingRequiredWildcardRequestHeader() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        header,
-                        get("/header/reqwild"),
-                        jsonResponse(200)),
+                header,
+                get("/header/reqwild"),
+                jsonResponse(200)),
                 equalTo("Header 'x-{?}' on action(GET /header/reqwild) is required but not found")
         );
     }
@@ -102,9 +102,9 @@ public class HeaderTest extends HighlevelTestBase {
         final MockHttpServletResponse response = jsonResponse(200, "\"hula\"");
         response.addHeader("a", "b");
         assertOneResponseViolationThat(test(aggregator,
-                        header,
-                        get("/data"),
-                        response),
+                header,
+                get("/data"),
+                response),
                 equalTo("Header 'a' on action(GET /data) response(200) is not defined")
         );
     }
@@ -115,9 +115,9 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("req", "1");
         response.addHeader("req", "2");
         assertOneResponseViolationThat(test(aggregator,
-                        header,
-                        get("/resheader"),
-                        response),
+                header,
+                get("/resheader"),
+                response),
                 equalTo("Header 'req' on action(GET /resheader) response(200) is not repeat but found repeatedly")
         );
     }
@@ -137,9 +137,9 @@ public class HeaderTest extends HighlevelTestBase {
     @Test
     public void missingRequiredResponseHeader() throws Exception {
         assertOneResponseViolationThat(test(aggregator,
-                        header,
-                        get("/resheader"),
-                        jsonResponse(200, "\"hula\"")),
+                header,
+                get("/resheader"),
+                jsonResponse(200, "\"hula\"")),
                 equalTo("Header 'req' on action(GET /resheader) response(200) is required but not found")
         );
     }
@@ -159,9 +159,9 @@ public class HeaderTest extends HighlevelTestBase {
     @Test
     public void missingRequiredWildcardResponseHeader() throws Exception {
         assertOneResponseViolationThat(test(aggregator,
-                        header,
-                        get("/resheader/reqwild"),
-                        jsonResponse(200)),
+                header,
+                get("/resheader/reqwild"),
+                jsonResponse(200)),
                 equalTo("Header 'x-{?}' on action(GET /resheader/reqwild) response(200) is required but not found")
         );
     }
@@ -199,9 +199,9 @@ public class HeaderTest extends HighlevelTestBase {
     @Test
     public void notIgnoreXrequestHeadersIfGiven() throws Exception {
         assertOneRequestViolationThat(test(aggregator,
-                        header.ignoringXheaders(),
-                        get("/header/xint").header("x-int", "blu").header("x-ig", "nix"),
-                        jsonResponse(200)),
+                header.ignoringXheaders(),
+                get("/header/xint").header("x-int", "blu").header("x-ig", "nix"),
+                jsonResponse(200)),
                 equalTo("Header 'x-int' on action(GET /header/xint) - Value 'blu' is not a valid integer"));
     }
 
@@ -211,9 +211,9 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("x-int", "blu");
         response.addHeader("x-ig", "nix");
         assertOneResponseViolationThat(test(aggregator,
-                        header.ignoringXheaders(),
-                        get("/header/xint"),
-                        response),
+                header.ignoringXheaders(),
+                get("/header/xint"),
+                response),
                 equalTo("Header 'x-int' on action(GET /header/xint) response(200) - Value 'blu' is not a valid integer"));
     }
 

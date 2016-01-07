@@ -15,8 +15,10 @@
  */
 package guru.nidi.ramltester.spring;
 
+import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.IoUtils;
 import guru.nidi.ramltester.util.UriComponents;
@@ -27,7 +29,6 @@ import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public class SpringMockRamlRequest implements RamlRequest {
 
     @Override
     public String getRequestUrl(String baseUri, boolean includeServletPath) {
-        return baseUri != null ? baseUri + delegate.getPathInfo() : delegate.getRequestURL().toString();
+        return baseUri == null ? delegate.getRequestURL().toString() : (baseUri + delegate.getPathInfo());
     }
 
     @Override
@@ -57,7 +58,7 @@ public class SpringMockRamlRequest implements RamlRequest {
         try {
             return UriComponents.parseQuery(q == null ? null : UriUtils.decode(q, "utf-8"));
         } catch (UnsupportedEncodingException e) {
-            throw new AssertionError("Cannot happen");
+            throw new AssertionError("Cannot happen", e);
         }
     }
 
@@ -66,7 +67,7 @@ public class SpringMockRamlRequest implements RamlRequest {
         final Values values = new Values(delegate.getParameterMap());
         if (delegate instanceof MockMultipartHttpServletRequest) {
             for (final Map.Entry<String, List<MultipartFile>> entry : ((MockMultipartHttpServletRequest) delegate).getMultiFileMap().entrySet()) {
-                for (final MultipartFile file : entry.getValue()) {
+                for (int i = 0; i < entry.getValue().size(); i++) {
                     values.addValue(entry.getKey(), new FileValue());
                 }
             }
@@ -76,16 +77,7 @@ public class SpringMockRamlRequest implements RamlRequest {
 
     @Override
     public Values getHeaderValues() {
-        final Values headers = new Values();
-        final Enumeration<String> names = delegate.getHeaderNames();
-        while (names.hasMoreElements()) {
-            final String name = names.nextElement();
-            final Enumeration<String> values = delegate.getHeaders(name);
-            while (values.hasMoreElements()) {
-                headers.addValue(name, values.nextElement());
-            }
-        }
-        return headers;
+        return ServletRamlRequest.getHeaderValues(delegate);
     }
 
     @Override
@@ -98,7 +90,7 @@ public class SpringMockRamlRequest implements RamlRequest {
         try {
             return IoUtils.readIntoByteArray(delegate.getInputStream());
         } catch (IOException e) {
-            throw new RuntimeException("Could not read request body", e);
+            throw new RamlCheckerException("Could not read request body", e);
         }
     }
 }

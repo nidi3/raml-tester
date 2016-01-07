@@ -17,6 +17,7 @@ package guru.nidi.ramltester.util;
 
 import guru.nidi.ramltester.model.Values;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,14 @@ import java.util.regex.Pattern;
  *
  */
 public final class UriComponents {
+    private final String scheme;
+    private final String userInfo;
+    private final String host;
+    private final Integer port;
+    private final String path;
+    private final String queryString;
+    private final Values queryParameters;
+
     private static final class HttpUrl {
         private static final String
                 HTTP = "(?i)(http|https):",
@@ -56,14 +65,6 @@ public final class UriComponents {
                 GROUP_VALUE = 3;
     }
 
-    private final String scheme;
-    private final String userInfo;
-    private final String host;
-    private final Integer port;
-    private final String path;
-    private final String queryString;
-    private final Values queryParameters;
-
     private UriComponents(String scheme, String userInfo, String host, Integer port, String path, String query) {
         this.scheme = scheme;
         this.userInfo = userInfo;
@@ -77,8 +78,7 @@ public final class UriComponents {
     public static UriComponents fromHttpUrl(String httpUrl) {
         final Matcher m = HttpUrl.PATTERN.matcher(httpUrl);
         if (m.matches()) {
-            final String scheme = m.group(HttpUrl.GROUP_SCHEME) == null ? null : m.group(HttpUrl.GROUP_SCHEME).toLowerCase();
-            final String userInfo = m.group(HttpUrl.GROUP_USER);
+            final String scheme = m.group(HttpUrl.GROUP_SCHEME) == null ? null : m.group(HttpUrl.GROUP_SCHEME).toLowerCase(Locale.ENGLISH);
             final String host = m.group(HttpUrl.GROUP_HOST);
             if (scheme != null && scheme.length() > 0 && (host == null || host.length() == 0)) {
                 throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
@@ -89,6 +89,7 @@ public final class UriComponents {
                     : null;
             final String path = m.group(HttpUrl.GROUP_PATH);
             final String query = m.group(HttpUrl.GROUP_QUERY);
+            final String userInfo = m.group(HttpUrl.GROUP_USER);
 
             return new UriComponents(scheme, userInfo, host, port, path, query);
         } else {

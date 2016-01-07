@@ -23,6 +23,7 @@ import java.io.OutputStream;
  *
  */
 class SavingOutputStream extends OutputStream {
+    //TODO no similar code extraction between SavingOutputStream, DelegatingServletOutputStream, DelegatingWriter?
     private final OutputStream delegate;
     private final ByteArrayOutputStream saved;
 
@@ -37,14 +38,14 @@ class SavingOutputStream extends OutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        IOException e1 = null, e2 = null;
+        IOException e1 = null;
         try {
             delegate.write(b);
         } catch (IOException e) {
             e1 = e;
         }
         saved.write(b);
-        throwIfNeeded(e1, e2);
+        throwIfNeeded(e1, null);
     }
 
     @Override
@@ -65,14 +66,14 @@ class SavingOutputStream extends OutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        IOException e1 = null, e2 = null;
+        IOException e1 = null;
         try {
             delegate.write(b, off, len);
         } catch (IOException e) {
             e1 = e;
         }
         saved.write(b, off, len);
-        throwIfNeeded(e1, e2);
+        throwIfNeeded(e1, null);
     }
 
     @Override

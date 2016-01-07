@@ -20,7 +20,7 @@ import java.util.*;
 /**
  *
  */
-public class Values implements Iterable<Map.Entry<String, List<Object>>> {
+public final class Values implements Iterable<Map.Entry<String, List<Object>>> {
     private final Map<String, List<Object>> values = new HashMap<>();
 
     public Values() {
@@ -91,12 +91,8 @@ public class Values implements Iterable<Map.Entry<String, List<Object>>> {
         }
 
         final Values values1 = (Values) o;
+        return values.equals(values1.values);
 
-        if (!values.equals(values1.values)) {
-            return false;
-        }
-
-        return true;
     }
 
     @Override

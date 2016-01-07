@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.util;
+package guru.nidi.ramltester.core;
 
 /**
  *
  */
-public final class FileValue {
-    @Override
-    public int hashCode() {
-        return 0;
+public class RamlCheckerException extends RuntimeException {
+    public RamlCheckerException(String message) {
+        super(message);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj != null && obj.getClass() == FileValue.class;
+    public RamlCheckerException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
