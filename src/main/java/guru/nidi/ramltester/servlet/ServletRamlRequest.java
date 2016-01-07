@@ -93,7 +93,6 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
     public BufferedReader getReader() throws IOException {
         readContentIfNeeded();
         final InputStreamReader in = getCharacterEncoding() == null
-                //TODO is default encoding correct?
                 ? new InputStreamReader(new ByteArrayInputStream(content))
                 : new InputStreamReader(new ByteArrayInputStream(content), getCharacterEncoding());
         return new BufferedReader(in);

@@ -98,7 +98,8 @@ public class CodeAnalysisTest {
                 .because("is in test").ignore(
                         "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", "DM_DEFAULT_ENCODING", "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR").in(
                         "*Test")
-                .because("these are marked with TODOs").ignore(
+                //TODO
+                .because("TODO").ignore(
                         "DM_DEFAULT_ENCODING").in(
                         "RestAssuredRamlRequest", "ServletRamlRequest", "ServletRamlResponse")
                 .because("arrays are only used internally").ignore(
@@ -152,13 +153,16 @@ public class CodeAnalysisTest {
                 .because("it's style").ignore(
                         "CollapsibleIfStatements").in(
                         "RamlValidatorChecker")
-                .because("It's marked with a TODO").ignore(
+                //TODO
+                .because("TODO").ignore(
                         "GodClass").in(
                         "ParameterChecker", "Usage", "MediaType")
-                .because("It's marked with a TODO").ignore(
+                //TODO
+                .because("TODO").ignore(
                         "CyclomaticComplexity", "NPathComplexity").in(
                         "VariableMatcher", "MediaType")
-                .because("It's marked with a TODO").ignore(
+                //TODO
+                .because("TODO").ignore(
                         "AvoidDeeplyNestedIfStmts").in(
                         "ContentNegotiationChecker")
                 .because("is in test").ignore(
@@ -178,7 +182,8 @@ public class CodeAnalysisTest {
         final MatchCollector collector = new MatchCollector()
                 .because("there's no common superclass").ignore(
                         "DelegatingServletOutputStream", "DelegatingWriter")
-                .because("It's marked with a TODO").ignore(
+                //TODO
+                .because("TODO").ignore(
                         "SavingOutputStream", "DelegatingServletOutputStream", "DelegatingWriter")
                 .because("java...").ignore(
                         "UsageCollector", "SecurityExtractor")

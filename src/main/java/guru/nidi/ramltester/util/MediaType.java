@@ -22,8 +22,6 @@ import java.util.*;
  *
  */
 public final class MediaType {
-    //TODO god class?
-
     public static final Comparator<MediaType> QUALITY_COMPARATOR = new Comparator<MediaType>() {
         @Override
         public int compare(MediaType m1, MediaType m2) {
@@ -142,7 +140,6 @@ public final class MediaType {
     }
 
     public int similarity(MediaType other) {
-        //TODO method too complex
         if (getType().equals(other.getType())) {
             if (getSubtype().equals(other.getSubtype())) {
                 return getParameters().equals(other.getParameters()) ? 4 : 3;

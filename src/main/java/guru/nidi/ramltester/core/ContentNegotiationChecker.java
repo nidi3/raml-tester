@@ -38,7 +38,6 @@ class ContentNegotiationChecker {
     }
 
     public void check(RamlRequest request, RamlResponse response, Action action, MediaTypeMatch typeMatch) {
-        //TODO method too complex
         final String accept = acceptHeader(request, response, typeMatch);
         if (accept == null) {
             return;

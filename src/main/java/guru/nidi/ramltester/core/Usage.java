@@ -21,8 +21,6 @@ import java.util.*;
  *
  */
 public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
-    //TODO god class?
-
     private final Map<String, Resource> resources = new HashMap<>();
 
     private static <T> T getOrCreate(Class<T> clazz, Map<String, T> map, String name) {

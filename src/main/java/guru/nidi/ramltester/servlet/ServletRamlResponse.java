@@ -111,7 +111,6 @@ public class ServletRamlResponse extends HttpServletResponseWrapper implements R
     public PrintWriter getWriter() throws IOException {
         if (writer == null) {
             final Writer targetWriter = characterEncoding == null
-                    //TODO is default encoding correct?
                     ? new OutputStreamWriter(content)
                     : new OutputStreamWriter(content, characterEncoding);
             writer = new PrintWriter(new DelegatingWriter(super.getWriter(), targetWriter));

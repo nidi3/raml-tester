@@ -42,7 +42,6 @@ class RestAssuredRamlRequest extends RestAssuredRamlMessage implements RamlReque
     @Override
     public byte[] getContent() {
         final String body = requestSpec.getBody();
-        //TODO is default encoding correct?
         return body == null ? null : body.getBytes();
     }
 

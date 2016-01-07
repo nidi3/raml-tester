@@ -23,7 +23,6 @@ import java.io.OutputStream;
  *
  */
 class SavingOutputStream extends OutputStream {
-    //TODO no similar code extraction between SavingOutputStream, DelegatingServletOutputStream, DelegatingWriter?
     private final OutputStream delegate;
     private final ByteArrayOutputStream saved;
 

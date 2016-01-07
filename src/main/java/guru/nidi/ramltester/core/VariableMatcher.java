@@ -34,7 +34,6 @@ final class VariableMatcher {
     }
 
     public static VariableMatcher match(String pattern, String value) {
-        //TODO method too complex
         final Values variables = new Values();
         int patternPos = 0, valuePos = 0;
         while (patternPos < pattern.length() && valuePos < value.length()) {

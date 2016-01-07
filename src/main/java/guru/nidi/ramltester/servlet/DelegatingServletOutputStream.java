@@ -23,7 +23,6 @@ import java.io.OutputStream;
  *
  */
 class DelegatingServletOutputStream extends ServletOutputStream {
-    //TODO no similar code extraction between SavingOutputStream, DelegatingServletOutputStream, DelegatingWriter?
     private final OutputStream delegate1;
     private final OutputStream delegate2;
 

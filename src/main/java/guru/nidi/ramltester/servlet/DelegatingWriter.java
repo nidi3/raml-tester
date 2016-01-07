@@ -22,7 +22,6 @@ import java.io.Writer;
  *
  */
 class DelegatingWriter extends Writer {
-    //TODO no similar code extraction between SavingOutputStream, DelegatingServletOutputStream, DelegatingWriter?
     private final Writer delegate1;
     private final Writer delegate2;
 
