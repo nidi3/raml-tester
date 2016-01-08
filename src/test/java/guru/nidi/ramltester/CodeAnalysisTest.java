@@ -18,7 +18,6 @@ package guru.nidi.ramltester;
 import edu.umd.cs.findbugs.Priorities;
 import guru.nidi.codeassert.config.AnalyzerConfig;
 import guru.nidi.codeassert.config.In;
-import guru.nidi.codeassert.config.PackageCollector;
 import guru.nidi.codeassert.dependency.DependencyRule;
 import guru.nidi.codeassert.dependency.DependencyRuler;
 import guru.nidi.codeassert.dependency.DependencyRules;
@@ -38,6 +37,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static guru.nidi.codeassert.config.PackageCollector.allPackages;
 import static guru.nidi.codeassert.dependency.DependencyMatchers.hasNoCycles;
 import static guru.nidi.codeassert.dependency.DependencyMatchers.matchesExactly;
 import static guru.nidi.codeassert.findbugs.FindBugsMatchers.findsNoBugs;
@@ -55,9 +55,9 @@ public class CodeAnalysisTest {
     @Before
     public void init() throws IOException {
         withTest = AnalyzerConfig.mavenMainAndTestClasses()
-                .collecting(PackageCollector.all().including("guru.nidi.ramltester").excludingRest());
+                .collecting(allPackages().including("guru.nidi.ramltester").excludingRest());
         withoutTest = AnalyzerConfig.mavenMainClasses()
-                .collecting(PackageCollector.all().including("guru.nidi.ramltester").excludingRest());
+                .collecting(allPackages().including("guru.nidi.ramltester").excludingRest());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class CodeAnalysisTest {
 
     @Test
     public void findBugs() {
-        final BugCollector collector = BugCollector.simple(null, Priorities.NORMAL_PRIORITY)
+        final BugCollector collector = new BugCollector().minPriority(Priorities.NORMAL_PRIORITY)
                 .because("I don't agree",
                         In.everywhere().ignore("SBSC_USE_STRINGBUFFER_CONCATENATION"))
                 .because("it's in test",
@@ -110,7 +110,7 @@ public class CodeAnalysisTest {
 
     @Test
     public void pmd() {
-        final ViolationCollector collector = ViolationCollector.simple(RulePriority.MEDIUM)
+        final ViolationCollector collector = new ViolationCollector().minPriority(RulePriority.MEDIUM)
                 .because("makes no sense",
                         In.everywhere().ignore("JUnitSpelling"))
                 .because("does not understand constants (logger is NOT)",
@@ -153,7 +153,7 @@ public class CodeAnalysisTest {
 
     @Test
     public void cpd() {
-        final MatchCollector collector = MatchCollector.simple()
+        final MatchCollector collector = new MatchCollector()
                 .because("there's no common superclass",
                         In.locs("DelegatingServletOutputStream", "DelegatingWriter").ignoreAll())
                 .because("TODO",                 //TODO
