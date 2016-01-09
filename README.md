@@ -5,14 +5,15 @@ Test if a request/response matches a given raml definition.
 
 Use in a spring MVC test
 ------------------------
+[//]: # (spring)
 ```java
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = Application.class)
-public class SimpleTest {
+public class SpringTest {
 
-    private static RamlDefinition api = RamlLoaders.fromClasspath(SimpleTest.class).load("api.raml")
-        .assumingBaseUri("http://nidi.guru/raml/simple/v1");
+    private static RamlDefinition api = RamlLoaders.fromClasspath(SpringTest.class).load("api.raml")
+            .assumingBaseUri("http://nidi.guru/raml/simple/v1");
     private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     @ClassRule
@@ -27,17 +28,17 @@ public class SimpleTest {
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
-    
+
     @Test
     public void greeting() throws Exception {
         Assert.assertThat(api.validate(), validates());
-        
+
         mockMvc.perform(get("/greeting").accept(MediaType.parseMediaType("application/json")))
                 .andExpect(api.matches().aggregating(aggregator));
     }
-
 }
 ```
+[//]: # (end)
 
 The `ExpectedUsage` rule checks if all resources, query parameters, form parameters, headers and response codes
 defined in the RAML are at least used once.
@@ -50,12 +51,13 @@ See also the [raml-tester-uc-spring](https://github.com/nidi3/raml-tester-uc-spr
 
 Use in a Java EE / JAX-RS environment
 -------------------------------------
+[//]: # (jaxrs)
 ```java
 @RunWith(Arquillian.class)
-public class SimpleTest {
+public class JaxrsTest {
 
-    private static RamlDefinition api = RamlLoaders.fromClasspath(SimpleTest.class).load("api.raml")
-        .assumingBaseUri("http://nidi.guru/raml/simple/v1");
+    private static RamlDefinition api = RamlLoaders.fromClasspath(JaxrsTest.class).load("api.raml")
+            .assumingBaseUri("http://nidi.guru/raml/simple/v1");
     private static SimpleReportAggregator aggregator = new SimpleReportAggregator();
     private static WebTarget target;
 
@@ -64,12 +66,12 @@ public class SimpleTest {
 
     @Deployment(testable = false)
     public static WebArchive createDeployment() {
-        return ShrinkWrap.create(WebArchive.class).addClass(MyApplication.class);
+        return ShrinkWrap.create(WebArchive.class).addClass(Application.class);
     }
-    
+
     @ArquillianResource
     private URL base;
-    
+
     @Before
     public void setup() throws MalformedURLException {
         Client client = ClientBuilder.newClient();
@@ -78,22 +80,23 @@ public class SimpleTest {
 
     @Test
     public void greeting() throws Exception {
-        Assert.assertThat(api.validate(), validates());
+        assertThat(api.validate(), validates());
 
         final CheckingWebTarget webTarget = api.createWebTarget(target).aggregating(aggregator);
         webTarget.request().post(Entity.text("apple"));
 
         assertThat(webTarget.getLastReport(), checks());
     }
-
 }
 ```
+[//]: # (end)
 
 The `RamlMatchers.checks()` matcher validates that the request and response conform to the RAML.
 
 
 Use in a pure servlet environment
 ---------------------------------
+[//]: # (servlet)
 ```java
 public class RamlFilter implements Filter {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -102,56 +105,66 @@ public class RamlFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
-        log.info(api.validate());
+        log.info(api.validate().toString());
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-                         throws IOException, ServletException {
+            throws IOException, ServletException {
         final RamlReport report = api.testAgainst(request, response, chain);
         log.info("Raml report: " + report);
     }
 
     @Override
-    public void destroy() {}
+    public void destroy() {
+    }
 }
-
 ```
+[//]: # (end)
+
 Or see the [raml-tester-uc-sevlet](https://github.com/nidi3/raml-tester-uc-servlet) project.
 
 Use together with Apache HttpComponents
 ---------------------------------------
+
+[//]: # (httpComponents)
 ```java
-@Test
-public void testRequest(){
-    RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
-    Assert.assertThat(api.validate(), validates());
+public class HttpComponentsTest {
+    @Test
+    public void testRequest() throws IOException {
+        RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+        Assert.assertThat(api.validate(), validates());
 
-    RamlHttpClient client = api.createHttpClient();
-    HttpGet get = new HttpGet("http://test.server/path");
-    HttpResponse response = client.execute(get);
+        RamlHttpClient client = api.createHttpClient();
+        HttpGet get = new HttpGet("http://test.server/path");
+        HttpResponse response = client.execute(get);
 
-    Assert.assertThat(client.getLastReport(), checks());
+        Assert.assertThat(client.getLastReport(), checks());
+    }
 }
-
 ```
+[//]: # (end)
+
 Or see the [raml-tester-uc-servlet](https://github.com/nidi3/raml-tester-uc-servlet) project.
 
 Use together with RestAssured
 ---------------------------------------
+[//]: # (restAssured)
 ```java
-@Test
-public void testWithRestAssured(){
-	RestAssured.baseURI = "http://test.server/path";
-	RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
-	Assert.assertThat(api.validate(), validates());
-	
-	RestAssuredClient restAssured = api.createRestAssured();
-	restAssured.given().get("/base/data").andReturn();
-	Assert.assertTrue(restAssured.getLastReport().isEmpty());
-}
+public class RestAssuredTest {
+    @Test
+    public void testWithRestAssured() {
+        RestAssured.baseURI = "http://test.server/path";
+        RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+        Assert.assertThat(api.validate(), validates());
 
+        RestAssuredClient restAssured = api.createRestAssured();
+        restAssured.given().get("/base/data").andReturn();
+        Assert.assertTrue(restAssured.getLastReport().isEmpty());
+    }
+}
 ```
+[//]: # (end)
 
 Use as a standalone proxy
 -------------------------
@@ -171,16 +184,17 @@ FailFast
 ---------------------------------------
 You can configure the RamlDefinition to throw an exception in case a violation is found.
 
+[//]: # (failFast)
 ```java
 @Test(expected = RamlViolationException.class)
 public void testInvalidResource() {
-	RestAssured.baseURI = "http://test.server/path";
-	RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
-	Assert.assertThat(api.validate(), validates());
-	
-	RestAssuredClient restAssured = api.failFast().createRestAssured();
-	restAssured.given().get("/wrong/path").andReturn();
-	fail("Should throw RamlViolationException");
-}
+    RestAssured.baseURI = "http://test.server/path";
+    RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("api.yaml");
+    Assert.assertThat(api.validate(), validates());
 
+    RestAssuredClient restAssured = api.failFast().createRestAssured();
+    restAssured.given().get("/wrong/path").andReturn();
+    fail("Should throw RamlViolationException");
+}
 ```
+[//]: # (end)

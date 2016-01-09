@@ -29,6 +29,36 @@
         <tag>HEAD</tag>
     </scm>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>guru.nidi.maven.plugins</groupId>
+                <artifactId>snippets-maven-plugin</artifactId>
+                <version>0.0.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>snippets</goal>
+                        </goals>
+                        <configuration>
+                            <inputs>
+                                <input>
+                                    src/test/java/guru/nidi/ramltester/snippets
+                                </input>
+                            </inputs>
+                            <outputs>
+                                <output>README.md</output>
+                            </outputs>
+                            <prefix>\n```java</prefix>
+                            <postfix>```\n</postfix>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>guru.nidi.raml</groupId>
@@ -202,6 +232,23 @@
             <version>${tomcat.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.arquillian.junit</groupId>
+            <artifactId>arquillian-junit-container</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+        <dependency>
+            <groupId>org.jboss.arquillian</groupId>
+            <artifactId>arquillian-bom</artifactId>
+            <version>1.1.10.Final</version>
+            <scope>import</scope>
+            <type>pom</type>
+        </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
