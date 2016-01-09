@@ -102,6 +102,8 @@ public class CodeAnalysisTest {
                         In.locs("RestAssuredRamlRequest", "ServletRamlRequest", "ServletRamlResponse").ignore("DM_DEFAULT_ENCODING"))
                 .because("arrays are only used internally",
                         In.locs("*Response", "*Request").ignore("EI_EXPOSE_REP", "EI_EXPOSE_REP2"))
+                .because("They are snippets",
+                        In.loc("guru.nidi.ramltester.snippets.*").ignoreAll())
                 .because("it's class private and only used in 1 occasion",
                         In.loc("CheckerHelper$ResourceMatch").ignore("EQ_COMPARETO_USE_OBJECT_EQUALS"));
         final FindBugsAnalyzer analyzer = new FindBugsAnalyzer(withTest, collector);
@@ -140,6 +142,8 @@ public class CodeAnalysisTest {
                         In.locs("ParameterChecker", "Usage", "MediaType").ignore("GodClass"),
                         In.locs("VariableMatcher", "MediaType").ignore("CyclomaticComplexity", "NPathComplexity"),
                         In.loc("ContentNegotiationChecker").ignore("AvoidDeeplyNestedIfStmts"))
+                .because("They are snippets",
+                        In.loc("guru.nidi.ramltester.snippets.*").ignoreAll())
                 .because("is in test",
                         In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"));
         final PmdAnalyzer analyzer = new PmdAnalyzer(withTest, collector)

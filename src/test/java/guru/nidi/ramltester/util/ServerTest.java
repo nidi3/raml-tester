@@ -15,7 +15,10 @@
  */
 package guru.nidi.ramltester.util;
 
-import org.apache.catalina.*;
+import org.apache.catalina.Context;
+import org.apache.catalina.Host;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.LifecycleState;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.JarScanner;
 import org.apache.tomcat.JarScannerCallback;
@@ -37,6 +40,7 @@ import java.util.Set;
  *
  */
 public abstract class ServerTest {
+    protected static final int PORT = 18765;
     private static Tomcat tomcat;
     private static Set<Class<?>> inited = new HashSet<>();
     private final static JarScanner NO_SCAN = new JarScanner() {
@@ -53,21 +57,17 @@ public abstract class ServerTest {
             SLF4JBridgeHandler.install();
 
             tomcat = new Tomcat();
-            tomcat.setPort(port());
+            tomcat.setPort(PORT);
             tomcat.setBaseDir(".");
-            final Context ctx = tomcat.addWebapp("/", "src/test");
+            final Context ctx = tomcat.addWebapp("", "src/test");
             ctx.setJarScanner(NO_SCAN);
             ((Host) ctx.getParent()).setAppBase("");
 
             init(ctx);
 
             tomcat.start();
-            final Server server = tomcat.getServer();
-            server.start();
         }
     }
-
-    protected abstract int port();
 
     protected void init(Context ctx) {
     }
@@ -77,7 +77,7 @@ public abstract class ServerTest {
     }
 
     protected String baseUrlWithPort() {
-        return baseUrl() + ":" + port();
+        return baseUrl() + ":" +PORT;
     }
 
     protected String baseUrl() {

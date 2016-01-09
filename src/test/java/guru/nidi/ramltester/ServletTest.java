@@ -58,11 +58,6 @@ public class ServletTest extends ServerTest {
         client = HttpClientBuilder.create().build();
     }
 
-    @Override
-    protected int port() {
-        return 8083;
-    }
-
     @Test
     public void testServletOk() throws IOException {
         final HttpGet get = new HttpGet(url("data"));

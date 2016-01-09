@@ -81,11 +81,6 @@ public class ServletRamlMessageTest extends ServerTest {
         client = HttpClientBuilder.create().build();
     }
 
-    @Override
-    protected int port() {
-        return 8084;
-    }
-
     interface MessageTester {
         void test(HttpServletRequest servletRequest, HttpServletResponse servletResponse, RamlRequest ramlRequest, RamlResponse ramlResponse) throws IOException;
     }

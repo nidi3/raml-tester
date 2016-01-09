@@ -48,11 +48,6 @@ public class HttpCommonsTest extends ServerTest {
     @ClassRule
     public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator);
 
-    @Override
-    protected int port() {
-        return 8082;
-    }
-
     @Test
     public void testServletOk() throws IOException {
         final HttpGet get = new HttpGet(url("base/data"));

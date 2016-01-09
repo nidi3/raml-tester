@@ -71,11 +71,6 @@ public class RestTemplateTest extends ServerTest {
     }
 
     @Override
-    protected int port() {
-        return 8081;
-    }
-
-    @Override
     protected void init(Context ctx) {
         final AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
         appCtx.register(getClass());

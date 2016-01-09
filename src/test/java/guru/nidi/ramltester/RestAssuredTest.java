@@ -50,11 +50,6 @@ public class RestAssuredTest extends ServerTest {
         restAssured = api.createRestAssured();
     }
 
-    @Override
-    protected int port() {
-        return 8082;
-    }
-
     @Test
     public void testServletOk() throws IOException {
         restAssured.given().get("/base/data").andReturn();
@@ -75,7 +70,7 @@ public class RestAssuredTest extends ServerTest {
     @Test
     public void testWithPortAndPath() throws IOException {
         RestAssured.baseURI = baseUrl();
-        RestAssured.port = port();
+        RestAssured.port = PORT;
         restAssured.given().get("/base/data").andReturn();
         assertThat(restAssured.getLastReport(), checks());
     }

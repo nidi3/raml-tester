@@ -51,7 +51,6 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class JaxrsTest extends ServerTest {
     private static final RamlDefinition raml = RamlLoaders.fromClasspath(JaxrsTest.class).load("jaxrs.raml");
-    private final String uri = "http://localhost:" + port();
     private final Client client;
 
     private static final MultiReportAggregator aggregator = new MultiReportAggregator();
@@ -70,17 +69,12 @@ public class JaxrsTest extends ServerTest {
                 new ResteasyClientBuilder().build());
     }
 
-    @Override
-    protected int port() {
-        return 8086;
-    }
-
     @Test
     public void model() {
         final RamlRequest[] request = new RamlRequest[1];
         final RamlResponse[] response = new RamlResponse[1];
 
-        final CheckingWebTarget checking = raml.createWebTarget(client.target(uri)).aggregating(aggregator);
+        final CheckingWebTarget checking = raml.createWebTarget(client.target(baseUrlWithPort())).aggregating(aggregator);
 
         checking.register(new ClientResponseFilter() {
             @Override
@@ -100,7 +94,7 @@ public class JaxrsTest extends ServerTest {
         assertEquals("POST", request[0].getMethod());
         assertEquals(valuesOf("qp", "true"), request[0].getQueryValues());
         assertEquals(Arrays.asList("h2"), request[0].getHeaderValues().get("h"));
-        assertEquals("http://localhost:" + port() + "/app/path", request[0].getRequestUrl(null, false));
+        assertEquals(url("app/path"), request[0].getRequestUrl(null, false));
         assertEquals("text/plain", request[0].getContentType());
         assertArrayEquals("data".getBytes(), request[0].getContent());
 
@@ -112,7 +106,7 @@ public class JaxrsTest extends ServerTest {
 
     @Test
     public void client() {
-        final CheckingWebTarget checking = raml.createWebTarget(client.target(uri));
+        final CheckingWebTarget checking = raml.createWebTarget(client.target(baseUrlWithPort()));
         checking.path("/app/path").queryParam("qp", "true")
                 .request().header("h", "h2")
                 .post(Entity.entity("data", "text/plain"));
