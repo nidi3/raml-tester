@@ -23,24 +23,20 @@ import guru.nidi.codeassert.dependency.DependencyRuler;
 import guru.nidi.codeassert.dependency.DependencyRules;
 import guru.nidi.codeassert.findbugs.BugCollector;
 import guru.nidi.codeassert.findbugs.FindBugsAnalyzer;
+import guru.nidi.codeassert.findbugs.FindBugsResult;
 import guru.nidi.codeassert.model.ModelAnalyzer;
-import guru.nidi.codeassert.pmd.CpdAnalyzer;
-import guru.nidi.codeassert.pmd.MatchCollector;
-import guru.nidi.codeassert.pmd.PmdAnalyzer;
-import guru.nidi.codeassert.pmd.ViolationCollector;
+import guru.nidi.codeassert.model.ModelResult;
+import guru.nidi.codeassert.pmd.*;
 import guru.nidi.ramltester.core.ParameterCheckerTest;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.MediaTypeTest;
 import net.sourceforge.pmd.RulePriority;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static guru.nidi.codeassert.config.PackageCollector.allPackages;
-import static guru.nidi.codeassert.dependency.DependencyMatchers.hasNoCycles;
-import static guru.nidi.codeassert.dependency.DependencyMatchers.matchesExactly;
-import static guru.nidi.codeassert.findbugs.FindBugsMatchers.findsNoBugs;
+import static guru.nidi.codeassert.dependency.DependencyMatchers.*;
+import static guru.nidi.codeassert.findbugs.FindBugsMatchers.hasNoBugs;
 import static guru.nidi.codeassert.pmd.PmdMatchers.hasNoDuplications;
 import static guru.nidi.codeassert.pmd.PmdMatchers.hasNoPmdViolations;
 import static guru.nidi.codeassert.pmd.Rulesets.*;
@@ -50,14 +46,24 @@ import static org.junit.Assert.assertThat;
  *
  */
 public class CodeAnalysisTest {
-    private AnalyzerConfig withTest, withoutTest;
+    private static AnalyzerConfig withTest, withoutTest;
 
-    @Before
-    public void init() throws IOException {
+    private static ModelResult modelResult;
+    private static FindBugsResult findBugsResult;
+    private static PmdResult pmdResult;
+    private static CpdResult cpdResult;
+
+    @BeforeClass
+    public static void init() {
         withTest = AnalyzerConfig.mavenMainAndTestClasses()
                 .collecting(allPackages().including("guru.nidi.ramltester").excludingRest());
         withoutTest = AnalyzerConfig.mavenMainClasses()
                 .collecting(allPackages().including("guru.nidi.ramltester").excludingRest());
+
+        modelResult = new ModelAnalyzer(withoutTest).analyze();
+        findBugsResult = findBugs();
+        pmdResult = pmd();
+        cpdResult = cpd();
     }
 
     @Test
@@ -80,16 +86,40 @@ public class CodeAnalysisTest {
         }
 
         final DependencyRules rules = DependencyRules.denyAll().withRules(new GuruNidiRamltester());
-        assertThat(new ModelAnalyzer(withoutTest), matchesExactly(rules));
+        assertThat(modelResult, matchesExactly(rules));
     }
 
     @Test
     public void noCircularDependencies() {
-        assertThat(new ModelAnalyzer(withoutTest), hasNoCycles());
+        assertThat(modelResult, hasNoCycles());
     }
 
     @Test
-    public void findBugs() {
+    public void noFindBugs() {
+        assertThat(findBugsResult, hasNoBugs());
+    }
+
+    @Test
+    public void noFindBugsUnusedActions() {
+        assertThat(findBugsResult, hasNoUnusedActions());
+    }
+
+    @Test
+    public void noPmdViolations() {
+        assertThat(pmdResult, hasNoPmdViolations());
+    }
+
+    @Test
+    public void noPmdUnusedActions() {
+        assertThat(pmdResult, hasNoUnusedActions());
+    }
+
+    @Test
+    public void noDuplications() {
+        assertThat(cpdResult, hasNoDuplications());
+    }
+
+    private static FindBugsResult findBugs() {
         final BugCollector collector = new BugCollector().minPriority(Priorities.NORMAL_PRIORITY)
                 .because("I don't agree",
                         In.everywhere().ignore("SBSC_USE_STRINGBUFFER_CONCATENATION"))
@@ -106,12 +136,10 @@ public class CodeAnalysisTest {
                         In.loc("guru.nidi.ramltester.snippets.*").ignoreAll())
                 .because("it's class private and only used in 1 occasion",
                         In.loc("CheckerHelper$ResourceMatch").ignore("EQ_COMPARETO_USE_OBJECT_EQUALS"));
-        final FindBugsAnalyzer analyzer = new FindBugsAnalyzer(withTest, collector);
-        assertThat(analyzer, findsNoBugs());
+        return new FindBugsAnalyzer(withTest, collector).analyze();
     }
 
-    @Test
-    public void pmd() {
+    private static PmdResult pmd() {
         final ViolationCollector collector = new ViolationCollector().minPriority(RulePriority.MEDIUM)
                 .because("makes no sense",
                         In.everywhere().ignore("JUnitSpelling"))
@@ -146,17 +174,16 @@ public class CodeAnalysisTest {
                         In.loc("guru.nidi.ramltester.snippets.*").ignoreAll())
                 .because("is in test",
                         In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"));
-        final PmdAnalyzer analyzer = new PmdAnalyzer(withTest, collector)
+        return new PmdAnalyzer(withTest, collector)
                 .withRuleSets(basic(), braces(), design(), exceptions(), imports(), junit(),
                         optimizations(), strings(), sunSecure(), typeResolution(), unnecessary(), unused(),
                         codesize().tooManyMethods(35),
                         empty().allowCommentedEmptyCatch(true),
-                        naming().variableLen(1, 25));
-        assertThat(analyzer, hasNoPmdViolations());
+                        naming().variableLen(1, 25))
+                .analyze();
     }
 
-    @Test
-    public void cpd() {
+    private static CpdResult cpd() {
         final MatchCollector collector = new MatchCollector()
                 .because("there's no common superclass",
                         In.locs("DelegatingServletOutputStream", "DelegatingWriter").ignoreAll())
@@ -169,7 +196,6 @@ public class CodeAnalysisTest {
                         In.clazz(RamlHttpClient.class).ignoreAll())
                 .because("Equals...",
                         In.locs("RamlViolations", "Values").ignoreAll());
-        final CpdAnalyzer analyzer = new CpdAnalyzer(withoutTest, 35, collector);
-        assertThat(analyzer, hasNoDuplications());
+        return new CpdAnalyzer(withoutTest, 35, collector).analyze();
     }
 }
