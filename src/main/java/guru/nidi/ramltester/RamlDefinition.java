@@ -67,6 +67,14 @@ public class RamlDefinition {
         return new RamlDefinition(config.ignoringXheaders(ignoreXheaders));
     }
 
+    public RamlDefinition includeServletPath() {
+        return includeServletPath(true);
+    }
+
+    public RamlDefinition includeServletPath(boolean includeServletPath) {
+        return new RamlDefinition(config.includeServletPath(includeServletPath));
+    }
+
     /**
      * Will throw a {@link RamlViolationException} in case there are errors on the {@link RamlReport}
      *
