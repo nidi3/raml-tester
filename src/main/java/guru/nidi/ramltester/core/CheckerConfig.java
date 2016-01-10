@@ -59,6 +59,14 @@ public class CheckerConfig {
         return new CheckerConfig(raml, schemaValidators, baseUri, includeServletPath, ignoreXheaders, failFast);
     }
 
+    public CheckerConfig includeServletPath() {
+        return includeServletPath(true);
+    }
+
+    public CheckerConfig includeServletPath(boolean includeServletPath) {
+        return new CheckerConfig(raml, schemaValidators, baseUri, includeServletPath, ignoreXheaders, failFast);
+    }
+
     public CheckerConfig failFast() {
         return failFast(true);
     }
