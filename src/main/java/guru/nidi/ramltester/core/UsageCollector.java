@@ -97,7 +97,7 @@ abstract class UsageCollector {
     abstract void collect(String key, Usage.Action action, Set<String> result);
 
     public Set<String> collect(Usage usage) {
-        final Set<String> res = new HashSet<>();
+        final Set<String> res = new HashSet<String>();
         for (final Map.Entry<String, Usage.Resource> resourceEntry : usage) {
             for (final Map.Entry<String, Usage.Action> actionEntry : resourceEntry.getValue()) {
                 collect(actionEntry.getKey() + " " + resourceEntry.getKey(), actionEntry.getValue(), res);

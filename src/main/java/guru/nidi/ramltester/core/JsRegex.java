@@ -48,6 +48,13 @@ final class JsRegex {
         }
     }
 
+    static class AssertionError extends RuntimeException {
+
+        public AssertionError(String s, Throwable e) {
+            super(s, e);
+        }
+    }
+
     public static boolean matches(String input, String regex) {
         final String unquoted = (isDoubleQuoted(regex) || isSingleQuoted(regex))
                 ? regex.substring(1, regex.length() - 1)
@@ -65,7 +72,7 @@ final class JsRegex {
 
     public static boolean matches(String input, String regex, String flags) {
         try {
-            return (boolean) ((Invocable) ENGINE).invokeFunction("matches", input, regex, flags);
+            return (Boolean) ((Invocable) ENGINE).invokeFunction("matches", input, regex, flags);
         } catch (Exception e) {
             Throwable t = e;
             while (t.getMessage() == null && t.getCause() != null) {

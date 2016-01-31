@@ -48,7 +48,8 @@ public final class IoUtils {
         if (in == null) {
             return new byte[0];
         }
-        try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
             final byte[] buf = new byte[1000];
             int read;
             while ((read = in.read(buf)) > 0) {
@@ -57,6 +58,7 @@ public final class IoUtils {
             return out.toByteArray();
         } finally {
             in.close();
+            out.close();
         }
     }
 }

@@ -44,13 +44,13 @@ public final class SchemaValidators {
     }
 
     public SchemaValidators addSchemaValidator(SchemaValidator schemaValidator) {
-        final ArrayList<SchemaValidator> newValidators = new ArrayList<>(validators);
+        final ArrayList<SchemaValidator> newValidators = new ArrayList<SchemaValidator>(validators);
         newValidators.add(schemaValidator);
         return new SchemaValidators(newValidators);
     }
 
     public SchemaValidators withloader(Loader loader) {
-        final ArrayList<SchemaValidator> newValidators = new ArrayList<>();
+        final ArrayList<SchemaValidator> newValidators = new ArrayList<SchemaValidator>();
         for (final SchemaValidator validator : validators) {
             newValidators.add(validator.withLoader(loader));
         }

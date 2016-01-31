@@ -19,7 +19,7 @@ package guru.nidi.ramltester.core;
  *
  */
 public class ThreadLocalReportStore implements ReportStore {
-    private static final ThreadLocal<RamlReport> lastReport = new ThreadLocal<>();
+    private static final ThreadLocal<RamlReport> lastReport = new ThreadLocal<RamlReport>();
 
     @Override
     public void storeReport(RamlReport report) {

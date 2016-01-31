@@ -26,6 +26,7 @@ import org.apache.catalina.Context;
 import org.apache.catalina.deploy.FilterDef;
 import org.apache.catalina.deploy.FilterMap;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -65,7 +66,7 @@ public class ServletRamlMessageTest extends ServerTest {
     private static TestFilter testFilter;
     private static HttpServlet testServlet, gzipTestServlet;
     private static MessageTester tester;
-    private static final BlockingQueue<Error> error = new ArrayBlockingQueue<>(1);
+    private static final BlockingQueue<Error> error = new ArrayBlockingQueue<Error>(1);
     private static final Error OK = new Error() {
     };
 
@@ -251,13 +252,17 @@ public class ServletRamlMessageTest extends ServerTest {
             res.addHeader("resHeader", "hula");
             res.setStatus(222);
             final byte[] buf = new byte[1000];
-            try (final ServletInputStream in = req.getInputStream();
-                 final ServletOutputStream out = res.getOutputStream()) {
+            final ServletInputStream in = req.getInputStream();
+            final ServletOutputStream out = res.getOutputStream();
+            try {
                 int read;
                 while ((read = in.read(buf)) > 0) {
                     out.write(buf, 0, read);
                 }
                 out.flush();
+            } finally {
+                IOUtils.closeQuietly(in);
+                IOUtils.closeQuietly(out);
             }
         }
     }

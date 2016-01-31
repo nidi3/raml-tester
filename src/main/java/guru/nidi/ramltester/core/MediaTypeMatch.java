@@ -92,7 +92,7 @@ final class MediaTypeMatch {
     }
 
     private static Map<MediaType, MimeType> mediaTypes(RamlViolations violations, Map<String, MimeType> bodies, Locator locator) {
-        final Map<MediaType, MimeType> types = new LinkedHashMap<>();
+        final Map<MediaType, MimeType> types = new LinkedHashMap<MediaType, MimeType>();
         for (final Map.Entry<String, MimeType> entry : bodies.entrySet()) {
             try {
                 types.put(MediaType.valueOf(entry.getKey()), entry.getValue());
@@ -104,7 +104,7 @@ final class MediaTypeMatch {
     }
 
     private static List<Map.Entry<MediaType, MimeType>> findBestMatches(Map<MediaType, MimeType> types, MediaType targetType) {
-        final List<Map.Entry<MediaType, MimeType>> bestMatches = new ArrayList<>();
+        final List<Map.Entry<MediaType, MimeType>> bestMatches = new ArrayList<Map.Entry<MediaType, MimeType>>();
         for (final Map.Entry<MediaType, MimeType> entry : types.entrySet()) {
             final int similarity = targetType.similarity(entry.getKey());
             if (bestMatches.isEmpty()) {

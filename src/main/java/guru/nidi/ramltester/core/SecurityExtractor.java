@@ -57,7 +57,7 @@ class SecurityExtractor {
     }
 
     public List<Map<String, QueryParameter>> queryParameters() {
-        final List<Map<String, QueryParameter>> res = new RemovePropagatingList<>();
+        final List<Map<String, QueryParameter>> res = new RemovePropagatingList<Map<String, QueryParameter>>();
         for (final SecurityScheme scheme : schemes) {
             if (scheme.getDescribedBy() != null) {
                 res.add(scheme.getDescribedBy().getQueryParameters());
@@ -67,7 +67,7 @@ class SecurityExtractor {
     }
 
     public List<Map<String, Header>> headers() {
-        final List<Map<String, Header>> res = new RemovePropagatingList<>();
+        final List<Map<String, Header>> res = new RemovePropagatingList<Map<String, Header>>();
         for (final SecurityScheme scheme : schemes) {
             if (scheme.getDescribedBy() != null) {
                 res.add(scheme.getDescribedBy().getHeaders());
@@ -77,7 +77,7 @@ class SecurityExtractor {
     }
 
     public List<Map<String, Response>> responses() {
-        final List<Map<String, Response>> res = new RemovePropagatingList<>();
+        final List<Map<String, Response>> res = new RemovePropagatingList<Map<String, Response>>();
         for (final SecurityScheme scheme : schemes) {
             if (scheme.getDescribedBy() != null) {
                 res.add(scheme.getDescribedBy().getResponses());
@@ -96,7 +96,7 @@ class SecurityExtractor {
         }
 
         public List<SecurityScheme> securedBy(Action action) {
-            final List<SecurityScheme> res = new ArrayList<>();
+            final List<SecurityScheme> res = new ArrayList<SecurityScheme>();
             if (!action.getSecuredBy().isEmpty()) {
                 res.addAll(securitySchemes(action.getSecuredBy(), new Message("securityScheme.undefined", new Locator(action))));
             } else if (!action.getResource().getSecuredBy().isEmpty()) {
@@ -108,7 +108,7 @@ class SecurityExtractor {
         }
 
         private List<SecurityScheme> securitySchemes(List<SecurityReference> refs, Message message) {
-            final List<SecurityScheme> res = new ArrayList<>();
+            final List<SecurityScheme> res = new ArrayList<SecurityScheme>();
             for (final SecurityReference ref : refs) {
                 final String name = ref.getName();
                 final SecurityScheme ss = securityScheme(name);

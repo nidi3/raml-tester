@@ -50,6 +50,6 @@ public class UsageTest extends HighlevelTestBase {
     }
 
     private Set<String> set(String... values) {
-        return new HashSet<>(Arrays.asList(values));
+        return new HashSet<String>(Arrays.asList(values));
     }
 }

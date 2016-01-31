@@ -51,7 +51,7 @@ public class SpringMockRamlMessageTest {
     public ResponseEntity<String> test() {
         final HttpHeaders headers = new HttpHeaders();
         headers.add("head", "resValue");
-        return new ResponseEntity<>("responsö", headers, HttpStatus.ACCEPTED);
+        return new ResponseEntity<String>("responsö", headers, HttpStatus.ACCEPTED);
     }
 
     @Test

@@ -40,7 +40,7 @@ public class CoreTestBase {
     }
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
-        assertThat("Expected exactly one violation", 1, new IsEqual<>(violations.size()));
+        assertThat("Expected exactly one violation", 1, new IsEqual<Integer>(violations.size()));
         assertThat(violations.iterator().next(), matcher);
     }
 
@@ -50,7 +50,7 @@ public class CoreTestBase {
 
     @SuppressWarnings("unchecked")
     protected <T> Map<String, T> mapOf(Object... keysAndValues) {
-        final Map<String, T> v = new HashMap<>();
+        final Map<String, T> v = new HashMap<String, T>();
         for (int i = 0; i < keysAndValues.length; i += 2) {
             v.put((String) keysAndValues[i], (T) keysAndValues[i + 1]);
         }

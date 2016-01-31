@@ -21,7 +21,7 @@ import java.util.*;
  *
  */
 public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
-    private final Map<String, Resource> resources = new HashMap<>();
+    private final Map<String, Resource> resources = new HashMap<String, Resource>();
 
     private static <T> T getOrCreate(Class<T> clazz, Map<String, T> map, String name) {
         T res = map.get(name);
@@ -29,7 +29,9 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             try {
                 res = clazz.newInstance();
                 map.put(name, res);
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException e) {
+                throw new RamlCheckerException("Could not create instance of " + clazz, e);
+            } catch (IllegalAccessException e) {
                 throw new RamlCheckerException("Could not create instance of " + clazz, e);
             }
         }
@@ -74,7 +76,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     }
 
     public Set<String> getUnusedResources() {
-        final Set<String> res = new HashSet<>();
+        final Set<String> res = new HashSet<String>();
         for (final Map.Entry<String, Resource> resourceEntry : this) {
             if (resourceEntry.getValue().getUses() == 0 && !resourceEntry.getValue().actions.isEmpty()) {
                 res.add(resourceEntry.getKey());
@@ -120,7 +122,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     }
 
     static class Resource extends UsageBase implements Iterable<Map.Entry<String, Action>> {
-        private final Map<String, Action> actions = new HashMap<>();
+        private final Map<String, Action> actions = new HashMap<String, Action>();
 
         public Action action(String name) {
             return getOrCreate(Action.class, actions, name);
@@ -138,11 +140,11 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     }
 
     static class Action extends UsageBase {
-        private final Map<String, Response> responses = new HashMap<>();
-        private final Map<String, MimeType> mimeTypes = new HashMap<>();
-        private final CountSet<String> queryParameters = new CountSet<>();
-        private final CountSet<String> requestHeaders = new CountSet<>();
-        private final CountSet<String> responseCodes = new CountSet<>();
+        private final Map<String, Response> responses = new HashMap<String, Response>();
+        private final Map<String, MimeType> mimeTypes = new HashMap<String, MimeType>();
+        private final CountSet<String> queryParameters = new CountSet<String>();
+        private final CountSet<String> requestHeaders = new CountSet<String>();
+        private final CountSet<String> responseCodes = new CountSet<String>();
 
         public Response response(String name) {
             return getOrCreate(Response.class, responses, name);
@@ -213,7 +215,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     }
 
     static class Response {
-        private final CountSet<String> responseHeaders = new CountSet<>();
+        private final CountSet<String> responseHeaders = new CountSet<String>();
 
         public void addResponseHeaders(Set<String> names) {
             responseHeaders.addAll(names);
@@ -236,7 +238,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     }
 
     static class MimeType {
-        private final CountSet<String> formParameters = new CountSet<>();
+        private final CountSet<String> formParameters = new CountSet<String>();
 
         public void addFormParameters(Set<String> names) {
             formParameters.addAll(names);

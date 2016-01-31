@@ -36,7 +36,7 @@ public final class MediaType {
 
     private static final String CHARSET = "charset";
     private static final String WILDCARD_TYPE = "*";
-    private static final Map<String, MediaType> KNOWN_SUFFICES = new HashMap<>();
+    private static final Map<String, MediaType> KNOWN_SUFFICES = new HashMap<String, MediaType>();
 
     static {
         KNOWN_SUFFICES.put("json", JSON);
@@ -86,7 +86,7 @@ public final class MediaType {
     }
 
     private static Map<String, String> parseParameters(String[] parts) {
-        final Map<String, String> parameters = new LinkedHashMap<>(parts.length);
+        final Map<String, String> parameters = new LinkedHashMap<String, String>(parts.length);
         if (parts.length > 1) {
             for (int i = 1; i < parts.length; i++) {
                 final String parameter = parts[i];
@@ -227,7 +227,7 @@ public final class MediaType {
             return null;
         }
         final StringTokenizer st = new StringTokenizer(str, delimiters);
-        final List<String> tokens = new ArrayList<>();
+        final List<String> tokens = new ArrayList<String>();
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
             token = token.trim();

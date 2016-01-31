@@ -88,7 +88,7 @@ class ParameterChecker {
     public Set<String> checkParameters(Map<String, ? extends AbstractParam> params, List<? extends Map<String, ? extends AbstractParam>> extensions,
                                        Values values, Message message) {
         if (extensions.isEmpty()) {
-            final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
+            final Map<String, List<? extends AbstractParam>> listParams = new HashMap<String, List<? extends AbstractParam>>();
             addToMapOfList(params, listParams);
             return checkListParameters(listParams, values, message);
         }
@@ -114,7 +114,7 @@ class ParameterChecker {
 
     private Set<String> checkExtendedParameters(Map<String, ? extends AbstractParam> params, Map<String, ? extends AbstractParam> extension,
                                                 Values values, Message message, RamlViolations violations) {
-        final Map<String, List<? extends AbstractParam>> listParams = new HashMap<>();
+        final Map<String, List<? extends AbstractParam>> listParams = new HashMap<String, List<? extends AbstractParam>>();
         addToMapOfList(extension, listParams);
         addToMapOfList(params, listParams);
         final ParameterChecker checker = new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
@@ -126,7 +126,7 @@ class ParameterChecker {
     }
 
     public Set<String> checkListParameters(Map<String, List<? extends AbstractParam>> params, Values values, Message message) {
-        final Set<String> found = new HashSet<>();
+        final Set<String> found = new HashSet<String>();
         for (final Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
             final String paramName = findMatchingParamName(params.keySet(), entry.getKey());

@@ -21,7 +21,7 @@ import java.util.*;
  *
  */
 public final class Values implements Iterable<Map.Entry<String, List<Object>>> {
-    private final Map<String, List<Object>> values = new HashMap<>();
+    private final Map<String, List<Object>> values = new HashMap<String, List<Object>>();
 
     public Values() {
     }
@@ -43,7 +43,7 @@ public final class Values implements Iterable<Map.Entry<String, List<Object>>> {
     public Values addValue(String name, Object value) {
         List<Object> vs = values.get(name);
         if (vs == null) {
-            vs = new ArrayList<>();
+            vs = new ArrayList<Object>();
             values.put(name, vs);
         }
         vs.add(value);
@@ -51,7 +51,7 @@ public final class Values implements Iterable<Map.Entry<String, List<Object>>> {
     }
 
     public void setValue(String name, String value) {
-        final List<Object> vs = new ArrayList<>();
+        final List<Object> vs = new ArrayList<Object>();
         vs.add(value);
         values.put(name, vs);
     }
