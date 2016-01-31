@@ -80,7 +80,7 @@ class ContentNegotiationChecker {
     }
 
     private List<MediaType> acceptMediaTypes(String accept) {
-        final List<MediaType> acceptTypes = new ArrayList<>();
+        final List<MediaType> acceptTypes = new ArrayList<MediaType>();
         for (final String type : accept.split(",")) {
             try {
                 final MediaType acceptType = MediaType.valueOf(type);

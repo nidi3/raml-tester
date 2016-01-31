@@ -67,7 +67,7 @@ public class RestTemplateTest extends ServerTest {
     public HttpEntity<String> test(@RequestParam(required = false) String param) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        return new HttpEntity<>(param == null ? "\"json string\"" : "illegal json", headers);
+        return new HttpEntity<String>(param == null ? "\"json string\"" : "illegal json", headers);
     }
 
     @Override

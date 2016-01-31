@@ -72,7 +72,7 @@ final class CheckerHelper {
     }
 
     public static Resource findResource(String resourcePath, Map<String, Resource> resources, Values values) {
-        final List<ResourceMatch> matches = new ArrayList<>();
+        final List<ResourceMatch> matches = new ArrayList<ResourceMatch>();
         for (final Map.Entry<String, Resource> entry : resources.entrySet()) {
             final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
             if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
@@ -118,7 +118,7 @@ final class CheckerHelper {
     }
 
     public static Map<String, List<? extends AbstractParam>> getEffectiveBaseUriParams(Map<String, UriParameter> baseUriParams, Action action) {
-        final Map<String, List<? extends AbstractParam>> params = new HashMap<>();
+        final Map<String, List<? extends AbstractParam>> params = new HashMap<String, List<? extends AbstractParam>>();
         if (action.getBaseUriParameters() != null) {
             params.putAll(action.getBaseUriParameters());
         }
@@ -164,11 +164,11 @@ final class CheckerHelper {
 
     @SuppressWarnings("unchecked")
     public static Collection<Map.Entry<String, AbstractParam>> paramEntries(Map<String, ?> params) {
-        final List<Map.Entry<String, AbstractParam>> res = new ArrayList<>();
+        final List<Map.Entry<String, AbstractParam>> res = new ArrayList<Map.Entry<String, AbstractParam>>();
         for (final Map.Entry<String, ?> param : params.entrySet()) {
             if (param.getValue() instanceof List) {
                 for (final AbstractParam p : (List<AbstractParam>) param.getValue()) {
-                    res.add(new AbstractMap.SimpleEntry<>(param.getKey(), p));
+                    res.add(new AbstractMap.SimpleEntry<String, AbstractParam>(param.getKey(), p));
                 }
             } else {
                 res.add((Map.Entry<String, AbstractParam>) param);

@@ -69,7 +69,9 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
             final Validator validator = s.newValidator();
             validator.setErrorHandler(new ViolationsWritingErrorHandler(violations, message));
             validator.validate(new StreamSource(content));
-        } catch (SAXException | IOException e) {
+        } catch (SAXException e) {
+            violations.add(message.withParam(e.getMessage()));
+        } catch (IOException e) {
             violations.add(message.withParam(e.getMessage()));
         }
     }

@@ -49,7 +49,7 @@ public class UriTest extends HighlevelTestBase {
     public HttpEntity<String> test() {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_HTML);
-        return new HttpEntity<>(headers);
+        return new HttpEntity<String>(headers);
     }
 
     @Test(expected = AssertionError.class)

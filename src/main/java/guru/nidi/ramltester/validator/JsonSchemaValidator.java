@@ -34,6 +34,8 @@ import guru.nidi.ramltester.util.Message;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  *
  */
@@ -77,7 +79,8 @@ public class JsonSchemaValidator implements SchemaValidator {
     @Override
     public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
         init();
-        try (final Reader s = schema) {
+        final Reader s = schema;
+        try  {
             final JsonSchemaFactory factory = this.factory == null ? JsonSchemaFactory.byDefault() : this.factory;
             final JsonSchema jsonSchema = factory.getJsonSchema(JsonLoader.fromReader(schema));
             final ProcessingReport report = jsonSchema.validate(JsonLoader.fromReader(content));
@@ -88,8 +91,12 @@ public class JsonSchemaValidator implements SchemaValidator {
                 }
                 violations.add(message.withParam(msg));
             }
-        } catch (ProcessingException | IOException e) {
+        } catch (ProcessingException e) {
             violations.add(message.withMessageParam("jsonSchemaValidator.schema.invalid", e.getMessage()));
+        } catch (IOException e) {
+            violations.add(message.withMessageParam("jsonSchemaValidator.schema.invalid", e.getMessage()));
+        } finally {
+            IOUtils.closeQuietly(s);
         }
     }
 }

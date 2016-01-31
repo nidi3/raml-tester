@@ -72,6 +72,13 @@ public class FormDecoder {
         return new Values();
     }
 
+    static class AssertionError extends RuntimeException {
+
+        public AssertionError(String s, Throwable e) {
+            super(s, e);
+        }
+    }
+
     private static String charset(String contentType) {
         if (contentType == null) {
             return DEFAULT_CHARSET;
@@ -93,7 +100,9 @@ public class FormDecoder {
                 values.addValue(itemStream.getFieldName(), valueOf(itemStream));
             }
             return values;
-        } catch (IOException | FileUploadException e) {
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not parse multipart request", e);
+        } catch (FileUploadException e) {
             throw new IllegalArgumentException("Could not parse multipart request", e);
         }
     }

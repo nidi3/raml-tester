@@ -21,7 +21,7 @@ import java.util.*;
  *
  */
 class CountSet<T> extends AbstractSet<T> {
-    private final Map<T, Integer> map = new HashMap<>();
+    private final Map<T, Integer> map = new HashMap<T, Integer>();
 
     public void add(T value, int count) {
         final int old = getCount(value);
