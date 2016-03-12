@@ -57,7 +57,7 @@ public final class MyTypeValidator
         final SchemaTree schema = data.getSchema();
         System.out.println(schema);
         System.out.println(schema.setPointer(schema.getPointer().parent()));
-        schema.setPointer(schema.getPointer().parent().parent()).getNode().findPath("required")
+//        schema.setPointer(schema.getPointer().parent().parent()).getNode().findPath("required")
         if (!types.contains(type))
             report.error(newMsg(data, bundle, "err.common.typeNoMatch")
                 .putArgument("found", type)
