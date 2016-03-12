@@ -109,6 +109,7 @@ public class MediaTypeTest {
     @Test
     public void onlyTypeMatchingIsNotSimilar() {
         assertFalse(anySimilar("a/b", "a/c"));
+        assertTrue(anySimilar("a/b", "*/*"));
     }
 
     @Test

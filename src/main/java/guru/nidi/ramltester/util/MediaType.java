@@ -102,7 +102,7 @@ public final class MediaType {
     }
 
     public double getQualityParameter() {
-        final String q =unquote(getParameter("q"));
+        final String q = unquote(getParameter("q"));
         return q == null ? 1 : Double.parseDouble(q);
     }
 
@@ -145,7 +145,8 @@ public final class MediaType {
         int factor = init;
         final Object[] myParts = parts();
         final Object[] otherParts = other.parts();
-        for (int i = 0; i < myParts.length; i++) {
+        int i = 0;
+        for (; i < myParts.length; i++) {
             if (WILDCARD_TYPE.equals(myParts[i]) || (WILDCARD_TYPE.equals(otherParts[i]))) {
                 s += factor;
             } else if (myParts[i].equals(otherParts[i])) {
@@ -156,7 +157,7 @@ public final class MediaType {
             factor /= 3;
         }
         //only first part matches -> not similar at all
-        return s <= 2 * init ? 0 : s;
+        return i <= 1 ? 0 : s;
     }
 
     private String[] parts() {

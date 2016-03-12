@@ -43,7 +43,7 @@ public class SecurityTest extends HighlevelTestBase {
     public void allowSecurityElementsInLocalGlobalSecured() throws Exception {
         assertNoViolations(test(
                 global,
-                get("/sec12").header("Authorization1", "blu"),
+                get("/sec12").header("X-Custom-Context", "blu"),
                 response(200, "", null)));
     }
 

@@ -9,7 +9,9 @@ securitySchemes:
       type: x-other
       describedBy:
         headers:
-          Authorization1:
+          X-Custom-Context:
+            type: string
+            required: false
   - noDesc:
       type: x-noDesc
   - wrongType:
