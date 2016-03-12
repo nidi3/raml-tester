@@ -34,39 +34,32 @@ import java.util.EnumSet;
 /**
  * Keyword validator for draft v4's {@code type}
  */
-public final class MyTypeValidator
-    extends AbstractKeywordValidator
-{
+public final class MyTypeValidator extends AbstractKeywordValidator {
     private final EnumSet<NodeType> types = EnumSet.noneOf(NodeType.class);
 
-    public MyTypeValidator(final JsonNode digest)
-    {
+    public MyTypeValidator(final JsonNode digest) {
         super("type");
-        for (final JsonNode node: digest.get(keyword))
+        for (final JsonNode node : digest.get(keyword)) {
             types.add(NodeType.fromName(node.textValue()));
+        }
     }
 
     @Override
-    public void validate(final Processor<FullData, FullData> processor,
-        final ProcessingReport report, final MessageBundle bundle,
-        final FullData data)
-        throws ProcessingException
-    {
-        final NodeType type
-            = NodeType.getNodeType(data.getInstance().getNode());
+    public void validate(final Processor<FullData, FullData> processor, final ProcessingReport report, final MessageBundle bundle, final FullData data) throws ProcessingException {
+        final NodeType type = NodeType.getNodeType(data.getInstance().getNode());
         final SchemaTree schema = data.getSchema();
         System.out.println(schema);
         System.out.println(schema.setPointer(schema.getPointer().parent()));
 //        schema.setPointer(schema.getPointer().parent().parent()).getNode().findPath("required")
-        if (!types.contains(type))
+        if (!types.contains(type)) {
             report.error(newMsg(data, bundle, "err.common.typeNoMatch")
-                .putArgument("found", type)
-                .putArgument("expected", toArrayNode(types)));
+                    .putArgument("found", type)
+                    .putArgument("expected", toArrayNode(types)));
+        }
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return keyword + ": " + types;
     }
 }
