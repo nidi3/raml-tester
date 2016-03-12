@@ -63,55 +63,130 @@ public class MediaTypeTest {
 
     @Test
     public void wildcardTypeCompatibility() {
-        assertTrue(valueOf("a/b").isCompatibleWith(valueOf("*")));
-        assertTrue(valueOf("*").isCompatibleWith(valueOf("a/b")));
+        assertTrue(compatible("a/b", "*"));
+        assertTrue(compatible("*", "a/b"));
     }
 
     @Test
     public void wildcardSubtypeCompatibility() {
-        assertTrue(valueOf("a/b").isCompatibleWith(valueOf("a/*")));
-        assertFalse(valueOf("a/b").isCompatibleWith(valueOf("a/*+bla")));
-        assertTrue(valueOf("a/b+bla").isCompatibleWith(valueOf("a/*+bla")));
+        assertTrue(compatible("a/b", "a/*"));
+        assertFalse(compatible("a/b", "a/*+bla"));
+        assertTrue(compatible("a/b+bla", "a/*+bla"));
     }
 
     @Test
     public void typeCompatibility() {
-        assertFalse(valueOf("a/b").isCompatibleWith(valueOf("c/b")));
-        assertFalse(valueOf("a/b").isCompatibleWith(valueOf("a/c")));
-        assertTrue(valueOf("a/b").isCompatibleWith(valueOf("a/b")));
-        assertTrue(valueOf("a/b").isCompatibleWith(valueOf("a/b;x=y")));
+        assertFalse(compatible("a/b", "c/b"));
+        assertFalse(compatible("a/b", "a/c"));
+        assertTrue(compatible("a/b", "a/b"));
+        assertTrue(compatible("a/b", "a/b;x=y"));
     }
 
     @Test
     public void jsonCompatibility() {
-        assertTrue(MediaType.JSON.isCompatibleWith(valueOf("a/b+json")));
-        assertTrue(valueOf("a/b+json").isCompatibleWith(MediaType.JSON));
-    }
-
-    @Test
-    public void similarity() {
-        similarity(valueOf("application/json"));
-        similarity(valueOf("a/b+json"));
+        assertTrue(compatible(MediaType.JSON.toString(), "a/b+json"));
+        assertTrue(compatible("a/b+json", MediaType.JSON.toString()));
     }
 
     @Test
     public void suffixWildcardSimilarity() {
-        final MediaType complete = valueOf("a/b+c");
-        final MediaType wildcard = valueOf("a/*+c");
-        assertTrue(complete.similarity(wildcard) > 0);
-        assertTrue(complete.similarity(complete) > complete.similarity(wildcard));
-        assertEquals(0, complete.similarity(valueOf("a/*+d")));
+        assertTrue(anySimilar("a/b+c", "a/*+c"));
+        assertTrue(similarer("a/b+c", "a/b+c", "a/*+c"));
+        assertFalse(anySimilar("a/b+c", "a/*+d"));
     }
 
-    private void similarity(MediaType complete) {
-        final MediaType withParams = valueOf("application/json;c=d"),
-                differentSub = valueOf("application/c"),
-                subwild = valueOf("application/*"),
-                wild = valueOf("*/*");
-        assertTrue(withParams.similarity(withParams) > withParams.similarity(complete));
-        assertTrue(complete.similarity(complete) > complete.similarity(subwild));
-        assertTrue(complete.similarity(subwild) > complete.similarity(wild));
-        assertEquals(0, complete.similarity(differentSub));
-        assertEquals(complete.similarity(subwild), differentSub.similarity(subwild));
+    @Test
+    public void jsonSimilarity() {
+        similarity("application/json");
+        similarity("a/b+json");
     }
+
+    @Test
+    public void similarityExamples() {
+        assertTrue(similarer("application/ld+json;charset=ISO-8859-1", "application/ld+json", "application/vnd.geo+json"));
+    }
+
+    @Test
+    public void onlyTypeMatchingIsNotSimilar() {
+        assertFalse(anySimilar("a/b", "a/c"));
+    }
+
+    @Test
+    public void longerMatchIsMoreSimilar() {
+        assertTrue(similarer("a/b;x=y", "a/b;x=y", "a/b"));
+        assertTrue(similarer("a/b+json", "a/x+json", "application/json"));
+        assertTrue(similarer("a/b+json", "a/b+json", "a/x+json"));
+        assertTrue(similarer("a/b+json;x=y", "a/b+json;x=y", "a/b+json"));
+    }
+
+    @Test
+    public void wildcardMatchIsLessSimilarThanExact() {
+        assertTrue(similarer("a/b", "a/*", "*/*"));
+        assertTrue(similarer("a/b", "a/b", "a/*"));
+        assertTrue(similarer("a/b+json", "a/b+json", "a/*+json"));
+    }
+
+    @Test
+    public void wildcardMatchIsMoreSimilarThanNone() {
+        assertTrue(similarer("a/b+json", "a/*+json", "a/c+json"));
+    }
+
+    @Test
+    public void qualityParamOk() {
+        assertEquals(.5, valueOf("a/b;q=.5").getQualityParameter(), .0000001);
+        assertEquals(0, valueOf("a/b;q='0'").getQualityParameter(), .0000001);
+        assertEquals(1, valueOf("a/b;q=\"1\"").getQualityParameter(), .0000001);
+    }
+
+    @Test(expected = InvalidMediaTypeException.class)
+    public void qualityParamNotNumeric() {
+        valueOf("a/b;q=a");
+    }
+
+    @Test(expected = InvalidMediaTypeException.class)
+    public void qualityParamTooLow() {
+        valueOf("a/b;q=-.001");
+    }
+
+    @Test(expected = InvalidMediaTypeException.class)
+    public void qualityParamTooHigh() {
+        valueOf("a/b;q=1.001");
+    }
+
+    @Test(expected = InvalidMediaTypeException.class)
+    public void qualityParamEmpty() {
+        valueOf("a/b;q=");
+    }
+
+    @Test
+    public void charset() {
+        assertEquals("cs", valueOf("a/b; charset=cs").getCharset("def"));
+        assertEquals("def", valueOf("a/b").getCharset("def"));
+    }
+
+    private boolean compatible(String base, String type) {
+        return valueOf(base).isCompatibleWith(valueOf(type));
+    }
+
+    private void similarity(String complete) {
+        assertTrue(similarer("application/json;c=d", "application/json;c=d", complete));
+        assertTrue(similarer(complete, complete, "application/*"));
+        assertTrue(similarer(complete, "application/*", "*/*"));
+        assertFalse(anySimilar(complete, "application/c"));
+
+        assertTrue(asSimilar("application/*", complete, "application/c"));
+    }
+
+    private boolean anySimilar(String base, String type) {
+        return valueOf(base).similarity(valueOf(type)) > 0;
+    }
+
+    private boolean similarer(String base, String type1, String type2) {
+        return valueOf(base).similarity(valueOf(type1)) > valueOf(base).similarity(valueOf(type2));
+    }
+
+    private boolean asSimilar(String base, String type1, String type2) {
+        return valueOf(base).similarity(valueOf(type1)) == valueOf(base).similarity(valueOf(type2));
+    }
+
 }

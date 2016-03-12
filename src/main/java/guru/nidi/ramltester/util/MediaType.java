@@ -102,7 +102,7 @@ public final class MediaType {
     }
 
     public double getQualityParameter() {
-        final String q = getParameter("q");
+        final String q =unquote(getParameter("q"));
         return q == null ? 1 : Double.parseDouble(q);
     }
 
@@ -140,23 +140,34 @@ public final class MediaType {
     }
 
     public int similarity(MediaType other) {
-        if (getType().equals(other.getType())) {
-            if (getSubtype().equals(other.getSubtype())) {
-                return getParameters().equals(other.getParameters()) ? 4 : 3;
+        int s = 0;
+        final int init = 3 * 3 * 3 * 3;
+        int factor = init;
+        final Object[] myParts = parts();
+        final Object[] otherParts = other.parts();
+        for (int i = 0; i < myParts.length; i++) {
+            if (WILDCARD_TYPE.equals(myParts[i]) || (WILDCARD_TYPE.equals(otherParts[i]))) {
+                s += factor;
+            } else if (myParts[i].equals(otherParts[i])) {
+                s += 2 * factor;
+            } else {
+                break;
             }
-            if (isThisOrOtherWildcardSubtype(other)) {
-                return hasSameSuffix(other) ? 2 : 0;
-            }
+            factor /= 3;
         }
-        if (isWildcardType() || other.isWildcardType()) {
-            return 1;
+        //only first part matches -> not similar at all
+        return s <= 2 * init ? 0 : s;
+    }
+
+    private String[] parts() {
+        final String suffix = getSuffix();
+        if (suffix == null) {
+            return new String[]{type, subtype, "*", "*", parameters.toString()};
         }
-        final MediaType thisKnown = applyKnownSuffices();
-        final MediaType otherKnown = other.applyKnownSuffices();
-        if (thisKnown != this || otherKnown != other) {
-            return thisKnown.similarity(otherKnown);
-        }
-        return 0;
+        final MediaType known = KNOWN_SUFFICES.get(suffix);
+        return known == null
+                ? new String[]{"unknown", suffix, type, getPureSubtype(), parameters.toString()}
+                : new String[]{known.type, known.subtype, type, getPureSubtype(), parameters.toString()};
     }
 
     public boolean isCompatibleWith(MediaType other) {
@@ -186,19 +197,14 @@ public final class MediaType {
     }
 
     private boolean hasSameSuffix(MediaType other) {
-        final String thisSuffix = findSuffix();
-        final String otherSuffix = other.findSuffix();
+        final String thisSuffix = getSuffix();
+        final String otherSuffix = other.getSuffix();
         return (thisSuffix == null && otherSuffix == null) || (thisSuffix != null && thisSuffix.equals(otherSuffix));
     }
 
     private MediaType applyKnownSuffices() {
-        final MediaType known = KNOWN_SUFFICES.get(findSuffix());
+        final MediaType known = KNOWN_SUFFICES.get(getSuffix());
         return known == null ? this : known;
-    }
-
-    private String findSuffix() {
-        final int pos = getSubtype().indexOf('+');
-        return pos == -1 ? null : getSubtype().substring(pos + 1);
     }
 
     public String getType() {
@@ -207,6 +213,16 @@ public final class MediaType {
 
     public String getSubtype() {
         return subtype;
+    }
+
+    public String getPureSubtype() {
+        final int pos = getSubtype().indexOf('+');
+        return pos == -1 ? getSubtype() : getSubtype().substring(0, pos);
+    }
+
+    public String getSuffix() {
+        final int pos = getSubtype().indexOf('+');
+        return pos == -1 ? null : getSubtype().substring(pos + 1);
     }
 
     public Map<String, String> getParameters() {
