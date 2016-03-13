@@ -146,22 +146,6 @@ final class CheckerHelper {
         }
     }
 
-    public static Response findResponse(Action action, int status, SecurityExtractor security) {
-        Response res = action.getResponses().get(Integer.toString(status));
-        if (res == null) {
-            final Iterator<Map<String, Response>> iter = security.responses().iterator();
-            //there could be more that 1 matching response, problem?
-            while (iter.hasNext()) {
-                final Map<String, Response> resMap = iter.next();
-                res = resMap.get(Integer.toString(status));
-                if (res == null) {
-                    iter.remove();
-                }
-            }
-        }
-        return res;
-    }
-
     @SuppressWarnings("unchecked")
     public static Collection<Map.Entry<String, AbstractParam>> paramEntries(Map<String, ?> params) {
         final List<Map.Entry<String, AbstractParam>> res = new ArrayList<>();
@@ -182,6 +166,13 @@ final class CheckerHelper {
         return refSchema == null
                 ? new NamedReader(schema, new Message("schema.inline").toString())
                 : new NamedReader(refSchema, new Message("schema", schema).toString());
+    }
+
+    public static <T> Map<String, T> mergeMaps(Map<String, T> map1, Map<String, T> map2) {
+        final Map<String, T> res = new HashMap<>();
+        res.putAll(map1);
+        res.putAll(map2);
+        return res;
     }
 
 }

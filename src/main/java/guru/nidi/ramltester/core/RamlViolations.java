@@ -50,6 +50,10 @@ public class RamlViolations implements Iterable<String> {
         addIf(condition, new Message(key, params));
     }
 
+    void addAll(RamlViolations violations) {
+        this.violations.addAll(violations.violations);
+    }
+
     public int size() {
         return violations.size();
     }

@@ -15,9 +15,13 @@
  */
 package guru.nidi.ramltester;
 
+import guru.nidi.ramltester.core.RamlReport;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -35,7 +39,7 @@ public class SecurityTest extends HighlevelTestBase {
     public void allowSecurityElementsInGlobalSecured() throws Exception {
         assertNoViolations(test(
                 global,
-                get("/sec2").param("access_token", "bla").header("Authorization2", "blu"),
+                get("/sec2?access_token=bla").header("Authorization2", "blu"),
                 response(401, "", null)));
     }
 
@@ -43,7 +47,7 @@ public class SecurityTest extends HighlevelTestBase {
     public void allowSecurityElementsInLocalGlobalSecured() throws Exception {
         assertNoViolations(test(
                 global,
-                get("/sec12").header("X-Custom-Context", "blu"),
+                get("/sec12").header("AuthorizationOpt", "blu"),
                 response(200, "", null)));
     }
 
@@ -51,29 +55,79 @@ public class SecurityTest extends HighlevelTestBase {
     public void dontAllowMixSecuritySchemas() throws Exception {
         assertRequestViolationsThat(test(
                 global,
-                get("/sec12").header("Authorization1", "1").header("Authorization2", "2"),
+                get("/sec12").header("AuthorizationOpt", "1").header("Authorization2", "2"),
                 response(200, "", null)),
-                either(is(equalTo("Header 'Authorization1' on action(GET /sec12) is not defined")))
+                either(is(equalTo("Header 'AuthorizationOpt' on action(GET /sec12) is not defined")))
                         .or(is(equalTo("Header 'Authorization2' on action(GET /sec12) is not defined")))
         );
+    }
 
+    @Test
+    public void dontEliminateUniqueSecurityScheme() throws Exception {
+        assertOneRequestViolationThat(test(
+                local,
+                get("/uniqueSec").header("AuthorizationOpt", "blu"),
+                response(200, "", null)),
+                equalTo("Header 'AuthorizationReq' on action(GET /uniqueSec) is required but not found"));
+    }
+
+    @Test
+    public void showAmbiguousSecurityResolutionWithNull() throws Exception {
+        final RamlReport report = test(
+                local,
+                get("/optSec").header("AuthorizationOpt", "blu"),
+                response(200, "", null));
+        assertEquals(Arrays.asList(
+                "Assuming security scheme 'null': Header 'AuthorizationOpt' on action(GET /optSec) is not defined",
+                "Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /optSec) is required but not found"),
+                report.getRequestViolations().asList());
+    }
+
+    @Test
+    public void showAmbiguousSecurityResolution() throws Exception {
+        final RamlReport report = test(
+                local,
+                get("/doubleSec").header("AuthorizationOpt", "blu"),
+                response(200, "", null));
+        assertEquals(Arrays.asList(
+                "Assuming security scheme 'OAuth 2.0': Header 'AuthorizationOpt' on action(GET /doubleSec) is not defined",
+                "Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /doubleSec) is required but not found"),
+                report.getRequestViolations().asList());
+    }
+
+    @Test
+    public void showOnlyBestSecurityResolution() throws Exception {
+        assertOneRequestViolationThat(test(
+                local,
+                get("/doubleSec?access_token=a").header("Authorization2", "blu").header("AuthorizationReq", "s"),
+                response(200, "", null)),
+                equalTo("Assuming security scheme 'OAuth 2.0': Header 'AuthorizationReq' on action(GET /doubleSec) is not defined"));
     }
 
     @Test
     public void allowSecurityElementsInLocalSecured() throws Exception {
         assertNoViolations(test(
                 local,
-                get("/sec").param("access_token", "bla").header("Authorization2", "blu"),
+                get("/sec?access_token=bla").header("Authorization2", "blu"),
                 response(401, "", null)));
     }
 
     @Test
-    public void dontAllowSecurityElementsInUnsecured() throws Exception {
+    public void dontAllowSecurityHeaderInUnsecured() throws Exception {
         assertOneRequestViolationThat(test(
                 local,
-                get("/unsec").param("access_token", "bla").header("Authorization2", "blu"),
+                get("/unsec").header("Authorization2", "blu"),
                 response(200, "", null)),
                 equalTo("Header 'Authorization2' on action(GET /unsec) is not defined"));
+    }
+
+    @Test
+    public void dontAllowSecurityQueryInUnsecured() throws Exception {
+        assertOneRequestViolationThat(test(
+                local,
+                get("/unsec?access_token=bla"),
+                response(200, "", null)),
+                equalTo("Query parameter 'access_token' on action(GET /unsec) is not defined"));
     }
 
     @Test

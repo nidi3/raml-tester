@@ -35,7 +35,8 @@ import static guru.nidi.ramltester.core.UsageBuilder.*;
  */
 public class RamlChecker {
     private final CheckerConfig config;
-    private RamlViolations requestViolations, responseViolations;
+    private RamlViolations requestViolations;
+    private RamlViolationsPerSecurity violationsPerSecurity;
     private Locator locator;
     private Usage usage;
 
@@ -57,18 +58,18 @@ public class RamlChecker {
         final RamlReport report = new RamlReport(config.raml);
         usage = report.getUsage();
         requestViolations = report.getRequestViolations();
-        responseViolations = report.getResponseViolations();
+        final RamlViolations responseViolations = report.getResponseViolations();
         locator = new Locator();
         try {
             final Action action = findAction(request);
             final SecurityExtractor security = new SecurityExtractor(config.raml, action, requestViolations);
             security.check(requestViolations);
+            violationsPerSecurity = new RamlViolationsPerSecurity(security);
             checkRequest(request, action, security);
             if (response != null) {
-                final MediaTypeMatch typeMatch = checkResponse(response, action, security);
-                new ContentNegotiationChecker(requestViolations, responseViolations)
-                        .check(request, response, action, typeMatch);
+                checkResponse(request, response, action, security);
             }
+            violationsPerSecurity.addLeastViolations(requestViolations, responseViolations);
         } catch (RamlViolationException e) {
             //ignore, results are in report
         }
@@ -161,21 +162,27 @@ public class RamlChecker {
     }
 
     private void checkQueryParameters(Values values, Action action, SecurityExtractor security) {
-        actionUsage(usage, action).addQueryParameters(
-                new ParameterChecker(requestViolations)
-                        .checkParameters(action.getQueryParameters(), security.queryParameters(), values, new Message("queryParam", locator))
-        );
+        //TODO usage is multiplied by security schemes
+        for (final SecurityScheme scheme : security.getSchemes()) {
+            actionUsage(usage, action).addQueryParameters(
+                    new ParameterChecker(violationsPerSecurity.requestViolations(scheme))
+                            .checkParameters(mergeMaps(action.getQueryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator))
+            );
+        }
     }
 
     private void checkRequestHeaderParameters(Values values, Action action, SecurityExtractor security) {
-        actionUsage(usage, action).addRequestHeaders(
-                new ParameterChecker(requestViolations)
-                        .acceptWildcard()
-                        .ignoreX(config.ignoreXheaders)
-                        .caseSensitive(false)
-                        .predefined(DefaultHeaders.REQUEST)
-                        .checkParameters(action.getHeaders(), security.headers(), values, new Message("headerParam", locator))
-        );
+        //TODO usage is multiplied by security schemes
+        for (final SecurityScheme scheme : security.getSchemes()) {
+            actionUsage(usage, action).addRequestHeaders(
+                    new ParameterChecker(violationsPerSecurity.requestViolations(scheme))
+                            .acceptWildcard()
+                            .ignoreX(config.ignoreXheaders)
+                            .caseSensitive(false)
+                            .predefined(DefaultHeaders.REQUEST)
+                            .checkParameters(mergeMaps(action.getHeaders(), security.headers(scheme)), values, new Message("headerParam", locator))
+            );
+        }
     }
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, Action action) {
@@ -230,21 +237,35 @@ public class RamlChecker {
         }
     }
 
-    public MediaTypeMatch checkResponse(RamlResponse response, Action action, SecurityExtractor security) {
-        final Response res = findResponse(action, response.getStatus(), security);
+    public void checkResponse(RamlRequest request, RamlResponse response, Action action, SecurityExtractor security) {
+        //TODO usage is multiplied by security schemes
+        for (final SecurityScheme scheme : security.getSchemes()) {
+            final RamlViolations requestViolations = violationsPerSecurity.requestViolations(scheme);
+            final RamlViolations responseViolations = violationsPerSecurity.responseViolations(scheme);
+            final MediaTypeMatch typeMatch = doCheckReponse(responseViolations, response, action, security.responses(scheme));
+            if (typeMatch != null) {
+                new ContentNegotiationChecker(requestViolations, responseViolations)
+                        .check(request, response, action, typeMatch);
+            }
+        }
+    }
+
+    private MediaTypeMatch doCheckReponse(RamlViolations violations, RamlResponse response, Action action, Map<String, Response> securityResponses) {
+        final Map<String, Response> responseMap = mergeMaps(action.getResponses(), securityResponses);
+        final Response res = responseMap.get(Integer.toString(response.getStatus()));
         if (res == null) {
-            responseViolations.add("responseCode.undefined", locator, response.getStatus());
-            throw new RamlViolationException();
+            violations.add("responseCode.undefined", locator, response.getStatus());
+            return null;
         }
         final String statusStr = Integer.toString(response.getStatus());
         actionUsage(usage, action).addResponseCode(statusStr);
         locator.responseCode(statusStr);
-        checkResponseHeaderParameters(response.getHeaderValues(), action, statusStr, res);
+        checkResponseHeaderParameters(violations, response.getHeaderValues(), action, statusStr, res);
 
-        final MediaTypeMatch typeMatch = MediaTypeMatch.find(responseViolations, response, res.getBody(), locator);
+        final MediaTypeMatch typeMatch = MediaTypeMatch.find(violations, response, res.getBody(), locator);
         if (typeMatch != null) {
             locator.responseMime(typeMatch.getMatchingMime());
-            checkSchema(responseViolations, response.getContent(), typeMatch);
+            checkSchema(violations, response.getContent(), typeMatch);
         }
         return typeMatch;
     }
@@ -273,9 +294,9 @@ public class RamlChecker {
         }
     }
 
-    private void checkResponseHeaderParameters(Values values, Action action, String responseCode, Response response) {
+    private void checkResponseHeaderParameters(RamlViolations violations, Values values, Action action, String responseCode, Response response) {
         responseUsage(usage, action, responseCode).addResponseHeaders(
-                new ParameterChecker(responseViolations)
+                new ParameterChecker(violations)
                         .acceptWildcard()
                         .ignoreX(config.ignoreXheaders)
                         .caseSensitive(false)

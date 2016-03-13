@@ -21,6 +21,7 @@ import org.raml.model.parameter.Header;
 import org.raml.model.parameter.QueryParameter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -47,46 +48,35 @@ class SecurityExtractor {
         }
     }
 
-    private class RemovePropagatingList<T> extends ArrayList<T> {
-        @Override
-        public T remove(int index) {
-            final T removed = super.remove(index);
-            schemes.remove(index);
-            return removed;
-        }
+    public List<SecurityScheme> getSchemes() {
+        return schemes;
     }
 
-    public List<Map<String, QueryParameter>> queryParameters() {
-        final List<Map<String, QueryParameter>> res = new RemovePropagatingList<>();
-        for (final SecurityScheme scheme : schemes) {
-            if (scheme.getDescribedBy() != null) {
-                res.add(scheme.getDescribedBy().getQueryParameters());
-            }
-        }
-        return res;
+    public Map<String, QueryParameter> queryParameters(SecurityScheme scheme) {
+        return scheme.getDescribedBy() == null
+                ? Collections.<String, QueryParameter>emptyMap()
+                : scheme.getDescribedBy().getQueryParameters();
     }
 
-    public List<Map<String, Header>> headers() {
-        final List<Map<String, Header>> res = new RemovePropagatingList<>();
-        for (final SecurityScheme scheme : schemes) {
-            if (scheme.getDescribedBy() != null) {
-                res.add(scheme.getDescribedBy().getHeaders());
-            }
-        }
-        return res;
+    public Map<String, Header> headers(SecurityScheme scheme) {
+        return scheme.getDescribedBy() == null
+                ? Collections.<String, Header>emptyMap()
+                : scheme.getDescribedBy().getHeaders();
     }
 
-    public List<Map<String, Response>> responses() {
-        final List<Map<String, Response>> res = new RemovePropagatingList<>();
-        for (final SecurityScheme scheme : schemes) {
-            if (scheme.getDescribedBy() != null) {
-                res.add(scheme.getDescribedBy().getResponses());
-            }
-        }
-        return res;
+    public Map<String, Response> responses(SecurityScheme scheme) {
+        return scheme.getDescribedBy() == null
+                ? Collections.<String, Response>emptyMap()
+                : scheme.getDescribedBy().getResponses();
     }
 
     private static final class SchemeFinder {
+        private static final SecurityScheme NULL_SCHEMA = new SecurityScheme();
+
+        static {
+            NULL_SCHEMA.setType("null");
+        }
+
         private final Raml raml;
         private final RamlViolations violations;
 
@@ -104,6 +94,9 @@ class SecurityExtractor {
             } else if (!raml.getSecuredBy().isEmpty()) {
                 res.addAll(securitySchemes(raml.getSecuredBy(), new Message("securityScheme.undefined", new Locator())));
             }
+            if (res.isEmpty()) {
+                res.add(NULL_SCHEMA);
+            }
             return res;
         }
 
@@ -111,11 +104,15 @@ class SecurityExtractor {
             final List<SecurityScheme> res = new ArrayList<>();
             for (final SecurityReference ref : refs) {
                 final String name = ref.getName();
-                final SecurityScheme ss = securityScheme(name);
-                if (ss == null) {
-                    violations.addIf(!"null".equals(name), message.withParam(name));
+                if ("null".equals(name)) {
+                    res.add(NULL_SCHEMA);
                 } else {
-                    res.add(ss);
+                    final SecurityScheme ss = securityScheme(name);
+                    if (ss == null) {
+                        violations.add(message.withParam(name));
+                    } else {
+                        res.add(ss);
+                    }
                 }
             }
             return res;
