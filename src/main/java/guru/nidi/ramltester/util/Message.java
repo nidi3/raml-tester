@@ -31,7 +31,7 @@ public class Message {
             MESSAGES.load(Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream("guru/nidi/ramltester/messages.properties"));
         } catch (IOException e) {
-            throw new AssertionError("Could not load messages", e);
+            throw new AssertionError(e);
         }
     }
 

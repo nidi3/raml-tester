@@ -44,7 +44,7 @@ final class JsRegex {
             ENGINE = new ScriptEngineManager().getEngineByExtension("js");
             ENGINE.eval(MATCHES_IN_JS);
         } catch (ScriptException e) {
-            throw new AssertionError("Could not initialize js engine", e);
+            throw new AssertionError(e);
         }
     }
 

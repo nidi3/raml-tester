@@ -63,7 +63,7 @@ public class FormDecoder {
             } catch (UnsupportedEncodingException e) {
                 throw new IllegalArgumentException("Unknown charset " + charset, e);
             } catch (IOException e) {
-                throw new AssertionError("Cannot happen", e);
+                throw new AssertionError(e);
             }
         }
         if (type.isCompatibleWith(MULTIPART)) {

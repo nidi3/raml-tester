@@ -58,7 +58,7 @@ public class SpringMockRamlRequest implements RamlRequest {
         try {
             return UriComponents.parseQuery(q == null ? null : UriUtils.decode(q, "utf-8"));
         } catch (UnsupportedEncodingException e) {
-            throw new AssertionError("Cannot happen", e);
+            throw new AssertionError(e);
         }
     }
 
