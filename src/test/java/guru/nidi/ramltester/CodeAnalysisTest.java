@@ -34,7 +34,7 @@ import guru.nidi.ramltester.util.MediaTypeTest;
 import net.sourceforge.pmd.RulePriority;
 import org.junit.Test;
 
-import static guru.nidi.codeassert.junit.CodeAssertMatchers.matchesExactly;
+import static guru.nidi.codeassert.junit.CodeAssertMatchers.packagesMatchExactly;
 import static guru.nidi.codeassert.pmd.Rulesets.*;
 import static org.junit.Assert.assertThat;
 
@@ -44,7 +44,7 @@ import static org.junit.Assert.assertThat;
 public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
-        class GuruNidiRamltester implements DependencyRuler {
+        class GuruNidiRamltester extends DependencyRuler {
             DependencyRule $self, core, httpcomponents, restassured, junit, validator, model, servlet, spring, jaxrs, util;
 
             public void defineRules() {
@@ -63,8 +63,8 @@ public class CodeAnalysisTest extends CodeAssertTest {
 //TODO dependencies to externals (spring, httpcomponents etc.)
         final DependencyRules rules = DependencyRules.denyAll()
                 .withExternals("java*", "org*", "com*", "guru.nidi.loader*")
-                .withRules(new GuruNidiRamltester());
-        assertThat(modelResult(), matchesExactly(rules));
+                .withRelativeRules(new GuruNidiRamltester());
+        assertThat(modelResult(), packagesMatchExactly(rules));
     }
 
     @Override
@@ -87,7 +87,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("arrays are only used internally",
                         In.locs("*Response", "*Request").ignore("EI_EXPOSE_REP", "EI_EXPOSE_REP2"))
                 .because("They are snippets",
-                        In.loc("guru.nidi.ramltester.snippets.*").ignoreAll())
+                        In.loc("guru.nidi.ramltester.snippets*").ignoreAll())
                 .because("it's class private and only used in 1 occasion",
                         In.loc("CheckerHelper$ResourceMatch").ignore("EQ_COMPARETO_USE_OBJECT_EQUALS"));
         return new FindBugsAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector).analyze();
@@ -126,7 +126,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.locs("VariableMatcher", "MediaType").ignore("CyclomaticComplexity", "NPathComplexity"),
                         In.loc("ContentNegotiationChecker").ignore("AvoidDeeplyNestedIfStmts"))
                 .because("They are snippets",
-                        In.loc("guru.nidi.ramltester.snippets.*").ignoreAll())
+                        In.loc("guru.nidi.ramltester.snippets*").ignoreAll())
                 .because("is in test",
                         In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"));
         return new PmdAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector)
