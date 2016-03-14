@@ -29,7 +29,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             try {
                 res = clazz.newInstance();
                 map.put(name, res);
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (Exception e) {
                 throw new RamlCheckerException("Could not create instance of " + clazz, e);
             }
         }
