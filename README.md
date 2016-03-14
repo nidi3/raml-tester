@@ -3,6 +3,24 @@ raml-tester [![Build Status](https://travis-ci.org/nidi3/raml-tester.svg?branch=
 
 Test if a request/response matches a given raml definition.
 
+Add it to a project
+-------------------
+Add these lines to the `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>guru.nidi.raml</groupId>
+    <artifactId>raml-tester</artifactId>
+    <version>0.8.8</version>
+</dependency>
+```
+
+If you are stuck with java 1.6, use the compatible version by adding the following line:
+
+```xml
+    <classifier>jdk6</classifier>
+```
+
 Use in a spring MVC test
 ------------------------
 [//]: # (spring)

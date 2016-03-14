@@ -1,6 +1,5 @@
 language: java
 sudo: false
-install: "mvn help:effective-pom"
 #deploy:
 #  provider: releases
 #  api_key:
