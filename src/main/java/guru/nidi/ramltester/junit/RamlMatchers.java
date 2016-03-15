@@ -26,45 +26,35 @@ public final class RamlMatchers {
     }
 
     /**
-     * RamlReport has correct RAML, and Request/Response.
-     *
-     * @return
+     * @return A Matcher checking RamlReport has correct RAML and Request/Response.
      */
     public static Matcher<RamlReport> hasNoViolations() {
         return new NoViolationsMatcher(true, true, true);
     }
 
     /**
-     * RamlReport has correct RAML.
-     *
-     * @return
+     * @return A Matcher checking RamlReport has correct RAML.
      */
     public static Matcher<RamlReport> validates() {
         return new NoViolationsMatcher(true, false, false);
     }
 
     /**
-     * RamlReport has correct Request/Response.
-     *
-     * @return
+     * @return A Matcher checking RamlReport has correct Request/Response.
      */
     public static Matcher<RamlReport> checks() {
         return new NoViolationsMatcher(false, true, true);
     }
 
     /**
-     * RamlReport has correct Request.
-     *
-     * @return
+     * @return A Matcher checking RamlReport has correct Request.
      */
     public static Matcher<RamlReport> requestChecks() {
         return new NoViolationsMatcher(false, true, false);
     }
 
     /**
-     * RamlReport has correct Response.
-     *
-     * @return
+     * @return A Matcher checking RamlReport has correct Response.
      */
     public static Matcher<RamlReport> responseChecks() {
         return new NoViolationsMatcher(false, false, true);
