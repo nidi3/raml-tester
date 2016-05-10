@@ -23,15 +23,16 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.io.IOException;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.checks;
 import static guru.nidi.ramltester.util.TestUtils.violations;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -88,6 +89,13 @@ public class HttpCommonsTest extends ServerTest {
         assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
         assertEquals(null, response.getEntity());
         assertTrue(client.getLastReport().isEmpty());
+    }
+
+    @Test
+    public void emptyPostRequest() throws IOException {
+        final HttpPost post = new HttpPost(url("base"));
+        client.execute(post);
+        assertThat(client.getLastReport(), checks());
     }
 
     @Override

@@ -77,7 +77,7 @@ public abstract class ServerTest {
     }
 
     protected String baseUrlWithPort() {
-        return baseUrl() + ":" +PORT;
+        return baseUrl() + ":" + PORT;
     }
 
     protected String baseUrl() {
