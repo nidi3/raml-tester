@@ -50,7 +50,7 @@ class HttpComponentsRamlMessage {
 
     protected HttpEntityEnclosingRequest buffered(HttpEntityEnclosingRequest request) {
         final HttpEntity entity = request.getEntity();
-        if (!entity.isRepeatable()) {
+        if (entity != null && !entity.isRepeatable()) {
             request.setEntity(buffered(entity));
         }
         return request;
