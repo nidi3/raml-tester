@@ -118,14 +118,14 @@ class RamlValidatorChecker {
     }
 
     private void description(String name, AbstractParam param, ParamName paramName) {
-        if (param.getDescription() == null || param.getDescription().isEmpty()) {
+        if (isNullOrEmpty(param.getDescription())) {
             violation("parameter.description.missing", locator, name, paramName);
         }
     }
 
     public void description(String desc) {
         if (has(Validation.DESCRIPTION)) {
-            if (desc == null || desc.isEmpty()) {
+            if (isNullOrEmpty(desc)) {
                 violation("description.missing", locator);
             }
         }
@@ -133,8 +133,16 @@ class RamlValidatorChecker {
 
     public void description(List<DocumentationItem> docs) {
         if (has(Validation.DESCRIPTION)) {
-            if (docs == null || docs.isEmpty()) {
-                violation("description.missing", locator);
+            if (isNullOrEmpty(docs)) {
+                violation("documentation.missing", locator);
+            } else {
+                for (final DocumentationItem doc : docs) {
+                    if (isNullOrEmpty(doc.getTitle())) {
+                        violation("documentation.missing.title", locator);
+                    } else if (isNullOrEmpty(doc.getContent())) {
+                        violation("documentation.missing.content", locator);
+                    }
+                }
             }
         }
     }
@@ -285,5 +293,13 @@ class RamlValidatorChecker {
                         new Message("schema.example.mismatch", locator, example));
             }
         }
+    }
+
+    private boolean isNullOrEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
+
+    private boolean isNullOrEmpty(List<?> s) {
+        return s == null || s.isEmpty();
     }
 }

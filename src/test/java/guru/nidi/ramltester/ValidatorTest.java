@@ -29,9 +29,13 @@ import static org.junit.Assert.assertThat;
  *
  */
 public class ValidatorTest extends HighlevelTestBase {
-    private static RamlDefinition example = RamlLoaders.fromClasspath(ValidatorTest.class).load("example.raml");
-    private static RamlDefinition uriParams = RamlLoaders.fromClasspath(ValidatorTest.class).load("uriParameters.raml");
-    private static RamlDefinition description = RamlLoaders.fromClasspath(ValidatorTest.class).load("description.raml");
+    private static final RamlLoaders RAML_LOADERS = RamlLoaders.fromClasspath(ValidatorTest.class);
+    private static final RamlDefinition
+            example = RAML_LOADERS.load("example.raml"),
+            uriParams = RAML_LOADERS.load("uriParameters.raml"),
+            description = RAML_LOADERS.load("description.raml"),
+            noDocTitle = RAML_LOADERS.load("description-no-title.raml"),
+            noDocContent = RAML_LOADERS.load("description-no-content.raml");
 
     @Test
     public void example() {
@@ -109,7 +113,7 @@ public class ValidatorTest extends HighlevelTestBase {
         final RamlReport report = description.validator().withChecks(DESCRIPTION).validate();
         assertEquals(12, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("Root definition has no description", it.next());
+        assertEquals("Root definition has no documentation", it.next());
         assertEquals("baseUriParameter 'path' in Root definition has no description", it.next());
         assertEquals("resource(/bla/{param}) has no description", it.next());
         assertEquals("baseUriParameter 'path' in resource(/bla/{param}) has no description", it.next());
@@ -121,6 +125,22 @@ public class ValidatorTest extends HighlevelTestBase {
         assertEquals("formParameter 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') has no description", it.next());
         assertEquals("action(GET /bla/{param}) response(200) has no description", it.next());
         assertEquals("header 'ok' in action(GET /bla/{param}) response(200) has no description", it.next());
+    }
+
+    @Test
+    public void missingDocTitle() {
+        final RamlReport report = noDocTitle.validator().withChecks(DESCRIPTION).validate();
+        assertEquals(1, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("Root definition has documentation with missing title", it.next());
+    }
+
+    @Test
+    public void missingDocContent() {
+        final RamlReport report = noDocContent.validator().withChecks(DESCRIPTION).validate();
+        assertEquals(1, report.getValidationViolations().size());
+        final Iterator<String> it = report.getValidationViolations().iterator();
+        assertEquals("Root definition has documentation with missing content", it.next());
     }
 
     @Test
