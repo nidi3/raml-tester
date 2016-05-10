@@ -127,6 +127,8 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.loc("ContentNegotiationChecker").ignore("AvoidDeeplyNestedIfStmts"))
                 .because("They are snippets",
                         In.loc("guru.nidi.ramltester.snippets*").ignoreAll())
+                .because("It's standard config",
+                        In.loc("CodeCoverage").ignore("NoPackage"))
                 .because("is in test",
                         In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"));
         return new PmdAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector)

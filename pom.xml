@@ -5,7 +5,7 @@
     <parent>
         <groupId>guru.nidi</groupId>
         <artifactId>guru-nidi-parent-pom</artifactId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
     </parent>
 
     <groupId>guru.nidi.raml</groupId>
@@ -32,6 +32,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>guru.nidi</groupId>
+                <artifactId>code-assert-maven-plugin</artifactId>
+                <version>0.0.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare</goal>
+                            <goal>assert</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>guru.nidi.maven.plugins</groupId>
                 <artifactId>snippets-maven-plugin</artifactId>
@@ -79,7 +92,7 @@
         <dependency>
             <groupId>guru.nidi.raml</groupId>
             <artifactId>raml-loader</artifactId>
-            <version>0.0.7</version>
+            <version>0.8.0</version>
         </dependency>
 
         <dependency>
@@ -219,7 +232,7 @@
         <dependency>
             <groupId>guru.nidi</groupId>
             <artifactId>code-assert</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.5</version>
             <scope>test</scope>
         </dependency>
 

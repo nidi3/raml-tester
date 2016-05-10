@@ -64,8 +64,11 @@ public class RamlLoaders {
         return new UrlLoader(baseUrl);
     }
 
-    private static Loader githubLoader(String token, String project) {
-        return new GithubLoader(token, project);
+    private static Loader githubLoader(String token, String user, String project) {
+        final int pos = project.indexOf('/');
+        return pos < 0
+                ? GithubLoader.forPrivate(token, user, project)
+                : GithubLoader.forPrivate(token, user, project.substring(0, pos), project.substring(pos));
     }
 
     private static Loader apiPortalLoader(String user, String password) {
@@ -100,12 +103,12 @@ public class RamlLoaders {
         return using(urlLoader(baseUrl));
     }
 
-    public static RamlLoaders fromGithub(String project) {
-        return fromGithub(null, project);
+    public static RamlLoaders fromGithub(String user, String project) {
+        return fromGithub(null, user, project);
     }
 
-    public static RamlLoaders fromGithub(String token, String project) {
-        return using(githubLoader(token, project));
+    public static RamlLoaders fromGithub(String token, String user, String project) {
+        return using(githubLoader(token, user, project));
     }
 
     public static RamlLoaders fromApiPortal(String user, String password) {
@@ -159,12 +162,12 @@ public class RamlLoaders {
         return andUsing(urlLoader(baseUrl));
     }
 
-    public RamlLoaders andFromGithub(String project) {
-        return andFromGithub(null, project);
+    public RamlLoaders andFromGithub(String user, String project) {
+        return andFromGithub(null, user, project);
     }
 
-    public RamlLoaders andFromGithub(String token, String project) {
-        return andUsing(githubLoader(token, project));
+    public RamlLoaders andFromGithub(String token, String user, String project) {
+        return andUsing(githubLoader(token, user, project));
     }
 
     public RamlLoaders andFromApiPortal(String user, String password) {
