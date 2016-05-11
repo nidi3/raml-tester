@@ -19,7 +19,7 @@ import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.model.MimeType;
+import org.raml.v2.api.model.v08.bodies.BodyLike;
 
 import java.util.*;
 
@@ -32,9 +32,9 @@ final class MediaTypeMatch {
     private final MediaType targetType;
     private final Collection<MediaType> definedTypes;
     private final MediaType matchingMedia;
-    private final MimeType matchingMime;
+    private final BodyLike matchingMime;
 
-    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia, MimeType matchingMime) {
+    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia, BodyLike matchingMime) {
         this.targetType = targetType;
         this.definedTypes = definedTypes;
         this.matchingMedia = matchingMedia;
@@ -53,7 +53,7 @@ final class MediaTypeMatch {
         return matchingMedia;
     }
 
-    public MimeType getMatchingMime() {
+    public BodyLike getMatchingMime() {
         return matchingMime;
     }
 
@@ -61,7 +61,7 @@ final class MediaTypeMatch {
         return targetType.getCharset("iso-8859-1");
     }
 
-    public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, Map<String, MimeType> bodies, Locator locator) {
+    public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, List<BodyLike> bodies, Locator locator) {
         if (isNoOrEmptyBodies(bodies)) {
             violations.addIf(hasContent(message), "body.superfluous", locator);
             return null;
@@ -78,8 +78,8 @@ final class MediaTypeMatch {
             violations.add("mediaType.illegal", locator, message.getContentType(), e.getMessage());
             return null;
         }
-        final Map<MediaType, MimeType> mediaTypes = mediaTypes(violations, bodies, locator);
-        final List<Map.Entry<MediaType, MimeType>> bestMatches = findBestMatches(mediaTypes, targetType);
+        final Map<MediaType, BodyLike> mediaTypes = mediaTypes(violations, bodies, locator);
+        final List<Map.Entry<MediaType, BodyLike>> bestMatches = findBestMatches(mediaTypes, targetType);
         if (bestMatches.isEmpty()) {
             violations.add("mediaType.undefined", locator, message.getContentType());
             return null;
@@ -91,21 +91,21 @@ final class MediaTypeMatch {
         return new MediaTypeMatch(targetType, mediaTypes.keySet(), bestMatches.get(0).getKey(), bestMatches.get(0).getValue());
     }
 
-    private static Map<MediaType, MimeType> mediaTypes(RamlViolations violations, Map<String, MimeType> bodies, Locator locator) {
-        final Map<MediaType, MimeType> types = new LinkedHashMap<>();
-        for (final Map.Entry<String, MimeType> entry : bodies.entrySet()) {
+    private static Map<MediaType, BodyLike> mediaTypes(RamlViolations violations, List<BodyLike> bodies, Locator locator) {
+        final Map<MediaType, BodyLike> types = new LinkedHashMap<>();
+        for (final BodyLike body : bodies) {
             try {
-                types.put(MediaType.valueOf(entry.getKey()), entry.getValue());
+                types.put(MediaType.valueOf(body.name()), body);
             } catch (InvalidMediaTypeException e) {
-                violations.add(new Message("mediaType.illegal", locator, entry.getKey(), e.getMessage()));
+                violations.add(new Message("mediaType.illegal", locator, body.name(), e.getMessage()));
             }
         }
         return types;
     }
 
-    private static List<Map.Entry<MediaType, MimeType>> findBestMatches(Map<MediaType, MimeType> types, MediaType targetType) {
-        final List<Map.Entry<MediaType, MimeType>> bestMatches = new ArrayList<>();
-        for (final Map.Entry<MediaType, MimeType> entry : types.entrySet()) {
+    private static List<Map.Entry<MediaType, BodyLike>> findBestMatches(Map<MediaType, BodyLike> types, MediaType targetType) {
+        final List<Map.Entry<MediaType, BodyLike>> bestMatches = new ArrayList<>();
+        for (final Map.Entry<MediaType, BodyLike> entry : types.entrySet()) {
             final int similarity = targetType.similarity(entry.getKey());
             if (bestMatches.isEmpty()) {
                 if (similarity > 0) {

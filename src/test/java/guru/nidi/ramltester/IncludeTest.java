@@ -16,9 +16,12 @@
 package guru.nidi.ramltester;
 
 import org.junit.Test;
-import org.raml.model.Action;
-import org.raml.model.ActionType;
-import org.raml.model.Raml;
+import org.raml.v2.api.model.v08.api.Api;
+import org.raml.v2.api.model.v08.bodies.Response;
+import org.raml.v2.api.model.v08.methods.Method;
+import org.raml.v2.api.model.v08.parameters.Parameter;
+
+import java.util.List;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -32,13 +35,30 @@ public class IncludeTest extends HighlevelTestBase {
 
     @Test
     public void load() throws Exception {
-        final Raml raml = api.getRaml();
-        final Action get = raml.getResource("/site").getAction(ActionType.GET);
-        assertNull(get.getQueryParameters().get("string.json"));
-        assertNotEquals("string.json", get.getResponses().get("200").getBody().get("application/json").getExample());
-        assertNotEquals("string.json", get.getResponses().get("201").getBody().get("application/json").getSchema());
-        assertNotEquals("string.json", get.getResponses().get("201").getBody().get("application/json").getExample());
+        final Api raml = api.getRaml();
+        final Method get = raml.resources().get(0).methods().get(0);
+        assertNull(paramByName(get.queryParameters(),"string.json"));
+        assertNotEquals("string.json", responseByCode(get.responses(), "200").body().get(0).example());
+        assertNotEquals("string.json", responseByCode(get.responses(), "201").body().get(0).schema());
+        assertNotEquals("string.json", responseByCode(get.responses(), "201").body().get(0).example());
     }
 
+    private Parameter paramByName(List<Parameter> parameters, String name) {
+        for (final Parameter parameter : parameters) {
+            if (parameter.name().equals(name)) {
+                return parameter;
+            }
+        }
+        return null;
+    }
+
+    private Response responseByCode(List<Response> responses, String code) {
+        for (final Response response : responses) {
+            if (response.code().value().equals(code)) {
+                return response;
+            }
+        }
+        return null;
+    }
 
 }

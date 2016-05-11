@@ -160,19 +160,19 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             return mimeTypes.entrySet();
         }
 
-        public void addQueryParameters(Set<String> names) {
+        public void addQueryParameters(Collection<String> names) {
             queryParameters.addAll(names);
         }
 
-        public void initQueryParameters(Set<String> names) {
+        public void initQueryParameters(Collection<String> names) {
             queryParameters.addAll(names, 0);
         }
 
-        public void addRequestHeaders(Set<String> names) {
+        public void addRequestHeaders(Collection<String> names) {
             requestHeaders.addAll(names);
         }
 
-        public void initRequestHeaders(Set<String> names) {
+        public void initRequestHeaders(Collection<String> names) {
             requestHeaders.addAll(names, 0);
         }
 
@@ -180,11 +180,11 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             responseCodes.add(name);
         }
 
-        public void addResponseCodes(Set<String> names) {
+        public void addResponseCodes(Collection<String> names) {
             responseCodes.addAll(names);
         }
 
-        public void initResponseCodes(Set<String> names) {
+        public void initResponseCodes(Collection<String> names) {
             responseCodes.addAll(names, 0);
         }
 
@@ -219,7 +219,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             responseHeaders.addAll(names);
         }
 
-        public void initResponseHeaders(Set<String> names) {
+        public void initResponseHeaders(Collection<String> names) {
             responseHeaders.addAll(names, 0);
         }
 
@@ -242,7 +242,7 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             formParameters.addAll(names);
         }
 
-        public void initFormParameters(Set<String> names) {
+        public void initFormParameters(Collection<String> names) {
             formParameters.addAll(names, 0);
         }
 

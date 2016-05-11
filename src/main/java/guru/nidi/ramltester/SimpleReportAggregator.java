@@ -16,7 +16,7 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.core.*;
-import org.raml.model.Raml;
+import org.raml.v2.api.model.v08.api.Api;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +27,7 @@ import java.util.Map;
  *
  */
 public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
-    private Raml raml;
+    private Api raml;
     private final List<RamlReport> reports = new ArrayList<>();
 
     @Override
@@ -35,7 +35,7 @@ public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
         if (report != null) {
             if (raml == null) {
                 raml = report.getRaml();
-            } else if (!raml.getTitle().equals(report.getRaml().getTitle())) {
+            } else if (!raml.title().equals(report.getRaml().title())) {
                 throw new IllegalArgumentException("This aggregator can only be used with one RamlDefinition. To work with multiple RamlDefinitions, use MultiReportAggregator.");
             }
             reports.add(report);
@@ -45,7 +45,7 @@ public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
 
     @Override
     public Iterable<Map.Entry<String, Usage>> usages() {
-        return Collections.singletonMap(raml.getTitle(), UsageBuilder.usage(raml, reports)).entrySet();
+        return Collections.singletonMap(raml.title(), UsageBuilder.usage(raml, reports)).entrySet();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
         return reports;
     }
 
-    protected Raml getRaml() {
+    protected Api getRaml() {
         return raml;
     }
 

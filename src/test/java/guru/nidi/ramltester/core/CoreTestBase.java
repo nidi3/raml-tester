@@ -17,7 +17,7 @@ package guru.nidi.ramltester.core;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.core.IsEqual;
-import org.raml.model.parameter.QueryParameter;
+import org.raml.v2.api.model.v08.parameters.Parameter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class CoreTestBase {
         assertThat(violations.iterator().next(), matcher);
     }
 
-    protected Map<String, QueryParameter> queryParameterMapOf(Object... keysAndValues) {
+    protected Map<String, Parameter> queryParameterMapOf(Object... keysAndValues) {
         return mapOf(keysAndValues);
     }
 

@@ -15,27 +15,31 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.model.*;
+import org.raml.v2.api.model.v08.api.Api;
+import org.raml.v2.api.model.v08.bodies.BodyLike;
+import org.raml.v2.api.model.v08.bodies.Response;
+import org.raml.v2.api.model.v08.methods.Method;
+import org.raml.v2.api.model.v08.resources.Resource;
 
 import java.util.List;
-import java.util.Map;
 
+import static guru.nidi.ramltester.core.CheckerHelper.namesOf;
 import static guru.nidi.ramltester.core.RamlValidatorChecker.ParamName.*;
 
 /**
  *
  */
 public class RamlValidator {
-    private final Raml raml;
+    private final Api raml;
     private final List<SchemaValidator> schemaValidators;
     private final Locator locator;
     private final RamlValidatorChecker checker;
 
-    public RamlValidator(Raml raml, List<SchemaValidator> schemaValidators) {
+    public RamlValidator(Api raml, List<SchemaValidator> schemaValidators) {
         this(raml, schemaValidators, new RamlValidatorChecker(raml, schemaValidators));
     }
 
-    private RamlValidator(Raml raml, List<SchemaValidator> schemaValidators, RamlValidatorChecker checker) {
+    private RamlValidator(Api raml, List<SchemaValidator> schemaValidators, RamlValidatorChecker checker) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.checker = checker;
@@ -59,10 +63,10 @@ public class RamlValidator {
     }
 
     public RamlReport validate() {
-        checker.parameters(raml.getBaseUriParameters(), BASE_URI);
-        checker.description(raml.getDocumentation());
-        checker.description(raml.getBaseUriParameters(), BASE_URI);
-        for (final Resource resource : raml.getResources().values()) {
+        checker.parameters(raml.baseUriParameters(), BASE_URI);
+        checker.description(raml.documentation());
+        checker.description(raml.baseUriParameters(), BASE_URI);
+        for (final Resource resource : raml.resources()) {
             resource(resource);
         }
         return checker.getReport();
@@ -71,58 +75,58 @@ public class RamlValidator {
     private void resource(Resource resource) {
         locator.resource(resource);
         checker.resourcePattern(resource);
-        checker.uriParameters(resource.getUriParameters().keySet(), resource);
-        checker.parameters(resource.getBaseUriParameters(), BASE_URI);
-        checker.parameters(resource.getUriParameters(), URI);
-        checker.description(resource.getDescription());
-        checker.description(resource.getBaseUriParameters(), BASE_URI);
-        checker.description(resource.getUriParameters(), URI);
+        checker.uriParameters(namesOf(resource.uriParameters()), resource);
+        checker.parameters(resource.baseUriParameters(), BASE_URI);
+        checker.parameters(resource.uriParameters(), URI);
+        checker.description(resource.description());
+        checker.description(resource.baseUriParameters(), BASE_URI);
+        checker.description(resource.uriParameters(), URI);
         checker.empty(resource);
-        for (final Resource res : resource.getResources().values()) {
+        for (final Resource res : resource.resources()) {
             resource(res);
         }
-        for (final Action action : resource.getActions().values()) {
+        for (final Method action : resource.methods()) {
             action(action);
         }
     }
 
-    private void action(Action action) {
+    private void action(Method action) {
         locator.action(action);
-        checker.parameters(action.getBaseUriParameters(), BASE_URI);
-        checker.parameters(action.getQueryParameters(), QUERY);
-        checker.headerPattern(action.getHeaders().keySet());
-        checker.description(action.getDescription());
-        checker.description(action.getBaseUriParameters(), BASE_URI);
-        checker.description(action.getQueryParameters(), QUERY);
-        checker.description(action.getHeaders(), HEADER);
+        checker.parameters(action.baseUriParameters(), BASE_URI);
+        checker.parameters(action.queryParameters(), QUERY);
+        checker.headerPattern(namesOf(action.headers()));
+        checker.description(action.description());
+        checker.description(action.baseUriParameters(), BASE_URI);
+        checker.description(action.queryParameters(), QUERY);
+        checker.description(action.headers(), HEADER);
         checker.empty(action);
-        if (action.getBody() != null) {
-            for (final MimeType mimeType : action.getBody().values()) {
+        if (action.body() != null) {
+            for (final BodyLike mimeType : action.body()) {
                 locator.requestMime(mimeType);
                 mimeType(mimeType);
             }
         }
-        for (final Map.Entry<String, Response> entry : action.getResponses().entrySet()) {
-            locator.responseCode(entry.getKey());
-            response(entry.getValue());
+        for (final Response response : action.responses()) {
+            locator.responseCode(response.code().value());
+            response(response);
         }
     }
 
-    private void mimeType(MimeType mimeType) {
-        if (mimeType.getFormParameters() != null) {
+    private void mimeType(BodyLike mimeType) {
+        if (mimeType.formParameters() != null) {
             checker.formParameters(mimeType);
-            checker.parameters(mimeType.getFormParameters(), FORM);
-            checker.description(mimeType.getFormParameters(), FORM);
+            checker.parameters(mimeType.formParameters(), FORM);
+            checker.description(mimeType.formParameters(), FORM);
         }
         checker.exampleSchema(mimeType);
     }
 
     private void response(Response response) {
-        checker.headerPattern(response.getHeaders().keySet());
-        checker.description(response.getDescription());
-        checker.description(response.getHeaders(), HEADER);
-        if (response.getBody() != null) {
-            for (final MimeType mimeType : response.getBody().values()) {
+        checker.headerPattern(namesOf(response.headers()));
+        checker.description(response.description());
+        checker.description(response.headers(), HEADER);
+        if (response.body() != null) {
+            for (final BodyLike mimeType : response.body()) {
                 locator.responseMime(mimeType);
                 mimeType(mimeType);
             }

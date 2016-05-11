@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.model.Raml;
+import org.raml.v2.api.model.v08.api.Api;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -24,17 +24,17 @@ import java.io.StringWriter;
  *
  */
 public class RamlReport {
-    private final Raml raml;
+    private final Api raml;
     private final Usage usage = new Usage();
     private final RamlViolations requestViolations = new RamlViolations();
     private final RamlViolations responseViolations = new RamlViolations();
     private final RamlViolations validationViolations = new RamlViolations();
 
-    public RamlReport(Raml raml) {
+    public RamlReport(Api raml) {
         this.raml = raml;
     }
 
-    public static RamlReport fromException(Raml raml, Exception cause) {
+    public static RamlReport fromException(Api raml, Exception cause) {
         final RamlReport report = new RamlReport(raml);
         final StringWriter out = new StringWriter();
         cause.printStackTrace(new PrintWriter(out));
@@ -59,7 +59,7 @@ public class RamlReport {
         return usage;
     }
 
-    public Raml getRaml() {
+    public Api getRaml() {
         return raml;
     }
 

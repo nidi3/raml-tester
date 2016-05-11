@@ -16,12 +16,12 @@
 package guru.nidi.ramltester.validator;
 
 import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.cfg.ValidationConfiguration;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.load.configuration.LoadingConfiguration;
-import com.github.fge.jsonschema.core.load.configuration.LoadingConfigurationBuilder;
-import com.github.fge.jsonschema.core.load.uri.URITranslatorConfiguration;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.core.report.ReportProvider;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import guru.nidi.loader.Loader;
@@ -39,24 +39,37 @@ import java.io.Reader;
  */
 public class JsonSchemaValidator implements SchemaValidator {
     private JsonSchemaFactory factory;
+    private final LoadingConfiguration loadingConfiguration;
+    private final ReportProvider reportProvider;
+    private final ValidationConfiguration validationConfiguration;
     private final Loader loader;
 
-    private JsonSchemaValidator(JsonSchemaFactory factory, Loader loader) {
-        this.factory = factory;
+    private JsonSchemaValidator(Loader loader, LoadingConfiguration loadingConfiguration, ReportProvider reportProvider, ValidationConfiguration validationConfiguration) {
         this.loader = loader;
+        this.loadingConfiguration = loadingConfiguration;
+        this.reportProvider = reportProvider;
+        this.validationConfiguration = validationConfiguration;
     }
 
     public JsonSchemaValidator() {
-        this(null, null);
+        this(null, null, null, null);
     }
 
-    public JsonSchemaValidator using(JsonSchemaFactory factory) {
-        return new JsonSchemaValidator(factory, loader);
+    public JsonSchemaValidator using(LoadingConfiguration loadingConfiguration) {
+        return new JsonSchemaValidator(loader, loadingConfiguration, reportProvider, validationConfiguration);
+    }
+
+    public JsonSchemaValidator using(ReportProvider reportProvider) {
+        return new JsonSchemaValidator(loader, loadingConfiguration, reportProvider, validationConfiguration);
+    }
+
+    public JsonSchemaValidator using(ValidationConfiguration validationConfiguration) {
+        return new JsonSchemaValidator(loader, loadingConfiguration, reportProvider, validationConfiguration);
     }
 
     @Override
     public SchemaValidator withLoader(Loader loader) {
-        return new JsonSchemaValidator(factory, loader);
+        return new JsonSchemaValidator(loader, loadingConfiguration, reportProvider, validationConfiguration);
     }
 
     @Override
@@ -65,12 +78,10 @@ public class JsonSchemaValidator implements SchemaValidator {
     }
 
     private synchronized void init() {
-        if (loader != null && factory == null) {
-            final LoadingConfigurationBuilder loadingConfig = LoadingConfiguration.newBuilder();
-            final String simpleName = loader.getClass().getSimpleName();
-            loadingConfig.addScheme(simpleName, new LoaderUriDownloader(loader));
-            loadingConfig.setURITranslatorConfiguration(URITranslatorConfiguration.newBuilder().setNamespace(simpleName + ":///").freeze());
-            factory = JsonSchemaFactory.newBuilder().setLoadingConfiguration(loadingConfig.freeze()).freeze();
+        if (factory == null) {
+            factory = loader == null
+                    ? JsonSchemaFactory.byDefault()
+                    : LoaderUriDownloader.createJsonSchemaFactory(loader, loadingConfiguration, reportProvider, validationConfiguration);
         }
     }
 
@@ -78,7 +89,6 @@ public class JsonSchemaValidator implements SchemaValidator {
     public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
         init();
         try (final Reader s = schema) {
-            final JsonSchemaFactory factory = this.factory == null ? JsonSchemaFactory.byDefault() : this.factory;
             final JsonSchema jsonSchema = factory.getJsonSchema(JsonLoader.fromReader(schema));
             final ProcessingReport report = jsonSchema.validate(JsonLoader.fromReader(content));
             if (!report.isSuccess()) {

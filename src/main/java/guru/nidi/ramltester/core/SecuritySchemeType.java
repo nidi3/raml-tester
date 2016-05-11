@@ -15,68 +15,60 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.model.SecurityScheme;
-import org.raml.model.SecuritySettings;
+import org.raml.v2.api.model.v08.security.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
  */
-enum SecuritySchemeType {
-    OAUTH_10("OAuth 1.0") {
-        @Override
-        public void check(SecurityScheme scheme, RamlViolations violations) {
-            final SecuritySettings settings = scheme.getSettings();
-            violations.addIf(settings == null || settings.getRequestTokenUri() == null, "oauth10.requestTokenUri.missing");
-            violations.addIf(settings == null || settings.getAuthorizationUri() == null, "oauth10.authorizationUri.missing");
-            violations.addIf(settings == null || settings.getTokenCredentialsUri() == null, "oauth10.tokenCredentialsUri.missing");
-        }
-    },
-    OAUTH_20("OAuth 2.0") {
-        private final List<String> GRANTS = Arrays.asList("code", "token", "owner", "credentials");
+abstract class SecuritySchemeType<T extends AbstractSecurityScheme> {
+    private static final Map<Class<?>, SecuritySchemeType<?>> INSTANCES = new HashMap<>();
 
-        @Override
-        public void check(SecurityScheme scheme, RamlViolations violations) {
-            final SecuritySettings settings = scheme.getSettings();
-            violations.addIf(settings == null || settings.getAuthorizationUri() == null, "oauth20.authorizationUri.missing");
-            violations.addIf(settings == null || settings.getAccessTokenUri() == null, "oauth20.accessTokenUri.missing");
-            violations.addIf(settings == null || settings.getAuthorizationGrants().isEmpty(), "oauth20.authorizationGrants.missing");
-            if (settings != null) {
-                for (final String grant : settings.getAuthorizationGrants()) {
-                    violations.addIf(!GRANTS.contains(grant), "oauth20.authorizationGrant.invalid", grant);
-                }
-            }
-        }
-    },
-    BASIC("Basic Authentication") {
-        @Override
-        public void check(SecurityScheme scheme, RamlViolations violations) {
-
-        }
-    },
-    DIGEST("Digest Authentication") {
-        @Override
-        public void check(SecurityScheme scheme, RamlViolations violations) {
-
-        }
-    };
-
-    private final String name;
-
-    SecuritySchemeType(String name) {
-        this.name = name;
+    public static SecuritySchemeType of(AbstractSecurityScheme scheme) {
+        return INSTANCES.get(scheme.getClass());
     }
 
-    public abstract void check(SecurityScheme scheme, RamlViolations violations);
+    public abstract void check(T scheme, RamlViolations violations);
 
-    public static SecuritySchemeType byName(String name) {
-        for (final SecuritySchemeType type : values()) {
-            if (type.name.equals(name)) {
-                return type;
+    static {
+        INSTANCES.put(OAuth1SecurityScheme.class, new SecuritySchemeType<OAuth1SecurityScheme>() {
+            @Override
+            public void check(OAuth1SecurityScheme scheme, RamlViolations violations) {
+                final OAuth1SecuritySchemeSettings settings = scheme.settings();
+                violations.addIf(settings == null || settings.requestTokenUri() == null, "oauth10.requestTokenUri.missing");
+                violations.addIf(settings == null || settings.authorizationUri() == null, "oauth10.authorizationUri.missing");
+                violations.addIf(settings == null || settings.tokenCredentialsUri() == null, "oauth10.tokenCredentialsUri.missing");
             }
-        }
-        return null;
+        });
+        INSTANCES.put(OAuth2SecurityScheme.class, new SecuritySchemeType<OAuth2SecurityScheme>() {
+            private final List<String> GRANTS = Arrays.asList("code", "token", "owner", "credentials");
+
+            @Override
+            public void check(OAuth2SecurityScheme scheme, RamlViolations violations) {
+                final OAuth2SecuritySchemeSettings settings = scheme.settings();
+                violations.addIf(settings == null || settings.authorizationUri() == null, "oauth20.authorizationUri.missing");
+                violations.addIf(settings == null || settings.accessTokenUri() == null, "oauth20.accessTokenUri.missing");
+                violations.addIf(settings == null || settings.authorizationGrants().isEmpty(), "oauth20.authorizationGrants.missing");
+                if (settings != null) {
+                    for (final String grant : settings.authorizationGrants()) {
+                        violations.addIf(!GRANTS.contains(grant), "oauth20.authorizationGrant.invalid", grant);
+                    }
+                }
+            }
+        });
+        INSTANCES.put(BasicSecurityScheme.class, new SecuritySchemeType<BasicSecurityScheme>() {
+            public void check(BasicSecurityScheme scheme, RamlViolations violations) {
+
+            }
+        });
+        INSTANCES.put(DigestSecurityScheme.class, new SecuritySchemeType<DigestSecurityScheme>() {
+            public void check(DigestSecurityScheme scheme, RamlViolations violations) {
+
+            }
+        });
     }
 }

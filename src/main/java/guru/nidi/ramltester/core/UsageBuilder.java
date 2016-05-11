@@ -15,10 +15,16 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.model.*;
+import org.raml.v2.api.model.v08.api.Api;
+import org.raml.v2.api.model.v08.bodies.BodyLike;
+import org.raml.v2.api.model.v08.bodies.Response;
+import org.raml.v2.api.model.v08.methods.Method;
+import org.raml.v2.api.model.v08.resources.Resource;
 
 import java.util.List;
-import java.util.Map;
+
+import static guru.nidi.ramltester.core.CheckerHelper.codesOf;
+import static guru.nidi.ramltester.core.CheckerHelper.namesOf;
 
 /**
  *
@@ -28,49 +34,49 @@ public final class UsageBuilder {
     }
 
     static Usage.Resource resourceUsage(Usage usage, Resource resource) {
-        return usage.resource(resource.getUri());
+        return usage.resource(resource.resourcePath());
     }
 
-    static Usage.Action actionUsage(Usage usage, Action action) {
-        return usage.resource(action.getResource().getUri()).action(action.getType().name());
+    static Usage.Action actionUsage(Usage usage, Method action) {
+        return usage.resource(action.resource().resourcePath()).action(action.method());
     }
 
-    static Usage.Response responseUsage(Usage usage, Action action, String responseCode) {
+    static Usage.Response responseUsage(Usage usage, Method action, String responseCode) {
         return actionUsage(usage, action).response(responseCode);
     }
 
-    static Usage.MimeType mimeTypeUsage(Usage usage, Action action, MimeType mimeType) {
-        return actionUsage(usage, action).mimeType(mimeType.getType());
+    static Usage.MimeType mimeTypeUsage(Usage usage, Method action, BodyLike mimeType) {
+        return actionUsage(usage, action).mimeType(mimeType.name());
     }
 
-    public static Usage usage(Raml raml, List<RamlReport> reports) {
+    public static Usage usage(Api raml, List<RamlReport> reports) {
         final Usage usage = new Usage();
-        createTotalUsage(usage, raml.getResources());
+        createTotalUsage(usage, raml.resources());
         for (final RamlReport report : reports) {
             usage.add(report.getUsage());
         }
         return usage;
     }
 
-    private static void createTotalUsage(Usage usage, Map<String, Resource> resources) {
-        for (final Map.Entry<String, Resource> resourceEntry : resources.entrySet()) {
-            resourceUsage(usage, resourceEntry.getValue());
-            for (final Action action : resourceEntry.getValue().getActions().values()) {
-                actionUsage(usage, action).initQueryParameters(action.getQueryParameters().keySet());
-                actionUsage(usage, action).initResponseCodes(action.getResponses().keySet());
-                actionUsage(usage, action).initRequestHeaders(action.getHeaders().keySet());
-                if (action.getBody() != null) {
-                    for (final MimeType mimeType : action.getBody().values()) {
-                        if (mimeType.getFormParameters() != null) {
-                            UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(mimeType.getFormParameters().keySet());
+    private static void createTotalUsage(Usage usage, List<Resource> resources) {
+        for (final Resource resource : resources) {
+            resourceUsage(usage, resource);
+            for (final Method action : resource.methods()) {
+                actionUsage(usage, action).initQueryParameters(namesOf(action.queryParameters()));
+                actionUsage(usage, action).initResponseCodes(codesOf(action.responses()));
+                actionUsage(usage, action).initRequestHeaders(namesOf(action.headers()));
+                if (action.body() != null) {
+                    for (final BodyLike mimeType : action.body()) {
+                        if (mimeType.formParameters() != null) {
+                            UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(namesOf(mimeType.formParameters()));
                         }
                     }
                 }
-                for (final Map.Entry<String, Response> responseEntry : action.getResponses().entrySet()) {
-                    responseUsage(usage, action, responseEntry.getKey()).initResponseHeaders(responseEntry.getValue().getHeaders().keySet());
+                for (final Response response : action.responses()) {
+                    responseUsage(usage, action, response.code().value()).initResponseHeaders(namesOf(response.headers()));
                 }
             }
-            createTotalUsage(usage, resourceEntry.getValue().getResources());
+            createTotalUsage(usage, resource.resources());
         }
     }
 }

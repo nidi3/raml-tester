@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.model.SecurityScheme;
+import org.raml.v2.api.model.v08.security.AbstractSecurityScheme;
 
 import java.util.*;
 
@@ -23,14 +23,14 @@ import java.util.*;
  *
  */
 class RamlViolationsPerSecurity {
-    private static final Comparator<SecurityScheme> SCHEME_COMPARATOR = new Comparator<SecurityScheme>() {
+    private static final Comparator<AbstractSecurityScheme> SCHEME_COMPARATOR = new Comparator<AbstractSecurityScheme>() {
         @Override
-        public int compare(SecurityScheme s1, SecurityScheme s2) {
-            return s1.getType().compareToIgnoreCase(s2.getType());
+        public int compare(AbstractSecurityScheme s1, AbstractSecurityScheme s2) {
+            return s1.type().compareToIgnoreCase(s2.type());
         }
     };
 
-    private final List<SecurityScheme> schemes;
+    private final List<AbstractSecurityScheme> schemes;
     private final Map<String, RamlViolations> requestViolations, responseViolations;
 
     public RamlViolationsPerSecurity(SecurityExtractor security) {
@@ -38,24 +38,24 @@ class RamlViolationsPerSecurity {
         Collections.sort(schemes, SCHEME_COMPARATOR);
         requestViolations = new HashMap<>();
         responseViolations = new HashMap<>();
-        for (final SecurityScheme scheme : schemes) {
-            requestViolations.put(scheme.getType(), new RamlViolations());
-            responseViolations.put(scheme.getType(), new RamlViolations());
+        for (final AbstractSecurityScheme scheme : schemes) {
+            requestViolations.put(scheme.type(), new RamlViolations());
+            responseViolations.put(scheme.type(), new RamlViolations());
         }
     }
 
-    public RamlViolations requestViolations(SecurityScheme scheme) {
-        return requestViolations.get(scheme.getType());
+    public RamlViolations requestViolations(AbstractSecurityScheme scheme) {
+        return requestViolations.get(scheme.type());
     }
 
-    public RamlViolations responseViolations(SecurityScheme scheme) {
-        return responseViolations.get(scheme.getType());
+    public RamlViolations responseViolations(AbstractSecurityScheme scheme) {
+        return responseViolations.get(scheme.type());
     }
 
-    public List<SecurityScheme> leastViolations() {
+    public List<AbstractSecurityScheme> leastViolations() {
         int best = Integer.MAX_VALUE;
-        final List<SecurityScheme> res = new ArrayList<>();
-        for (final SecurityScheme scheme : schemes) {
+        final List<AbstractSecurityScheme> res = new ArrayList<>();
+        for (final AbstractSecurityScheme scheme : schemes) {
             final int violations = requestViolations(scheme).size() + responseViolations(scheme).size();
             if (violations <= best) {
                 if (violations < best) {
@@ -69,18 +69,18 @@ class RamlViolationsPerSecurity {
     }
 
     public void addLeastViolations(RamlViolations request, RamlViolations response) {
-        for (final SecurityScheme scheme : leastViolations()) {
+        for (final AbstractSecurityScheme scheme : leastViolations()) {
             addAll(scheme, requestViolations(scheme), request);
             addAll(scheme, responseViolations(scheme), response);
         }
     }
 
-    private void addAll(SecurityScheme scheme, RamlViolations source, RamlViolations target) {
+    private void addAll(AbstractSecurityScheme scheme, RamlViolations source, RamlViolations target) {
         if (schemes.size() == 1) {
             target.addAll(source);
         } else {
             for (final String s : source) {
-                target.add("scheme", scheme.getType(), s);
+                target.add("scheme", scheme.type(), s);
             }
         }
     }

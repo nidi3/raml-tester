@@ -25,7 +25,6 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -62,9 +61,8 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
 
     @Override
     public void validate(Reader content, Reader schema, RamlViolations violations, Message message) {
-        final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
-            schemaFactory.setResourceResolver(new LoaderLSResourceResolver(loader));
+            final SchemaFactory schemaFactory = LoaderLSResourceResolver.createXmlSchemaFactory(loader);
             final Schema s = schemaFactory.newSchema(new StreamSource(schema));
             final Validator validator = s.newValidator();
             validator.setErrorHandler(new ViolationsWritingErrorHandler(violations, message));

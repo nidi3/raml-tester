@@ -19,9 +19,12 @@ import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.model.*;
-import org.raml.model.parameter.AbstractParam;
-import org.raml.model.parameter.UriParameter;
+import org.raml.v2.api.model.v08.api.Api;
+import org.raml.v2.api.model.v08.bodies.BodyLike;
+import org.raml.v2.api.model.v08.bodies.Response;
+import org.raml.v2.api.model.v08.methods.Method;
+import org.raml.v2.api.model.v08.parameters.Parameter;
+import org.raml.v2.api.model.v08.resources.Resource;
 
 import java.io.Reader;
 import java.util.*;
@@ -33,50 +36,40 @@ final class CheckerHelper {
     private CheckerHelper() {
     }
 
-    public static Protocol protocolOf(String s) {
-        if ("http".equalsIgnoreCase(s)) {
-            return Protocol.HTTP;
-        }
-        if ("https".equalsIgnoreCase(s)) {
-            return Protocol.HTTPS;
-        }
-        return null;
-    }
-
-    public static boolean isNoOrEmptyBodies(Map<String, MimeType> bodies) {
-        return bodies == null || bodies.isEmpty() || (bodies.size() == 1 && bodies.containsKey(null));
+    public static boolean isNoOrEmptyBodies(List<BodyLike> bodies) {
+        return bodies == null || bodies.isEmpty();
     }
 
     public static boolean hasContent(RamlMessage message) {
         return message.getContent() != null && message.getContent().length > 0;
     }
 
-    public static boolean existSchemalessBody(Map<String, MimeType> bodies) {
-        for (final MimeType mimeType : bodies.values()) {
-            if (mimeType.getSchema() == null) {
+    public static boolean existSchemalessBody(List<BodyLike> bodies) {
+        for (final BodyLike mimeType : bodies) {
+            if (mimeType.schema() == null) {
                 return true;
             }
         }
         return false;
     }
 
-    public static AbstractParam findUriParam(String uriParam, Resource resource) {
-        final UriParameter param = resource.getUriParameters().get(uriParam);
+    public static Parameter findUriParam(String uriParam, Resource resource) {
+        final Parameter param = paramByName(resource.uriParameters(), uriParam);
         if (param != null) {
             return param;
         }
-        if (resource.getParentResource() != null) {
-            return findUriParam(uriParam, resource.getParentResource());
+        if (resource.parentResource() != null) {
+            return findUriParam(uriParam, resource.parentResource());
         }
         return null;
     }
 
-    public static Resource findResource(String resourcePath, Map<String, Resource> resources, Values values) {
+    public static Resource findResource(String resourcePath, List<Resource> resources, Values values) {
         final List<ResourceMatch> matches = new ArrayList<>();
-        for (final Map.Entry<String, Resource> entry : resources.entrySet()) {
-            final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
+        for (final Resource resource : resources) {
+            final VariableMatcher pathMatch = VariableMatcher.match(resource.resourcePath(), resourcePath);
             if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
-                matches.add(new ResourceMatch(pathMatch, entry.getValue()));
+                matches.add(new ResourceMatch(pathMatch, resource));
             }
         }
         Collections.sort(matches);
@@ -87,7 +80,7 @@ final class CheckerHelper {
             }
             if (match.match.isMatch()) {
                 values.addValues(match.match.getVariables());
-                return findResource(match.match.getSuffix(), match.resource.getResources(), values);
+                return findResource(match.match.getSuffix(), match.resource.resources(), values);
             }
         }
         return null;
@@ -117,52 +110,54 @@ final class CheckerHelper {
         return null;
     }
 
-    public static Map<String, List<? extends AbstractParam>> getEffectiveBaseUriParams(Map<String, UriParameter> baseUriParams, Action action) {
-        final Map<String, List<? extends AbstractParam>> params = new HashMap<>();
-        if (action.getBaseUriParameters() != null) {
-            params.putAll(action.getBaseUriParameters());
+    public static List<Parameter> getEffectiveBaseUriParams(List<Parameter> baseUriParams, Method action) {
+        final List<Parameter> params = new ArrayList<>();
+        if (action.baseUriParameters() != null) {
+            params.addAll(action.baseUriParameters());
         }
-        addNotSetBaseUriParams(action.getResource(), params);
+        addNotSetBaseUriParams(action.resource(), params);
         if (baseUriParams != null) {
-            for (final Map.Entry<String, UriParameter> entry : baseUriParams.entrySet()) {
-                if (!params.containsKey(entry.getKey())) {
-                    params.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+            for (final Parameter parameter : baseUriParams) {
+                if (!namesOf(params).contains(parameter.name())) {
+                    params.add(parameter);
                 }
             }
         }
         return params;
     }
 
-    private static void addNotSetBaseUriParams(Resource resource, Map<String, List<? extends AbstractParam>> params) {
-        if (resource.getBaseUriParameters() != null) {
-            for (final Map.Entry<String, List<UriParameter>> entry : resource.getBaseUriParameters().entrySet()) {
-                if (!params.containsKey(entry.getKey())) {
-                    params.put(entry.getKey(), entry.getValue());
+    private static void addNotSetBaseUriParams(Resource resource, List<Parameter> params) {
+        if (resource.baseUriParameters() != null) {
+            for (final Parameter parameter : resource.baseUriParameters()) {
+                if (!namesOf(params).contains(parameter.name())) {
+                    params.add(parameter);
                 }
             }
         }
-        if (resource.getParentResource() != null) {
-            addNotSetBaseUriParams(resource.getParentResource(), params);
+        if (resource.parentResource() != null) {
+            addNotSetBaseUriParams(resource.parentResource(), params);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static Collection<Map.Entry<String, AbstractParam>> paramEntries(Map<String, ?> params) {
-        final List<Map.Entry<String, AbstractParam>> res = new ArrayList<>();
-        for (final Map.Entry<String, ?> param : params.entrySet()) {
-            if (param.getValue() instanceof List) {
-                for (final AbstractParam p : (List<AbstractParam>) param.getValue()) {
-                    res.add(new AbstractMap.SimpleEntry<>(param.getKey(), p));
-                }
-            } else {
-                res.add((Map.Entry<String, AbstractParam>) param);
-            }
-        }
-        return res;
+    public static List<Parameter> paramEntries(List<Parameter> params) {
+//        final List<Map.Entry<String, AbstractParam>> res = new ArrayList<>();
+//        for (final Parameter param : params) {
+//            if (param.getValue() instanceof List) {
+//                for (final AbstractParam p : (List<AbstractParam>) param.getValue()) {
+//                    res.add(new AbstractMap.SimpleEntry<>(param.getKey(), p));
+//                }
+//            } else {
+//                res.add(param);
+//            }
+//        }
+//        return res;
+        return params;
     }
 
-    public static Reader resolveSchema(Raml raml, String schema) {
-        final String refSchema = raml.getConsolidatedSchemas().get(schema);
+    public static Reader resolveSchema(Api raml, String schema) {
+//        final String refSchema = raml.getConsolidatedSchemas().get(schema);
+        String refSchema = schema;
         return refSchema == null
                 ? new NamedReader(schema, new Message("schema.inline").toString())
                 : new NamedReader(refSchema, new Message("schema", schema).toString());
@@ -173,6 +168,56 @@ final class CheckerHelper {
         res.putAll(map1);
         res.putAll(map2);
         return res;
+    }
+
+    public static <T> List<T> mergeLists(List<T> list1, List<T> list2) {
+        final List<T> res = new ArrayList<>();
+        res.addAll(list1);
+        res.addAll(list2);
+        return res;
+    }
+
+    public static List<String> namesOf(List<Parameter> params) {
+        final List<String> res = new ArrayList<>();
+        for (final Parameter param : params) {
+            res.add(param.name());
+        }
+        return res;
+    }
+
+    public static List<String> codesOf(List<Response> params) {
+        final List<String> res = new ArrayList<>();
+        for (final Response param : params) {
+            res.add(param.code().value());
+        }
+        return res;
+    }
+
+    public static Parameter paramByName(List<Parameter> parameters, String name) {
+        final List<Parameter> res = paramsByName(parameters, name);
+        if (res.size() > 1) {
+            throw new IllegalArgumentException("Expected only one parameter with given name " + name);
+        }
+        return res.isEmpty() ? null : res.get(0);
+    }
+
+    public static List<Parameter> paramsByName(List<Parameter> parameters, String name) {
+        final List<Parameter> res = new ArrayList<>();
+        for (final Parameter parameter : parameters) {
+            if (parameter.name().equals(name)) {
+                res.add(parameter);
+            }
+        }
+        return res;
+    }
+
+    public static Response responseByCode(List<Response> responses, String code) {
+        for (final Response response : responses) {
+            if (response.code().value().equals(code)) {
+                return response;
+            }
+        }
+        return null;
     }
 
 }

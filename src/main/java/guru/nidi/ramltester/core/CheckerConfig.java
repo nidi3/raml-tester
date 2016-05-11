@@ -15,7 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.model.Raml;
+import org.raml.v2.api.RamlModelResult;
 
 import java.util.List;
 
@@ -23,18 +23,18 @@ import java.util.List;
  *
  */
 public class CheckerConfig {
-    public final Raml raml;
+    public final RamlModelResult raml;
     public final List<SchemaValidator> schemaValidators;
     public final String baseUri;
     public final boolean includeServletPath;
     public final boolean ignoreXheaders;
     public final boolean failFast;
 
-    public CheckerConfig(Raml raml, List<SchemaValidator> schemaValidators) {
+    public CheckerConfig(RamlModelResult raml, List<SchemaValidator> schemaValidators) {
         this(raml, schemaValidators, null, false, false, false);
     }
 
-    public CheckerConfig(Raml raml, List<SchemaValidator> schemaValidators, String baseUri, boolean includeServletPath, boolean ignoreXheaders, boolean failFast) {
+    public CheckerConfig(RamlModelResult raml, List<SchemaValidator> schemaValidators, String baseUri, boolean includeServletPath, boolean ignoreXheaders, boolean failFast) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.baseUri = baseUri;

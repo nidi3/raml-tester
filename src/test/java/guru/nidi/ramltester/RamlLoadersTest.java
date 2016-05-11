@@ -107,7 +107,7 @@ public class RamlLoadersTest {
     }
 
     private void assertTitle(RamlLoaders loaders, String raml, String expected) {
-        assertEquals(expected, loaders.load(raml).getRaml().getTitle());
+        assertEquals(expected, loaders.load(raml).getRaml().title());
     }
 }
 

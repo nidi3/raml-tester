@@ -16,115 +16,117 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.util.Message;
-import org.raml.model.*;
-import org.raml.model.parameter.Header;
-import org.raml.model.parameter.QueryParameter;
+import org.raml.v2.api.model.v08.api.Api;
+import org.raml.v2.api.model.v08.bodies.Response;
+import org.raml.v2.api.model.v08.methods.Method;
+import org.raml.v2.api.model.v08.parameters.Parameter;
+import org.raml.v2.api.model.v08.security.AbstractSecurityScheme;
+import org.raml.v2.api.model.v08.security.SecuritySchemeRef;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
  */
 class SecurityExtractor {
-    private final Raml raml;
-    private final List<SecurityScheme> schemes;
+    private final Api raml;
+    private final List<AbstractSecurityScheme> schemes;
 
-    public SecurityExtractor(Raml raml, Action action, RamlViolations violations) {
+    public SecurityExtractor(Api raml, Method action, RamlViolations violations) {
         this.raml = raml;
         schemes = new SchemeFinder(raml, violations).securedBy(action);
     }
 
     public void check(RamlViolations violations) {
-        for (final Map<String, SecurityScheme> schemeMap : raml.getSecuritySchemes()) {
-            for (final SecurityScheme scheme : schemeMap.values()) {
-                final SecuritySchemeType type = SecuritySchemeType.byName(scheme.getType());
-                if (type != null) {
-                    type.check(scheme, violations);
-                }
+        for (final AbstractSecurityScheme scheme : raml.securitySchemes()) {
+            final SecuritySchemeType type = SecuritySchemeType.of(scheme);
+            if (type != null) {
+                type.check(scheme, violations);
             }
         }
     }
 
-    public List<SecurityScheme> getSchemes() {
+    public List<AbstractSecurityScheme> getSchemes() {
         return schemes;
     }
 
-    public Map<String, QueryParameter> queryParameters(SecurityScheme scheme) {
-        return scheme.getDescribedBy() == null
-                ? Collections.<String, QueryParameter>emptyMap()
-                : scheme.getDescribedBy().getQueryParameters();
+    public List<Parameter> queryParameters(AbstractSecurityScheme scheme) {
+        return scheme.describedBy() == null
+                ? Collections.<Parameter>emptyList()
+                : scheme.describedBy().queryParameters();
     }
 
-    public Map<String, Header> headers(SecurityScheme scheme) {
-        return scheme.getDescribedBy() == null
-                ? Collections.<String, Header>emptyMap()
-                : scheme.getDescribedBy().getHeaders();
+    public List<Parameter> headers(AbstractSecurityScheme scheme) {
+        return scheme.describedBy() == null
+                ? Collections.<Parameter>emptyList()
+                : scheme.describedBy().headers();
     }
 
-    public Map<String, Response> responses(SecurityScheme scheme) {
-        return scheme.getDescribedBy() == null
-                ? Collections.<String, Response>emptyMap()
-                : scheme.getDescribedBy().getResponses();
+    public List<Response> responses(AbstractSecurityScheme scheme) {
+        return scheme.describedBy() == null
+                ? Collections.<Response>emptyList()
+                : scheme.describedBy().responses();
     }
 
     private static final class SchemeFinder {
-        private static final SecurityScheme NULL_SCHEMA = new SecurityScheme();
+//        private static final AbstractSecurityScheme NULL_SCHEMA = new SecurityScheme();
+//
+//        static {
+//            NULL_SCHEMA.setType("null");
+//        }
 
-        static {
-            NULL_SCHEMA.setType("null");
-        }
-
-        private final Raml raml;
+        private final Api raml;
         private final RamlViolations violations;
 
-        public SchemeFinder(Raml raml, RamlViolations violations) {
+        public SchemeFinder(Api raml, RamlViolations violations) {
             this.raml = raml;
             this.violations = violations;
         }
 
-        public List<SecurityScheme> securedBy(Action action) {
-            final List<SecurityScheme> res = new ArrayList<>();
-            if (!action.getSecuredBy().isEmpty()) {
-                res.addAll(securitySchemes(action.getSecuredBy(), new Message("securityScheme.undefined", new Locator(action))));
-            } else if (!action.getResource().getSecuredBy().isEmpty()) {
-                res.addAll(securitySchemes(action.getResource().getSecuredBy(), new Message("securityScheme.undefined", new Locator(action.getResource()))));
-            } else if (!raml.getSecuredBy().isEmpty()) {
-                res.addAll(securitySchemes(raml.getSecuredBy(), new Message("securityScheme.undefined", new Locator())));
+        public List<AbstractSecurityScheme> securedBy(Method action) {
+            final List<AbstractSecurityScheme> res = new ArrayList<>();
+            if (!action.securedBy().isEmpty()) {
+                res.addAll(securitySchemes(action.securedBy(), new Message("securityScheme.undefined", new Locator(action))));
+            } else if (!action.resource().securedBy().isEmpty()) {
+                res.addAll(securitySchemes(action.resource().securedBy(), new Message("securityScheme.undefined", new Locator(action.resource()))));
+            } else if (!raml.securedBy().isEmpty()) {
+                res.addAll(securitySchemes(raml.securedBy(), new Message("securityScheme.undefined", new Locator())));
             }
-            if (res.isEmpty()) {
-                res.add(NULL_SCHEMA);
+//            if (res.isEmpty()) {
+//                res.add(NULL_SCHEMA);
+//            }
+            return res;
+        }
+
+        private List<AbstractSecurityScheme> securitySchemes(List<SecuritySchemeRef> refs, Message message) {
+            final List<AbstractSecurityScheme> res = new ArrayList<>();
+            for (final SecuritySchemeRef ref : refs) {
+                res.add(ref.securityScheme());
+//                final String name = ref.name();
+//                if ("null".equals(name)) {
+//                    res.add(NULL_SCHEMA);
+//                } else {
+//
+//                    final SecurityScheme ss = securityScheme(name);
+//                    if (ss == null) {
+//                        violations.add(message.withParam(name));
+//                    } else {
+//                        res.add(ss);
+//                    }
+//                }
             }
             return res;
         }
 
-        private List<SecurityScheme> securitySchemes(List<SecurityReference> refs, Message message) {
-            final List<SecurityScheme> res = new ArrayList<>();
-            for (final SecurityReference ref : refs) {
-                final String name = ref.getName();
-                if ("null".equals(name)) {
-                    res.add(NULL_SCHEMA);
-                } else {
-                    final SecurityScheme ss = securityScheme(name);
-                    if (ss == null) {
-                        violations.add(message.withParam(name));
-                    } else {
-                        res.add(ss);
-                    }
-                }
-            }
-            return res;
-        }
-
-        private SecurityScheme securityScheme(String name) {
-            for (final Map<String, SecurityScheme> map : raml.getSecuritySchemes()) {
-                if (map.containsKey(name)) {
-                    return map.get(name);
-                }
-            }
-            return null;
-        }
+//        private SecurityScheme securityScheme(String name) {
+//            for (final AbstractSecurityScheme scheme: raml.securitySchemes()) {
+//                if (map.containsKey(name)) {
+//                    return map.get(name);
+//                }
+//            }
+//            return null;
+//        }
     }
 }

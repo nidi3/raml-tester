@@ -17,10 +17,20 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.model.*;
-import org.raml.model.parameter.AbstractParam;
+import org.raml.v2.api.model.v08.api.Api;
+import org.raml.v2.api.model.v08.api.DocumentationItem;
+import org.raml.v2.api.model.v08.bodies.BodyLike;
+import org.raml.v2.api.model.v08.methods.Method;
+import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
+import org.raml.v2.api.model.v08.parameters.Parameter;
+import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
+import org.raml.v2.api.model.v08.resources.Resource;
+import org.raml.v2.api.model.v08.system.types.MarkdownString;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static guru.nidi.ramltester.core.CheckerHelper.*;
@@ -50,7 +60,7 @@ class RamlValidatorChecker {
         }
     }
 
-    private final Raml raml;
+    private final Api raml;
     private final Locator locator;
     private final Pattern resourcePattern;
     private final Pattern parameterPattern;
@@ -60,11 +70,11 @@ class RamlValidatorChecker {
     private final RamlReport report;
     private final RamlViolations violations;
 
-    public RamlValidatorChecker(Raml raml, List<SchemaValidator> schemaValidators) {
+    public RamlValidatorChecker(Api raml, List<SchemaValidator> schemaValidators) {
         this(raml, new Locator(), schemaValidators, EnumSet.allOf(Validation.class), null, null, null);
     }
 
-    public RamlValidatorChecker(Raml raml, Locator locator, List<SchemaValidator> schemaValidators, EnumSet<Validation> validations, Pattern resourcePattern, Pattern parameterPattern, Pattern headerPattern) {
+    public RamlValidatorChecker(Api raml, Locator locator, List<SchemaValidator> schemaValidators, EnumSet<Validation> validations, Pattern resourcePattern, Pattern parameterPattern, Pattern headerPattern) {
         this.raml = raml;
         this.locator = locator;
         this.resourcePattern = resourcePattern;
@@ -109,21 +119,21 @@ class RamlValidatorChecker {
         violations.add(new Message(key, params));
     }
 
-    public void description(Map<String, ?> params, ParamName paramName) {
+    public void description(List<Parameter>params, ParamName paramName) {
         if (has(Validation.DESCRIPTION)) {
-            for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
-                description(param.getKey(), param.getValue(), paramName);
+            for (final Parameter param : paramEntries(params)) {
+                description(param.name(), param, paramName);
             }
         }
     }
 
-    private void description(String name, AbstractParam param, ParamName paramName) {
-        if (isNullOrEmpty(param.getDescription())) {
+    private void description(String name, Parameter param, ParamName paramName) {
+        if (isNullOrEmpty(param.description())) {
             violation("parameter.description.missing", locator, name, paramName);
         }
     }
 
-    public void description(String desc) {
+    public void description(MarkdownString desc) {
         if (has(Validation.DESCRIPTION)) {
             if (isNullOrEmpty(desc)) {
                 violation("description.missing", locator);
@@ -137,9 +147,9 @@ class RamlValidatorChecker {
                 violation("documentation.missing", locator);
             } else {
                 for (final DocumentationItem doc : docs) {
-                    if (isNullOrEmpty(doc.getTitle())) {
+                    if (isNullOrEmpty(doc.title())) {
                         violation("documentation.missing.title", locator);
-                    } else if (isNullOrEmpty(doc.getContent())) {
+                    } else if (isNullOrEmpty(doc.content())) {
                         violation("documentation.missing.content", locator);
                     }
                 }
@@ -149,15 +159,15 @@ class RamlValidatorChecker {
 
     public void empty(Resource resource) {
         if (has(Validation.EMPTY)) {
-            if (resource.getActions().isEmpty() && resource.getResources().isEmpty()) {
+            if (resource.methods().isEmpty() && resource.resources().isEmpty()) {
                 violation("empty", locator);
             }
         }
     }
 
-    public void empty(Action action) {
+    public void empty(Method action) {
         if (has(Validation.EMPTY)) {
-            if (action.getResponses().isEmpty()) {
+            if (action.responses().isEmpty()) {
                 violation("empty", locator);
             }
         }
@@ -165,13 +175,13 @@ class RamlValidatorChecker {
 
     private void baseUriParameters(Collection<String> names) {
         if (has(Validation.URI_PARAMETER)) {
-            if (raml.getBaseUri() == null && !names.isEmpty()) {
+            if (raml.baseUri() == null && !names.isEmpty()) {
                 violation("baseUriParameters.illegal", locator);
             } else {
                 for (final String name : names) {
                     if ("version".equals(name)) {
                         violation("baseUriParameter.illegal", locator, name);
-                    } else if (!raml.getBaseUri().contains("{" + name + "}")) {
+                    } else if (!raml.baseUri().value().contains("{" + name + "}")) {
                         violation("baseUriParameter.invalid", locator, name);
                     }
                 }
@@ -184,7 +194,7 @@ class RamlValidatorChecker {
             for (final String name : names) {
                 if ("version".equals(name)) {
                     violation("uriParameter.illegal", locator, name);
-                } else if (!resource.getUri().contains("{" + name + "}")) {
+                } else if (!resource.resourcePath().contains("{" + name + "}")) {
                     violation("uriParameter.invalid", locator, name);
                 }
             }
@@ -193,7 +203,7 @@ class RamlValidatorChecker {
 
     public void resourcePattern(Resource resource) {
         if (resourcePattern != null) {
-            final String uri = resource.getRelativeUri().replaceAll("\\{[^}/]+\\}", "");
+            final String uri = resource.relativeUri().value().replaceAll("\\{[^}/]+\\}", "");
             for (final String part : uri.split("/")) {
                 if (part != null && part.length() > 0 && !resourcePattern.matcher(part).matches()) {
                     violation("resource.name.invalid", locator, resourcePattern.pattern());
@@ -202,14 +212,14 @@ class RamlValidatorChecker {
         }
     }
 
-    public void parameters(Map<String, ?> params, ParamName paramName) {
+    public void parameters(List<Parameter> params, ParamName paramName) {
         if (paramName == ParamName.BASE_URI) {
-            baseUriParameters(params.keySet());
+            baseUriParameters(namesOf(params));
         }
         if (parameterPattern != null) {
-            for (final String name : params.keySet()) {
-                if (!parameterPattern.matcher(name).matches()) {
-                    violation("parameter.name.invalid", locator, name, paramName, parameterPattern.pattern());
+            for (final Parameter param : params) {
+                if (!parameterPattern.matcher(param.name()).matches()) {
+                    violation("parameter.name.invalid", locator, param.name(), paramName, parameterPattern.pattern());
                 }
             }
         }
@@ -218,58 +228,57 @@ class RamlValidatorChecker {
         }
         if (has(Validation.EXAMPLE)) {
             final ParameterChecker checker = new ParameterChecker(violations);
-            for (final Map.Entry<String, AbstractParam> param : paramEntries(params)) {
-                parameterValues(param.getValue(), checker, new Message("parameter.condition", locator, param.getKey(), paramName));
+            for (final Parameter param : paramEntries(params)) {
+                parameterValues(param, checker, new Message("parameter.condition", locator, param.name(), paramName));
             }
         }
     }
 
-    public void formParameters(MimeType mimeType) {
+    public void formParameters(BodyLike mimeType) {
         if (has(Validation.PARAMETER)) {
-            if (!MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
-                    !MediaType.valueOf(mimeType.getType()).isCompatibleWith(MediaType.MULTIPART)) {
+            if (!MediaType.valueOf(mimeType.name()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
+                    !MediaType.valueOf(mimeType.name()).isCompatibleWith(MediaType.MULTIPART)) {
                 violation("formParameter.illegal", locator);
             }
         }
     }
 
-    private void parameterDef(Map<String, ?> params, ParamName paramName) {
-        for (final Map.Entry<String, AbstractParam> entry : paramEntries(params)) {
-            final String name = entry.getKey();
-            final AbstractParam param = entry.getValue();
-            final ParamType type = param.getType() == null ? ParamType.STRING : param.getType();
-            if (type == ParamType.STRING) {
-                minMaxNotAllowed(param, name, paramName);
-            } else {
-                stringConstraintsNotAllowed(param, name, paramName);
-                if (type != ParamType.INTEGER && type != ParamType.NUMBER) {
-                    minMaxNotAllowed(param, name, paramName);
-                }
-                if (type == ParamType.FILE) {
-                    violations.addIf(paramName != ParamName.FORM, new Message("parameter.file.illegal", locator, name, paramName));
-                }
-            }
+    private void parameterDef(List<Parameter> params, ParamName paramName) {
+//        for (final Parameter param : paramEntries(params)) {
+//            final String name = param.name();
+//            final String type = param.type() == null ? "string": param.type();
+//            if (param instanceof StringTypeDeclaration) {
+//                minMaxNotAllowed((NumberTypeDeclaration) param, name, paramName);
+//            } else {
+//                stringConstraintsNotAllowed(param, name, paramName);
+//                if (type != ParamType.INTEGER && type != ParamType.NUMBER) {
+//                    minMaxNotAllowed(param, name, paramName);
+//                }
+//                if (type == ParamType.FILE) {
+//                    violations.addIf(paramName != ParamName.FORM, new Message("parameter.file.illegal", locator, name, paramName));
+//                }
+//            }
+//        }
+    }
+
+    private void stringConstraintsNotAllowed(StringTypeDeclaration param, String name, ParamName paramName) {
+        violations.addIf(param.enumValues() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "enum"));
+        violations.addIf(param.pattern() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "pattern"));
+        violations.addIf(param.minLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minLength"));
+        violations.addIf(param.maxLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maxLength"));
+    }
+
+    private void minMaxNotAllowed(NumberTypeDeclaration param, String name, ParamName paramName) {
+        violations.addIf(param.minimum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minimum"));
+        violations.addIf(param.maximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
+    }
+
+    private void parameterValues(Parameter param, ParameterChecker checker, Message message) {
+        if (param.example() != null) {
+            checker.checkParameter(param, param.example(), message.withParam("example"));
         }
-    }
-
-    private void stringConstraintsNotAllowed(AbstractParam param, String name, ParamName paramName) {
-        violations.addIf(param.getEnumeration() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "enum"));
-        violations.addIf(param.getPattern() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "pattern"));
-        violations.addIf(param.getMinLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minLength"));
-        violations.addIf(param.getMaxLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maxLength"));
-    }
-
-    private void minMaxNotAllowed(AbstractParam param, String name, ParamName paramName) {
-        violations.addIf(param.getMinimum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minimum"));
-        violations.addIf(param.getMaximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
-    }
-
-    private void parameterValues(AbstractParam param, ParameterChecker checker, Message message) {
-        if (param.getExample() != null) {
-            checker.checkParameter(param, param.getExample(), message.withParam("example"));
-        }
-        if (param.getDefaultValue() != null) {
-            checker.checkParameter(param, param.getDefaultValue(), message.withParam("default value"));
+        if (param.defaultValue() != null) {
+            checker.checkParameter(param, param.defaultValue(), message.withParam("default value"));
         }
     }
 
@@ -283,11 +292,11 @@ class RamlValidatorChecker {
         }
     }
 
-    public void exampleSchema(MimeType mimeType) {
+    public void exampleSchema(BodyLike mimeType) {
         if (has(Validation.EXAMPLE)) {
-            final String schema = mimeType.getSchema();
-            final String example = mimeType.getExample();
-            final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.getType()));
+            final String schema = mimeType.schema().value();
+            final String example = mimeType.example().value();
+            final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.name()));
             if (schema != null && example != null && validator != null) {
                 validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(raml, schema), violations,
                         new Message("schema.example.mismatch", locator, example));
@@ -297,6 +306,10 @@ class RamlValidatorChecker {
 
     private boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
+    }
+
+    private boolean isNullOrEmpty(MarkdownString s) {
+        return s == null || s.value().isEmpty();
     }
 
     private boolean isNullOrEmpty(List<?> s) {

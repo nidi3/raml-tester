@@ -31,7 +31,7 @@ public class MultiReportAggregator implements ReportAggregator {
     @Override
     public RamlReport addReport(RamlReport report) {
         if (report != null) {
-            final String title = report.getRaml().getTitle();
+            final String title = report.getRaml().title();
             final List<RamlReport> reportList = getOrCreateReports(title);
             reportList.add(report);
         }
@@ -39,7 +39,7 @@ public class MultiReportAggregator implements ReportAggregator {
     }
 
     public List<RamlReport> getReports(RamlDefinition definition) {
-        return getOrCreateReports(definition.getRaml().getTitle());
+        return getOrCreateReports(definition.getRaml().title());
     }
 
     public Usage getUsage(RamlDefinition definition) {

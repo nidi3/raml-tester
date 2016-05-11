@@ -15,28 +15,12 @@
  */
 package guru.nidi.ramltester;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.nidi.loader.Loader;
-import org.raml.parser.loader.ResourceLoader;
-import org.raml.parser.tagresolver.IncludeResolver;
-import org.raml.parser.tagresolver.TagResolver;
-import org.raml.parser.visitor.RamlDocumentBuilder;
-import org.raml.parser.visitor.TupleType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-
-import java.io.IOException;
-import java.util.Map;
-
 /**
  * Allows !includes of json schemas which reference relative files.
  * By setting the id property accordingly.
  */
-class RelativeJsonSchemaAwareRamlDocumentBuilder extends RamlDocumentBuilder {
-    private static final Logger log = LoggerFactory.getLogger(RelativeJsonSchemaAwareRamlDocumentBuilder.class);
+class RelativeJsonSchemaAwareRamlDocumentBuilder{// extends RamlDocumentBuilder {
+    /*private static final Logger log = LoggerFactory.getLogger(RelativeJsonSchemaAwareRamlDocumentBuilder.class);
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final String protocol;
@@ -94,4 +78,5 @@ class RelativeJsonSchemaAwareRamlDocumentBuilder extends RamlDocumentBuilder {
         }
         super.onScalar(node, tupleType);
     }
+    */
 }

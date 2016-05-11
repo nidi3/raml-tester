@@ -25,7 +25,8 @@ import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.raml.model.Raml;
+import org.raml.v2.api.RamlModelResult;
+import org.raml.v2.api.model.v08.api.Api;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.client.RestTemplate;
@@ -43,7 +44,7 @@ import java.io.IOException;
 public class RamlDefinition {
     private final CheckerConfig config;
 
-    public RamlDefinition(Raml raml, SchemaValidators schemaValidators) {
+    public RamlDefinition(RamlModelResult raml, SchemaValidators schemaValidators) {
         this(new CheckerConfig(raml, schemaValidators.getValidators()));
     }
 
@@ -88,8 +89,8 @@ public class RamlDefinition {
         return new RamlDefinition(config.failFast(failFast));
     }
 
-    public Raml getRaml() {
-        return config.raml;
+    public Api getRaml() {
+        return config.raml.getApiV08();
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
@@ -137,7 +138,7 @@ public class RamlDefinition {
     }
 
     public RamlValidator validator() {
-        return new RamlValidator(config.raml, config.schemaValidators);
+        return new RamlValidator(config.raml.getApiV08(), config.schemaValidators);
     }
 
     public RamlReport validate() {

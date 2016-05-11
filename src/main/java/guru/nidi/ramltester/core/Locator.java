@@ -16,19 +16,19 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.util.Message;
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Resource;
+import org.raml.v2.api.model.v08.bodies.BodyLike;
+import org.raml.v2.api.model.v08.methods.Method;
+import org.raml.v2.api.model.v08.resources.Resource;
 
 /**
  *
  */
 final class Locator {
     private Resource resource;
-    private Action action;
-    private MimeType requestMime;
+    private Method action;
+    private BodyLike requestMime;
     private String responseCode;
-    private MimeType responseMime;
+    private BodyLike responseMime;
 
     public Locator() {
     }
@@ -37,11 +37,11 @@ final class Locator {
         resource(resource);
     }
 
-    public Locator(Action action) {
+    public Locator(Method action) {
         action(action);
     }
 
-    public Locator(MimeType mimeType) {
+    public Locator(BodyLike mimeType) {
         requestMime(mimeType);
     }
 
@@ -53,15 +53,15 @@ final class Locator {
         responseMime = null;
     }
 
-    public void action(Action action) {
-        this.resource = action.getResource();
+    public void action(Method action) {
+        this.resource = action.resource();
         this.action = action;
         requestMime = null;
         responseCode = null;
         responseMime = null;
     }
 
-    public void requestMime(MimeType requestMime) {
+    public void requestMime(BodyLike requestMime) {
         this.requestMime = requestMime;
         responseCode = null;
         responseMime = null;
@@ -73,7 +73,7 @@ final class Locator {
         responseMime = null;
     }
 
-    public void responseMime(MimeType responseMime) {
+    public void responseMime(BodyLike responseMime) {
         this.responseMime = responseMime;
         requestMime = null;
     }
@@ -82,22 +82,22 @@ final class Locator {
     public String toString() {
         if (responseCode != null) {
             return (actionString() + " " + new Message("response", responseCode).toString()) +
-                    (responseMime == null ? "" : (" " + new Message("mimeType", responseMime.getType()).toString()));
+                    (responseMime == null ? "" : (" " + new Message("mimeType", responseMime.name()).toString()));
         }
         if (requestMime != null) {
             return (action == null ? "" : (actionString() + " ")) +
-                    new Message("mimeType", requestMime.getType()).toString();
+                    new Message("mimeType", requestMime.name()).toString();
         }
         if (action != null) {
             return actionString();
         }
         if (resource != null) {
-            return new Message("resource", resource.getUri()).toString();
+            return new Message("resource", resource.resourcePath()).toString();
         }
         return new Message("root").toString();
     }
 
     private String actionString() {
-        return new Message("action", action.getType(), action.getResource().getUri()).toString();
+        return new Message("action", action.method(), action.resource().resourcePath()).toString();
     }
 }
