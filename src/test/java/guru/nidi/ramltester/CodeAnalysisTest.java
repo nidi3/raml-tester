@@ -32,6 +32,7 @@ import guru.nidi.ramltester.core.ParameterCheckerTest;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.MediaTypeTest;
 import net.sourceforge.pmd.RulePriority;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static guru.nidi.codeassert.junit.CodeAssertMatchers.packagesMatchExactly;
@@ -41,6 +42,7 @@ import static org.junit.Assert.assertThat;
 /**
  *
  */
+@Ignore
 public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {

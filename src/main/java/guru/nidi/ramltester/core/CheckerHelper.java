@@ -67,7 +67,7 @@ final class CheckerHelper {
     public static Resource findResource(String resourcePath, List<Resource> resources, Values values) {
         final List<ResourceMatch> matches = new ArrayList<>();
         for (final Resource resource : resources) {
-            final VariableMatcher pathMatch = VariableMatcher.match(resource.resourcePath(), resourcePath);
+            final VariableMatcher pathMatch = VariableMatcher.match(resource.relativeUri().value(), resourcePath);
             if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
                 matches.add(new ResourceMatch(pathMatch, resource));
             }

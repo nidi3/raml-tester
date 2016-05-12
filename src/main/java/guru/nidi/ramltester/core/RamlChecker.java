@@ -123,7 +123,7 @@ public class RamlChecker {
 
     private Method findAction(Resource resource, String method) {
         for (final Method action : resource.methods()) {
-            if (action.method().equals(method)) {
+            if (action.method().equals(method.toLowerCase())) {
                 return action;
             }
         }
