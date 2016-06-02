@@ -20,6 +20,8 @@ import org.raml.v2.api.model.v08.bodies.BodyLike;
 import org.raml.v2.api.model.v08.methods.Method;
 import org.raml.v2.api.model.v08.resources.Resource;
 
+import java.util.Locale;
+
 /**
  *
  */
@@ -98,6 +100,6 @@ final class Locator {
     }
 
     private String actionString() {
-        return new Message("action", action.method().toUpperCase(), action.resource().resourcePath()).toString();
+        return new Message("action", action.method().toUpperCase(Locale.ENGLISH), action.resource().resourcePath()).toString();
     }
 }

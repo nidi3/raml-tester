@@ -18,7 +18,10 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.parameters.*;
+import org.raml.v2.api.model.v08.parameters.IntegerTypeDeclaration;
+import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
+import org.raml.v2.api.model.v08.parameters.Parameter;
+import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +173,7 @@ class ParameterChecker {
     }
 
     private void checkNullParameter(Parameter param, Message detail) {
-        if (param instanceof StringTypeDeclaration) {
+        if (param.type() == null || "string".equals(param.type())) {
             checkStringParameter(param, "", detail);
         } else {
             violations.add(detail.withMessageParam("value.empty"));
@@ -178,22 +181,25 @@ class ParameterChecker {
     }
 
     private void checkFileParameter(Parameter param, Message detail) {
-        if (!(param instanceof FileTypeDeclaration)) {
+        if (!"file".equals(param.type())) {
             violations.add(detail.withMessageParam("file.superfluous", param.type()));
         }
     }
 
     private void checkStringParameter(Parameter param, String value, Message detail) {
-        if (param instanceof BooleanTypeDeclaration) {
+        if (param.type() == null) {
+            return;
+        }
+        if ("boolean".equals(param.type())) {
             checkBoolean(value, detail);
-        } else if (param instanceof DateTypeDeclaration) {
+        } else if ("date".equals(param.type())) {
             checkDate(value, detail);
-        } else if (param instanceof FileTypeDeclaration) {
+        } else if ("file".equals(param.type())) {
             checkFile(detail);
-        } else if (param instanceof IntegerTypeDeclaration) {
-            checkInteger((IntegerTypeDeclaration) param, value, detail);
-        } else if (param instanceof NumberTypeDeclaration) {
-            checkNumber((NumberTypeDeclaration) param, value, detail);
+        } else if ("integer".equals(param.type())) {
+            checkInteger(param, value, detail);
+        } else if ("number".equals(param.type())) {
+            checkNumber(param, value, detail);
         } else if (param instanceof StringTypeDeclaration) {
             checkString((StringTypeDeclaration) param, value, detail);
         } else {
@@ -216,21 +222,26 @@ class ParameterChecker {
                 detail.withMessageParam("length.tooBig", param.maxLength()));
     }
 
-    private void checkNumber(NumberTypeDeclaration param, String value, Message detail) {
+    private void checkNumber(Parameter param, String value, Message detail) {
         if (NUMBER.matcher(value).matches()) {
-            if ("inf".equals(value) || "-inf".equals(value) || "nan".equals(value)) {
-                violations.addIf(param.minimum() != null || param.maximum() != null, detail.withMessageParam("unbound"));
-            } else {
-                checkNumericLimits(param, Double.parseDouble(value), detail);
+            if (param instanceof NumberTypeDeclaration) {
+                NumberTypeDeclaration numeric = (NumberTypeDeclaration) param;
+                if ("inf".equals(value) || "-inf".equals(value) || "nan".equals(value)) {
+                    violations.addIf(numeric.minimum() != null || numeric.maximum() != null, detail.withMessageParam("unbound"));
+                } else {
+                    checkNumericLimits(numeric, Double.parseDouble(value), detail);
+                }
             }
         } else {
             violations.add(detail.withMessageParam("number.invalid"));
         }
     }
 
-    private void checkInteger(IntegerTypeDeclaration param, String value, Message detail) {
+    private void checkInteger(Parameter param, String value, Message detail) {
         if (INTEGER.matcher(value).matches()) {
-            checkNumericLimits(param, Double.parseDouble(value), detail);
+            if (param instanceof IntegerTypeDeclaration) {
+                checkNumericLimits((NumberTypeDeclaration) param, Double.parseDouble(value), detail);
+            }
         } else {
             violations.add(detail.withMessageParam("integer.invalid"));
         }
