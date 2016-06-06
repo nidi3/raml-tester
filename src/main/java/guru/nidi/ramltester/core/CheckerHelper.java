@@ -60,6 +60,7 @@ final class CheckerHelper {
         return null;
     }
 
+    public static List<ResourceMatch> findResource(String resourcePath, Map<String, Resource> resources, Values values) {
     public static UnifiedResource findResource(String resourcePath, List<UnifiedResource> resources, Values values) {
         final List<ResourceMatch> matches = new ArrayList<>();
         for (final UnifiedResource resource : resources) {
@@ -69,17 +70,18 @@ final class CheckerHelper {
             }
         }
         Collections.sort(matches);
+        final List<ResourceMatch> found = new ArrayList<>();
         for (final ResourceMatch match : matches) {
             if (match.match.isCompleteMatch()) {
                 values.addValues(match.match.getVariables());
-                return match.resource;
-            }
-            if (match.match.isMatch()) {
+                found.add(match);
+            } else if (match.match.isMatch()) {
                 values.addValues(match.match.getVariables());
                 return findResource(match.match.getSuffix(), match.resource.resources(), values);
+                found.addAll(findResource(match.match.getSuffix(), match.resource.getResources(), values));
             }
         }
-        return null;
+        return found;
     }
 
     private static final class ResourceMatch implements Comparable<ResourceMatch> {
