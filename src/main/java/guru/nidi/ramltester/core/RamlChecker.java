@@ -116,11 +116,16 @@ public class RamlChecker {
 
     private Resource findResourceByPath(String resourcePath) {
         final Values values = new Values();
-        final Resource resource = findResource(resourcePath, config.raml.getResources(), values);
-        if (resource == null) {
+        final List<ResourceMatch> matches = findResource(resourcePath, config.raml.getResources(), values);
+        if (matches.isEmpty()) {
             requestViolations.add("resource.undefined", resourcePath);
             throw new RamlViolationException();
         }
+        if (matches.size() > 1 && matches.get(0).compareTo(matches.get(1)) == 0) {
+            requestViolations.add("resource.ambiguous", resourcePath, matches.get(0).resource.getUri(), matches.get(1).resource.getUri());
+            throw new RamlViolationException();
+        }
+        final Resource resource = matches.get(0).resource;
         locator.resource(resource);
         checkUriParams(values, resource);
         return resource;

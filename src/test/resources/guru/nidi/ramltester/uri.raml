@@ -52,3 +52,19 @@ baseUriParameters:
           enum: ['sub-host-get']
       responses:
         200:
+/ambigous/{a}:
+  uriParameters:
+    a:
+/ambigous/{b}:
+  uriParameters:
+    a:
+/multi{a}-{b}:
+  uriParameters:
+    a:
+    b:
+/multi{c}:
+  uriParameters:
+    c:
+  get:
+    queryParameters:
+      c:

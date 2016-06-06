@@ -71,7 +71,7 @@ final class CheckerHelper {
         return null;
     }
 
-    public static Resource findResource(String resourcePath, Map<String, Resource> resources, Values values) {
+    public static List<ResourceMatch> findResource(String resourcePath, Map<String, Resource> resources, Values values) {
         final List<ResourceMatch> matches = new ArrayList<>();
         for (final Map.Entry<String, Resource> entry : resources.entrySet()) {
             final VariableMatcher pathMatch = VariableMatcher.match(entry.getKey(), resourcePath);
@@ -80,22 +80,22 @@ final class CheckerHelper {
             }
         }
         Collections.sort(matches);
+        final List<ResourceMatch> found = new ArrayList<>();
         for (final ResourceMatch match : matches) {
             if (match.match.isCompleteMatch()) {
                 values.addValues(match.match.getVariables());
-                return match.resource;
-            }
-            if (match.match.isMatch()) {
+                found.add(match);
+            } else if (match.match.isMatch()) {
                 values.addValues(match.match.getVariables());
-                return findResource(match.match.getSuffix(), match.resource.getResources(), values);
+                found.addAll(findResource(match.match.getSuffix(), match.resource.getResources(), values));
             }
         }
-        return null;
+        return found;
     }
 
-    private static final class ResourceMatch implements Comparable<ResourceMatch> {
-        private final VariableMatcher match;
-        private final Resource resource;
+    public static final class ResourceMatch implements Comparable<ResourceMatch> {
+        final VariableMatcher match;
+        final Resource resource;
 
         public ResourceMatch(VariableMatcher match, Resource resource) {
             this.match = match;
