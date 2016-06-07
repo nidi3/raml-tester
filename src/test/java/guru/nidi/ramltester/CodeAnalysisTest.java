@@ -117,7 +117,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("it's checked and correct",
                         In.locs("RelativeJsonSchemaAwareRamlDocumentBuilder", "MediaType", "ServletRamlMessageTest").ignore("CompareObjectsWithEquals"),
                         In.locs("JsRegex", "MediaType").ignore("PreserveStackTrace"),
-                        In.locs("JsRegex","Usage").ignore("AvoidCatchingGenericException"),
+                        In.locs("JsRegex", "Usage").ignore("AvoidCatchingGenericException"),
                         In.classes(UriTest.class, ParameterCheckerTest.class, MediaTypeTest.class).ignore("JUnitTestsShouldIncludeAssert"))
                 .because("it's style",
                         In.loc("RamlValidatorChecker").ignore("CollapsibleIfStatements"))

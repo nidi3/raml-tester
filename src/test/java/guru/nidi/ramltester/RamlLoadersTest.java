@@ -16,7 +16,6 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.Base;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -58,7 +57,6 @@ public class RamlLoadersTest {
     }
 
     @Test
-    @Ignore
     public void github() {
         assertTitle(RamlLoaders.fromGithub("nidi3", "raml-tester"), "src/test/resources/guru/nidi/ramltester/simple.raml", "simple");
     }
@@ -99,7 +97,6 @@ public class RamlLoadersTest {
     }
 
     @Test
-    @Ignore
     public void classpathAndGithub() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromGithub("nidi3", "raml-tester/src/test/resources/guru/nidi");
         assertTitle(loaders, "simple.raml", "simple");

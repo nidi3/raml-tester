@@ -69,7 +69,7 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
         return getHeaderValues(request());
     }
 
-    public static Values getHeaderValues(HttpServletRequest request){
+    public static Values getHeaderValues(HttpServletRequest request) {
         final Values headers = new Values();
         final Enumeration<String> names = request.getHeaderNames();
         while (names.hasMoreElements()) {
