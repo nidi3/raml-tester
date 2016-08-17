@@ -41,8 +41,13 @@ class RestAssuredRamlRequest extends RestAssuredRamlMessage implements RamlReque
 
     @Override
     public byte[] getContent() {
-        final String body = requestSpec.getBody();
-        return body == null ? null : body.getBytes();
+        final Object body = requestSpec.getBody();
+
+        if (body instanceof String) {
+            return ((String) body).getBytes();
+        }
+
+        return (byte[]) body;
     }
 
     @Override
