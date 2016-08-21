@@ -21,6 +21,7 @@ import guru.nidi.ramltester.model.Values;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeThat;
@@ -36,6 +37,10 @@ public class TestUtils {
         final String env = System.getenv(name);
         assumeThat("Environment variable " + name + " is not set, skipping test", env, notNullValue());
         return env;
+    }
+
+    public static void assumeEnv(String name, String value) {
+        assumeThat("Environment variable " + name + " has not value " + value + ", skipping test", getEnv(name), equalTo(value));
     }
 
     public static void assertValuesEquals(Object[] expected, Values actual) {

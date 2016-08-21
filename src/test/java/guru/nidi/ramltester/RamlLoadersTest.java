@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import java.io.File;
 
+import static guru.nidi.ramltester.util.TestUtils.assumeEnv;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -58,6 +59,7 @@ public class RamlLoadersTest {
 
     @Test
     public void github() {
+        assumeEnv("USER", "nidi");
         assertTitle(RamlLoaders.fromGithub("nidi3", "raml-tester"), "src/test/resources/guru/nidi/ramltester/simple.raml", "simple");
     }
 
@@ -98,6 +100,7 @@ public class RamlLoadersTest {
 
     @Test
     public void classpathAndGithub() {
+        assumeEnv("USER", "nidi");
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromGithub("nidi3", "raml-tester/src/test/resources/guru/nidi");
         assertTitle(loaders, "simple.raml", "simple");
         assertTitle(loaders, "ramltester/simple.raml", "simple");
