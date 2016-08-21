@@ -16,6 +16,7 @@
 package guru.nidi.ramltester;
 
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import guru.nidi.ramltester.util.ServerTest;
@@ -28,8 +29,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static guru.nidi.ramltester.junit.RamlMatchers.checks;
-import static guru.nidi.ramltester.junit.RamlMatchers.responseChecks;
+import static guru.nidi.ramltester.junit.RamlMatchers.*;
 import static guru.nidi.ramltester.util.TestUtils.violations;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -105,6 +105,24 @@ public class RestAssuredTest extends ServerTest {
         assertThat(restAssured.getLastReport(), responseChecks());
         assertEquals(violations("Query parameter 'empty' on action(GET /base/data) is not repeat but found repeatedly"),
                 restAssured.getLastReport().getRequestViolations());
+    }
+
+    @Test
+    public void stringBody() throws IOException {
+        final Response response = restAssured.given().content("\"42\"").contentType(ContentType.JSON).post("/data").andReturn();
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
+        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(restAssured.getLastReport(), requestChecks());
+        assertThat(restAssured.getLastReport(), responseChecks());
+    }
+
+    @Test
+    public void byteArrayBody() throws IOException {
+        final Response response = restAssured.given().content("\"42\"".getBytes()).contentType(ContentType.JSON).post("/data").andReturn();
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
+        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(restAssured.getLastReport(), requestChecks());
+        assertThat(restAssured.getLastReport(), responseChecks());
     }
 
     @Override

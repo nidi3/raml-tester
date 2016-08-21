@@ -23,7 +23,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.util.EntityUtils;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -93,8 +93,8 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void emptyPostRequest() throws IOException {
-        final HttpPost post = new HttpPost(url("base"));
-        client.execute(post);
+        final HttpPut put = new HttpPut(url("base"));
+        client.execute(put);
         assertThat(client.getLastReport(), checks());
     }
 

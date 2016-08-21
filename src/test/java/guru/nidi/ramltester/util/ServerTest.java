@@ -108,5 +108,10 @@ public abstract class ServerTest {
                 res.setStatus(HttpServletResponse.SC_NO_CONTENT);
             }
         }
+
+        @Override
+        protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+            res.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        }
     }
 }
