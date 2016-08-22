@@ -56,9 +56,6 @@ public class RamlChecker {
     public RamlChecker(CheckerConfig config) {
         this.config = config;
         api = config.raml.getApiV08();
-        if (api == null) {
-            throw new RamlViolationException(RamlReport.fromModelResult(api, config.raml));
-        }
     }
 
     public RamlReport check(RamlRequest request) {
