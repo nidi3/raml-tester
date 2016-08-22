@@ -98,6 +98,6 @@ final class Locator {
     }
 
     private String actionString() {
-        return new Message("action", action.method(), action.resource().resourcePath()).toString();
+        return new Message("action", action.method().toUpperCase(), action.resource().resourcePath()).toString();
     }
 }

@@ -22,7 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
 import org.raml.v2.api.model.v08.parameters.Parameter;
-import org.raml.v2.api.model.v08.parameters.ParameterLocation;
 import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
 import org.raml.v2.api.model.v08.system.types.MarkdownString;
 
@@ -320,17 +319,12 @@ public class ParameterCheckerTest extends CoreTestBase {
         }
 
         @Override
-        public ParameterLocation location() {
-            return null;
-        }
-
-        @Override
         public Boolean required() {
             return required;
         }
 
         @Override
-        public Object defaultValue() {
+        public String defaultValue() {
             return null;
         }
 

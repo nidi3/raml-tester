@@ -109,7 +109,8 @@ class ParameterChecker {
                 violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)), namedMsg.withMessageParam("undefined"));
             } else {
                 for (final Parameter parameter : parameters) {
-                    violations.addIf(!parameter.repeat() && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
+                    final boolean rep = parameter.repeat() != null && parameter.repeat();
+                    violations.addIf(!rep && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
                     for (final Object value : entry.getValue()) {
                         checkParameter(parameter, value, namedMsg);
                     }
@@ -201,7 +202,7 @@ class ParameterChecker {
     }
 
     private void checkString(StringTypeDeclaration param, String value, Message detail) {
-        violations.addIf(param.enumValues() != null && !param.enumValues().contains(value),
+        violations.addIf(param.enumValues() != null && !param.enumValues().isEmpty() && !param.enumValues().contains(value),
                 detail.withMessageParam("enum.invalid", param.enumValues()));
         try {
             violations.addIf(param.pattern() != null && !JsRegex.matches(value, param.pattern()),

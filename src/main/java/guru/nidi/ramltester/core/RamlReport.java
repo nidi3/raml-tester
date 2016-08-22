@@ -15,6 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
+import org.raml.v2.api.RamlModelResult;
+import org.raml.v2.api.model.common.ValidationResult;
 import org.raml.v2.api.model.v08.api.Api;
 
 import java.io.PrintWriter;
@@ -34,11 +36,19 @@ public class RamlReport {
         this.raml = raml;
     }
 
+    public static RamlReport fromModelResult(Api raml, RamlModelResult modelResult) {
+        final RamlReport report = new RamlReport(raml);
+        for (final ValidationResult result : modelResult.getValidationResults()) {
+            report.getValidationViolations().add("checking.exception", result.toString());
+        }
+        return report;
+    }
+
     public static RamlReport fromException(Api raml, Exception cause) {
         final RamlReport report = new RamlReport(raml);
         final StringWriter out = new StringWriter();
         cause.printStackTrace(new PrintWriter(out));
-        report.getRequestViolations().add("checking.exception", out.toString());
+        report.getValidationViolations().add("checking.exception", out.toString());
         return report;
     }
 

@@ -25,10 +25,10 @@ import java.util.Map;
 /**
  *
  */
-abstract class SecuritySchemeType<T extends AbstractSecurityScheme> {
+abstract class SecuritySchemeType<T extends SecurityScheme> {
     private static final Map<Class<?>, SecuritySchemeType<?>> INSTANCES = new HashMap<>();
 
-    public static SecuritySchemeType of(AbstractSecurityScheme scheme) {
+    public static SecuritySchemeType of(SecurityScheme scheme) {
         return INSTANCES.get(scheme.getClass());
     }
 

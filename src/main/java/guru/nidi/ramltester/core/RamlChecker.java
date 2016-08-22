@@ -27,7 +27,8 @@ import org.raml.v2.api.model.v08.bodies.Response;
 import org.raml.v2.api.model.v08.methods.Method;
 import org.raml.v2.api.model.v08.parameters.Parameter;
 import org.raml.v2.api.model.v08.resources.Resource;
-import org.raml.v2.api.model.v08.security.AbstractSecurityScheme;
+import org.raml.v2.api.model.v08.security.SecurityScheme;
+import org.raml.v2.api.model.v08.system.types.SchemaString;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -55,6 +56,9 @@ public class RamlChecker {
     public RamlChecker(CheckerConfig config) {
         this.config = config;
         api = config.raml.getApiV08();
+        if (api == null) {
+            throw new RamlViolationException(RamlReport.fromModelResult(api, config.raml));
+        }
     }
 
     public RamlReport check(RamlRequest request) {
@@ -163,7 +167,7 @@ public class RamlChecker {
         }
         @SuppressWarnings("unchecked")
         final List<Parameter> formParameters = mimeType.formParameters();
-        if (formParameters == null) {
+        if (formParameters == null || formParameters.isEmpty()) {
             requestViolations.add("formParameters.missing", locator);
         } else {
             checkFormParametersValues(action, mimeType, values, formParameters);
@@ -179,7 +183,7 @@ public class RamlChecker {
 
     private void checkQueryParameters(Values values, Method action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
-        for (final AbstractSecurityScheme scheme : security.getSchemes()) {
+        for (final SecurityScheme scheme : security.getSchemes()) {
             actionUsage(usage, action).addQueryParameters(
                     new ParameterChecker(violationsPerSecurity.requestViolations(scheme))
                             .checkParameters(mergeLists(action.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator))
@@ -189,7 +193,7 @@ public class RamlChecker {
 
     private void checkRequestHeaderParameters(Values values, Method action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
-        for (final AbstractSecurityScheme scheme : security.getSchemes()) {
+        for (final SecurityScheme scheme : security.getSchemes()) {
             actionUsage(usage, action).addRequestHeaders(
                     new ParameterChecker(violationsPerSecurity.requestViolations(scheme))
                             .acceptWildcard()
@@ -211,7 +215,7 @@ public class RamlChecker {
     private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
         final VariableMatcher pathMatch = VariableMatcher.match(ramlUri.getPath(), requestUri.getPath());
         if (!pathMatch.isMatch()) {
-            requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri());
+            requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri().value());
             throw new RamlViolationException();
         }
         return pathMatch;
@@ -220,15 +224,15 @@ public class RamlChecker {
     private VariableMatcher getHostMatch(UriComponents requestUri, UriComponents ramlUri) {
         final VariableMatcher hostMatch = VariableMatcher.match(ramlUri.getHost(), requestUri.getHost());
         if (!hostMatch.isCompleteMatch()) {
-            requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri());
+            requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri().value());
             throw new RamlViolationException();
         }
         return hostMatch;
     }
 
     private void checkProtocol(Method action, UriComponents requestUri, UriComponents ramlUri) {
-        final List<String> protocols = findProtocols(action, ramlUri.getScheme());
-        requestViolations.addIf(!protocols.contains(requestUri.getScheme()), "protocol.undefined", locator, requestUri.getScheme());
+        final List<String> protocols = findProtocols(action, ramlUri.getScheme().toUpperCase());
+        requestViolations.addIf(!protocols.contains(requestUri.getScheme().toUpperCase()), "protocol.undefined", locator, requestUri.getScheme());
     }
 
     private List<String> findProtocols(Method action, String fallback) {
@@ -255,7 +259,7 @@ public class RamlChecker {
 
     public void checkResponse(RamlRequest request, RamlResponse response, Method action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
-        for (final AbstractSecurityScheme scheme : security.getSchemes()) {
+        for (final SecurityScheme scheme : security.getSchemes()) {
             final RamlViolations requestViolations = violationsPerSecurity.requestViolations(scheme);
             final RamlViolations responseViolations = violationsPerSecurity.responseViolations(scheme);
             final MediaTypeMatch typeMatch = doCheckReponse(responseViolations, response, action, security.responses(scheme));
@@ -287,10 +291,11 @@ public class RamlChecker {
     }
 
     private void checkSchema(RamlViolations violations, byte[] body, MediaTypeMatch typeMatch) {
-        final String schema = typeMatch.getMatchingMime().schemaContent();
-        if (schema == null) {
+        final SchemaString ss = typeMatch.getMatchingMime().schema();
+        if (ss == null) {
             return;
         }
+        final String schema = ss.value();
         final SchemaValidator validator = findSchemaValidator(config.schemaValidators, typeMatch.getTargetType());
         if (validator == null) {
             violations.add("schemaValidator.missing", locator, typeMatch.getTargetType());
