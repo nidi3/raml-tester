@@ -3,6 +3,15 @@ raml-tester [![Build Status](https://travis-ci.org/nidi3/raml-tester.svg?branch=
 
 Test if a request/response matches a given raml definition.
 
+Versioning
+--
+
+Version | Contents
+---|---
+0.8.x | Stable version, uses [RAML parser 0.8.x](https://github.com/raml-org/raml-java-parser/tree/v1) and supports only RAML v0.8
+0.9.x | Development version, uses [RAML parser 1.x](https://github.com/raml-org/raml-java-parser) and supports RAML v0.8 and [parts of v1.0](https://github.com/nidi3/raml-tester/blob/raml-parser-2/1.0-support.md)
+1.0.x | As soon as RAML v1.0 support is stable
+
 Add it to a project
 -------------------
 Add these lines to the `pom.xml`:
