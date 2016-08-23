@@ -20,13 +20,13 @@ import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.UnifiedApi;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
 import guru.nidi.ramltester.spring.RamlRestTemplate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.raml.v2.api.RamlModelResult;
-import org.raml.v2.api.model.v08.api.Api;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.client.RestTemplate;
@@ -76,6 +76,10 @@ public class RamlDefinition {
         return new RamlDefinition(config.includeServletPath(includeServletPath));
     }
 
+    public UnifiedApi getRaml() {
+        return config.getRaml();
+    }
+
     /**
      * Will throw a {@link RamlViolationException} in case there are errors on the {@link RamlReport}
      *
@@ -89,8 +93,8 @@ public class RamlDefinition {
         return new RamlDefinition(config.failFast(failFast));
     }
 
-    public Api getRaml() {
-        return config.raml.getApiV08();
+    public RamlModelResult getModel() {
+        return config.raml;
     }
 
     public RamlReport testAgainst(RamlRequest request, RamlResponse response) {
@@ -138,7 +142,7 @@ public class RamlDefinition {
     }
 
     public RamlValidator validator() {
-        return new RamlValidator(config.raml.getApiV08(), config.schemaValidators);
+        return new RamlValidator(config.getRaml(), config.schemaValidators);
     }
 
     public RamlReport validate() {

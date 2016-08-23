@@ -195,7 +195,7 @@ public class RamlLoaders {
                 ? new RamlCache(decorated).loadRaml(name)
 //                : new RelativeJsonSchemaAwareRamlDocumentBuilder(decorated, new LoaderRamlResourceLoader(decorated)).build(name);
                 : new RamlModelBuilder(new LoaderRamlResourceLoader(decorated)).buildApi(name);
-        if (raml.getApiV08() == null) {
+        if (raml.hasErrors()) {
             throw new RamlViolationException(RamlReport.fromModelResult(null, raml));
         }
         final SchemaValidators validators = schemaValidators.withloader(decorated);

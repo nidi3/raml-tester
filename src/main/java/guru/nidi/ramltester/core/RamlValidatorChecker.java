@@ -15,16 +15,12 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.api.Api;
-import org.raml.v2.api.model.v08.api.DocumentationItem;
 import org.raml.v2.api.model.v08.bodies.BodyLike;
-import org.raml.v2.api.model.v08.methods.Method;
 import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
-import org.raml.v2.api.model.v08.parameters.Parameter;
 import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
-import org.raml.v2.api.model.v08.resources.Resource;
 import org.raml.v2.api.model.v08.system.types.MarkdownString;
 
 import java.util.Arrays;
@@ -60,7 +56,7 @@ class RamlValidatorChecker {
         }
     }
 
-    private final Api raml;
+    private final UnifiedApi raml;
     private final Locator locator;
     private final Pattern resourcePattern;
     private final Pattern parameterPattern;
@@ -70,11 +66,11 @@ class RamlValidatorChecker {
     private final RamlReport report;
     private final RamlViolations violations;
 
-    public RamlValidatorChecker(Api raml, List<SchemaValidator> schemaValidators) {
+    public RamlValidatorChecker(UnifiedApi raml, List<SchemaValidator> schemaValidators) {
         this(raml, new Locator(), schemaValidators, EnumSet.allOf(Validation.class), null, null, null);
     }
 
-    public RamlValidatorChecker(Api raml, Locator locator, List<SchemaValidator> schemaValidators, EnumSet<Validation> validations, Pattern resourcePattern, Pattern parameterPattern, Pattern headerPattern) {
+    public RamlValidatorChecker(UnifiedApi raml, Locator locator, List<SchemaValidator> schemaValidators, EnumSet<Validation> validations, Pattern resourcePattern, Pattern parameterPattern, Pattern headerPattern) {
         this.raml = raml;
         this.locator = locator;
         this.resourcePattern = resourcePattern;
@@ -119,21 +115,21 @@ class RamlValidatorChecker {
         violations.add(new Message(key, params));
     }
 
-    public void description(List<Parameter>params, ParamName paramName) {
+    public void description(List<UnifiedType> params, ParamName paramName) {
         if (has(Validation.DESCRIPTION)) {
-            for (final Parameter param : paramEntries(params)) {
+            for (final UnifiedType param : paramEntries(params)) {
                 description(param.name(), param, paramName);
             }
         }
     }
 
-    private void description(String name, Parameter param, ParamName paramName) {
+    private void description(String name, UnifiedType param, ParamName paramName) {
         if (isNullOrEmpty(param.description())) {
             violation("parameter.description.missing", locator, name, paramName);
         }
     }
 
-    public void description(MarkdownString desc) {
+    public void description(String desc) {
         if (has(Validation.DESCRIPTION)) {
             if (isNullOrEmpty(desc)) {
                 violation("description.missing", locator);
@@ -141,12 +137,12 @@ class RamlValidatorChecker {
         }
     }
 
-    public void description(List<DocumentationItem> docs) {
+    public void description(List<UnifiedDocItem> docs) {
         if (has(Validation.DESCRIPTION)) {
             if (isNullOrEmpty(docs)) {
                 violation("documentation.missing", locator);
             } else {
-                for (final DocumentationItem doc : docs) {
+                for (final UnifiedDocItem doc : docs) {
                     if (isNullOrEmpty(doc.title())) {
                         violation("documentation.missing.title", locator);
                     } else if (isNullOrEmpty(doc.content())) {
@@ -157,7 +153,7 @@ class RamlValidatorChecker {
         }
     }
 
-    public void empty(Resource resource) {
+    public void empty(UnifiedResource resource) {
         if (has(Validation.EMPTY)) {
             if (resource.methods().isEmpty() && resource.resources().isEmpty()) {
                 violation("empty", locator);
@@ -165,7 +161,7 @@ class RamlValidatorChecker {
         }
     }
 
-    public void empty(Method action) {
+    public void empty(UnifiedMethod action) {
         if (has(Validation.EMPTY)) {
             if (action.responses().isEmpty()) {
                 violation("empty", locator);
@@ -181,7 +177,7 @@ class RamlValidatorChecker {
                 for (final String name : names) {
                     if ("version".equals(name)) {
                         violation("baseUriParameter.illegal", locator, name);
-                    } else if (!raml.baseUri().value().contains("{" + name + "}")) {
+                    } else if (!raml.baseUri().contains("{" + name + "}")) {
                         violation("baseUriParameter.invalid", locator, name);
                     }
                 }
@@ -189,7 +185,7 @@ class RamlValidatorChecker {
         }
     }
 
-    public void uriParameters(Collection<String> names, Resource resource) {
+    public void uriParameters(Collection<String> names, UnifiedResource resource) {
         if (has(Validation.URI_PARAMETER)) {
             for (final String name : names) {
                 if ("version".equals(name)) {
@@ -201,9 +197,9 @@ class RamlValidatorChecker {
         }
     }
 
-    public void resourcePattern(Resource resource) {
+    public void resourcePattern(UnifiedResource resource) {
         if (resourcePattern != null) {
-            final String uri = resource.relativeUri().value().replaceAll("\\{[^}/]+\\}", "");
+            final String uri = resource.relativeUri().replaceAll("\\{[^}/]+\\}", "");
             for (final String part : uri.split("/")) {
                 if (part != null && part.length() > 0 && !resourcePattern.matcher(part).matches()) {
                     violation("resource.name.invalid", locator, resourcePattern.pattern());
@@ -212,12 +208,12 @@ class RamlValidatorChecker {
         }
     }
 
-    public void parameters(List<Parameter> params, ParamName paramName) {
+    public void parameters(List<UnifiedType> params, ParamName paramName) {
         if (paramName == ParamName.BASE_URI) {
             baseUriParameters(namesOf(params));
         }
         if (parameterPattern != null) {
-            for (final Parameter param : params) {
+            for (final UnifiedType param : params) {
                 if (!parameterPattern.matcher(param.name()).matches()) {
                     violation("parameter.name.invalid", locator, param.name(), paramName, parameterPattern.pattern());
                 }
@@ -228,7 +224,7 @@ class RamlValidatorChecker {
         }
         if (has(Validation.EXAMPLE)) {
             final ParameterChecker checker = new ParameterChecker(violations);
-            for (final Parameter param : paramEntries(params)) {
+            for (final UnifiedType param : paramEntries(params)) {
                 parameterValues(param, checker, new Message("parameter.condition", locator, param.name(), paramName));
             }
         }
@@ -243,7 +239,7 @@ class RamlValidatorChecker {
         }
     }
 
-    private void parameterDef(List<Parameter> params, ParamName paramName) {
+    private void parameterDef(List<UnifiedType> params, ParamName paramName) {
 //        for (final Parameter param : paramEntries(params)) {
 //            final String name = param.name();
 //            final String type = param.type() == null ? "string": param.type();
@@ -273,7 +269,7 @@ class RamlValidatorChecker {
         violations.addIf(param.maximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
     }
 
-    private void parameterValues(Parameter param, ParameterChecker checker, Message message) {
+    private void parameterValues(UnifiedType param, ParameterChecker checker, Message message) {
         if (param.example() != null) {
             checker.checkParameter(param, param.example(), message.withParam("example"));
         }

@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.UnifiedType;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.Message;
@@ -85,7 +86,7 @@ class ParameterChecker {
         return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
-    public Set<String> checkParameters(List<Parameter> params, Values values, Message message) {
+    public Set<String> checkParameters(List<UnifiedType> params, Values values, Message message) {
         final List<Parameter> listParams = new ArrayList<>();
 //        addToMapOfList(params, listParams);
 //        return checkListParameters(listParams, values, message);
@@ -102,16 +103,16 @@ class ParameterChecker {
         return acceptUndefined || predefined.contains(name) || (ignoreX && name.startsWith("x-"));
     }
 
-    public Set<String> checkListParameters(List<Parameter> params, Values values, Message message) {
+    public Set<String> checkListParameters(List<UnifiedType> params, Values values, Message message) {
         final Set<String> found = new HashSet<>();
         for (final Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
             final String paramName = findMatchingParamName(namesOf(params), entry.getKey());
-            final List<Parameter> parameters = paramsByName(params, paramName);
+            final List<UnifiedType> parameters = paramsByName(params, paramName);
             if (parameters == null || parameters.isEmpty()) {
                 violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)), namedMsg.withMessageParam("undefined"));
             } else {
-                for (final Parameter parameter : parameters) {
+                for (final UnifiedType parameter : parameters) {
                     final boolean rep = parameter.repeat() != null && parameter.repeat();
                     violations.addIf(!rep && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
                     for (final Object value : entry.getValue()) {
@@ -156,7 +157,7 @@ class ParameterChecker {
                 name.endsWith(key.substring(wildcardPos + WILDCARD.length()));
     }
 
-    public void checkParameter(Parameter param, Object value, Message message) {
+    public void checkParameter(UnifiedType param, Object value, Message message) {
         if (value == null) {
             final Message detail = message.withInnerParam(new Message("value", "empty"));
             checkNullParameter(param, detail);

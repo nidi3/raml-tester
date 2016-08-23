@@ -15,6 +15,9 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.Api08;
+import guru.nidi.ramltester.model.Api10;
+import guru.nidi.ramltester.model.UnifiedApi;
 import org.raml.v2.api.RamlModelResult;
 
 import java.util.List;
@@ -41,6 +44,12 @@ public class CheckerConfig {
         this.includeServletPath = includeServletPath;
         this.ignoreXheaders = ignoreXheaders;
         this.failFast = failFast;
+    }
+
+    public UnifiedApi getRaml() {
+        return raml.isVersion08()
+                ? new Api08(raml.getApiV08())
+                : new Api10(raml.getApiV10());
     }
 
     public CheckerConfig assumingBaseUri(String baseUri) {

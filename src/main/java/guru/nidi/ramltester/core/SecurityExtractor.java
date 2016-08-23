@@ -15,16 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.api.Api;
-import org.raml.v2.api.model.v08.bodies.Response;
-import org.raml.v2.api.model.v08.methods.Method;
-import org.raml.v2.api.model.v08.parameters.Parameter;
-import org.raml.v2.api.model.v08.security.SecurityScheme;
-import org.raml.v2.api.model.v08.security.SecuritySchemePart;
-import org.raml.v2.api.model.v08.security.SecuritySchemeRef;
-import org.raml.v2.api.model.v08.security.SecuritySchemeSettings;
-import org.raml.v2.api.model.v08.system.types.MarkdownString;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,16 +26,16 @@ import java.util.List;
  *
  */
 class SecurityExtractor {
-    private final Api raml;
-    private final List<SecurityScheme> schemes;
+    private final UnifiedApi raml;
+    private final List<UnifiedSecScheme> schemes;
 
-    public SecurityExtractor(Api raml, Method action, RamlViolations violations) {
+    public SecurityExtractor(UnifiedApi raml, UnifiedMethod action, RamlViolations violations) {
         this.raml = raml;
         schemes = new SchemeFinder(raml, violations).securedBy(action);
     }
 
     public void check(RamlViolations violations) {
-        for (final SecurityScheme scheme : raml.securitySchemes()) {
+        for (final UnifiedSecScheme scheme : raml.securitySchemes()) {
             final SecuritySchemeType type = SecuritySchemeType.of(scheme);
             if (type != null) {
                 type.check(scheme, violations);
@@ -51,33 +43,33 @@ class SecurityExtractor {
         }
     }
 
-    public List<SecurityScheme> getSchemes() {
+    public List<UnifiedSecScheme> getSchemes() {
         return schemes;
     }
 
-    public List<Parameter> queryParameters(SecurityScheme scheme) {
+    public List<UnifiedType> queryParameters(UnifiedSecScheme scheme) {
         return scheme.describedBy() == null
-                ? Collections.<Parameter>emptyList()
+                ? Collections.<UnifiedType>emptyList()
                 : scheme.describedBy().queryParameters();
     }
 
-    public List<Parameter> headers(SecurityScheme scheme) {
+    public List<UnifiedType> headers(UnifiedSecScheme scheme) {
         return scheme.describedBy() == null
-                ? Collections.<Parameter>emptyList()
+                ? Collections.<UnifiedType>emptyList()
                 : scheme.describedBy().headers();
     }
 
-    public List<Response> responses(SecurityScheme scheme) {
+    public List<UnifiedResponse> responses(UnifiedSecScheme scheme) {
         return scheme.describedBy() == null
-                ? Collections.<Response>emptyList()
+                ? Collections.<UnifiedResponse>emptyList()
                 : scheme.describedBy().responses();
     }
 
     private static final class SchemeFinder {
-        private static final SecurityScheme NULL_SCHEMA = new SecurityScheme() {
+        private static final UnifiedSecScheme NULL_SCHEMA = new UnifiedSecScheme() {
 
             @Override
-            public MarkdownString description() {
+            public String description() {
                 return null;
             }
 
@@ -92,26 +84,26 @@ class SecurityExtractor {
             }
 
             @Override
-            public SecuritySchemePart describedBy() {
+            public UnifiedSecSchemePart describedBy() {
                 return null;
             }
 
             @Override
-            public SecuritySchemeSettings settings() {
+            public UnifiedSecSchemeSettings settings() {
                 return null;
             }
         };
 
-        private final Api raml;
+        private final UnifiedApi raml;
         private final RamlViolations violations;
 
-        public SchemeFinder(Api raml, RamlViolations violations) {
+        public SchemeFinder(UnifiedApi raml, RamlViolations violations) {
             this.raml = raml;
             this.violations = violations;
         }
 
-        public List<SecurityScheme> securedBy(Method action) {
-            final List<SecurityScheme> res = new ArrayList<>();
+        public List<UnifiedSecScheme> securedBy(UnifiedMethod action) {
+            final List<UnifiedSecScheme> res = new ArrayList<>();
             if (!action.securedBy().isEmpty()) {
                 res.addAll(securitySchemes(action.securedBy(), new Message("securityScheme.undefined", new Locator(action))));
             } else if (!action.resource().securedBy().isEmpty()) {
@@ -125,9 +117,9 @@ class SecurityExtractor {
             return res;
         }
 
-        private List<SecurityScheme> securitySchemes(List<SecuritySchemeRef> refs, Message message) {
-            final List<SecurityScheme> res = new ArrayList<>();
-            for (final SecuritySchemeRef ref : refs) {
+        private List<UnifiedSecScheme> securitySchemes(List<UnifiedSecSchemeRef> refs, Message message) {
+            final List<UnifiedSecScheme> res = new ArrayList<>();
+            for (final UnifiedSecSchemeRef ref : refs) {
                 res.add(ref == null ? NULL_SCHEMA : ref.securityScheme());
 //                final String name = ref.name();
 //                if ("null".equals(name)) {

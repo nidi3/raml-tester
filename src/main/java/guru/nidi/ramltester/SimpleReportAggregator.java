@@ -16,7 +16,7 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.ramltester.core.*;
-import org.raml.v2.api.model.v08.api.Api;
+import guru.nidi.ramltester.model.UnifiedApi;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +27,7 @@ import java.util.Map;
  *
  */
 public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
-    private Api raml;
+    private UnifiedApi raml;
     private final List<RamlReport> reports = new ArrayList<>();
 
     @Override
@@ -57,7 +57,7 @@ public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
         return reports;
     }
 
-    protected Api getRaml() {
+    protected UnifiedApi getRaml() {
         return raml;
     }
 

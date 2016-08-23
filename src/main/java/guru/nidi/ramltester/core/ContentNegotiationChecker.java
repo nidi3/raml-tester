@@ -17,10 +17,10 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.UnifiedMethod;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.methods.Method;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +37,7 @@ class ContentNegotiationChecker {
         this.responseViolations = responseViolations;
     }
 
-    public void check(RamlRequest request, RamlResponse response, Method action, MediaTypeMatch typeMatch) {
+    public void check(RamlRequest request, RamlResponse response, UnifiedMethod action, MediaTypeMatch typeMatch) {
         final String accept = acceptHeader(request, response, typeMatch);
         if (accept == null) {
             return;

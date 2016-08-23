@@ -15,11 +15,11 @@
  */
 package guru.nidi.ramltester.core;
 
-import org.raml.v2.api.model.v08.api.Api;
+import guru.nidi.ramltester.model.UnifiedApi;
+import guru.nidi.ramltester.model.UnifiedMethod;
+import guru.nidi.ramltester.model.UnifiedResource;
+import guru.nidi.ramltester.model.UnifiedResponse;
 import org.raml.v2.api.model.v08.bodies.BodyLike;
-import org.raml.v2.api.model.v08.bodies.Response;
-import org.raml.v2.api.model.v08.methods.Method;
-import org.raml.v2.api.model.v08.resources.Resource;
 
 import java.util.List;
 
@@ -30,16 +30,16 @@ import static guru.nidi.ramltester.core.RamlValidatorChecker.ParamName.*;
  *
  */
 public class RamlValidator {
-    private final Api raml;
+    private final UnifiedApi raml;
     private final List<SchemaValidator> schemaValidators;
     private final Locator locator;
     private final RamlValidatorChecker checker;
 
-    public RamlValidator(Api raml, List<SchemaValidator> schemaValidators) {
+    public RamlValidator(UnifiedApi raml, List<SchemaValidator> schemaValidators) {
         this(raml, schemaValidators, new RamlValidatorChecker(raml, schemaValidators));
     }
 
-    private RamlValidator(Api raml, List<SchemaValidator> schemaValidators, RamlValidatorChecker checker) {
+    private RamlValidator(UnifiedApi raml, List<SchemaValidator> schemaValidators, RamlValidatorChecker checker) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.checker = checker;
@@ -66,13 +66,13 @@ public class RamlValidator {
         checker.parameters(raml.baseUriParameters(), BASE_URI);
         checker.description(raml.documentation());
         checker.description(raml.baseUriParameters(), BASE_URI);
-        for (final Resource resource : raml.resources()) {
+        for (final UnifiedResource resource : raml.resources()) {
             resource(resource);
         }
         return checker.getReport();
     }
 
-    private void resource(Resource resource) {
+    private void resource(UnifiedResource resource) {
         locator.resource(resource);
         checker.resourcePattern(resource);
         checker.uriParameters(namesOf(resource.uriParameters()), resource);
@@ -82,15 +82,15 @@ public class RamlValidator {
         checker.description(resource.baseUriParameters(), BASE_URI);
         checker.description(resource.uriParameters(), URI);
         checker.empty(resource);
-        for (final Resource res : resource.resources()) {
+        for (final UnifiedResource res : resource.resources()) {
             resource(res);
         }
-        for (final Method action : resource.methods()) {
+        for (final UnifiedMethod action : resource.methods()) {
             action(action);
         }
     }
 
-    private void action(Method action) {
+    private void action(UnifiedMethod action) {
         locator.action(action);
         checker.parameters(action.baseUriParameters(), BASE_URI);
         checker.parameters(action.queryParameters(), QUERY);
@@ -106,8 +106,8 @@ public class RamlValidator {
                 mimeType(mimeType);
             }
         }
-        for (final Response response : action.responses()) {
-            locator.responseCode(response.code().value());
+        for (final UnifiedResponse response : action.responses()) {
+            locator.responseCode(response.code());
             response(response);
         }
     }
@@ -121,7 +121,7 @@ public class RamlValidator {
         checker.exampleSchema(mimeType);
     }
 
-    private void response(Response response) {
+    private void response(UnifiedResponse response) {
         checker.headerPattern(namesOf(response.headers()));
         checker.description(response.description());
         checker.description(response.headers(), HEADER);

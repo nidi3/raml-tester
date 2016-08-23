@@ -15,16 +15,10 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.RamlMessage;
-import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.api.Api;
 import org.raml.v2.api.model.v08.bodies.BodyLike;
-import org.raml.v2.api.model.v08.bodies.Response;
-import org.raml.v2.api.model.v08.methods.Method;
-import org.raml.v2.api.model.v08.parameters.Parameter;
-import org.raml.v2.api.model.v08.resources.Resource;
 
 import java.io.Reader;
 import java.util.*;
@@ -53,8 +47,8 @@ final class CheckerHelper {
         return false;
     }
 
-    public static Parameter findUriParam(String uriParam, Resource resource) {
-        final Parameter param = paramByName(resource.uriParameters(), uriParam);
+    public static UnifiedType findUriParam(String uriParam, UnifiedResource resource) {
+        final UnifiedType param = paramByName(resource.uriParameters(), uriParam);
         if (param != null) {
             return param;
         }
@@ -64,10 +58,10 @@ final class CheckerHelper {
         return null;
     }
 
-    public static Resource findResource(String resourcePath, List<Resource> resources, Values values) {
+    public static UnifiedResource findResource(String resourcePath, List<UnifiedResource> resources, Values values) {
         final List<ResourceMatch> matches = new ArrayList<>();
-        for (final Resource resource : resources) {
-            final VariableMatcher pathMatch = VariableMatcher.match(resource.relativeUri().value(), resourcePath);
+        for (final UnifiedResource resource : resources) {
+            final VariableMatcher pathMatch = VariableMatcher.match(resource.relativeUri(), resourcePath);
             if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
                 matches.add(new ResourceMatch(pathMatch, resource));
             }
@@ -88,9 +82,9 @@ final class CheckerHelper {
 
     private static final class ResourceMatch implements Comparable<ResourceMatch> {
         private final VariableMatcher match;
-        private final Resource resource;
+        private final UnifiedResource resource;
 
-        public ResourceMatch(VariableMatcher match, Resource resource) {
+        public ResourceMatch(VariableMatcher match, UnifiedResource resource) {
             this.match = match;
             this.resource = resource;
         }
@@ -110,14 +104,14 @@ final class CheckerHelper {
         return null;
     }
 
-    public static List<Parameter> getEffectiveBaseUriParams(List<Parameter> baseUriParams, Method action) {
-        final List<Parameter> params = new ArrayList<>();
+    public static List<UnifiedType> getEffectiveBaseUriParams(List<UnifiedType> baseUriParams, UnifiedMethod action) {
+        final List<UnifiedType> params = new ArrayList<>();
         if (action.baseUriParameters() != null) {
             params.addAll(action.baseUriParameters());
         }
         addNotSetBaseUriParams(action.resource(), params);
         if (baseUriParams != null) {
-            for (final Parameter parameter : baseUriParams) {
+            for (final UnifiedType parameter : baseUriParams) {
                 if (!namesOf(params).contains(parameter.name())) {
                     params.add(parameter);
                 }
@@ -126,9 +120,9 @@ final class CheckerHelper {
         return params;
     }
 
-    private static void addNotSetBaseUriParams(Resource resource, List<Parameter> params) {
+    private static void addNotSetBaseUriParams(UnifiedResource resource, List<UnifiedType> params) {
         if (resource.baseUriParameters() != null) {
-            for (final Parameter parameter : resource.baseUriParameters()) {
+            for (final UnifiedType parameter : resource.baseUriParameters()) {
                 if (!namesOf(params).contains(parameter.name())) {
                     params.add(parameter);
                 }
@@ -140,7 +134,7 @@ final class CheckerHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Parameter> paramEntries(List<Parameter> params) {
+    public static List<UnifiedType> paramEntries(List<UnifiedType> params) {
 //        final List<Map.Entry<String, AbstractParam>> res = new ArrayList<>();
 //        for (final Parameter param : params) {
 //            if (param.getValue() instanceof List) {
@@ -155,7 +149,7 @@ final class CheckerHelper {
         return params;
     }
 
-    public static Reader resolveSchema(Api raml, String schema) {
+    public static Reader resolveSchema(UnifiedApi raml, String schema) {
 //        final String refSchema = raml.getConsolidatedSchemas().get(schema);
         String refSchema = schema;
         return refSchema == null
@@ -177,33 +171,33 @@ final class CheckerHelper {
         return res;
     }
 
-    public static List<String> namesOf(List<Parameter> params) {
+    public static List<String> namesOf(List<UnifiedType> params) {
         final List<String> res = new ArrayList<>();
-        for (final Parameter param : params) {
+        for (final UnifiedType param : params) {
             res.add(param.name());
         }
         return res;
     }
 
-    public static List<String> codesOf(List<Response> params) {
+    public static List<String> codesOf(List<UnifiedResponse> params) {
         final List<String> res = new ArrayList<>();
-        for (final Response param : params) {
-            res.add(param.code().value());
+        for (final UnifiedResponse param : params) {
+            res.add(param.code());
         }
         return res;
     }
 
-    public static Parameter paramByName(List<Parameter> parameters, String name) {
-        final List<Parameter> res = paramsByName(parameters, name);
+    public static UnifiedType paramByName(List<UnifiedType> parameters, String name) {
+        final List<UnifiedType> res = paramsByName(parameters, name);
         if (res.size() > 1) {
             throw new IllegalArgumentException("Expected only one parameter with given name " + name);
         }
         return res.isEmpty() ? null : res.get(0);
     }
 
-    public static List<Parameter> paramsByName(List<Parameter> parameters, String name) {
-        final List<Parameter> res = new ArrayList<>();
-        for (final Parameter parameter : parameters) {
+    public static List<UnifiedType> paramsByName(List<UnifiedType> parameters, String name) {
+        final List<UnifiedType> res = new ArrayList<>();
+        for (final UnifiedType parameter : parameters) {
             if (parameter.name().equals(name)) {
                 res.add(parameter);
             }
@@ -211,9 +205,9 @@ final class CheckerHelper {
         return res;
     }
 
-    public static Response responseByCode(List<Response> responses, String code) {
-        for (final Response response : responses) {
-            if (response.code().value().equals(code)) {
+    public static UnifiedResponse responseByCode(List<UnifiedResponse> responses, String code) {
+        for (final UnifiedResponse response : responses) {
+            if (response.code().equals(code)) {
                 return response;
             }
         }
