@@ -39,7 +39,6 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>prepare</goal>
                             <goal>assert</goal>
                         </goals>
                     </execution>
@@ -73,7 +72,7 @@
             <plugin>
                 <groupId>guru.nidi.maven.plugins</groupId>
                 <artifactId>tools-maven-plugin</artifactId>
-                <version>1.0.19</version>
+                <version>1.0.20</version>
                 <executions>
                     <execution>
                         <goals>
