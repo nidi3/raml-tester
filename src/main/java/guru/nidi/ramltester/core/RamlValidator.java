@@ -19,8 +19,8 @@ import guru.nidi.ramltester.model.*;
 
 import java.util.List;
 
-import static guru.nidi.ramltester.core.CheckerHelper.namesOf;
 import static guru.nidi.ramltester.core.RamlValidatorChecker.ParamName.*;
+import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
 /**
  *
@@ -71,7 +71,7 @@ public class RamlValidator {
     private void resource(UnifiedResource resource) {
         locator.resource(resource);
         checker.resourcePattern(resource);
-        checker.uriParameters(namesOf(resource.uriParameters()), resource);
+        checker.uriParameters(typeNamesOf(resource.uriParameters()), resource);
         checker.parameters(resource.baseUriParameters(), BASE_URI);
         checker.parameters(resource.uriParameters(), URI);
         checker.description(resource.description());
@@ -90,7 +90,7 @@ public class RamlValidator {
         locator.action(action);
         checker.parameters(action.baseUriParameters(), BASE_URI);
         checker.parameters(action.queryParameters(), QUERY);
-        checker.headerPattern(namesOf(action.headers()));
+        checker.headerPattern(typeNamesOf(action.headers()));
         checker.description(action.description());
         checker.description(action.baseUriParameters(), BASE_URI);
         checker.description(action.queryParameters(), QUERY);
@@ -118,7 +118,7 @@ public class RamlValidator {
     }
 
     private void response(UnifiedResponse response) {
-        checker.headerPattern(namesOf(response.headers()));
+        checker.headerPattern(typeNamesOf(response.headers()));
         checker.description(response.description());
         checker.description(response.headers(), HEADER);
         if (response.body() != null) {

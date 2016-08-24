@@ -26,6 +26,7 @@ import java.util.*;
 
 import static guru.nidi.ramltester.core.CheckerHelper.*;
 import static guru.nidi.ramltester.core.UsageBuilder.*;
+import static guru.nidi.ramltester.model.UnifiedModel.responseByCode;
 
 /**
  *
@@ -288,6 +289,9 @@ public class RamlChecker {
 
     private void checkSchema(RamlViolations violations, byte[] body, MediaTypeMatch typeMatch) {
         final String schema = typeMatch.getMatchingMime().type();
+        if (schema == null) {
+            return;
+        }
         final SchemaValidator validator = findSchemaValidator(config.schemaValidators, typeMatch.getTargetType());
         if (validator == null) {
             violations.add("schemaValidator.missing", locator, typeMatch.getTargetType());

@@ -19,8 +19,9 @@ import guru.nidi.ramltester.model.*;
 
 import java.util.List;
 
-import static guru.nidi.ramltester.core.CheckerHelper.codesOf;
-import static guru.nidi.ramltester.core.CheckerHelper.namesOf;
+import static guru.nidi.ramltester.model.UnifiedModel.codesOf;
+import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
+
 
 /**
  *
@@ -58,18 +59,18 @@ public final class UsageBuilder {
         for (final UnifiedResource resource : resources) {
             resourceUsage(usage, resource);
             for (final UnifiedMethod action : resource.methods()) {
-                actionUsage(usage, action).initQueryParameters(namesOf(action.queryParameters()));
+                actionUsage(usage, action).initQueryParameters(typeNamesOf(action.queryParameters()));
                 actionUsage(usage, action).initResponseCodes(codesOf(action.responses()));
-                actionUsage(usage, action).initRequestHeaders(namesOf(action.headers()));
+                actionUsage(usage, action).initRequestHeaders(typeNamesOf(action.headers()));
                 if (action.body() != null) {
                     for (final UnifiedBody mimeType : action.body()) {
                         if (mimeType.formParameters() != null) {
-                            UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(namesOf(mimeType.formParameters()));
+                            UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(typeNamesOf(mimeType.formParameters()));
                         }
                     }
                 }
                 for (final UnifiedResponse response : action.responses()) {
-                    responseUsage(usage, action, response.code()).initResponseHeaders(namesOf(response.headers()));
+                    responseUsage(usage, action, response.code()).initResponseHeaders(typeNamesOf(response.headers()));
                 }
             }
             createTotalUsage(usage, resource.resources());

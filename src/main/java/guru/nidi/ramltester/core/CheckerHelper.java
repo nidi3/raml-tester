@@ -23,6 +23,9 @@ import org.raml.v2.api.model.v08.parameters.Parameter;
 import java.io.Reader;
 import java.util.*;
 
+import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
+import static guru.nidi.ramltester.model.UnifiedModel.typeByName;
+
 /**
  *
  */
@@ -112,7 +115,7 @@ final class CheckerHelper {
         addNotSetBaseUriParams(action.resource(), params);
         if (baseUriParams != null) {
             for (final UnifiedType parameter : baseUriParams) {
-                if (!namesOf(params).contains(parameter.name())) {
+                if (!typeNamesOf(params).contains(parameter.name())) {
                     params.add(parameter);
                 }
             }
@@ -121,11 +124,9 @@ final class CheckerHelper {
     }
 
     private static void addNotSetBaseUriParams(UnifiedResource resource, List<UnifiedType> params) {
-        if (resource.baseUriParameters() != null) {
-            for (final UnifiedType parameter : resource.baseUriParameters()) {
-                if (!namesOf(params).contains(parameter.name())) {
-                    params.add(parameter);
-                }
+        for (final UnifiedType parameter : resource.baseUriParameters()) {
+            if (!typeNamesOf(params).contains(parameter.name())) {
+                params.add(parameter);
             }
         }
         if (resource.parentResource() != null) {
@@ -179,22 +180,6 @@ final class CheckerHelper {
         return res;
     }
 
-    public static List<String> namesOf(List<UnifiedType> params) {
-        final List<String> res = new ArrayList<>();
-        for (final UnifiedType param : params) {
-            res.add(param.name());
-        }
-        return res;
-    }
-
-    public static List<String> codesOf(List<UnifiedResponse> params) {
-        final List<String> res = new ArrayList<>();
-        for (final UnifiedResponse param : params) {
-            res.add(param.code());
-        }
-        return res;
-    }
-
     public static Parameter paramByName(List<Parameter> parameters, String name) {
         final List<Parameter> res = paramsByName(parameters, name);
         if (res.size() > 1) {
@@ -212,31 +197,6 @@ final class CheckerHelper {
         }
         return res;
     }
-    public static UnifiedType typeByName(List<UnifiedType> parameters, String name) {
-        final List<UnifiedType> res = typesByName(parameters, name);
-        if (res.size() > 1) {
-            throw new IllegalArgumentException("Expected only one parameter with given name " + name);
-        }
-        return res.isEmpty() ? null : res.get(0);
-    }
 
-    public static List<UnifiedType> typesByName(List<UnifiedType> parameters, String name) {
-        final List<UnifiedType> res = new ArrayList<>();
-        for (final UnifiedType parameter : parameters) {
-            if (parameter.name().equals(name)) {
-                res.add(parameter);
-            }
-        }
-        return res;
-    }
-
-    public static UnifiedResponse responseByCode(List<UnifiedResponse> responses, String code) {
-        for (final UnifiedResponse response : responses) {
-            if (response.code().equals(code)) {
-                return response;
-            }
-        }
-        return null;
-    }
 
 }

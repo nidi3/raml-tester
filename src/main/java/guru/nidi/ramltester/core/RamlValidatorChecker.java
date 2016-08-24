@@ -21,7 +21,6 @@ import guru.nidi.ramltester.util.Message;
 import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
 import org.raml.v2.api.model.v08.parameters.Parameter;
 import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
-import org.raml.v2.api.model.v08.system.types.MarkdownString;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +29,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static guru.nidi.ramltester.core.CheckerHelper.*;
+import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
 /**
  *
@@ -210,7 +210,7 @@ class RamlValidatorChecker {
 
     public void parameters(List<UnifiedType> params, ParamName paramName) {
         if (paramName == ParamName.BASE_URI) {
-            baseUriParameters(namesOf(params));
+            baseUriParameters(typeNamesOf(params));
         }
         if (parameterPattern != null) {
             for (final UnifiedType param : params) {
@@ -305,10 +305,6 @@ class RamlValidatorChecker {
 
     private boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
-    }
-
-    private boolean isNullOrEmpty(MarkdownString s) {
-        return s == null || s.value().isEmpty();
     }
 
     private boolean isNullOrEmpty(List<?> s) {
