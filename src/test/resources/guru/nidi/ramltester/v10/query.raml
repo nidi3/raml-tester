@@ -5,7 +5,8 @@ baseUri: http://nidi.guru/raml/{version}
 version: v1
 mediaType: application/default
 schemas:
-  - string: !include string.json
+  String:
+    schema: !include string.json
 
 /data:
   get:
@@ -20,8 +21,6 @@ schemas:
     queryParameters:
       req:
         required: true
-      rep:
-        repeat: true
       int:
         type: integer
     responses:

@@ -5,8 +5,11 @@ baseUri: http://nidi.guru/raml/{version}
 version: v1
 mediaType: application/default
 schemas:
-  - string: !include string.json
-  - invalid: xxx
+  String:
+    schema: !include string.json
+  invalid:
+    schema: |
+      {"type": "null"}
 /:
   get:
     responses:
@@ -23,7 +26,9 @@ schemas:
           abc/xyz+json:
             schema: |
               {"type":"string"}
-            example: !include 42.json
+            example:
+              strict: false
+              value: !include 42.json
 /schema:
   get:
     responses:
@@ -40,10 +45,6 @@ schemas:
         body:
           application/json:
             schema: string
-      203:
-        body:
-          application/json:
-            schema: undefined
       204:
         body:
           application/json:
@@ -75,10 +76,6 @@ schemas:
                       </xs:complexType>
                   </xs:element>
               </xs:schema>
-      209:
-        body:
-          text/bla:
-            schema: text/bla
       210:
         body:
           application/json:

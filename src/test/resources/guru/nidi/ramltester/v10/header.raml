@@ -5,7 +5,8 @@ baseUri: http://nidi.guru/raml/{version}
 version: v1
 mediaType: application/default
 schemas:
-  - string: !include string.json
+  String:
+    schema: !include string.json
 
 /data:
   get:
@@ -20,8 +21,6 @@ schemas:
     headers:
       req:
         required: true
-      rep:
-        repeat: true
       x-{?}:
     responses:
       200:
@@ -53,8 +52,6 @@ schemas:
         headers:
           req:
             required: true
-          rep:
-            repeat: true
           x-{?}:
         body:
           application/json:
