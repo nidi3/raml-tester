@@ -15,7 +15,6 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.UnifiedType;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.Message;
@@ -32,13 +31,13 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static guru.nidi.ramltester.core.CheckerHelper.namesOf;
+import static guru.nidi.ramltester.core.CheckerHelper.paramNamesOf;
 import static guru.nidi.ramltester.core.CheckerHelper.paramsByName;
 
 /**
  *
  */
-class ParameterChecker {
+class ParameterChecker08 {
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
     private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
@@ -53,7 +52,7 @@ class ParameterChecker {
     private final boolean caseSensitive;
     private final Set<String> predefined;
 
-    ParameterChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, boolean caseSensitive, Set<String> predefined) {
+    ParameterChecker08(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, boolean caseSensitive, Set<String> predefined) {
         this.violations = violations;
         this.acceptUndefined = acceptUndefined;
         this.acceptWildcard = acceptWildcard;
@@ -62,31 +61,31 @@ class ParameterChecker {
         this.predefined = predefined;
     }
 
-    ParameterChecker(RamlViolations violations) {
+    ParameterChecker08(RamlViolations violations) {
         this(violations, false, false, false, true, Collections.<String>emptySet());
     }
 
-    ParameterChecker acceptUndefined() {
-        return new ParameterChecker(violations, true, acceptWildcard, ignoreX, caseSensitive, predefined);
+    ParameterChecker08 acceptUndefined() {
+        return new ParameterChecker08(violations, true, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
-    ParameterChecker acceptWildcard() {
-        return new ParameterChecker(violations, acceptUndefined, true, ignoreX, caseSensitive, predefined);
+    ParameterChecker08 acceptWildcard() {
+        return new ParameterChecker08(violations, acceptUndefined, true, ignoreX, caseSensitive, predefined);
     }
 
-    ParameterChecker ignoreX(boolean ignoreX) {
-        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
+    ParameterChecker08 ignoreX(boolean ignoreX) {
+        return new ParameterChecker08(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
-    ParameterChecker caseSensitive(boolean caseSensitive) {
-        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
+    ParameterChecker08 caseSensitive(boolean caseSensitive) {
+        return new ParameterChecker08(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
-    ParameterChecker predefined(Set<String> predefined) {
-        return new ParameterChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
+    ParameterChecker08 predefined(Set<String> predefined) {
+        return new ParameterChecker08(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
     }
 
-    public Set<String> checkParameters(List<UnifiedType> params, Values values, Message message) {
+    public Set<String> checkParameters(List<Parameter> params, Values values, Message message) {
         final List<Parameter> listParams = new ArrayList<>();
 //        addToMapOfList(params, listParams);
 //        return checkListParameters(listParams, values, message);
@@ -103,16 +102,16 @@ class ParameterChecker {
         return acceptUndefined || predefined.contains(name) || (ignoreX && name.startsWith("x-"));
     }
 
-    public Set<String> checkListParameters(List<UnifiedType> params, Values values, Message message) {
+    public Set<String> checkListParameters(List<Parameter> params, Values values, Message message) {
         final Set<String> found = new HashSet<>();
         for (final Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
-            final String paramName = findMatchingParamName(namesOf(params), entry.getKey());
-            final List<UnifiedType> parameters = paramsByName(params, paramName);
-            if (parameters == null || parameters.isEmpty()) {
+            final String paramName = findMatchingParamName(paramNamesOf(params), entry.getKey());
+            final List<Parameter> ps = paramsByName(params, paramName);
+            if (ps == null || ps.isEmpty()) {
                 violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)), namedMsg.withMessageParam("undefined"));
             } else {
-                for (final UnifiedType parameter : parameters) {
+                for (final Parameter parameter : ps) {
                     final boolean rep = parameter.repeat() != null && parameter.repeat();
                     violations.addIf(!rep && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
                     for (final Object value : entry.getValue()) {
@@ -157,7 +156,13 @@ class ParameterChecker {
                 name.endsWith(key.substring(wildcardPos + WILDCARD.length()));
     }
 
-    public void checkParameter(UnifiedType param, Object value, Message message) {
+    public void checkParameters(Parameter param, List<Object> values, Message message) {
+        for (final Object val : values) {
+            checkParameter(param, val, message);
+        }
+    }
+
+    public void checkParameter(Parameter param, Object value, Message message) {
         if (value == null) {
             final Message detail = message.withInnerParam(new Message("value", "empty"));
             checkNullParameter(param, detail);

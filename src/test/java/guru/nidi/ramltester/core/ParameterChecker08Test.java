@@ -36,7 +36,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 /**
  *
  */
-public class ParameterCheckerTest extends CoreTestBase {
+public class ParameterChecker08Test extends CoreTestBase {
 
     @BeforeClass
     public static void init() {
@@ -232,25 +232,25 @@ public class ParameterCheckerTest extends CoreTestBase {
 
     private void assertNoViolation(Parameter param, String value) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new ParameterChecker08(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(Parameter param, String value, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new ParameterChecker08(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
         assertOneViolationThat(violations, matcher);
     }
 
     private void assertNoViolation(List<Parameter> params, Values values) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
+        new ParameterChecker08(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(List<Parameter> params, Values values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
+        new ParameterChecker08(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);
     }
 

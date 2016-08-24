@@ -23,4 +23,6 @@ public interface UnifiedMethod {
     List<UnifiedResponse> responses();
 
     List<UnifiedSecSchemeRef> securedBy();
+
+    List<UnifiedBody> body();
 }

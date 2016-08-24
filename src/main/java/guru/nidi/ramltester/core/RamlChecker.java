@@ -19,9 +19,7 @@ import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.Message;
 import guru.nidi.ramltester.util.UriComponents;
-import org.raml.v2.api.model.v08.bodies.BodyLike;
 import org.raml.v2.api.model.v08.parameters.Parameter;
-import org.raml.v2.api.model.v08.system.types.SchemaString;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -151,12 +149,12 @@ public class RamlChecker {
         }
     }
 
-    private void checkFormParameters(UnifiedMethod action, Values values, BodyLike mimeType) {
-        if (mimeType.schema() != null) {
+    private void checkFormParameters(UnifiedMethod action, Values values, UnifiedBody mimeType) {
+        if (mimeType.type() != null) {
             requestViolations.add("schema.superfluous", locator);
         }
         @SuppressWarnings("unchecked")
-        final List<Parameter> formParameters = mimeType.formParameters();
+        final List<UnifiedType> formParameters = mimeType.formParameters();
         if (formParameters == null || formParameters.isEmpty()) {
             requestViolations.add("formParameters.missing", locator);
         } else {
@@ -164,42 +162,48 @@ public class RamlChecker {
         }
     }
 
-    private void checkFormParametersValues(UnifiedMethod action, BodyLike mimeType, Values values, List<UnifiedType> formParameters) {
-        mimeTypeUsage(usage, action, mimeType).addFormParameters(
-                new ParameterChecker(requestViolations)
-                        .checkListParameters(formParameters, values, new Message("formParam", locator))
-        );
+    private void checkFormParametersValues(UnifiedMethod action, UnifiedBody mimeType, Values values, List<UnifiedType> formParameters) {
+        final Usage.MimeType mt = mimeTypeUsage(usage, action, mimeType);
+        if (config.raml.isVersion08()) {
+            mt.addFormParameters(new ParameterChecker08(requestViolations)
+                    .checkListParameters(UnifiedModel.<Parameter>typeDelegates(formParameters), values, new Message("formParam", locator)));
+        }
     }
 
     private void checkQueryParameters(Values values, UnifiedMethod action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
         for (final UnifiedSecScheme scheme : security.getSchemes()) {
-            actionUsage(usage, action).addQueryParameters(
-                    new ParameterChecker(violationsPerSecurity.requestViolations(scheme))
-                            .checkParameters(mergeLists(action.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator))
-            );
+            final Usage.Action a = actionUsage(usage, action);
+            if (config.raml.isVersion08()) {
+                a.addQueryParameters(new ParameterChecker08(violationsPerSecurity.requestViolations(scheme))
+                        .checkParameters(UnifiedModel.<Parameter>typeDelegates(mergeLists(action.queryParameters(), security.queryParameters(scheme))), values, new Message("queryParam", locator)));
+            }
         }
     }
 
     private void checkRequestHeaderParameters(Values values, UnifiedMethod action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
         for (final UnifiedSecScheme scheme : security.getSchemes()) {
-            actionUsage(usage, action).addRequestHeaders(
-                    new ParameterChecker(violationsPerSecurity.requestViolations(scheme))
-                            .acceptWildcard()
-                            .ignoreX(config.ignoreXheaders)
-                            .caseSensitive(false)
-                            .predefined(DefaultHeaders.REQUEST)
-                            .checkParameters(mergeLists(action.headers(), security.headers(scheme)), values, new Message("headerParam", locator))
-            );
+            final Usage.Action a = actionUsage(usage, action);
+            if (config.raml.isVersion08()) {
+                a.addRequestHeaders(
+                        new ParameterChecker08(violationsPerSecurity.requestViolations(scheme))
+                                .acceptWildcard()
+                                .ignoreX(config.ignoreXheaders)
+                                .caseSensitive(false)
+                                .predefined(DefaultHeaders.REQUEST)
+                                .checkParameters(UnifiedModel.<Parameter>typeDelegates(mergeLists(action.headers(), security.headers(scheme))), values, new Message("headerParam", locator)));
+            }
         }
     }
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, UnifiedMethod action) {
-        final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
-        final List<UnifiedType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
-        paramChecker.checkListParameters(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", locator));
-        paramChecker.checkListParameters(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", locator));
+        if (config.raml.isVersion08()) {
+            final ParameterChecker08 paramChecker = new ParameterChecker08(requestViolations).acceptUndefined();
+            final List<UnifiedType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
+            paramChecker.checkListParameters(UnifiedModel.<Parameter>typeDelegates(baseUriParams), hostMatch.getVariables(), new Message("baseUriParam", locator));
+            paramChecker.checkListParameters(UnifiedModel.<Parameter>typeDelegates(baseUriParams), pathMatch.getVariables(), new Message("baseUriParam", locator));
+        }
     }
 
     private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
@@ -237,12 +241,14 @@ public class RamlChecker {
     }
 
     private void checkUriParams(Values values, UnifiedResource resource) {
-        final ParameterChecker paramChecker = new ParameterChecker(requestViolations).acceptUndefined();
-        for (final Map.Entry<String, List<Object>> entry : values) {
-            final UnifiedType uriParam = findUriParam(entry.getKey(), resource);
-            final Message message = new Message("uriParam", locator, entry.getKey());
-            if (uriParam != null) {
-                paramChecker.checkParameter(uriParam, entry.getValue().get(0), message);
+        if (config.raml.isVersion08()) {
+            final ParameterChecker08 paramChecker = new ParameterChecker08(requestViolations).acceptUndefined();
+            for (final Map.Entry<String, List<Object>> entry : values) {
+                final UnifiedType uriParam = findUriParam(entry.getKey(), resource);
+                final Message message = new Message("uriParam", locator, entry.getKey());
+                if (uriParam != null) {
+                    paramChecker.checkParameter(uriParam.<Parameter>delegate(), entry.getValue().get(0), message);
+                }
             }
         }
     }
@@ -281,11 +287,7 @@ public class RamlChecker {
     }
 
     private void checkSchema(RamlViolations violations, byte[] body, MediaTypeMatch typeMatch) {
-        final SchemaString ss = typeMatch.getMatchingMime().schema();
-        if (ss == null) {
-            return;
-        }
-        final String schema = ss.value();
+        final String schema = typeMatch.getMatchingMime().type();
         final SchemaValidator validator = findSchemaValidator(config.schemaValidators, typeMatch.getTargetType());
         if (validator == null) {
             violations.add("schemaValidator.missing", locator, typeMatch.getTargetType());
@@ -306,14 +308,16 @@ public class RamlChecker {
     }
 
     private void checkResponseHeaderParameters(RamlViolations violations, Values values, UnifiedMethod action, String responseCode, UnifiedResponse response) {
-        responseUsage(usage, action, responseCode).addResponseHeaders(
-                new ParameterChecker(violations)
-                        .acceptWildcard()
-                        .ignoreX(config.ignoreXheaders)
-                        .caseSensitive(false)
-                        .predefined(DefaultHeaders.RESPONSE)
-                        .checkParameters(response.headers(), values, new Message("headerParam", locator))
-        );
+        final Usage.Response r = responseUsage(usage, action, responseCode);
+        if (config.raml.isVersion08()) {
+            r.addResponseHeaders(
+                    new ParameterChecker08(violations)
+                            .acceptWildcard()
+                            .ignoreX(config.ignoreXheaders)
+                            .caseSensitive(false)
+                            .predefined(DefaultHeaders.RESPONSE)
+                            .checkParameters(UnifiedModel.<Parameter>typeDelegates(response.headers()), values, new Message("headerParam", locator)));
+        }
     }
 }
 

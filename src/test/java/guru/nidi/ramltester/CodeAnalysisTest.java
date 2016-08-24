@@ -28,7 +28,7 @@ import guru.nidi.codeassert.junit.CodeAssertTest;
 import guru.nidi.codeassert.model.ModelAnalyzer;
 import guru.nidi.codeassert.model.ModelResult;
 import guru.nidi.codeassert.pmd.*;
-import guru.nidi.ramltester.core.ParameterCheckerTest;
+import guru.nidi.ramltester.core.ParameterChecker08Test;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.MediaTypeTest;
 import net.sourceforge.pmd.RulePriority;
@@ -120,7 +120,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.locs("RelativeJsonSchemaAwareRamlDocumentBuilder", "MediaType", "ServletRamlMessageTest").ignore("CompareObjectsWithEquals"),
                         In.locs("JsRegex", "MediaType").ignore("PreserveStackTrace"),
                         In.locs("JsRegex","Usage").ignore("AvoidCatchingGenericException"),
-                        In.classes(UriTest.class, ParameterCheckerTest.class, MediaTypeTest.class).ignore("JUnitTestsShouldIncludeAssert"))
+                        In.classes(UriTest.class, ParameterChecker08Test.class, MediaTypeTest.class).ignore("JUnitTestsShouldIncludeAssert"))
                 .because("it's style",
                         In.loc("RamlValidatorChecker").ignore("CollapsibleIfStatements"))
                 .because("TODO",                 //TODO

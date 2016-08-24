@@ -67,4 +67,9 @@ public class Method08 implements UnifiedMethod {
     public List<UnifiedSecSchemeRef> securedBy() {
         return SecSchemeRef08.of(method.securedBy());
     }
+
+    @Override
+    public List<UnifiedBody> body() {
+        return Body08.of(method.body());
+    }
 }

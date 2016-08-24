@@ -11,4 +11,6 @@ public interface UnifiedResponse {
     String code();
 
     List<UnifiedType> headers();
+
+    List<UnifiedBody> body();
 }

@@ -37,4 +37,9 @@ public class Response10 implements UnifiedResponse {
     public List<UnifiedType> headers() {
         return Type10.of(response.headers());
     }
+
+    @Override
+    public List<UnifiedBody> body() {
+        return Body10.of(response.body());
+    }
 }

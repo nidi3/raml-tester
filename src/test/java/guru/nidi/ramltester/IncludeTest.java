@@ -35,7 +35,7 @@ public class IncludeTest extends HighlevelTestBase {
 
     @Test
     public void load() throws Exception {
-        final Api raml = api.getRaml();
+        final Api raml = api.getModel().getApiV08();
         final Method get = raml.resources().get(0).methods().get(0);
         assertNull(paramByName(get.queryParameters(),"string.json"));
         assertNotEquals("string.json", responseByCode(get.responses(), "200").body().get(0).example());

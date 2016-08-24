@@ -15,11 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.UnifiedApi;
-import guru.nidi.ramltester.model.UnifiedMethod;
-import guru.nidi.ramltester.model.UnifiedResource;
-import guru.nidi.ramltester.model.UnifiedResponse;
-import org.raml.v2.api.model.v08.bodies.BodyLike;
+import guru.nidi.ramltester.model.*;
 
 import java.util.List;
 
@@ -101,7 +97,7 @@ public class RamlValidator {
         checker.description(action.headers(), HEADER);
         checker.empty(action);
         if (action.body() != null) {
-            for (final BodyLike mimeType : action.body()) {
+            for (final UnifiedBody mimeType : action.body()) {
                 locator.requestMime(mimeType);
                 mimeType(mimeType);
             }
@@ -112,7 +108,7 @@ public class RamlValidator {
         }
     }
 
-    private void mimeType(BodyLike mimeType) {
+    private void mimeType(UnifiedBody mimeType) {
         if (mimeType.formParameters() != null) {
             checker.formParameters(mimeType);
             checker.parameters(mimeType.formParameters(), FORM);
@@ -126,7 +122,7 @@ public class RamlValidator {
         checker.description(response.description());
         checker.description(response.headers(), HEADER);
         if (response.body() != null) {
-            for (final BodyLike mimeType : response.body()) {
+            for (final UnifiedBody mimeType : response.body()) {
                 locator.responseMime(mimeType);
                 mimeType(mimeType);
             }

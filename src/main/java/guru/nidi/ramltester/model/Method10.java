@@ -68,4 +68,9 @@ public class Method10 implements UnifiedMethod {
         return SecSchemeRef10.of(method.securedBy());
     }
 
+    @Override
+    public List<UnifiedBody> body() {
+        return Body10.of(method.body());
+    }
+
 }

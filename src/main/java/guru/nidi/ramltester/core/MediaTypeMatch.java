@@ -16,10 +16,10 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlMessage;
+import guru.nidi.ramltester.model.UnifiedBody;
 import guru.nidi.ramltester.util.InvalidMediaTypeException;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.bodies.BodyLike;
 
 import java.util.*;
 
@@ -32,9 +32,9 @@ final class MediaTypeMatch {
     private final MediaType targetType;
     private final Collection<MediaType> definedTypes;
     private final MediaType matchingMedia;
-    private final BodyLike matchingMime;
+    private final UnifiedBody matchingMime;
 
-    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia, BodyLike matchingMime) {
+    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia, UnifiedBody matchingMime) {
         this.targetType = targetType;
         this.definedTypes = definedTypes;
         this.matchingMedia = matchingMedia;
@@ -53,7 +53,7 @@ final class MediaTypeMatch {
         return matchingMedia;
     }
 
-    public BodyLike getMatchingMime() {
+    public UnifiedBody getMatchingMime() {
         return matchingMime;
     }
 
@@ -61,7 +61,7 @@ final class MediaTypeMatch {
         return targetType.getCharset("iso-8859-1");
     }
 
-    public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, List<BodyLike> bodies, Locator locator) {
+    public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, List<UnifiedBody> bodies, Locator locator) {
         if (isNoOrEmptyBodies(bodies)) {
             violations.addIf(hasContent(message), "body.superfluous", locator);
             return null;
@@ -78,8 +78,8 @@ final class MediaTypeMatch {
             violations.add("mediaType.illegal", locator, message.getContentType(), e.getMessage());
             return null;
         }
-        final Map<MediaType, BodyLike> mediaTypes = mediaTypes(violations, bodies, locator);
-        final List<Map.Entry<MediaType, BodyLike>> bestMatches = findBestMatches(mediaTypes, targetType);
+        final Map<MediaType, UnifiedBody> mediaTypes = mediaTypes(violations, bodies, locator);
+        final List<Map.Entry<MediaType, UnifiedBody>> bestMatches = findBestMatches(mediaTypes, targetType);
         if (bestMatches.isEmpty()) {
             violations.add("mediaType.undefined", locator, message.getContentType());
             return null;
@@ -91,9 +91,9 @@ final class MediaTypeMatch {
         return new MediaTypeMatch(targetType, mediaTypes.keySet(), bestMatches.get(0).getKey(), bestMatches.get(0).getValue());
     }
 
-    private static Map<MediaType, BodyLike> mediaTypes(RamlViolations violations, List<BodyLike> bodies, Locator locator) {
-        final Map<MediaType, BodyLike> types = new LinkedHashMap<>();
-        for (final BodyLike body : bodies) {
+    private static Map<MediaType, UnifiedBody> mediaTypes(RamlViolations violations, List<UnifiedBody> bodies, Locator locator) {
+        final Map<MediaType, UnifiedBody> types = new LinkedHashMap<>();
+        for (final UnifiedBody body : bodies) {
             try {
                 types.put(MediaType.valueOf(body.name()), body);
             } catch (InvalidMediaTypeException e) {
@@ -103,9 +103,9 @@ final class MediaTypeMatch {
         return types;
     }
 
-    private static List<Map.Entry<MediaType, BodyLike>> findBestMatches(Map<MediaType, BodyLike> types, MediaType targetType) {
-        final List<Map.Entry<MediaType, BodyLike>> bestMatches = new ArrayList<>();
-        for (final Map.Entry<MediaType, BodyLike> entry : types.entrySet()) {
+    private static List<Map.Entry<MediaType, UnifiedBody>> findBestMatches(Map<MediaType, UnifiedBody> types, MediaType targetType) {
+        final List<Map.Entry<MediaType, UnifiedBody>> bestMatches = new ArrayList<>();
+        for (final Map.Entry<MediaType, UnifiedBody> entry : types.entrySet()) {
             final int similarity = targetType.similarity(entry.getKey());
             if (bestMatches.isEmpty()) {
                 if (similarity > 0) {

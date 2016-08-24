@@ -15,10 +15,10 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.model.UnifiedBody;
 import guru.nidi.ramltester.model.UnifiedMethod;
 import guru.nidi.ramltester.model.UnifiedResource;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.bodies.BodyLike;
 
 import java.util.Locale;
 
@@ -28,9 +28,9 @@ import java.util.Locale;
 final class Locator {
     private UnifiedResource resource;
     private UnifiedMethod action;
-    private BodyLike requestMime;
+    private UnifiedBody requestMime;
     private String responseCode;
-    private BodyLike responseMime;
+    private UnifiedBody responseMime;
 
     public Locator() {
     }
@@ -43,7 +43,7 @@ final class Locator {
         action(action);
     }
 
-    public Locator(BodyLike mimeType) {
+    public Locator(UnifiedBody mimeType) {
         requestMime(mimeType);
     }
 
@@ -63,7 +63,7 @@ final class Locator {
         responseMime = null;
     }
 
-    public void requestMime(BodyLike requestMime) {
+    public void requestMime(UnifiedBody requestMime) {
         this.requestMime = requestMime;
         responseCode = null;
         responseMime = null;
@@ -75,7 +75,7 @@ final class Locator {
         responseMime = null;
     }
 
-    public void responseMime(BodyLike responseMime) {
+    public void responseMime(UnifiedBody responseMime) {
         this.responseMime = responseMime;
         requestMime = null;
     }

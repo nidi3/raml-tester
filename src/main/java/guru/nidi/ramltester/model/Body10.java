@@ -9,24 +9,19 @@ import java.util.List;
 /**
  *
  */
-public class Type10 implements UnifiedType {
+public class Body10 implements UnifiedBody {
     private TypeDeclaration type;
 
-    public Type10(TypeDeclaration type) {
+    public Body10(TypeDeclaration type) {
         this.type = type;
     }
 
-    static List<UnifiedType> of(List<TypeDeclaration> types) {
-        final List<UnifiedType> res = new ArrayList<>();
-        for (final TypeDeclaration td : types) {
-            res.add(new Type10(td));
+    static List<UnifiedBody> of(List<TypeDeclaration> bodies) {
+        final List<UnifiedBody> res = new ArrayList<>();
+        for (final TypeDeclaration t : bodies) {
+            res.add(new Body10(t));
         }
         return res;
-    }
-
-    @Override
-    public Object delegate() {
-        return type;
     }
 
     @Override
@@ -35,8 +30,13 @@ public class Type10 implements UnifiedType {
     }
 
     @Override
-    public String description() {
-        return type.description().value();
+    public List<UnifiedType> formParameters() {
+        return null;
+    }
+
+    @Override
+    public String type() {
+        return type.type();
     }
 
     @Override
@@ -46,10 +46,5 @@ public class Type10 implements UnifiedType {
             res.add(ex.value());
         }
         return res;
-    }
-
-    @Override
-    public String defaultValue() {
-        return type.defaultValue();
     }
 }

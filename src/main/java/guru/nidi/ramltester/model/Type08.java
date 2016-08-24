@@ -5,6 +5,8 @@ import org.raml.v2.api.model.v08.parameters.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+
 /**
  *
  */
@@ -24,6 +26,11 @@ public class Type08 implements UnifiedType {
     }
 
     @Override
+    public Object delegate() {
+        return parameter;
+    }
+
+    @Override
     public String name() {
         return parameter.name();
     }
@@ -33,4 +40,13 @@ public class Type08 implements UnifiedType {
         return parameter.description().value();
     }
 
+    @Override
+    public List<String> examples() {
+        return singletonList(parameter.example());
+    }
+
+    @Override
+    public String defaultValue() {
+        return parameter.defaultValue();
+    }
 }

@@ -15,11 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.UnifiedApi;
-import guru.nidi.ramltester.model.UnifiedMethod;
-import guru.nidi.ramltester.model.UnifiedResource;
-import guru.nidi.ramltester.model.UnifiedResponse;
-import org.raml.v2.api.model.v08.bodies.BodyLike;
+import guru.nidi.ramltester.model.*;
 
 import java.util.List;
 
@@ -45,7 +41,7 @@ public final class UsageBuilder {
         return actionUsage(usage, action).response(responseCode);
     }
 
-    static Usage.MimeType mimeTypeUsage(Usage usage, UnifiedMethod action, BodyLike mimeType) {
+    static Usage.MimeType mimeTypeUsage(Usage usage, UnifiedMethod action, UnifiedBody mimeType) {
         return actionUsage(usage, action).mimeType(mimeType.name());
     }
 
@@ -66,7 +62,7 @@ public final class UsageBuilder {
                 actionUsage(usage, action).initResponseCodes(codesOf(action.responses()));
                 actionUsage(usage, action).initRequestHeaders(namesOf(action.headers()));
                 if (action.body() != null) {
-                    for (final BodyLike mimeType : action.body()) {
+                    for (final UnifiedBody mimeType : action.body()) {
                         if (mimeType.formParameters() != null) {
                             UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(namesOf(mimeType.formParameters()));
                         }

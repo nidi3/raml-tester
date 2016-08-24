@@ -18,8 +18,8 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.bodies.BodyLike;
 import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
+import org.raml.v2.api.model.v08.parameters.Parameter;
 import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
 import org.raml.v2.api.model.v08.system.types.MarkdownString;
 
@@ -223,14 +223,16 @@ class RamlValidatorChecker {
             parameterDef(params, paramName);
         }
         if (has(Validation.EXAMPLE)) {
-            final ParameterChecker checker = new ParameterChecker(violations);
-            for (final UnifiedType param : paramEntries(params)) {
-                parameterValues(param, checker, new Message("parameter.condition", locator, param.name(), paramName));
+            if (raml instanceof Api08) {
+                final ParameterChecker08 checker = new ParameterChecker08(violations);
+                for (final UnifiedType param : paramEntries(params)) {
+                    parameterValues(param, checker, new Message("parameter.condition", locator, param.name(), paramName));
+                }
             }
         }
     }
 
-    public void formParameters(BodyLike mimeType) {
+    public void formParameters(UnifiedBody mimeType) {
         if (has(Validation.PARAMETER)) {
             if (!MediaType.valueOf(mimeType.name()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
                     !MediaType.valueOf(mimeType.name()).isCompatibleWith(MediaType.MULTIPART)) {
@@ -269,12 +271,12 @@ class RamlValidatorChecker {
         violations.addIf(param.maximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
     }
 
-    private void parameterValues(UnifiedType param, ParameterChecker checker, Message message) {
-        if (param.example() != null) {
-            checker.checkParameter(param, param.example(), message.withParam("example"));
+    private void parameterValues(UnifiedType param, ParameterChecker08 checker, Message message) {
+        if (!param.examples().isEmpty()) {
+            checker.checkParameter(param.<Parameter>delegate(), param.examples(), message.withParam("example"));
         }
         if (param.defaultValue() != null) {
-            checker.checkParameter(param, param.defaultValue(), message.withParam("default value"));
+            checker.checkParameter(param.<Parameter>delegate(), param.defaultValue(), message.withParam("default value"));
         }
     }
 
@@ -288,14 +290,15 @@ class RamlValidatorChecker {
         }
     }
 
-    public void exampleSchema(BodyLike mimeType) {
+    public void exampleSchema(UnifiedBody mimeType) {
         if (has(Validation.EXAMPLE)) {
-            final String schema = mimeType.schema().value();
-            final String example = mimeType.example().value();
+            final String schema = mimeType.type();
             final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.name()));
-            if (schema != null && example != null && validator != null) {
-                validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(raml, schema), violations,
-                        new Message("schema.example.mismatch", locator, example));
+            if (schema != null && validator != null) {
+                for (final String example : mimeType.examples()) {
+                    validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(raml, schema), violations,
+                            new Message("schema.example.mismatch", locator, example));
+                }
             }
         }
     }
