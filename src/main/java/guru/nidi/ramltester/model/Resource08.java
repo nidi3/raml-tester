@@ -40,7 +40,7 @@ public class Resource08 implements UnifiedResource {
 
     @Override
     public String description() {
-        return resource.description().value();
+        return resource.description() == null ? null : resource.description().value();
     }
 
     @Override

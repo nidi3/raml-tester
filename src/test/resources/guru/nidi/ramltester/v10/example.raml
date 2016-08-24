@@ -4,40 +4,35 @@ title: example
 baseUri: http://nidi.guru/raml/{version}
 version: v1
 schemas:
-  - string: !include string.json
+  String:
+    schema: !include string.json
 
 /empty:
 /nonEmpty:
   get:
-/nonEmpty:
   /sub:
     get:
 /ok:
   post:
     queryParameters:
       a:
-        minimum: 5
       b:
         type: boolean
-        pattern: a
-        minimum: 5
       c:
         type: integer
         minimum: 5
-        pattern: a
       d:
         type: file
       q:
         type: number
-        example: 10
+        example:
+          strict: false
+          value: 10
         default: 2
         minimum: 4
         maximum: 8
     body:
       application/json:
-        formParameters:
-          f:
-            type: file
         schema: |
           {"type":"string"}
         example: |
@@ -59,13 +54,15 @@ schemas:
     body:
       application/json:
         schema: string
-        example: 42
+        example:
+          strict: false
+          value: 42
     responses:
       200:
         body:
           application/json:
             schema: string
-            example: 42
+            example: "42"
       201:
         body:
           application/json:

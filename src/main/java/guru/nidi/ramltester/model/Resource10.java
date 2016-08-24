@@ -20,6 +20,8 @@ import org.raml.v2.api.model.v10.resources.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+
 /**
  *
  */
@@ -40,7 +42,7 @@ public class Resource10 implements UnifiedResource {
 
     @Override
     public String description() {
-        return resource.description().value();
+        return resource.description() == null ? null : resource.description().value();
     }
 
     @Override
@@ -80,7 +82,7 @@ public class Resource10 implements UnifiedResource {
 
     @Override
     public List<UnifiedType> baseUriParameters() {
-        return null;
+        return emptyList();
     }
 
     @Override

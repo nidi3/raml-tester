@@ -20,6 +20,8 @@ import org.raml.v2.api.model.v10.methods.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+
 /**
  *
  */
@@ -65,12 +67,12 @@ public class Method10 implements UnifiedMethod {
 
     @Override
     public String description() {
-        return method.description().value();
+        return method.description() == null ? null : method.description().value();
     }
 
     @Override
     public List<UnifiedType> baseUriParameters() {
-        return null;
+        return emptyList();
     }
 
     @Override

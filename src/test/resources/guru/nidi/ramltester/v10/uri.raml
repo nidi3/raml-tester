@@ -34,21 +34,10 @@ baseUriParameters:
         responses:
           203:
 /bu:
-  baseUriParameters:
-    host:
-      enum: ['bu-host']
   get:
     responses:
       200:
   /sub:
-    baseUriParameters:
-      host:
-        enum: ['sub-host']
-      root:
-        enum: ['sub-raml']
     get:
-      baseUriParameters:
-        host:
-          enum: ['sub-host-get']
       responses:
         200:

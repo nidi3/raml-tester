@@ -65,7 +65,7 @@ public class Method08 implements UnifiedMethod {
 
     @Override
     public String description() {
-        return method.description().value();
+        return method.description() == null ? null : method.description().value();
     }
 
     @Override

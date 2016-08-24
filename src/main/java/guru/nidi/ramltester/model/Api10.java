@@ -41,7 +41,7 @@ public class Api10 implements UnifiedApi {
 
     @Override
     public String baseUri() {
-        return api.baseUri().value();
+        return api.baseUri() == null ? null : api.baseUri().value();
     }
 
     @Override

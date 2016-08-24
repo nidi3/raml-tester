@@ -51,7 +51,7 @@ public class Type10 implements UnifiedType {
 
     @Override
     public String description() {
-        return type.description().value();
+        return type.description() == null ? null : type.description().value();
     }
 
     @Override
