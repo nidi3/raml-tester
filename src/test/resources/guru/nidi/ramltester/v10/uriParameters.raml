@@ -1,0 +1,41 @@
+#%RAML 1.0
+---
+title: example
+baseUri: http://nidi.guru/{path}
+version: v1
+baseUriParameters:
+  path:
+  invalid:
+  version:
+
+/bla/{param}:
+  baseUriParameters:
+    path:
+    subInvalid:
+  uriParameters:
+    param:
+    uriInvalid:
+    version:
+  get:
+    queryParameters:
+      ok:
+      Nok:
+    headers:
+      ok:
+      Hok:
+    baseUriParameters:
+      actioninvalid:
+    body:
+      application/x-www-form-urlencoded:
+        formParameters:
+          Form:
+    responses:
+      200:
+        headers:
+          ok:
+          Rok:
+  /subA/{p}:
+    uriParameters:
+      param:
+      p:
+      subinvalid:

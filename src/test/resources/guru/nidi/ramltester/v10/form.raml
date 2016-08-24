@@ -1,0 +1,51 @@
+#%RAML 1.0
+---
+title: form
+baseUri: http://nidi.guru/raml/{version}
+version: v1
+mediaType: application/default
+schemas:
+  - string: !include string.json
+
+/form:
+  post:
+    body:
+      application/x-www-form-urlencoded:
+        formParameters:
+          param:
+    responses:
+      200:
+
+  /parameterless:
+    post:
+      body:
+        application/x-www-form-urlencoded:
+      responses:
+        200:
+
+  /schema:
+    post:
+      body:
+        application/x-www-form-urlencoded:
+          formParameters:
+          schema: string
+      responses:
+        200:
+
+  /multi:
+    post:
+      body:
+        multipart/form-data:
+          formParameters:
+            param:
+            file:
+              type: file
+      responses:
+        200:
+/noForm:
+  post:
+    body:
+      application/json:
+        schema: string
+    responses:
+      200:

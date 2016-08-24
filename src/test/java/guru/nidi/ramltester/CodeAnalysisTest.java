@@ -31,6 +31,7 @@ import guru.nidi.codeassert.pmd.*;
 import guru.nidi.ramltester.core.ParameterChecker08Test;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.MediaTypeTest;
+import guru.nidi.ramltester.v08.UriTest;
 import net.sourceforge.pmd.RulePriority;
 import org.junit.Ignore;
 import org.junit.Test;

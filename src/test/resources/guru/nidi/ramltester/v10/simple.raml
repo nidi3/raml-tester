@@ -1,0 +1,115 @@
+#%RAML 1.0
+---
+title: simple
+baseUri: http://nidi.guru/raml/{version}
+version: v1
+mediaType: application/default
+schemas:
+  - string: !include string.json
+  - invalid: xxx
+/:
+  get:
+    responses:
+      200:
+/d:
+  get:
+    responses:
+      200:
+/data:
+  get:
+    responses:
+      200:
+        body:
+          abc/xyz+json:
+            schema: |
+              {"type":"string"}
+            example: !include 42.json
+/schema:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            schema: |
+              {"type":"string"}
+      201:
+        body:
+          application/json:
+            schema: !include string.json
+      202:
+        body:
+          application/json:
+            schema: string
+      203:
+        body:
+          application/json:
+            schema: undefined
+      204:
+        body:
+          application/json:
+            schema: |
+              {"$ref": "string.json"}
+      205:
+        body:
+          application/json:
+            schema: !include sub2/ref.json
+      206:
+        body:
+          application/xml:
+            schema: !include string.xsd
+      207:
+        body:
+          application/xml:
+            schema: !include ref.xsd
+      208:
+        body:
+          text/xml:
+            schema: |
+              <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+                         xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                  <xs:element name="api-request">
+                      <xs:complexType>
+                          <xs:sequence>
+                              <xs:element type="xs:string" name="input"/>
+                          </xs:sequence>
+                      </xs:complexType>
+                  </xs:element>
+              </xs:schema>
+      209:
+        body:
+          text/bla:
+            schema: text/bla
+      210:
+        body:
+          application/json:
+            schema: invalid
+/mediaType:
+  get:
+    responses:
+      200:
+        body:
+          schema: string
+      201:
+        body:
+          application/json:
+            schema: string
+          abc/xyz+json:
+            schema: string
+          text/xml:
+          text/plain:
+      202:
+        body:
+          "*/*":
+          text/*:
+          text/xml:
+          text/xml;a=b:
+  post:
+    body:
+      application/json:
+        schema: string
+      abc/xyz+json:
+        schema: string
+    responses:
+      201:
+        body:
+          application/json:

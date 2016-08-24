@@ -1,0 +1,28 @@
+#%RAML 1.0
+---
+title: description
+baseUri: http://nidi.guru/{path}
+version: v1
+baseUriParameters:
+  path:
+
+/bla/{param}:
+  baseUriParameters:
+    path:
+  uriParameters:
+    param:
+  get:
+    queryParameters:
+      ok:
+    headers:
+      ok:
+    baseUriParameters:
+      actioninvalid:
+    body:
+      application/x-www-form-urlencoded:
+        formParameters:
+          Form:
+    responses:
+      200:
+        headers:
+          ok:

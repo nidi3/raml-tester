@@ -1,0 +1,9 @@
+#%RAML 1.0
+---
+title: load
+baseUri: http://{host}/{root}/{version}/{undefined}
+version: v1
+schemas:
+  - string: !include http://localhost:8085/deliver/string.json
+  - string: !include file://./src/test/resources/guru/nidi/ramltester/string.json
+  - string: !include classpath://guru/nidi/ramltester/string.json

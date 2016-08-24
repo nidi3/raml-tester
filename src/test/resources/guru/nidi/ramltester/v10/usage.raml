@@ -1,0 +1,29 @@
+#%RAML 1.0
+---
+title: usage
+baseUri: http://nidi.guru/raml/{version}
+version: v1
+
+/data:
+  post:
+    body:
+      application/x-www-form-urlencoded:
+        formParameters:
+          uuFormParam:
+  get:
+    queryParameters:
+      uuQuery:
+    headers:
+      uuReqHeader:
+    responses:
+      201:
+      200:
+        headers:
+          uuResHeader:
+        body:
+          application/json:
+            schema: |
+              {"type":"string"}
+/uuWithoutAction:
+/uuWithAction:
+  get:

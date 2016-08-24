@@ -1,0 +1,59 @@
+#%RAML 1.0
+---
+title: type
+baseUri: http://nidi.guru/raml/{version}
+version: v1
+
+/type:
+  get:
+    queryParameters:
+      boolean:
+        type: boolean
+      integer:
+        type: integer
+      number:
+        type: number
+      integerLimit:
+        type: integer
+        minimum: -5
+        maximum: 666
+      numberLimit:
+        type: number
+        minimum: 5e-2
+        maximum: 666.6
+      string:
+        type: string
+        minLength: 2
+        maxLength: 5
+      date:
+        type: date
+      enum:
+        enum: ['a','b']
+      pattern1:
+        pattern: \d{2}/[a-y]
+      pattern2:
+        pattern: /\d{2}\/[a-y]/
+      pattern3:
+        pattern: /\d{2}\/[a-y]/i
+      pattern4:
+        pattern: '/\d{2}\/[a-y]/i'
+      pattern5:
+        pattern: "/\\d{2}\\/[a-y]/i"
+#      multi:
+#        - type: integer
+#          minimum: 5
+#        - enum: ['a','b']
+    responses:
+      200:
+        body:
+          '*/*':
+/empty:
+  post:
+    responses:
+      200:
+        body:
+          application/json:
+            schema: !include string.json
+      201:
+        body:
+      202:
