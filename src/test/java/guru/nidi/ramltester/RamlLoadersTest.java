@@ -29,27 +29,27 @@ import static org.junit.Assert.assertEquals;
 public class RamlLoadersTest {
     @Test
     public void fileString() {
-        assertTitle(RamlLoaders.fromFile("src/test/resources/guru/nidi/ramltester"), "simple.raml", "simple");
+        assertTitle(RamlLoaders.fromFile("src/test/resources/guru/nidi/ramltester/v08"), "simple.raml", "simple");
     }
 
     @Test
     public void file() {
-        assertTitle(RamlLoaders.fromFile(new File("src/test/resources/guru/nidi/ramltester")), "simple.raml", "simple");
+        assertTitle(RamlLoaders.fromFile(new File("src/test/resources/guru/nidi/ramltester/v08")), "simple.raml", "simple");
     }
 
     @Test
     public void baseClasspath() {
-        assertTitle(RamlLoaders.fromClasspath(), "guru/nidi/ramltester/simple.raml", "simple");
+        assertTitle(RamlLoaders.fromClasspath(), "guru/nidi/ramltester/v08/simple.raml", "simple");
     }
 
     @Test
     public void stringClasspath() {
-        assertTitle(RamlLoaders.fromClasspath("guru/nidi/ramltester"), "simple.raml", "simple");
+        assertTitle(RamlLoaders.fromClasspath("guru/nidi/ramltester/v08"), "simple.raml", "simple");
     }
 
     @Test
     public void classClasspath() {
-        assertTitle(RamlLoaders.fromClasspath(RamlLoaders.class), "simple.raml", "simple");
+        assertTitle(RamlLoaders.fromClasspath(RamlLoaders.class), "v08/simple.raml", "simple");
     }
 
     @Test
@@ -66,35 +66,35 @@ public class RamlLoadersTest {
     @Test
     public void classpathAndFileString() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromFile("src/test/resources/guru/nidi");
-        assertTitle(loaders, "simple.raml", "simple");
-        assertTitle(loaders, "ramltester/simple.raml", "simple");
+        assertTitle(loaders, "v08/simple.raml", "simple");
+        assertTitle(loaders, "ramltester/v08/simple.raml", "simple");
     }
 
     @Test
     public void classpathAndFile() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromFile(new File("src/test/resources/guru/nidi"));
-        assertTitle(loaders, "simple.raml", "simple");
-        assertTitle(loaders, "ramltester/simple.raml", "simple");
+        assertTitle(loaders, "v08/simple.raml", "simple");
+        assertTitle(loaders, "ramltester/v08/simple.raml", "simple");
     }
 
     @Test
     public void classpathAndStringClasspath() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromClasspath("guru/nidi");
-        assertTitle(loaders, "simple.raml", "simple");
-        assertTitle(loaders, "ramltester/simple.raml", "simple");
+        assertTitle(loaders, "v08/simple.raml", "simple");
+        assertTitle(loaders, "ramltester/v08/simple.raml", "simple");
     }
 
     @Test
     public void classpathAndClasspath() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromClasspath(Base.class);
-        assertTitle(loaders, "simple.raml", "simple");
-        assertTitle(loaders, "ramltester/simple.raml", "simple");
+        assertTitle(loaders, "v08/simple.raml", "simple");
+        assertTitle(loaders, "ramltester/v08/simple.raml", "simple");
     }
 
     @Test
     public void classpathAndUrl() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromUrl("https://raw.githubusercontent.com/nidi3/raml-tester/master/src/test/resources/guru/nidi");
-        assertTitle(loaders, "simple.raml", "simple");
+        assertTitle(loaders, "v08/simple.raml", "simple");
         assertTitle(loaders, "ramltester/simple.raml", "simple");
     }
 
