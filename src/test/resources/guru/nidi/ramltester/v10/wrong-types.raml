@@ -9,17 +9,22 @@ schemas:
 /empty:
 /nonEmpty:
   get:
+/nonEmpty:
   /sub:
     get:
 /ok:
   post:
     queryParameters:
       a:
+        minimum: 5
       b:
         type: boolean
+        pattern: a
+        minimum: 5
       c:
         type: integer
         minimum: 5
+        pattern: a
       d:
         type: file
       q:

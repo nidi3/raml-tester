@@ -18,14 +18,17 @@ package guru.nidi.ramltester.v10;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolationException;
+import guru.nidi.ramltester.core.RamlViolations;
 import org.junit.Test;
 
 import java.util.Iterator;
+import java.util.List;
 
 import static guru.nidi.ramltester.core.Validation.*;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -35,9 +38,47 @@ public class ValidatorTest extends HighlevelTestBase {
     private static final RamlDefinition
             example = RAML_LOADERS.load("example.raml"),
             uriParams = RAML_LOADERS.load("uriParameters.raml"),
-            description = RAML_LOADERS.load("description.raml"),
-            noDocTitle = RAML_LOADERS.load("description-no-title.raml"),
-            noDocContent = RAML_LOADERS.load("description-no-content.raml");
+            description = RAML_LOADERS.load("description.raml");
+
+    @Test
+    public void wrongTypeConstraints() {
+        //TODO remove check, done by parser now
+        try {
+            RAML_LOADERS.load("wrong-types.raml");
+            fail("Invalid RAML");
+        } catch (RamlViolationException e) {
+            final List<String> violations = e.getReport().getValidationViolations().asList();
+            assertThat(violations.get(0),containsString("Duplicated key '/nonEmpty'"));
+            assertThat(violations.get(1),containsString("Unexpected key 'minimum'"));
+            assertThat(violations.get(2),containsString("Unexpected key 'pattern'"));
+            assertThat(violations.get(3),containsString("Unexpected key 'minimum'"));
+            assertThat(violations.get(4),containsString("Unexpected key 'pattern'"));
+        }
+    }
+
+    @Test
+    public void missingDocTitle() {
+        //TODO remove check, done by parser now
+        try {
+            RAML_LOADERS.load("description-no-title.raml");
+            fail("Invalid RAML");
+        } catch (RamlViolationException e) {
+            final List<String> violations = e.getReport().getValidationViolations().asList();
+            assertThat(violations.get(0),containsString("Missing required field \"title\""));
+        }
+    }
+
+    @Test
+    public void missingDocContent() {
+        //TODO remove check, done by parser now
+        try {
+            RAML_LOADERS.load("description-no-content.raml");
+            fail("Invalid RAML");
+        } catch (RamlViolationException e) {
+            final List<String> violations = e.getReport().getValidationViolations().asList();
+            assertThat(violations.get(0),containsString("Missing required field \"content\""));
+        }
+    }
 
     @Test
     public void example() {
@@ -129,21 +170,6 @@ public class ValidatorTest extends HighlevelTestBase {
         assertEquals("header 'ok' in action(GET /bla/{param}) response(200) has no description", it.next());
     }
 
-    @Test
-    public void missingDocTitle() {
-        final RamlReport report = noDocTitle.validator().withChecks(DESCRIPTION).validate();
-        assertEquals(1, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("Root definition has documentation with missing title", it.next());
-    }
-
-    @Test
-    public void missingDocContent() {
-        final RamlReport report = noDocContent.validator().withChecks(DESCRIPTION).validate();
-        assertEquals(1, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("Root definition has documentation with missing content", it.next());
-    }
 
     @Test
     public void empty() {
