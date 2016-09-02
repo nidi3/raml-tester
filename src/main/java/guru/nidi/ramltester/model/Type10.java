@@ -80,7 +80,7 @@ public class Type10 implements UnifiedType {
     @Override
     public void validate(Object payload, RamlViolations violations, Message message) {
         for (final ValidationResult res : type.validate((String) payload)) {
-            violations.add(message.withParam(res.getMessage()));
+            violations.add(message.withInnerParam(new Message("value10", payload, res.getMessage())));
         }
     }
 

@@ -202,7 +202,7 @@ public class RamlChecker {
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, UnifiedMethod action) {
 //        final ParameterChecker08 paramChecker = new ParameterChecker08(requestViolations).acceptUndefined();
-        final TypeValidator validator = new TypeValidator(requestViolations).acceptUndefined();
+        final TypeValidator validator = new TypeValidator(requestViolations).acceptUndefined().ignoreRequired();
         final List<UnifiedType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
 //            paramChecker.checkListParameters(UnifiedModel.<Parameter>typeDelegates(baseUriParams), hostMatch.getVariables(), new Message("baseUriParam", locator));
 //            paramChecker.checkListParameters(UnifiedModel.<Parameter>typeDelegates(baseUriParams), pathMatch.getVariables(), new Message("baseUriParam", locator));

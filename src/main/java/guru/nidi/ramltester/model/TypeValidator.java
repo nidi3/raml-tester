@@ -19,39 +19,45 @@ public class TypeValidator {
     private final boolean acceptWildcard;
     private final boolean ignoreX;
     private final boolean caseSensitive;
+    private final boolean ignoreRequired;
     private final Set<String> predefined;
 
-    TypeValidator(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, boolean caseSensitive, Set<String> predefined) {
+    TypeValidator(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, boolean caseSensitive, boolean ignoreRequired, Set<String> predefined) {
         this.violations = violations;
         this.acceptUndefined = acceptUndefined;
         this.acceptWildcard = acceptWildcard;
         this.ignoreX = ignoreX;
         this.caseSensitive = caseSensitive;
+        this.ignoreRequired = ignoreRequired;
         this.predefined = predefined;
     }
 
     public TypeValidator(RamlViolations violations) {
-        this(violations, false, false, false, true, Collections.<String>emptySet());
+        this(violations, false, false, false, true, false, Collections.<String>emptySet());
     }
 
     public TypeValidator acceptUndefined() {
-        return new TypeValidator(violations, true, acceptWildcard, ignoreX, caseSensitive, predefined);
+        return new TypeValidator(violations, true, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
     }
 
     public TypeValidator acceptWildcard() {
-        return new TypeValidator(violations, acceptUndefined, true, ignoreX, caseSensitive, predefined);
+        return new TypeValidator(violations, acceptUndefined, true, ignoreX, caseSensitive, ignoreRequired, predefined);
     }
 
     public TypeValidator ignoreX(boolean ignoreX) {
-        return new TypeValidator(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
+        return new TypeValidator(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
     }
 
     public TypeValidator caseSensitive(boolean caseSensitive) {
-        return new TypeValidator(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
+        return new TypeValidator(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
+    }
+
+    public TypeValidator ignoreRequired() {
+        return new TypeValidator(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, true, predefined);
     }
 
     public TypeValidator predefined(Set<String> predefined) {
-        return new TypeValidator(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, predefined);
+        return new TypeValidator(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
     }
 
     public void validate(Object payload, Message message) {
@@ -79,7 +85,7 @@ public class TypeValidator {
         for (final UnifiedType parameter : params) {
             final Message namedMsg = message.withParam(parameter.name());
 //            for (final AbstractParam parameter : entry.getValue()) {
-            violations.addIf(parameter.required() && !found.contains(parameter.name()), namedMsg.withMessageParam("required.missing"));
+            violations.addIf(parameter.required() && !ignoreRequired && !found.contains(parameter.name()), namedMsg.withMessageParam("required.missing"));
 //            }
         }
         return found;
