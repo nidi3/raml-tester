@@ -15,8 +15,12 @@
  */
 package guru.nidi.ramltester.model;
 
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.util.Message;
+import org.raml.v2.api.model.common.ValidationResult;
 import org.raml.v2.api.model.v10.datamodel.ExampleSpec;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
+import org.raml.v2.internal.impl.v10.type.TypeId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +41,6 @@ public class Type10 implements UnifiedType {
             res.add(new Type10(td));
         }
         return res;
-    }
-
-    @Override
-    public Object delegate() {
-        return type;
     }
 
     @Override
@@ -67,4 +66,22 @@ public class Type10 implements UnifiedType {
     public String defaultValue() {
         return type.defaultValue();
     }
+
+    @Override
+    public boolean required() {
+        return type.required();
+    }
+
+    @Override
+    public boolean repeat() {
+        return type.name().endsWith("[]") || TypeId.ARRAY.getType().equals(type.type());
+    }
+
+    @Override
+    public void validate(Object payload, RamlViolations violations, Message message) {
+        for (final ValidationResult res : type.validate((String) payload)) {
+            violations.add(message.withParam(res.getMessage()));
+        }
+    }
+
 }

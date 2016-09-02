@@ -15,6 +15,8 @@
  */
 package guru.nidi.ramltester.model;
 
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.util.Message;
 import org.raml.v2.api.model.v08.parameters.Parameter;
 
 import java.util.ArrayList;
@@ -41,11 +43,6 @@ public class Type08 implements UnifiedType {
     }
 
     @Override
-    public Object delegate() {
-        return parameter;
-    }
-
-    @Override
     public String name() {
         return parameter.name();
     }
@@ -63,5 +60,20 @@ public class Type08 implements UnifiedType {
     @Override
     public String defaultValue() {
         return parameter.defaultValue();
+    }
+
+    @Override
+    public boolean required() {
+        return parameter.required();
+    }
+
+    @Override
+    public boolean repeat() {
+        return parameter.repeat() != null && parameter.repeat();
+    }
+
+    @Override
+    public void validate(Object payload, RamlViolations violations, Message message) {
+        new ParameterChecker08(violations).checkParameter(parameter, payload, message);
     }
 }

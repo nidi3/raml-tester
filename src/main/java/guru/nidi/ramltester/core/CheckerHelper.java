@@ -18,13 +18,12 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.parameters.Parameter;
 
 import java.io.Reader;
 import java.util.*;
 
-import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 import static guru.nidi.ramltester.model.UnifiedModel.typeByName;
+import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
 /**
  *
@@ -171,32 +170,5 @@ final class CheckerHelper {
         res.addAll(list2);
         return res;
     }
-
-    public static List<String> paramNamesOf(List<Parameter> params) {
-        final List<String> res = new ArrayList<>();
-        for (final Parameter param : params) {
-            res.add(param.name());
-        }
-        return res;
-    }
-
-    public static Parameter paramByName(List<Parameter> parameters, String name) {
-        final List<Parameter> res = paramsByName(parameters, name);
-        if (res.size() > 1) {
-            throw new IllegalArgumentException("Expected only one parameter with given name " + name);
-        }
-        return res.isEmpty() ? null : res.get(0);
-    }
-
-    public static List<Parameter> paramsByName(List<Parameter> parameters, String name) {
-        final List<Parameter> res = new ArrayList<>();
-        for (final Parameter parameter : parameters) {
-            if (parameter.name().equals(name)) {
-                res.add(parameter);
-            }
-        }
-        return res;
-    }
-
 
 }

@@ -67,7 +67,7 @@ public class Resource10 implements UnifiedResource {
 
     @Override
     public UnifiedResource parentResource() {
-        return new Resource10(resource.parentResource());
+        return resource.parentResource() == null ? null : new Resource10(resource.parentResource());
     }
 
     @Override

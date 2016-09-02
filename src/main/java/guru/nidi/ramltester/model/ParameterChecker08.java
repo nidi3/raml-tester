@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
+package guru.nidi.ramltester.model;
 
-import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.core.RamlCheckerException;
+import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.util.FileValue;
 import guru.nidi.ramltester.util.Message;
 import org.raml.v2.api.model.v08.parameters.IntegerTypeDeclaration;
@@ -31,8 +32,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static guru.nidi.ramltester.core.CheckerHelper.paramNamesOf;
-import static guru.nidi.ramltester.core.CheckerHelper.paramsByName;
+//import static guru.nidi.ramltester.core.CheckerHelper.paramNamesOf;
+//import static guru.nidi.ramltester.core.CheckerHelper.paramsByName;
 
 /**
  *
@@ -277,4 +278,23 @@ class ParameterChecker08 {
         violations.addIf(param.maximum() != null && param.maximum().compareTo(value) < 0,
                 message.withMessageParam("value.tooBig", param.maximum()));
     }
+
+    private List<String> paramNamesOf(List<Parameter> params) {
+        final List<String> res = new ArrayList<>();
+        for (final Parameter param : params) {
+            res.add(param.name());
+        }
+        return res;
+    }
+
+    private List<Parameter> paramsByName(List<Parameter> parameters, String name) {
+        final List<Parameter> res = new ArrayList<>();
+        for (final Parameter parameter : parameters) {
+            if (parameter.name().equals(name)) {
+                res.add(parameter);
+            }
+        }
+        return res;
+    }
+
 }

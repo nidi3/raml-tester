@@ -17,6 +17,7 @@ package guru.nidi.ramltester.model;
 
 import org.raml.v2.api.model.v10.datamodel.ExampleSpec;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
+import org.raml.v2.internal.impl.v10.type.TypeId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public class Body10 implements UnifiedBody {
 
     @Override
     public String type() {
-        return type.type();
+        return TypeId.ANY.getType().equals(type.type()) ? null : type.type();
     }
 
     @Override

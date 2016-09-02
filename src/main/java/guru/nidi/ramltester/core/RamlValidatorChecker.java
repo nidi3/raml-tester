@@ -19,7 +19,6 @@ import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
-import org.raml.v2.api.model.v08.parameters.Parameter;
 import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
 
 import java.util.Arrays;
@@ -223,11 +222,9 @@ class RamlValidatorChecker {
             parameterDef(params, paramName);
         }
         if (has(Validation.EXAMPLE)) {
-            if (raml instanceof Api08) {
-                final ParameterChecker08 checker = new ParameterChecker08(violations);
-                for (final UnifiedType param : paramEntries(params)) {
-                    parameterValues(param, checker, new Message("parameter.condition", locator, param.name(), paramName));
-                }
+//            final ParameterChecker08 checker = new ParameterChecker08(violations);
+            for (final UnifiedType param : paramEntries(params)) {
+                parameterValues(param, new Message("parameter.condition", locator, param.name(), paramName));
             }
         }
     }
@@ -271,12 +268,14 @@ class RamlValidatorChecker {
         violations.addIf(param.maximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
     }
 
-    private void parameterValues(UnifiedType param, ParameterChecker08 checker, Message message) {
+    private void parameterValues(UnifiedType param,  Message message) {
         if (!param.examples().isEmpty()) {
-            checker.checkParameter(param.<Parameter>delegate(), param.examples(), message.withParam("example"));
+            param.validate(param.examples(), violations, message.withParam("example"));
+//            checker.checkParameter(param.<Parameter>delegate(), param.examples(), message.withParam("example"));
         }
         if (param.defaultValue() != null) {
-            checker.checkParameter(param.<Parameter>delegate(), param.defaultValue(), message.withParam("default value"));
+            param.validate(param.defaultValue(), violations, message.withParam("default value"));
+//            checker.checkParameter(param.<Parameter>delegate(), param.defaultValue(), message.withParam("default value"));
         }
     }
 

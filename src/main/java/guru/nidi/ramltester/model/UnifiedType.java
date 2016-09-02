@@ -15,14 +15,15 @@
  */
 package guru.nidi.ramltester.model;
 
+import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.util.Message;
+
 import java.util.List;
 
 /**
  *
  */
 public interface UnifiedType {
-    <T> T delegate();
-
     String name();
 
     String description();
@@ -30,4 +31,10 @@ public interface UnifiedType {
     List<String> examples();
 
     String defaultValue();
+
+    boolean required();
+
+    boolean repeat();
+
+    void validate(Object payload, RamlViolations violations, Message message);
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
+package guru.nidi.ramltester.model;
 
 
 import javax.script.Invocable;

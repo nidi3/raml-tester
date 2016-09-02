@@ -6,7 +6,12 @@ version: v1
 schemas:
   String:
     schema: !include string.json
-
+  User:
+    type: object
+    properties:
+      firstname: string
+      lastname:  string
+      age:       number
 /empty:
 /nonEmpty:
   get:
@@ -31,6 +36,12 @@ schemas:
         default: 2
         minimum: 4
         maximum: 8
+      u:
+        type: User
+        example:
+          strict: false
+          value: |
+            {"name":"n"}
     body:
       application/json:
         schema: |

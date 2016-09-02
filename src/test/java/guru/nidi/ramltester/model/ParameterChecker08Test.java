@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
+package guru.nidi.ramltester.model;
 
-import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.core.CoreTestBase;
+import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;

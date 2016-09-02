@@ -25,14 +25,6 @@ public class UnifiedModel {
     private UnifiedModel() {
     }
 
-    public static <T> List<T> typeDelegates(List<UnifiedType> parameters) {
-        final List<T> res = new ArrayList<>();
-        for (final UnifiedType p : parameters) {
-            res.add((T) p.delegate());
-        }
-        return res;
-    }
-
     public static UnifiedResponse responseByCode(List<UnifiedResponse> responses, String code) {
         for (final UnifiedResponse response : responses) {
             if (response.code().equals(code)) {
@@ -68,6 +60,16 @@ public class UnifiedModel {
         return res;
     }
 
+    public static List<UnifiedType> typeNamesOf(List<UnifiedType> parameters, String name) {
+        final List<UnifiedType> res = new ArrayList<>();
+        for (final UnifiedType parameter : parameters) {
+            if (parameter.name().equals(name)) {
+                res.add(parameter);
+            }
+        }
+        return res;
+    }
+
     public static List<String> codesOf(List<UnifiedResponse> params) {
         final List<String> res = new ArrayList<>();
         for (final UnifiedResponse param : params) {
@@ -75,4 +77,5 @@ public class UnifiedModel {
         }
         return res;
     }
+
 }
