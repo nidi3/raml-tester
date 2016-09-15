@@ -128,6 +128,10 @@ public class RamlDefinition {
         return new RestAssuredClient(createTester());
     }
 
+    public guru.nidi.ramltester.restassured3.RestAssuredClient createRestAssured3() {
+        return new guru.nidi.ramltester.restassured3.RestAssuredClient(createTester());
+    }
+
     public CheckingWebTarget createWebTarget(WebTarget target) {
         return new CheckingWebTarget(createTester(), target);
     }

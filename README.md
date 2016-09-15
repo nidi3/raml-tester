@@ -192,6 +192,7 @@ public class RestAssuredTest {
 }
 ```
 [//]: # (end)
+If you are using RestAssured 3.0, call `api.createRestAssured3()`.
 
 Use as a standalone proxy
 -------------------------

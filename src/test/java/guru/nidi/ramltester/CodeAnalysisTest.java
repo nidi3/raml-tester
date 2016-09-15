@@ -45,15 +45,16 @@ public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
         class GuruNidiRamltester extends DependencyRuler {
-            DependencyRule $self, core, httpcomponents, restassured, junit, validator, model, servlet, spring, jaxrs, util;
+            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit, validator, model, servlet, spring, jaxrs, util;
 
             public void defineRules() {
-                $self.mayUse(model, core, servlet, httpcomponents, restassured, spring, jaxrs, validator, junit, util);
+                $self.mayUse(model, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
                 core.mayUse(model, util);
                 util.mayUse(model);
                 servlet.mayUse(model, util, core);
                 httpcomponents.mayUse(model, util, core);
                 restassured.mayUse(model, core);
+                restassured3.mayUse(model, core);
                 junit.mayUse(util, core);
                 validator.mayUse(util, core);
                 spring.mayUse(model, util, core, servlet);
@@ -62,7 +63,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
         }
 //TODO dependencies to externals (spring, httpcomponents etc.)
         final DependencyRules rules = DependencyRules.denyAll()
-                .withExternals("java*", "org*", "com*", "guru.nidi.loader*")
+                .withExternals("java*", "org*", "com*", "io*", "guru.nidi.loader*")
                 .withRelativeRules(new GuruNidiRamltester());
         assertThat(modelResult(), packagesMatchExactly(rules));
     }
@@ -153,7 +154,9 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.everywhere().ignore("public boolean equals(Object o) {"))
                 .because("Similar but not same",
                         In.locs("*Request", "*Response").ignoreAll(),
-                        In.clazz(RamlHttpClient.class).ignoreAll());
+                        In.clazz(RamlHttpClient.class).ignoreAll())
+                .because("Imports are different",
+                        In.locs("RestAssuredRamlMessage", "RestAssuredClient", "RamlValidationFilter").ignoreAll());
         return new CpdAnalyzer(AnalyzerConfig.maven().main(), 35, collector).analyze();
     }
 }
