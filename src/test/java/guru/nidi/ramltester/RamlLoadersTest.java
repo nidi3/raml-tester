@@ -58,12 +58,6 @@ public class RamlLoadersTest {
     }
 
     @Test
-    public void github() {
-        assumeEnv("USER", "nidi");
-        assertTitle(RamlLoaders.fromGithub("nidi3", "raml-tester"), "src/test/resources/guru/nidi/ramltester/simple.raml", "simple");
-    }
-
-    @Test
     public void classpathAndFileString() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromFile("src/test/resources/guru/nidi");
         assertTitle(loaders, "simple.raml", "simple");
@@ -94,14 +88,6 @@ public class RamlLoadersTest {
     @Test
     public void classpathAndUrl() {
         final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromUrl("https://raw.githubusercontent.com/nidi3/raml-tester/master/src/test/resources/guru/nidi");
-        assertTitle(loaders, "simple.raml", "simple");
-        assertTitle(loaders, "ramltester/simple.raml", "simple");
-    }
-
-    @Test
-    public void classpathAndGithub() {
-        assumeEnv("USER", "nidi");
-        final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromGithub("nidi3", "raml-tester/src/test/resources/guru/nidi");
         assertTitle(loaders, "simple.raml", "simple");
         assertTitle(loaders, "ramltester/simple.raml", "simple");
     }
