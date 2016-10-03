@@ -27,13 +27,20 @@ import java.util.List;
  */
 public class RamlViolations implements Iterable<String> {
     private final List<String> violations;
+    private final List<Object> violationObjects;
 
     public RamlViolations() {
-        this.violations = new ArrayList<>();
+        violations = new ArrayList<>();
+        violationObjects = new ArrayList<>();
     }
 
     public void add(Message message) {
+        add(message, null);
+    }
+
+    public void add(Message message, Object messageObject) {
         violations.add(message.toString());
+        violationObjects.add(messageObject);
     }
 
     void add(String key, Object... params) {
@@ -52,6 +59,7 @@ public class RamlViolations implements Iterable<String> {
 
     void addAll(RamlViolations violations) {
         this.violations.addAll(violations.violations);
+        this.violationObjects.addAll(violations.violationObjects);
     }
 
     public int size() {
@@ -64,6 +72,14 @@ public class RamlViolations implements Iterable<String> {
 
     public List<String> asList() {
         return Collections.unmodifiableList(violations);
+    }
+
+    public List<RamlViolationMessage> asMessages() {
+        final List<RamlViolationMessage> res = new ArrayList<>();
+        for (int i = 0; i < violations.size(); i++) {
+            res.add(new RamlViolationMessage(violations.get(i), violationObjects.get(i)));
+        }
+        return res;
     }
 
     @Override
