@@ -16,10 +16,7 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.loader.Loader;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.core.ReportAggregator;
-import guru.nidi.ramltester.core.SchemaValidator;
+import guru.nidi.ramltester.core.*;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
 import guru.nidi.ramltester.util.MediaType;
@@ -88,18 +85,39 @@ public class HighlevelTestBase {
         assertOneResponseViolationThat(test(raml, request, response), matcher);
     }
 
+    protected void assertOneResponseViolationThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
+        assertOneResponseViolationThat(test(raml, request, response), messageMatcher, messageObjectMatcher);
+    }
+
     protected void assertOneResponseViolationThat(RamlReport report, Matcher<String> matcher) {
         assertNoViolations(report.getRequestViolations());
         assertOneViolationThat(report.getResponseViolations(), matcher);
+    }
+
+    protected void assertOneResponseViolationThat(RamlReport report, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
+        assertNoViolations(report.getRequestViolations());
+        assertOneViolationThat(report.getResponseViolations(), messageMatcher, messageObjectMatcher);
     }
 
     protected void assertResponseViolationsThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
         assertResponseViolationsThat(test(raml, request, response), matcher);
     }
 
+    protected void assertResponseViolationsThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
+        assertResponseViolationsThat(test(raml, request, response), messageMatcher, messageObjectMatcher);
+    }
+
     protected void assertResponseViolationsThat(RamlReport report, Matcher<String> matcher) {
         assertNoViolations(report.getRequestViolations());
         assertViolationsThat(report.getResponseViolations(), matcher);
+    }
+
+    protected void assertResponseViolationsThat(RamlReport report, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
+        assertNoViolations(report.getRequestViolations());
+        for (final RamlViolationMessage message : report.getResponseViolations().asMessages()) {
+            assertThat(message.getMessage(), messageMatcher);
+            assertThat(message.getMessageObject(), messageObjectMatcher);
+        }
     }
 
     protected RamlReport test(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
@@ -119,6 +137,13 @@ public class HighlevelTestBase {
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
         assertThat("Expected exactly one violation", violations.size(), equalTo(1));
         assertThat(violations.iterator().next(), matcher);
+    }
+
+    protected void assertOneViolationThat(RamlViolations violations, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
+        assertThat("Expected exactly one violation", violations.size(), equalTo(1));
+        final RamlViolationMessage message = violations.asMessages().get(0);
+        assertThat(message.getMessage(), messageMatcher);
+        assertThat(message.getMessageObject(), messageObjectMatcher);
     }
 
     @SafeVarargs

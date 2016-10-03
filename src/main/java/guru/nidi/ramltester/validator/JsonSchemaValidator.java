@@ -86,7 +86,7 @@ public class JsonSchemaValidator implements SchemaValidator {
                 for (final ProcessingMessage reportLine : report) {
                     msg += reportLine.toString() + "\n";
                 }
-                violations.add(message.withParam(msg));
+                violations.add(message.withParam(msg), report);
             }
         } catch (ProcessingException | IOException e) {
             violations.add(message.withMessageParam("jsonSchemaValidator.schema.invalid", e.getMessage()));

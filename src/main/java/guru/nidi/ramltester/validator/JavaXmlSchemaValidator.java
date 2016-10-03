@@ -70,7 +70,7 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
             validator.setErrorHandler(new ViolationsWritingErrorHandler(violations, message));
             validator.validate(new StreamSource(content));
         } catch (SAXException | IOException e) {
-            violations.add(message.withParam(e.getMessage()));
+            violations.add(message.withParam(e.getMessage()), e);
         }
     }
 
@@ -86,19 +86,19 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
         @Override
         public void warning(SAXParseException e) throws SAXException {
             violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.warn",
-                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
+                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()), e);
         }
 
         @Override
         public void error(SAXParseException e) throws SAXException {
             violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.error",
-                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
+                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()), e);
         }
 
         @Override
         public void fatalError(SAXParseException e) throws SAXException {
             violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.fatal",
-                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()));
+                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()), e);
         }
     }
 
