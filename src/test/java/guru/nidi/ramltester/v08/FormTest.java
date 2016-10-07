@@ -76,6 +76,16 @@ public class FormTest extends HighlevelTestBase {
     }
 
     @Test
+    public void formNoFormParameters() throws Exception {
+        assertOneRequestViolationThat(test(aggregator,
+                form,
+                post("/form/noparameters").contentType(MediaType.APPLICATION_FORM_URLENCODED),
+                response(200, "", null)),
+                equalTo("No formParameters given on action(POST /form/noparameters) mime-type('application/x-www-form-urlencoded')")
+        );
+    }
+
+    @Test
     public void formWithSchema() throws Exception {
         final RamlDefinition form = RamlLoaders
                 .fromClasspath(getClass())
@@ -84,7 +94,7 @@ public class FormTest extends HighlevelTestBase {
 
         assertOneRequestViolationThat(test(aggregator,
                 form,
-                post("/form/schema").contentType(MediaType.APPLICATION_FORM_URLENCODED),
+                post("/form/schema").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("param","a"),
                 response(200, "", null)),
                 equalTo("No schema allowed on action(POST /form/schema) mime-type('application/x-www-form-urlencoded')")
         );
