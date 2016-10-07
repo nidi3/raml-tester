@@ -152,7 +152,7 @@ public class RamlChecker {
         }
         @SuppressWarnings("unchecked")
         final Map<String, List<? extends AbstractParam>> formParameters = (Map) mimeType.getFormParameters();
-        if (formParameters == null) {
+        if (formParameters == null || formParameters.isEmpty()) {
             requestViolations.add("formParameters.missing", locator);
         } else {
             checkFormParametersValues(action, mimeType, values, formParameters);
