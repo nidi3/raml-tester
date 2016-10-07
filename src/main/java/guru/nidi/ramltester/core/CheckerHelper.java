@@ -149,12 +149,10 @@ final class CheckerHelper {
         return params;
     }
 
-    public static Reader resolveSchema(UnifiedApi raml, String schema) {
-//        final String refSchema = raml.getConsolidatedSchemas().get(schema);
-        String refSchema = schema;
-        return refSchema == null
-                ? new NamedReader(schema, new Message("schema.inline").toString())
-                : new NamedReader(refSchema, new Message("schema", schema).toString());
+    public static Reader resolveSchema(String type, String typeDef) {
+        return type.equals(typeDef)
+                ? new NamedReader(typeDef, new Message("schema.inline").toString())
+                : new NamedReader(typeDef, new Message("schema", type).toString());
     }
 
     public static <T> Map<String, T> mergeMaps(Map<String, T> map1, Map<String, T> map2) {

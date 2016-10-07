@@ -27,5 +27,7 @@ public interface UnifiedBody {
 
     String type();
 
+    String typeDefinition();
+
     List<String> examples();
 }

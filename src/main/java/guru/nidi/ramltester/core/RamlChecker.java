@@ -290,8 +290,9 @@ public class RamlChecker {
     }
 
     private void checkSchema(RamlViolations violations, byte[] body, MediaTypeMatch typeMatch) {
-        final String schema = typeMatch.getMatchingMime().type();
-        if (schema == null) {
+        final String typeDef = typeMatch.getMatchingMime().typeDefinition();
+        final String type = typeMatch.getMatchingMime().type();
+        if (typeDef == null && type == null) {
             return;
         }
         final SchemaValidator validator = findSchemaValidator(config.schemaValidators, typeMatch.getTargetType());
@@ -307,7 +308,7 @@ public class RamlChecker {
         final String charset = typeMatch.getTargetCharset();
         try {
             final String content = new String(body, charset);
-            validator.validate(new NamedReader(content, new Message("body").toString()), resolveSchema(api, schema), violations, new Message("schema.body.mismatch", locator, content));
+            validator.validate(new NamedReader(content, new Message("body").toString()), resolveSchema(type, typeDef), violations, new Message("schema.body.mismatch", locator, content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
         }

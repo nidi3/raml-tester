@@ -51,8 +51,13 @@ public class Body08 implements UnifiedBody {
     }
 
     @Override
-    public String type() {
+    public String typeDefinition() {
         return body.schemaContent();
+    }
+
+    @Override
+    public String type() {
+        return body.schema() == null ? null : body.schema().value();
     }
 
     @Override

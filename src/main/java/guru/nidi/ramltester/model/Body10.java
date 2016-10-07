@@ -56,6 +56,11 @@ public class Body10 implements UnifiedBody {
     }
 
     @Override
+    public String typeDefinition() {
+        return type.type(); //TODO
+    }
+
+    @Override
     public List<String> examples() {
         final List<String> res = new ArrayList<>();
         for (final ExampleSpec ex : type.examples()) {

@@ -268,7 +268,7 @@ class RamlValidatorChecker {
         violations.addIf(param.maximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
     }
 
-    private void parameterValues(UnifiedType param,  Message message) {
+    private void parameterValues(UnifiedType param, Message message) {
         if (!param.examples().isEmpty()) {
             param.validate(param.examples(), violations, message.withParam("example"));
 //            checker.checkParameter(param.<Parameter>delegate(), param.examples(), message.withParam("example"));
@@ -291,11 +291,11 @@ class RamlValidatorChecker {
 
     public void exampleSchema(UnifiedBody mimeType) {
         if (has(Validation.EXAMPLE)) {
-            final String schema = mimeType.type();
+            final String typeDef = mimeType.typeDefinition();
             final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.name()));
-            if (schema != null && validator != null) {
+            if (typeDef != null && validator != null) {
                 for (final String example : mimeType.examples()) {
-                    validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(raml, schema), violations,
+                    validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(typeDef, mimeType.type()), violations,
                             new Message("schema.example.mismatch", locator, example));
                 }
             }
