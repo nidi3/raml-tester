@@ -29,6 +29,7 @@ public class SecScheme08 implements UnifiedSecScheme {
     public SecScheme08(SecurityScheme scheme) {
         this.scheme = scheme;
     }
+
     static List<UnifiedSecScheme> of(List<SecurityScheme> schemes) {
         final List<UnifiedSecScheme> res = new ArrayList<>();
         for (final SecurityScheme s : schemes) {
@@ -54,7 +55,7 @@ public class SecScheme08 implements UnifiedSecScheme {
 
     @Override
     public UnifiedSecSchemePart describedBy() {
-        return new SecSchemePart08(scheme.describedBy());
+        return scheme.describedBy() == null ? null : new SecSchemePart08(scheme.describedBy());
     }
 
     @Override

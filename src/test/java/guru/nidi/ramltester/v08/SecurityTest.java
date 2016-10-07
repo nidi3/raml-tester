@@ -18,12 +18,14 @@ package guru.nidi.ramltester.v08;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolationException;
 import org.junit.Test;
 
 import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -141,12 +143,14 @@ public class SecurityTest extends HighlevelTestBase {
     }
 
     @Test
-    //TODO should this test fail because of wrong securityScheme.type?
-    public void allowWrongSecurityType() throws Exception {
-        assertNoViolations(test(
-                global,
-                get("/type"),
-                response(200, "", null)));
+    public void dontAllowWrongSecurityType() {
+        try {
+            base.load("security-wrong-type.raml");
+            fail();
+        } catch (RamlViolationException e) {
+            assertOneViolationThat(e.getReport().getValidationViolations(),
+                    equalTo("Exception during RAML check: Invalid element wrong. -- security-wrong-type.raml [line=8, col=13]"));
+        }
     }
 
     @Test

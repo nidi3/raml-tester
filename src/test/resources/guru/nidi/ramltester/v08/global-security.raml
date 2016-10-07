@@ -13,8 +13,6 @@ securitySchemes:
             required: false
   - noDesc:
       type: x-noDesc
-  - wrongType:
-      type: wrong
 
 securedBy: [oauth_2_0]
 
@@ -34,11 +32,5 @@ securedBy: [oauth_2_0]
 /undesc:
   get:
     securedBy: [noDesc]
-    responses:
-      200:
-
-/type:
-  get:
-    securedBy: [wrongType]
     responses:
       200:

@@ -120,7 +120,7 @@ class SecurityExtractor {
         private List<UnifiedSecScheme> securitySchemes(List<UnifiedSecSchemeRef> refs, Message message) {
             final List<UnifiedSecScheme> res = new ArrayList<>();
             for (final UnifiedSecSchemeRef ref : refs) {
-                res.add(ref == null ? NULL_SCHEMA : ref.securityScheme());
+                res.add(ref.securityScheme() == null ? NULL_SCHEMA : ref.securityScheme());
 //                final String name = ref.name();
 //                if ("null".equals(name)) {
 //                    res.add(NULL_SCHEMA);
