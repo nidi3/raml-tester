@@ -150,6 +150,9 @@ final class CheckerHelper {
     }
 
     public static Reader resolveSchema(String type, String typeDef) {
+        if (typeDef == null) {
+            return new NamedReader(type, new Message("schema.inline").toString());
+        }
         return type.equals(typeDef)
                 ? new NamedReader(typeDef, new Message("schema.inline").toString())
                 : new NamedReader(typeDef, new Message("schema", type).toString());
