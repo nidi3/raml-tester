@@ -52,7 +52,7 @@ public class Body08 implements UnifiedBody {
 
     @Override
     public String type() {
-        return body.schema() == null ? null : body.schema().value(); //TODO body.schemaContent() when it's working
+        return body.schemaContent();
     }
 
     @Override
