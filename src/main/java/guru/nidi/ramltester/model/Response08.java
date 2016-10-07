@@ -40,7 +40,7 @@ public class Response08 implements UnifiedResponse {
 
     @Override
     public String description() {
-        return response.description().value();
+        return response.description() == null ? null : response.description().value();
     }
 
     @Override

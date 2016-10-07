@@ -49,7 +49,7 @@ public class Type08 implements UnifiedType {
 
     @Override
     public String description() {
-        return parameter.description().value();
+        return parameter.description() == null ? null : parameter.description().value();
     }
 
     @Override
