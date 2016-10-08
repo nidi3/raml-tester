@@ -146,9 +146,10 @@ public class ValidatorTest extends HighlevelTestBase {
     @Test
     public void empty() {
         final RamlReport report = example.validator().withChecks(EMPTY).validate();
-        assertEquals(2, report.getValidationViolations().size());
+        assertEquals(3, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
         assertEquals("resource(/empty) is empty", it.next());
         assertEquals("action(GET /nonEmpty/sub) is empty", it.next());
+        assertEquals("action(GET /nonEmpty) is empty", it.next());
     }
 }
