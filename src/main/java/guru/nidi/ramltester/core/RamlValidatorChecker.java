@@ -269,8 +269,8 @@ class RamlValidatorChecker {
     }
 
     private void parameterValues(UnifiedType param, Message message) {
-        if (!param.examples().isEmpty()) {
-            param.validate(param.examples(), violations, message.withParam("example"));
+        for (final String example : param.examples()) {
+            param.validate(example, violations, message.withParam("example"));
 //            checker.checkParameter(param.<Parameter>delegate(), param.examples(), message.withParam("example"));
         }
         if (param.defaultValue() != null) {
@@ -292,10 +292,11 @@ class RamlValidatorChecker {
     public void exampleSchema(UnifiedBody mimeType) {
         if (has(Validation.EXAMPLE)) {
             final String typeDef = mimeType.typeDefinition();
+            final String type = mimeType.type();
             final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.name()));
-            if (typeDef != null && validator != null) {
+            if ((typeDef != null || type != null) && validator != null) {
                 for (final String example : mimeType.examples()) {
-                    validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(typeDef, mimeType.type()), violations,
+                    validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(type, typeDef), violations,
                             new Message("schema.example.mismatch", locator, example));
                 }
             }

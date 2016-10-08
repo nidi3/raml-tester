@@ -19,6 +19,7 @@ import org.raml.v2.api.model.v08.methods.Method;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -40,7 +41,7 @@ public class Method08 implements UnifiedMethod {
 
     @Override
     public String method() {
-        return method.method();
+        return method.method().toUpperCase(Locale.ENGLISH);
     }
 
     @Override

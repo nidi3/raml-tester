@@ -20,6 +20,7 @@ import guru.nidi.ramltester.util.Message;
 import org.raml.v2.api.model.v08.parameters.Parameter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -54,7 +55,7 @@ public class Type08 implements UnifiedType {
 
     @Override
     public List<String> examples() {
-        return singletonList(parameter.example());
+        return parameter.example()==null? Collections.<String>emptyList(): singletonList(parameter.example());
     }
 
     @Override

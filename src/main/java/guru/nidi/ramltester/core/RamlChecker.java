@@ -115,7 +115,7 @@ public class RamlChecker {
 
     private UnifiedMethod findAction(UnifiedResource resource, String method) {
         for (final UnifiedMethod action : resource.methods()) {
-            if (action.method().equals(method.toLowerCase())) {
+            if (action.method().equals(method)) {
                 return action;
             }
         }

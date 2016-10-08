@@ -20,8 +20,6 @@ import guru.nidi.ramltester.model.UnifiedMethod;
 import guru.nidi.ramltester.model.UnifiedResource;
 import guru.nidi.ramltester.util.Message;
 
-import java.util.Locale;
-
 /**
  *
  */
@@ -100,6 +98,6 @@ final class Locator {
     }
 
     private String actionString() {
-        return new Message("action", action.method().toUpperCase(Locale.ENGLISH), action.resource().resourcePath()).toString();
+        return new Message("action", action.method(), action.resource().resourcePath()).toString();
     }
 }
