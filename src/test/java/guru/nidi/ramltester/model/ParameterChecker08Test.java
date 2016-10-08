@@ -21,6 +21,7 @@ import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.raml.v2.api.model.v08.parameters.IntegerTypeDeclaration;
 import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
 import org.raml.v2.api.model.v08.parameters.Parameter;
 import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
@@ -99,7 +100,7 @@ public class ParameterChecker08Test extends CoreTestBase {
     @Test
     public void limitedNumberType() {
         final ParameterImpl p = new ParameterImpl();
-        p.setType("integer");
+        p.setType("number");
         p.setMinimum(.05);
         p.setMaximum(666.6);
         for (final String value : new String[]{"5e-2", "0.05", "666.6"}) {
@@ -255,10 +256,10 @@ public class ParameterChecker08Test extends CoreTestBase {
         assertOneViolationThat(violations, matcher);
     }
 
-    private static class ParameterImpl implements Parameter, NumberTypeDeclaration, StringTypeDeclaration {
+    private static class ParameterImpl implements Parameter, IntegerTypeDeclaration, NumberTypeDeclaration, StringTypeDeclaration {
         private String type;
-        private double minimum, maximum;
-        private int minLength, maxLength;
+        private Double minimum, maximum;
+        private Integer minLength, maxLength;
         private List<String> enumeration;
         private String pattern;
         private boolean required, repeat;

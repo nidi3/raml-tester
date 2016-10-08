@@ -57,7 +57,7 @@ public class Body10 implements UnifiedBody {
 
     @Override
     public String typeDefinition() {
-        return type.type(); //TODO
+        return type(); //TODO
     }
 
     @Override
