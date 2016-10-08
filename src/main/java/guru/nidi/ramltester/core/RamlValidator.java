@@ -109,7 +109,7 @@ public class RamlValidator {
     }
 
     private void mimeType(UnifiedBody mimeType) {
-        if (mimeType.formParameters() != null) {
+        if (!mimeType.formParameters().isEmpty()) {
             checker.formParameters(mimeType);
             checker.parameters(mimeType.formParameters(), FORM);
             checker.description(mimeType.formParameters(), FORM);

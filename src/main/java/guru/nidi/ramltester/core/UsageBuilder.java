@@ -64,7 +64,7 @@ public final class UsageBuilder {
                 actionUsage(usage, action).initRequestHeaders(typeNamesOf(action.headers()));
                 if (action.body() != null) {
                     for (final UnifiedBody mimeType : action.body()) {
-                        if (mimeType.formParameters() != null) {
+                        if (!mimeType.formParameters().isEmpty()) {
                             UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(typeNamesOf(mimeType.formParameters()));
                         }
                     }
