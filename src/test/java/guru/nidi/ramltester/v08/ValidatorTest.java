@@ -42,7 +42,6 @@ public class ValidatorTest extends HighlevelTestBase {
 
     @Test
     public void wrongTypeConstraints() {
-        //TODO remove check, done by parser now
         try {
             RAML_LOADERS.load("wrong-types.raml");
             fail("Invalid RAML");
@@ -98,13 +97,8 @@ public class ValidatorTest extends HighlevelTestBase {
     @Test
     public void parameter() {
         final RamlReport report = example.validator().withChecks(PARAMETER).validate();
-        assertEquals(6, report.getValidationViolations().size());
+        assertEquals(1, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("queryParameter 'a' in action(POST /ok) has illegal condition 'minimum'", it.next());
-        assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'pattern'", it.next());
-        assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'minimum'", it.next());
-        assertEquals("queryParameter 'c' in action(POST /ok) has illegal condition 'pattern'", it.next());
-        assertEquals("queryParameter 'd' in action(POST /ok): File type is only allowed in formParameter", it.next());
         assertEquals("No formParameter allowed in action(POST /ok) mime-type('application/json') (only allowed with 'application/x-www-form-urlencoded' or 'multipart/form-data')", it.next());
     }
 
