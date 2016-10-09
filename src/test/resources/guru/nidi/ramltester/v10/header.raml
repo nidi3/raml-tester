@@ -19,9 +19,11 @@ schemas:
 /header:
   get:
     headers:
+      rep:
+        type: string[]
       req:
-        required: true
       x-{?}:
+        required: false
     responses:
       200:
         body:
@@ -32,27 +34,30 @@ schemas:
     get:
       headers:
         x-{?}:
-          required: true
       responses:
         200:
   /xint:
     get:
       headers:
         x-Int:
+          required: false
           type: integer
       responses:
         200:
           headers:
             x-Int:
+              required: false
               type: integer
 /resheader:
   get:
     responses:
       200:
         headers:
+          rep:
+            type: string[]
           req:
-            required: true
           x-{?}:
+            required: false
         body:
           application/json:
             schema: |

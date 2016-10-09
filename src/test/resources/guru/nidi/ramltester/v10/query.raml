@@ -19,9 +19,11 @@ schemas:
 /query:
   get:
     queryParameters:
+      rep:
+        type: string[]
       req:
-        required: true
       int:
+        required: false
         type: integer
     responses:
       200:
