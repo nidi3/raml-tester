@@ -42,10 +42,10 @@ public class ValidatorTest extends HighlevelTestBase {
                 equalTo("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4"),
                 startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
                         "Content: 42\n" +
-                        "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"),
+                        "Messages:\n- error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"),
                 startsWith("Example does not match schema for action(POST /nok) response(200) mime-type('application/json')\n" +
                         "Content: 42\n" +
-                        "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
+                        "Messages:\n- error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
     }
 
     @Test

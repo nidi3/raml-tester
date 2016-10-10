@@ -63,13 +63,13 @@ public class ContentNegotiationTest extends HighlevelTestBase {
 
     @Test
     public void simpleMatchingAcceptHeader() throws Exception {
-        assertNoViolations(test(simple, get("/schema").accept("application/json"), jsonResponse(200, "\"x\"")));
+        assertNoViolations(test(simple, get("/schema").accept("application/json"), jsonResponse(200, "{\"s\":\"string\",\"i\":42}")));
     }
 
     @Test
     public void wildcardMatchingAcceptHeader() throws Exception {
-        assertNoViolations(test(simple, get("/schema").accept("application/*"), jsonResponse(200, "\"x\"")));
-        assertNoViolations(test(simple, get("/schema").accept("*/*"), jsonResponse(200, "\"x\"")));
+        assertNoViolations(test(simple, get("/schema").accept("application/*"), jsonResponse(200, "{\"s\":\"string\",\"i\":42}")));
+        assertNoViolations(test(simple, get("/schema").accept("*/*"), jsonResponse(200, "{\"s\":\"string\",\"i\":42}")));
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ContentNegotiationTest extends HighlevelTestBase {
     @Test
     public void nonMatchingResponse() throws Exception {
         assertOneResponseViolationThat(
-                test(simple, get("/schema").accept("application/bla", "x/y"), jsonResponse(200, "\"x\"")),
+                test(simple, get("/schema").accept("application/bla", "x/y"), jsonResponse(200, "{\"s\":\"string\",\"i\":42}")),
                 equalTo("Response Content-Type 'application/json' is not compatible with Accept header 'application/bla, x/y'"));
     }
 

@@ -26,6 +26,7 @@ import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import guru.nidi.loader.Loader;
 import guru.nidi.loader.use.jsonschema.LoaderUriDownloader;
+import guru.nidi.ramltester.core.JsonSchemaViolationCause;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
 import guru.nidi.ramltester.util.MediaType;
@@ -84,12 +85,14 @@ public class JsonSchemaValidator implements SchemaValidator {
             if (!report.isSuccess()) {
                 String msg = "";
                 for (final ProcessingMessage reportLine : report) {
-                    msg += reportLine.toString() + "\n";
+                    msg += new Message("jsonSchemaValidator.message", reportLine.toString());
                 }
-                violations.add(message.withParam(msg), report);
+                violations.add(message.withParam(msg), new JsonSchemaViolationCause(report));
             }
-        } catch (ProcessingException | IOException e) {
-            violations.add(message.withMessageParam("jsonSchemaValidator.schema.invalid", e.getMessage()));
+        } catch (ProcessingException e) {
+            violations.add(message.withMessageParam("schema.invalid", e.getMessage()), new JsonSchemaViolationCause(e));
+        } catch (IOException e) {
+            violations.add(message.withMessageParam("schema.invalid", e.getMessage()));
         }
     }
 }
