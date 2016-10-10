@@ -16,6 +16,7 @@
 package guru.nidi.ramltester;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import guru.nidi.ramltester.core.JsonSchemaViolationCause;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolationMessage;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 public class SchemaTest extends HighlevelTestBase {
     private final RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
+    private ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
     @Test
     public void matchingJsonSchema() throws UnsupportedEncodingException {
@@ -70,7 +72,7 @@ public class SchemaTest extends HighlevelTestBase {
         final RamlReport report = test(simple, get("/schema"), jsonResponse(200, "{\"s\":{},\"i\":true}"));
         final RamlViolationMessage message = report.getResponseViolations().iterator().next();
         assertThat(message.getCause(), instanceOf(JsonSchemaViolationCause.class));
-        final String json = new ObjectMapper().writeValueAsString(message.getCause());
+        final String json = mapper.writeValueAsString(message.getCause());
         assertEquals(("{'messages':[" +
                 "{'message':'instance type (boolean) does not match any allowed primitive type (allowed: [\\'integer\\'])','logLevel':'ERROR'}," +
                 "{'message':'instance type (object) does not match any allowed primitive type (allowed: [\\'string\\'])','logLevel':'ERROR'}" +
@@ -109,7 +111,7 @@ public class SchemaTest extends HighlevelTestBase {
         final RamlReport report = test(simple, get("/schema"), response(208, "<api-request>str</api-request>", "text/xml"));
         final RamlViolationMessage message = report.getResponseViolations().iterator().next();
         assertThat(message.getCause(), instanceOf(XmlSchemaViolationCause.class));
-        final String json = new ObjectMapper().writeValueAsString(message.getCause());
+        final String json = mapper.writeValueAsString(message.getCause());
         assertEquals(("{'messages':[" +
                 "{'message':'cvc-complex-type.2.3: Element `api-request` cannot have character [children], because the type`s content type is element-only.','line':1,'column':31}," +
                 "{'message':'cvc-complex-type.2.4.b: The content of element `api-request` is not complete. One of `{input}` is expected.','line':1,'column':31}" +
