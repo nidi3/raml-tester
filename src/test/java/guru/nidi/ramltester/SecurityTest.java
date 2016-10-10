@@ -18,10 +18,7 @@ package guru.nidi.ramltester;
 import guru.nidi.ramltester.core.RamlReport;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -77,10 +74,9 @@ public class SecurityTest extends HighlevelTestBase {
                 local,
                 get("/optSec").header("AuthorizationOpt", "blu"),
                 response(200, "", null));
-        assertEquals(Arrays.asList(
-                "Assuming security scheme 'null': Header 'AuthorizationOpt' on action(GET /optSec) is not defined",
-                "Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /optSec) is required but not found"),
-                report.getRequestViolations().asList());
+        assertViolationsThat(report.getRequestViolations(),
+                equalTo("Assuming security scheme 'null': Header 'AuthorizationOpt' on action(GET /optSec) is not defined"),
+                equalTo("Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /optSec) is required but not found"));
     }
 
     @Test
@@ -89,10 +85,9 @@ public class SecurityTest extends HighlevelTestBase {
                 local,
                 get("/doubleSec").header("AuthorizationOpt", "blu"),
                 response(200, "", null));
-        assertEquals(Arrays.asList(
-                "Assuming security scheme 'OAuth 2.0': Header 'AuthorizationOpt' on action(GET /doubleSec) is not defined",
-                "Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /doubleSec) is required but not found"),
-                report.getRequestViolations().asList());
+        assertViolationsThat(report.getRequestViolations(),
+                equalTo("Assuming security scheme 'OAuth 2.0': Header 'AuthorizationOpt' on action(GET /doubleSec) is not defined"),
+                equalTo("Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /doubleSec) is required but not found"));
     }
 
     @Test

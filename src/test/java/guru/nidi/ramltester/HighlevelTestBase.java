@@ -29,10 +29,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -114,9 +114,9 @@ public class HighlevelTestBase {
 
     protected void assertResponseViolationsThat(RamlReport report, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
         assertNoViolations(report.getRequestViolations());
-        for (final RamlViolationMessage message : report.getResponseViolations().asMessages()) {
+        for (final RamlViolationMessage message : report.getResponseViolations()) {
             assertThat(message.getMessage(), messageMatcher);
-            assertThat(message.getMessageObject(), messageObjectMatcher);
+            assertThat(message.getCause(), messageObjectMatcher);
         }
     }
 
@@ -136,22 +136,22 @@ public class HighlevelTestBase {
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
         assertThat("Expected exactly one violation", violations.size(), equalTo(1));
-        assertThat(violations.iterator().next(), matcher);
+        assertThat(violations.iterator().next().getMessage(), matcher);
     }
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
         assertThat("Expected exactly one violation", violations.size(), equalTo(1));
-        final RamlViolationMessage message = violations.asMessages().get(0);
+        final RamlViolationMessage message = violations.iterator().next();
         assertThat(message.getMessage(), messageMatcher);
-        assertThat(message.getMessageObject(), messageObjectMatcher);
+        assertThat(message.getCause(), messageObjectMatcher);
     }
 
     @SafeVarargs
-    protected final void assertViolationsThat(RamlViolations violations, Matcher<String>... matcher) {
-        int i = 0;
-        for (final String violation : violations) {
-            assertThat(violation, matcher[i % matcher.length]);
-            i++;
+    protected final void assertViolationsThat(RamlViolations violations, Matcher<String>... matchers) {
+        assertEquals(matchers.length, violations.size());
+        final Iterator<RamlViolationMessage> it = violations.iterator();
+        for (final Matcher<String> matcher : matchers) {
+            assertThat(it.next().getMessage(), matcher);
         }
     }
 

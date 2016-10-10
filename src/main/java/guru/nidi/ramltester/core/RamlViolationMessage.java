@@ -18,23 +18,48 @@ package guru.nidi.ramltester.core;
 
 public class RamlViolationMessage {
     private final String message;
-    private final Object messageObject;
+    private final Object cause;
 
-    public RamlViolationMessage(String message, Object messageObject) {
+    public RamlViolationMessage(String message, Object cause) {
         this.message = message;
-        this.messageObject = messageObject;
+        this.cause = cause;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public Object getMessageObject() {
-        return messageObject;
+    public Object getCause() {
+        return cause;
     }
 
     @Override
     public String toString() {
         return message;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        RamlViolationMessage message1 = (RamlViolationMessage) o;
+
+        if (!message.equals(message1.message)) {
+            return false;
+        }
+        return cause != null ? cause.equals(message1.cause) : message1.cause == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = message.hashCode();
+        result = 31 * result + (cause != null ? cause.hashCode() : 0);
+        return result;
     }
 }
