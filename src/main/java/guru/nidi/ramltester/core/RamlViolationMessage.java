@@ -16,25 +16,50 @@
 package guru.nidi.ramltester.core;
 
 
+import guru.nidi.ramltester.model.RamlViolationCause;
+
 public class RamlViolationMessage {
     private final String message;
-    private final Object messageObject;
+    private final RamlViolationCause cause;
 
-    public RamlViolationMessage(String message, Object messageObject) {
+    public RamlViolationMessage(String message, RamlViolationCause cause) {
         this.message = message;
-        this.messageObject = messageObject;
+        this.cause = cause;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public Object getMessageObject() {
-        return messageObject;
+    public RamlViolationCause getCause() {
+        return cause;
     }
 
     @Override
     public String toString() {
         return message;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RamlViolationMessage)) {
+            return false;
+        }
+
+        final RamlViolationMessage that = (RamlViolationMessage) o;
+
+        return ( message == null && that.message == null )
+                || (message != null && message.equals(that.getMessage()));
+    }
+
+    @Override
+    public int hashCode() {
+        if (message == null) {
+            return 0;
+        }
+        return message.hashCode();
     }
 }

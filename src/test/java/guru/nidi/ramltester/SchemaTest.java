@@ -15,9 +15,9 @@
  */
 package guru.nidi.ramltester;
 
-import com.github.fge.jsonschema.core.report.ProcessingReport;
+import guru.nidi.ramltester.violations.JsonSchemaRamlViolationCause;
+import guru.nidi.ramltester.violations.XmlRamlViolationCause;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import java.io.UnsupportedEncodingException;
 
@@ -61,7 +61,7 @@ public class SchemaTest extends HighlevelTestBase {
                 startsWith("Body does not match schema for action(GET /schema) response(200) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: "),
-                instanceOf(ProcessingReport.class)
+                instanceOf(JsonSchemaRamlViolationCause.class)
         );
     }
 
@@ -74,7 +74,7 @@ public class SchemaTest extends HighlevelTestBase {
                 startsWith("Body does not match schema for action(GET /schema) response(201) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: "),
-                instanceOf(ProcessingReport.class)
+                instanceOf(JsonSchemaRamlViolationCause.class)
         );
     }
 
@@ -87,7 +87,7 @@ public class SchemaTest extends HighlevelTestBase {
                 startsWith("Body does not match schema for action(GET /schema) response(202) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Message: "),
-                instanceOf(ProcessingReport.class)
+                instanceOf(JsonSchemaRamlViolationCause.class)
         );
     }
 
@@ -100,7 +100,7 @@ public class SchemaTest extends HighlevelTestBase {
                 startsWith("Body does not match schema for action(GET /schema) response(208) mime-type('text/xml')\n" +
                         "Content: <api-request>str</api-request>\n" +
                         "Message: "),
-                instanceOf(SAXException.class)
+                instanceOf(XmlRamlViolationCause.class)
         );
     }
 
@@ -113,7 +113,7 @@ public class SchemaTest extends HighlevelTestBase {
                 startsWith("Body does not match schema for action(GET /schema) response(206) mime-type('application/xml')\n" +
                         "Content: 5\n" +
                         "Message: "),
-                instanceOf(SAXException.class)
+                instanceOf(XmlRamlViolationCause.class)
         );
     }
 
@@ -126,7 +126,7 @@ public class SchemaTest extends HighlevelTestBase {
                 startsWith("Body does not match schema for action(GET /schema) response(207) mime-type('application/xml')\n" +
                         "Content: 5\n" +
                         "Message: "),
-                instanceOf(SAXException.class)
+                instanceOf(XmlRamlViolationCause.class)
         );
     }
 

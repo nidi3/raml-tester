@@ -41,7 +41,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void example() {
         final RamlReport report = example.validator().withChecks(EXAMPLE).validate();
         assertEquals(4, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("example of queryParameter 'q' in action(POST /ok) - Value '10' is bigger than maximum 8", it.next());
         assertEquals("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4", it.next());
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
@@ -56,7 +56,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void parameter() {
         final RamlReport report = example.validator().withChecks(PARAMETER).validate();
         assertEquals(6, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("queryParameter 'a' in action(POST /ok) has illegal condition 'minimum'", it.next());
         assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'pattern'", it.next());
         assertEquals("queryParameter 'b' in action(POST /ok) has illegal condition 'minimum'", it.next());
@@ -69,7 +69,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void validUriParameters() {
         final RamlReport report = uriParams.validator().withChecks(URI_PARAMETER).validate();
         assertEquals(7, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("The baseUri has no variable 'invalid' in Root definition", it.next());
         assertEquals("baseUriParameter with name 'version' is not allowed in Root definition", it.next());
         assertEquals("The uri has no variable 'uriInvalid' in resource(/bla/{param})", it.next());
@@ -83,7 +83,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void resourcePattern() {
         final RamlReport report = uriParams.validator().withChecks().withResourcePattern("[a-z]+").validate();
         assertEquals(1, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("Name of resource(/bla/{param}/subA/{p}) does not match pattern '[a-z]+'", it.next());
 
     }
@@ -92,7 +92,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void parameterPattern() {
         final RamlReport report = uriParams.validator().withChecks().withParameterPattern("[a-z]+").validate();
         assertEquals(4, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("baseUriParameter name 'subInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'", it.next());
         assertEquals("uriParameter name 'uriInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'", it.next());
         assertEquals("queryParameter name 'Nok' in action(GET /bla/{param}) does not match pattern '[a-z]+'", it.next());
@@ -103,7 +103,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void headerPattern() {
         final RamlReport report = uriParams.validator().withChecks().withHeaderPattern("[a-z]+").validate();
         assertEquals(2, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("header name 'Hok' in action(GET /bla/{param}) does not match pattern '[a-z]+'", it.next());
         assertEquals("header name 'Rok' in action(GET /bla/{param}) response(200) does not match pattern '[a-z]+'", it.next());
     }
@@ -112,7 +112,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void description() {
         final RamlReport report = description.validator().withChecks(DESCRIPTION).validate();
         assertEquals(12, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("Root definition has no documentation", it.next());
         assertEquals("baseUriParameter 'path' in Root definition has no description", it.next());
         assertEquals("resource(/bla/{param}) has no description", it.next());
@@ -131,7 +131,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void missingDocTitle() {
         final RamlReport report = noDocTitle.validator().withChecks(DESCRIPTION).validate();
         assertEquals(1, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("Root definition has documentation with missing title", it.next());
     }
 
@@ -139,7 +139,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void missingDocContent() {
         final RamlReport report = noDocContent.validator().withChecks(DESCRIPTION).validate();
         assertEquals(1, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("Root definition has documentation with missing content", it.next());
     }
 
@@ -147,7 +147,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void empty() {
         final RamlReport report = example.validator().withChecks(EMPTY).validate();
         assertEquals(2, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
+        final Iterator<String> it = report.getValidationViolations().asList().iterator();
         assertEquals("resource(/empty) is empty", it.next());
         assertEquals("action(GET /nonEmpty/sub) is empty", it.next());
     }

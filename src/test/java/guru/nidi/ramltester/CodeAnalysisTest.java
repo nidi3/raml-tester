@@ -45,11 +45,12 @@ public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
         class GuruNidiRamltester extends DependencyRuler {
-            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit, validator, model, servlet, spring, jaxrs, util;
+            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit, validator, model, servlet, spring, jaxrs, util, violations;
 
             public void defineRules() {
                 $self.mayUse(model, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
-                core.mayUse(model, util);
+                core.mayUse(model, util, violations);
+                violations.mayUse(model, util);
                 util.mayUse(model);
                 servlet.mayUse(model, util, core);
                 httpcomponents.mayUse(model, util, core);
