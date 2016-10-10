@@ -41,7 +41,7 @@ public class CoreTestBase {
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
         assertThat("Expected exactly one violation", 1, new IsEqual<>(violations.size()));
-        assertThat(violations.iterator().next(), matcher);
+        assertThat(violations.asList().iterator().next(), matcher);
     }
 
     protected Map<String, QueryParameter> queryParameterMapOf(Object... keysAndValues) {

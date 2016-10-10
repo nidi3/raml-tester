@@ -15,32 +15,73 @@
  */
 package guru.nidi.ramltester.core;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import com.github.fge.jsonschema.core.report.ProcessingMessage;
+import guru.nidi.ramltester.violations.DefaultRamlValidationCause;
+import guru.nidi.ramltester.violations.JsonSchemaRamlViolationCause;
+import guru.nidi.ramltester.violations.XmlRamlViolationCause;
 import guru.nidi.ramltester.util.Message;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
  */
-public class RamlViolations implements Iterable<String> {
-    private final List<String> violations;
-    private final List<Object> violationObjects;
+public class RamlViolations implements Iterable<RamlViolationMessage> {
+    private final List<RamlViolationMessage> ramlViolationMessages;
 
     public RamlViolations() {
-        violations = new ArrayList<>();
-        violationObjects = new ArrayList<>();
+        ramlViolationMessages = new ArrayList<>();
     }
 
     public void add(Message message) {
-        add(message, null);
+        final RamlViolationMessage ramlViolationMessage = new RamlViolationMessage(message.toString(), new DefaultRamlValidationCause(message.toString()));
+        add(message, ramlViolationMessage);
     }
 
-    public void add(Message message, Object messageObject) {
-        violations.add(message.toString());
-        violationObjects.add(messageObject);
+    public void add(Message message, RamlViolationMessage ramlViolationMessage) {
+        ramlViolationMessages.add(ramlViolationMessage);
+    }
+
+    public void add(Message message, ProcessingMessage processingMessage){
+        final RamlViolationMessage ramlViolationMessage = new RamlViolationMessage(message.toString(), new JsonSchemaRamlViolationCause(processingMessage));
+        add(message, ramlViolationMessage);
+    }
+
+    public void add(Message message, ProcessingException e) {
+        final RamlViolationMessage ramlViolationMessage = new RamlViolationMessage(message.toString(), new JsonSchemaRamlViolationCause(e));
+        add(message, ramlViolationMessage);
+    }
+
+    public void add(Message message, JsonParseException e) {
+        try {
+            final RamlViolationMessage ramlViolationMessage = new RamlViolationMessage(message.toString(), new JsonSchemaRamlViolationCause(e));
+            add(message, ramlViolationMessage);
+        } catch (JsonProcessingException ex){
+
+            add(message, (IOException) ex);
+        }
+    }
+
+    public void add(Message message, SAXException e) {
+        final RamlViolationMessage ramlViolationMessage = new RamlViolationMessage(message.toString(), new XmlRamlViolationCause(e));
+        add(message, ramlViolationMessage);
+    }
+
+    public void add(Message message, IOException e) {
+        if(e instanceof JsonParseException){
+            add(message, (JsonParseException)e);
+        } else {
+            final RamlViolationMessage ramlViolationMessage = new RamlViolationMessage(message.toString(), new DefaultRamlValidationCause(e.getMessage()));
+            add(message, ramlViolationMessage);
+        }
     }
 
     void add(String key, Object... params) {
@@ -58,38 +99,35 @@ public class RamlViolations implements Iterable<String> {
     }
 
     void addAll(RamlViolations violations) {
-        this.violations.addAll(violations.violations);
-        this.violationObjects.addAll(violations.violationObjects);
+        this.ramlViolationMessages.addAll(violations.ramlViolationMessages);
     }
 
     public int size() {
-        return violations.size();
+        return ramlViolationMessages.size();
     }
 
     public boolean isEmpty() {
-        return violations.isEmpty();
+        return ramlViolationMessages.isEmpty();
     }
 
     public List<String> asList() {
-        return Collections.unmodifiableList(violations);
+        return ramlViolationMessages.stream()
+                .map(ramlViolationMessage -> ramlViolationMessage.getMessage())
+                .collect(Collectors.toList());
     }
 
     public List<RamlViolationMessage> asMessages() {
-        final List<RamlViolationMessage> res = new ArrayList<>();
-        for (int i = 0; i < violations.size(); i++) {
-            res.add(new RamlViolationMessage(violations.get(i), violationObjects.get(i)));
-        }
-        return res;
+        return ramlViolationMessages;
     }
 
     @Override
-    public Iterator<String> iterator() {
-        return violations.iterator();
+    public Iterator<RamlViolationMessage> iterator() {
+        return ramlViolationMessages.iterator();
     }
 
     @Override
     public String toString() {
-        return violations.toString();
+        return ramlViolationMessages.toString();
     }
 
     @Override
@@ -102,12 +140,13 @@ public class RamlViolations implements Iterable<String> {
         }
 
         final RamlViolations that = (RamlViolations) o;
-        return violations.equals(that.violations);
+        return ramlViolationMessages.equals(that.ramlViolationMessages);
 
     }
 
     @Override
     public int hashCode() {
-        return violations.hashCode();
+        return ramlViolationMessages.hashCode();
     }
+
 }
