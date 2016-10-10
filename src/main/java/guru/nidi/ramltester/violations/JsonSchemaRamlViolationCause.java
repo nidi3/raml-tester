@@ -31,12 +31,12 @@ public class JsonSchemaRamlViolationCause implements RamlViolationCause {
 
     public JsonSchemaRamlViolationCause(ProcessingMessage processingMessage) {
         message = processingMessage.getMessage();
-        asJson = processingMessage.asJson().asText();
+        asJson = processingMessage.asJson().toString();
     }
 
     public JsonSchemaRamlViolationCause(ProcessingException e) {
         message = e.getShortMessage();
-        asJson = e.getProcessingMessage().asJson().asText();
+        asJson = e.getProcessingMessage().asJson().toString();
     }
 
     public JsonSchemaRamlViolationCause(JsonParseException e) throws JsonProcessingException {
