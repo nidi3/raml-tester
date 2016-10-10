@@ -16,10 +16,10 @@
 package guru.nidi.ramltester.junit;
 
 import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolationMessage;
+import guru.nidi.ramltester.core.RamlViolations;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-
-import java.util.List;
 
 /**
  *
@@ -48,21 +48,21 @@ class NoViolationsMatcher extends TypeSafeMatcher<RamlReport> {
     @Override
     protected void describeMismatchSafely(RamlReport item, Description description) {
         if (validation) {
-            describeList(description, "\nValidation violations:", item.getValidationViolations().asList());
+            describeList(description, "\nValidation violations:", item.getValidationViolations());
         }
         if (request) {
-            describeList(description, "\nRequest violations:", item.getRequestViolations().asList());
+            describeList(description, "\nRequest violations:", item.getRequestViolations());
         }
         if (response) {
-            describeList(description, "\nResponse violations:", item.getResponseViolations().asList());
+            describeList(description, "\nResponse violations:", item.getResponseViolations());
         }
     }
 
-    private void describeList(Description description, String start, List<String> list) {
-        if (!list.isEmpty()) {
+    private void describeList(Description description, String start, RamlViolations violations) {
+        if (!violations.isEmpty()) {
             description.appendText(start);
-            for (final String s : list) {
-                description.appendText("\n  - ").appendText(s.replace("\n", "\n    "));
+            for (final RamlViolationMessage s : violations) {
+                description.appendText("\n  - ").appendText(s.getMessage().replace("\n", "\n    "));
             }
         }
     }

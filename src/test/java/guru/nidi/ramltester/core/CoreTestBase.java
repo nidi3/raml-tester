@@ -35,6 +35,6 @@ public class CoreTestBase {
 
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
         assertThat("Expected exactly one violation", 1, new IsEqual<>(violations.size()));
-        assertThat(violations.iterator().next(), matcher);
+        assertThat(violations.iterator().next().getMessage(), matcher);
     }
 }

@@ -29,6 +29,7 @@ import guru.nidi.codeassert.model.ModelAnalyzer;
 import guru.nidi.codeassert.model.ModelResult;
 import guru.nidi.codeassert.pmd.*;
 import guru.nidi.ramltester.core.RamlChecker;
+import guru.nidi.ramltester.core.RamlViolationMessage;
 import guru.nidi.ramltester.core.Type08CheckerTest;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.MediaTypeTest;
@@ -109,6 +110,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                                 "AbstractNaming", "UncommentedEmptyConstructor", "SimplifyStartsWith", "EmptyMethodInAbstractClassShouldBeAbstract",
                                 "AvoidSynchronizedAtMethodLevel", "UseStringBufferForStringAppends"),
                         In.loc("SecurityExtractor$SchemeFinder").ignore("ConfusingTernary"),
+                        In.clazz(RamlViolationMessage.class).ignore("ConfusingTernary", "LocalVariableCouldBeFinal"),
                         In.loc("UriComponents#getServer").ignore("NPathComplexity"))
                 .because("arrays are only used internally",
                         In.locs("*Response", "*Request").ignore("MethodReturnsInternalArray", "ArrayIsStoredDirectly"))

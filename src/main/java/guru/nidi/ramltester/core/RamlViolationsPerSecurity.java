@@ -79,7 +79,7 @@ class RamlViolationsPerSecurity {
         if (schemes.size() == 1) {
             target.addAll(source);
         } else {
-            for (final String s : source) {
+            for (final RamlViolationMessage s : source) {
                 target.add("scheme", scheme.type(), s);
             }
         }

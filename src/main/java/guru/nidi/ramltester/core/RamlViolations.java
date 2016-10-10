@@ -25,22 +25,19 @@ import java.util.List;
 /**
  *
  */
-public class RamlViolations implements Iterable<String> {
-    private final List<String> violations;
-    private final List<Object> violationObjects;
+public class RamlViolations implements Iterable<RamlViolationMessage> {
+    private final List<RamlViolationMessage> messages;
 
     public RamlViolations() {
-        violations = new ArrayList<>();
-        violationObjects = new ArrayList<>();
+        messages = new ArrayList<>();
     }
 
     public void add(Message message) {
         add(message, null);
     }
 
-    public void add(Message message, Object messageObject) {
-        violations.add(message.toString());
-        violationObjects.add(messageObject);
+    public void add(Message message, Object cause) {
+        messages.add(new RamlViolationMessage(message.toString(),cause));
     }
 
     void add(String key, Object... params) {
@@ -58,38 +55,29 @@ public class RamlViolations implements Iterable<String> {
     }
 
     void addAll(RamlViolations violations) {
-        this.violations.addAll(violations.violations);
-        this.violationObjects.addAll(violations.violationObjects);
+        this.messages.addAll(violations.messages);
     }
 
     public int size() {
-        return violations.size();
+        return messages.size();
     }
 
     public boolean isEmpty() {
-        return violations.isEmpty();
+        return messages.isEmpty();
     }
 
-    public List<String> asList() {
-        return Collections.unmodifiableList(violations);
-    }
-
-    public List<RamlViolationMessage> asMessages() {
-        final List<RamlViolationMessage> res = new ArrayList<>();
-        for (int i = 0; i < violations.size(); i++) {
-            res.add(new RamlViolationMessage(violations.get(i), violationObjects.get(i)));
-        }
-        return res;
+    public List<RamlViolationMessage> asList() {
+        return Collections.unmodifiableList(messages);
     }
 
     @Override
-    public Iterator<String> iterator() {
-        return violations.iterator();
+    public Iterator<RamlViolationMessage> iterator() {
+        return messages.iterator();
     }
 
     @Override
     public String toString() {
-        return violations.toString();
+        return messages.toString();
     }
 
     @Override
@@ -102,12 +90,12 @@ public class RamlViolations implements Iterable<String> {
         }
 
         final RamlViolations that = (RamlViolations) o;
-        return violations.equals(that.violations);
+        return messages.equals(that.messages);
 
     }
 
     @Override
     public int hashCode() {
-        return violations.hashCode();
+        return messages.hashCode();
     }
 }
