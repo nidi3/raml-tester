@@ -37,7 +37,7 @@ public class RamlViolations implements Iterable<RamlViolationMessage> {
     }
 
     public void add(Message message, Object cause) {
-        messages.add(new RamlViolationMessage(message.toString(),cause));
+        messages.add(new RamlViolationMessage(message.toString(), cause));
     }
 
     void add(String key, Object... params) {

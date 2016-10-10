@@ -19,6 +19,7 @@ import guru.nidi.loader.Loader;
 import guru.nidi.loader.use.xml.LoaderLSResourceResolver;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.SchemaValidator;
+import guru.nidi.ramltester.core.XmlSchemaViolationCause;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 import org.xml.sax.ErrorHandler;
@@ -31,6 +32,8 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -65,38 +68,43 @@ public class JavaXmlSchemaValidator implements SchemaValidator {
             final SchemaFactory schemaFactory = LoaderLSResourceResolver.createXmlSchemaFactory(loader);
             final Schema s = schemaFactory.newSchema(new StreamSource(schema));
             final Validator validator = s.newValidator();
-            validator.setErrorHandler(new ViolationsWritingErrorHandler(violations, message));
+            final ViolationsWritingErrorHandler errorHandler = new ViolationsWritingErrorHandler();
+            validator.setErrorHandler(errorHandler);
             validator.validate(new StreamSource(content));
-        } catch (SAXException | IOException e) {
-            violations.add(message.withParam(e.getMessage()), e);
+            if (!errorHandler.getExceptions().isEmpty()) {
+                String msg = "";
+                for (final SAXParseException ex : errorHandler.getExceptions()) {
+                    msg += new Message("javaXmlSchemaValidator.message", ex.getLineNumber(), ex.getColumnNumber(), ex.getMessage());
+                }
+                violations.add(message.withParam(msg), new XmlSchemaViolationCause(errorHandler.getExceptions()));
+            }
+        } catch (SAXException e) {
+            violations.add(message.withParam(new Message("schema.invalid", e.getMessage())), new XmlSchemaViolationCause(e));
+        } catch (IOException e) {
+            violations.add(message.withParam(new Message("schema.invalid", e.getMessage())));
         }
     }
 
     private static class ViolationsWritingErrorHandler implements ErrorHandler {
-        private final RamlViolations violations;
-        private final Message message;
-
-        public ViolationsWritingErrorHandler(RamlViolations violations, Message message) {
-            this.violations = violations;
-            this.message = message;
-        }
+        private final List<SAXParseException> exceptions = new ArrayList<>();
 
         @Override
         public void warning(SAXParseException e) throws SAXException {
-            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.warn",
-                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()), e);
+            exceptions.add(e);
         }
 
         @Override
         public void error(SAXParseException e) throws SAXException {
-            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.error",
-                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()), e);
+            exceptions.add(e);
         }
 
         @Override
         public void fatalError(SAXParseException e) throws SAXException {
-            violations.add(message.withMessageParam("javaXmlSchemaValidator.schema.fatal",
-                    e.getLineNumber(), e.getColumnNumber(), e.getMessage()), e);
+            exceptions.add(e);
+        }
+
+        public List<SAXParseException> getExceptions() {
+            return exceptions;
         }
     }
 

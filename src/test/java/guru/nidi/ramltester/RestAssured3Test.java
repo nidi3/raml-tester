@@ -84,7 +84,7 @@ public class RestAssured3Test extends ServerTest {
 
         assertEquals(violations("Body does not match schema for action(GET /base/data) response(200) mime-type('application/json')\n"
                         + "Content: illegal json\n"
-                        + "Message: Schema invalid: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n"
+                        + "Messages:\n- Schema invalid: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n"
                         + " at [Source: Body; line: 1, column: 8]"),
                 restAssured.getLastReport().getResponseViolations());
     }
