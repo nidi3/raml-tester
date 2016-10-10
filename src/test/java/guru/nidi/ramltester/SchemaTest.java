@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 public class SchemaTest extends HighlevelTestBase {
     private final RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
-    private ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+    private final ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
     @Test
     public void matchingJsonSchema() throws UnsupportedEncodingException {
