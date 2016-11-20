@@ -45,7 +45,9 @@ public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
 
     @Override
     public Iterable<Map.Entry<String, Usage>> usages() {
-        return Collections.singletonMap(raml.getTitle(), UsageBuilder.usage(raml, reports)).entrySet();
+        return reports.isEmpty()
+                ? Collections.<String, Usage>emptyMap().entrySet()
+                : Collections.singletonMap(raml.getTitle(), UsageBuilder.usage(raml, reports)).entrySet();
     }
 
     @Override

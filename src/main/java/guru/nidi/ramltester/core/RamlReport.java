@@ -34,14 +34,6 @@ public class RamlReport {
         this.raml = raml;
     }
 
-    public static RamlReport fromException(Raml raml, Exception cause) {
-        final RamlReport report = new RamlReport(raml);
-        final StringWriter out = new StringWriter();
-        cause.printStackTrace(new PrintWriter(out));
-        report.getRequestViolations().add("checking.exception", out.toString());
-        return report;
-    }
-
     public boolean isEmpty() {
         return requestViolations.isEmpty() && responseViolations.isEmpty() && validationViolations.isEmpty();
     }
