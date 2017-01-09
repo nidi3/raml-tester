@@ -41,7 +41,11 @@ public class SpringMockRamlRequest implements RamlRequest {
 
     @Override
     public String getRequestUrl(String baseUri, boolean includeServletPath) {
-        return baseUri == null ? delegate.getRequestURL().toString() : (baseUri + delegate.getPathInfo());
+        final String servletPath = includeServletPath ? delegate.getServletPath() : "";
+        final String pathInfo = delegate.getPathInfo() == null ? "" : delegate.getPathInfo();
+        return baseUri == null
+                ? delegate.getRequestURL().toString()
+                : (baseUri + servletPath + pathInfo);
     }
 
     @Override
