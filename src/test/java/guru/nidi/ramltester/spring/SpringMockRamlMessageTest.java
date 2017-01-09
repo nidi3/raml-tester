@@ -115,4 +115,12 @@ public class SpringMockRamlMessageTest {
         assertEquals("http://test.com/path", ramlRequest.getRequestUrl(null, false));
         assertEquals("http://x.y/path", ramlRequest.getRequestUrl("http://x.y", false));
     }
+
+    @Test
+    public void pathInfoNull() throws Exception {
+        final MvcResult result = mockMvc.perform(get("http://test.com/servlet").servletPath("/servlet")).andReturn();
+        final SpringMockRamlRequest ramlRequest = new SpringMockRamlRequest(result.getRequest());
+        assertEquals("http://base", ramlRequest.getRequestUrl("http://base", false));
+        assertEquals("http://base/servlet", ramlRequest.getRequestUrl("http://base", true));
+    }
 }
