@@ -88,7 +88,7 @@ public class ParameterChecker08Test extends CoreTestBase {
     public void numberType() {
         final ParameterImpl p = new ParameterImpl();
         p.setType("number");
-        for (final String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
+        for (final String value : new String[]{"0", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
             assertNoViolation(p, value);
         }
         for (final String value : new String[]{"", "-0", "1.", "1.123w"}) {
@@ -113,10 +113,6 @@ public class ParameterChecker08Test extends CoreTestBase {
         for (final String value : new String[]{"666.60001"}) {
             assertOneViolationThat(p, value,
                     equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is bigger than maximum 666.6"));
-        }
-        for (final String value : new String[]{"inf", "-inf", "nan"}) {
-            assertOneViolationThat(p, value,
-                    equalTo("BaseUri parameter 'xxx' on action - Value '" + value + "' is not inside any minimum/maximum"));
         }
     }
 

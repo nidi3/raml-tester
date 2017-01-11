@@ -55,7 +55,7 @@ public class SecScheme10 implements UnifiedSecScheme {
 
     @Override
     public UnifiedSecSchemePart describedBy() {
-        return new SecSchemePart10(scheme.describedBy());
+        return scheme.describedBy() == null ? null : new SecSchemePart10(scheme.describedBy());
     }
 
     @Override

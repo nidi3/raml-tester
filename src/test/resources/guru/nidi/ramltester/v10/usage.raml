@@ -11,13 +11,16 @@ version: v1
   get:
     queryParameters:
       uuQuery:
+        required: false
     headers:
       uuReqHeader:
+        required: false
     responses:
       201:
       200:
         headers:
           uuResHeader:
+            required: false
         body:
           application/json:
             schema: |

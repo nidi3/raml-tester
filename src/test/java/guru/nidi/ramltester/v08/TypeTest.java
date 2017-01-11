@@ -135,13 +135,6 @@ public class TypeTest extends HighlevelTestBase {
                     jsonResponse(200, "\"hula\""),
                     equalTo("Query parameter 'numberLimit' on action(GET /type) - Value '" + value + "' is bigger than maximum 666.6"));
         }
-        for (final String value : new String[]{"inf", "-inf", "nan"}) {
-            assertOneRequestViolationThat(
-                    type,
-                    get("/type?numberLimit=" + value),
-                    jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'numberLimit' on action(GET /type) - Value '" + value + "' is not inside any minimum/maximum"));
-        }
     }
 
     @Test

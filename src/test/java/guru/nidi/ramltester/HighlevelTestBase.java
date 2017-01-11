@@ -16,7 +16,6 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.loader.Loader;
-import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.core.ReportAggregator;

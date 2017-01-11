@@ -28,7 +28,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
  *
@@ -37,8 +36,7 @@ public class SecurityTest extends HighlevelTestBase {
     private static RamlLoaders base = RamlLoaders.fromClasspath(SecurityTest.class);
     private static RamlDefinition
             global = base.load("global-security.raml"),
-            local = base.load("local-security.raml"),
-            undef = base.load("undefined-security.raml");
+            local = base.load("local-security.raml");
 
     @Test
     public void allowSecurityElementsInGlobalSecured() throws Exception {
@@ -155,30 +153,17 @@ public class SecurityTest extends HighlevelTestBase {
     }
 
     @Test
-    public void undefinedGlobalSecuritySchema() throws Exception {
-        assertOneRequestViolationThat(test(
-                undef,
-                get("/unsec"),
-                response(200, "", null)),
-                equalTo("Security Scheme 'b' on Root definition is not defined"));
-    }
-
-    @Test
-    public void undefinedResourceSecuritySchema() throws Exception {
-        assertOneRequestViolationThat(test(
-                undef,
-                get("/sec"),
-                response(200, "", null)),
-                equalTo("Security Scheme 'c' on resource(/sec) is not defined"));
-    }
-
-    @Test
-    public void undefinedActionSecuritySchema() throws Exception {
-        assertOneRequestViolationThat(test(
-                undef,
-                post("/sec"),
-                response(200, "", null)),
-                equalTo("Security Scheme 'd' on action(POST /sec) is not defined"));
+    public void undefinedSchema() throws Exception {
+        try {
+            base.load("undefined-security.raml");
+            fail();
+        } catch (RamlViolationException e) {
+            assertEquals(Arrays.asList(
+                    "Exception during RAML check: Invalid reference 'b' -- undefined-security.raml [line=6, col=13]",
+                    "Exception during RAML check: Invalid reference 'c' -- undefined-security.raml [line=9, col=15]",
+                    "Exception during RAML check: Invalid reference 'd' -- undefined-security.raml [line=11, col=17]"),
+                    e.getReport().getValidationViolations().asList());
+        }
     }
 
 }

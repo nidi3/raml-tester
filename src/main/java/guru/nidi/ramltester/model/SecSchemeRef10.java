@@ -29,6 +29,7 @@ public class SecSchemeRef10 implements UnifiedSecSchemeRef {
     public SecSchemeRef10(SecuritySchemeRef ref) {
         this.ref = ref;
     }
+
     static List<UnifiedSecSchemeRef> of(List<SecuritySchemeRef> refs) {
         final List<UnifiedSecSchemeRef> res = new ArrayList<>();
         for (final SecuritySchemeRef r : refs) {
@@ -39,6 +40,6 @@ public class SecSchemeRef10 implements UnifiedSecSchemeRef {
 
     @Override
     public UnifiedSecScheme securityScheme() {
-        return new SecScheme10(ref.securityScheme());
+        return ref == null ? null : new SecScheme10(ref.securityScheme());
     }
 }
