@@ -25,8 +25,8 @@ version: v1
         type: string
         minLength: 2
         maxLength: 5
-#      date:
-#        type: date
+      date:
+        type: date
       enum:
         enum: ['a','b']
       pattern1:
@@ -39,10 +39,6 @@ version: v1
         pattern: '/\d{2}\/[a-y]/i'
       pattern5:
         pattern: "/\\d{2}\\/[a-y]/i"
-#      multi:
-#        - type: integer
-#          minimum: 5
-#        - enum: ['a','b']
     responses:
       200:
         body:

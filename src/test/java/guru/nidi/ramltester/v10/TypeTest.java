@@ -18,6 +18,7 @@ package guru.nidi.ramltester.v10;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -48,19 +49,20 @@ public class TypeTest extends HighlevelTestBase {
     }
 
     @Test
+    @Ignore("https://github.com/raml-org/raml-java-parser/issues/323")
     public void booleanNok() throws Exception {
-        for (final String value : new String[]{"", "TRUE", "yes", "0", "bla"}) {
+        for (final String value : new String[]{"TRUE", "T", "yes", "0", "bla"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?boolean=" + value),
                     jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'boolean' on action(GET /type) - Value '" + value + "' is not a valid boolean"));
+                    containsInOrder("Query parameter 'boolean' on action(GET /type) - Value '" + value + "': Invalid type ", "expected Boolean"));
         }
     }
 
     @Test
     public void integerOk() throws Exception {
-        for (final String value : new String[]{"0", "-1", "123456789"}) {
+        for (final String value : new String[]{"-0", "0", "+1", "-1", "123456789"}) {
             assertNoViolations(
                     type,
                     get("/type?integer=" + value),
@@ -76,34 +78,35 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void integerNok() throws Exception {
-        for (final String value : new String[]{"", "-0", "+1", "1.", "1.0", "123456x"}) {
+        for (final String value : new String[]{"1.", "1.0", "123456x", "w"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?integer=" + value),
                     jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'integer' on action(GET /type) - Value '" + value + "' is not a valid integer"));
+                    containsInOrder("Query parameter 'integer' on action(GET /type) - Value '" + value + "': Invalid type", "expected Integer"));
         }
         assertOneRequestViolationThat(
                 type,
                 get("/type?integerLimit=-6"),
                 jsonResponse(200, "\"hula\""),
-                equalTo("Query parameter 'integerLimit' on action(GET /type) - Value '-6' is smaller than minimum -5"));
+                equalTo("Query parameter 'integerLimit' on action(GET /type) - Value '-6': Expected number between -5 and 666"));
         assertOneRequestViolationThat(
                 type,
                 get("/type?integerLimit=667"),
                 jsonResponse(200, "\"hula\""),
-                equalTo("Query parameter 'integerLimit' on action(GET /type) - Value '667' is bigger than maximum 666"));
+                equalTo("Query parameter 'integerLimit' on action(GET /type) - Value '667': Expected number between -5 and 666"));
     }
 
     @Test
+    @Ignore("https://github.com/raml-org/raml-java-parser/issues/322")
     public void numberOk() throws Exception {
-        for (final String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
+        for (final String value : new String[]{"-0", "0", "-1", "-.1", "1.", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
             assertNoViolations(
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""));
         }
-        for (final String value : new String[]{"5e-2", "0.05", "666.6"}) {
+        for (final String value : new String[]{"5e-2", "0.05", "666.5"}) {
             assertNoViolations(
                     type,
                     get("/type?numberLimit=" + value),
@@ -112,13 +115,14 @@ public class TypeTest extends HighlevelTestBase {
     }
 
     @Test
+    @Ignore("https://github.com/raml-org/raml-java-parser/issues/322")
     public void numberNok() throws Exception {
-        for (final String value : new String[]{"", "-0", "1.", "1.123w"}) {
+        for (final String value : new String[]{"a", "1.123w"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?number=" + value),
                     jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'number' on action(GET /type) - Value '" + value + "' is not a valid number"));
+                    equalTo("Query parameter 'number' on action(GET /type) - Value '" + value + "': Invalid type String, expected Float"));
         }
         for (final String value : new String[]{"4.9e-2", "0.0049999"}) {
             assertOneRequestViolationThat(
@@ -134,33 +138,91 @@ public class TypeTest extends HighlevelTestBase {
                     jsonResponse(200, "\"hula\""),
                     equalTo("Query parameter 'numberLimit' on action(GET /type) - Value '" + value + "' is bigger than maximum 666.6"));
         }
-        for (final String value : new String[]{"inf", "-inf", "nan"}) {
-            assertOneRequestViolationThat(
-                    type,
-                    get("/type?numberLimit=" + value),
-                    jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'numberLimit' on action(GET /type) - Value '" + value + "' is not inside any minimum/maximum"));
-        }
     }
 
     @Test
-    public void dateOk() throws Exception {
-        for (final String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
+    public void dateOnlyOk() throws Exception {
+        for (final String value : new String[]{"2016-02-03", "16-02-03"}) {
             assertNoViolations(
                     type,
-                    get("/type?date=" + value),
+                    get("/type?date-only=" + value),
                     jsonResponse(200, "\"hula\""));
         }
     }
 
     @Test
-    public void dateNok() throws Exception {
-        for (final String value : new String[]{"", "Fri, 28 Feb 2014 12:34:56 CET", "Mon, 28 Feb 2014 12:34:56 GMT", "Sat, 29 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 14 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:62 GMT"}) {
+    public void dateOnlyNok() throws Exception {
+        for (final String value : new String[]{"2016-02", "2016-02-03T", "16-02-03T12:34"}) {
             assertOneRequestViolationThat(
                     type,
-                    get("/type?date=" + value),
+                    get("/type?date-only=" + value),
                     jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'date' on action(GET /type) - Value '" + value + "' is not a valid date"));
+                    equalTo("Query parameter 'date-only' on action(GET /type) - Value '" + value + "': Provided value " + value + " is not compliant with the format date_only provided in rfc3339"));
+        }
+    }
+
+    @Test
+    @Ignore("https://github.com/raml-org/raml-java-parser/issues/324")
+    public void timeOnlyOk() throws Exception {
+        for (final String value : new String[]{"01:02:03", "01:02:03.4", "01:02:03.45", "01:02:03.456"}) {
+            assertNoViolations(
+                    type,
+                    get("/type?time-only=" + value),
+                    jsonResponse(200, "\"hula\""));
+        }
+    }
+
+    @Test
+    public void timeOnlyNok() throws Exception {
+        for (final String value : new String[]{"01:02", "2016-02-03", "02-03-04"}) {
+            assertOneRequestViolationThat(
+                    type,
+                    get("/type?time-only=" + value),
+                    jsonResponse(200, "\"hula\""),
+                    equalTo("Query parameter 'time-only' on action(GET /type) - Value '" + value + "': Provided value " + value + " is not compliant with the format time_only provided in rfc3339"));
+        }
+    }
+
+    @Test
+    @Ignore("https://github.com/raml-org/raml-java-parser/issues/314")
+    public void datetimeOnlyOk() throws Exception {
+        for (final String value : new String[]{"2016-02-03T01:02:03", "2016-02-03T01:02:03.4", "2016-02-03T01:02:03.45", "2016-02-03T01:02:03.456"}) {
+            assertNoViolations(
+                    type,
+                    get("/type?datetime-only=" + value),
+                    jsonResponse(200, "\"hula\""));
+        }
+    }
+
+    @Test
+    public void datetimeOnlyNok() throws Exception {
+        for (final String value : new String[]{"2016-02-03", "2016-02-03T01:02:03Z", "2016-02-03T01:02:03Z+02", "2016-02-03T01:02:03 +02"}) {
+            assertOneRequestViolationThat(
+                    type,
+                    get("/type?datetime-only=" + value),
+                    jsonResponse(200, "\"hula\""),
+                    equalTo("Query parameter 'datetime-only' on action(GET /type) - Value '" + value + "': Provided value " + value + " is not compliant with the format datetime_only provided in rfc3339"));
+        }
+    }
+
+    @Test
+    public void datetimeOk() throws Exception {
+        for (final String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
+            assertNoViolations(
+                    type,
+                    get("/type?datetime=" + value),
+                    jsonResponse(200, "\"hula\""));
+        }
+    }
+
+    @Test
+    public void datetimeNok() throws Exception {
+        for (final String value : new String[]{"28 Feb 2014 12:34:56 GMT", "Fri, 28 Feb 2014 12:34:56", "Fri, 28 Feb 2014"}) {
+            assertOneRequestViolationThat(
+                    type,
+                    get("/type?datetime=" + value),
+                    jsonResponse(200, "\"hula\""),
+                    equalTo("Query parameter 'datetime' on action(GET /type) - Value '" + value + "': Provided value " + value + " is not compliant with the format datetime provided in rfc2616"));
         }
     }
 
@@ -180,12 +242,12 @@ public class TypeTest extends HighlevelTestBase {
                 type,
                 get("/type?string=a"),
                 jsonResponse(200, "\"hula\""),
-                equalTo("Query parameter 'string' on action(GET /type) - Value 'a' is shorter than minimum length 2"));
+                equalTo("Query parameter 'string' on action(GET /type) - Value 'a': Expected min length 2"));
         assertOneRequestViolationThat(
                 type,
                 get("/type?string=123456"),
                 jsonResponse(200, "\"hula\""),
-                equalTo("Query parameter 'string' on action(GET /type) - Value '123456' is longer than maximum length 5"));
+                equalTo("Query parameter 'string' on action(GET /type) - Value '123456': Expected max length 5"));
     }
 
     @Test
@@ -205,7 +267,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?enum=" + value),
                     jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'enum' on action(GET /type) - Value '" + value + "' is not a member of enum '[a, b]'"));
+                    equalTo("Query parameter 'enum' on action(GET /type) - Value '" + value + "': Invalid element " + value + "."));
         }
     }
 
@@ -243,47 +305,7 @@ public class TypeTest extends HighlevelTestBase {
                     type,
                     get("/type?pattern1=" + value),
                     jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'pattern1' on action(GET /type) - Value '" + value + "' does not match pattern '\\d{2}/[a-y]'"));
-        }
-    }
-
-    @Test
-    public void slashedPattern() throws Exception {
-        for (final String value : new String[]{"12/a", "00/y"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?pattern2=" + value),
-                    jsonResponse(200, "\"hula\""));
-        }
-        for (final String value : new String[]{"", "12/z", "1/a", "99/A"}) {
-            assertOneRequestViolationThat(
-                    type,
-                    get("/type?pattern2=" + value),
-                    jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter 'pattern2' on action(GET /type) - Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/'"));
-        }
-    }
-
-    @Test
-    public void modifiedPattern() throws Exception {
-        assertModifiedPattern("pattern3");
-        assertModifiedPattern("pattern4");
-        assertModifiedPattern("pattern5");
-    }
-
-    private void assertModifiedPattern(String param) throws Exception {
-        for (final String value : new String[]{"12/a", "00/y", "99/A"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?" + param + "=" + value),
-                    jsonResponse(200, "\"hula\""));
-        }
-        for (final String value : new String[]{"", "12/z", "1/a"}) {
-            assertOneRequestViolationThat(
-                    type,
-                    get("/type?" + param + "=" + value),
-                    jsonResponse(200, "\"hula\""),
-                    equalTo("Query parameter '" + param + "' on action(GET /type) - Value '" + value + "' does not match pattern '/\\d{2}\\/[a-y]/i'"));
+                    equalTo("Query parameter 'pattern1' on action(GET /type) - Value '" + value + "': Invalid value '" + value + "'. Expected \\d{2}/[a-y]"));
         }
     }
 

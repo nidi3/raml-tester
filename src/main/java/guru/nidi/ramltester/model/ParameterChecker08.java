@@ -233,11 +233,7 @@ class ParameterChecker08 {
         if (NUMBER.matcher(value).matches()) {
             if (param instanceof NumberTypeDeclaration) {
                 NumberTypeDeclaration numeric = (NumberTypeDeclaration) param;
-                if ("inf".equals(value) || "-inf".equals(value) || "nan".equals(value)) {
-                    violations.addIf(numeric.minimum() != null || numeric.maximum() != null, detail.withMessageParam("unbound"));
-                } else {
-                    checkNumericLimits(numeric, Double.parseDouble(value), detail);
-                }
+                checkNumericLimits(numeric, Double.parseDouble(value), detail);
             }
         } else {
             violations.add(detail.withMessageParam("number.invalid"));

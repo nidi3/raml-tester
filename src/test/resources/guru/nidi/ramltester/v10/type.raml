@@ -9,40 +9,47 @@ version: v1
     queryParameters:
       boolean:
         type: boolean
+        required: false
       integer:
         type: integer
+        required: false
       number:
         type: number
+        required: false
       integerLimit:
         type: integer
         minimum: -5
         maximum: 666
+        required: false
       numberLimit:
         type: number
         minimum: 5e-2
-        maximum: 666.6
+        maximum: 666.5
+        required: false
       string:
         type: string
         minLength: 2
         maxLength: 5
-      date:
+        required: false
+      date-only:
+        type: date-only
+        required: false
+      time-only:
+        type: time-only
+        required: false
+      datetime-only:
+        type: datetime-only
+        required: false
+      datetime:
         type: datetime
+        format: rfc2616
+        required: false
       enum:
         enum: ['a','b']
+        required: false
       pattern1:
         pattern: \d{2}/[a-y]
-      pattern2:
-        pattern: /\d{2}\/[a-y]/
-      pattern3:
-        pattern: /\d{2}\/[a-y]/i
-      pattern4:
-        pattern: '/\d{2}\/[a-y]/i'
-      pattern5:
-        pattern: "/\\d{2}\\/[a-y]/i"
-#      multi:
-#        - type: integer
-#          minimum: 5
-#        - enum: ['a','b']
+        required: false
     responses:
       200:
         body:

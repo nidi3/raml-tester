@@ -29,9 +29,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 
-/**
- * Wait for https://github.com/raml-org/raml-java-parser/issues/80 to be fixed.
- */
 public class IncludeTest extends HighlevelTestBase {
     private final RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("include.raml");
 

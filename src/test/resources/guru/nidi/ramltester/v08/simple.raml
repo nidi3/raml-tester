@@ -6,7 +6,8 @@ version: v1
 mediaType: application/default
 schemas:
   - string: !include string.json
-  - invalid: xxx
+  - invalid: |
+        {"type": "null"}
 /:
   get:
     responses:

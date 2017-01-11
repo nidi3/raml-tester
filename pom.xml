@@ -98,7 +98,7 @@
         <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser-2</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.5</version>
         </dependency>
 
         <dependency>

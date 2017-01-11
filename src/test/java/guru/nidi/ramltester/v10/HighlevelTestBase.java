@@ -33,8 +33,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -120,6 +122,10 @@ public class HighlevelTestBase {
     protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
         assertThat("Expected exactly one violation", violations.size(), equalTo(1));
         assertThat(violations.iterator().next(), matcher);
+    }
+
+    protected Matcher<String> containsInOrder(String... parts){
+        return stringContainsInOrder(Arrays.asList(parts));
     }
 
     @SafeVarargs

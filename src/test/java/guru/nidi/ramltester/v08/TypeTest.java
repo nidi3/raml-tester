@@ -97,7 +97,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void numberOk() throws Exception {
-        for (final String value : new String[]{"0", "inf", "-inf", "nan", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
+        for (final String value : new String[]{"0", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
             assertNoViolations(
                     type,
                     get("/type?number=" + value),

@@ -78,7 +78,7 @@ public class HeaderTest extends HighlevelTestBase {
     public void wildcardRequestHeader() throws Exception {
         assertNoViolations(test(aggregator,
                 header,
-                get("/header").header("x-bla", "1").header("x-hula", "2").header("req", "3"),
+                get("/header").header("x-bla", "1").header("x-hula", "2").header("req", "3").header("rep","x"),
                 jsonResponse(200, "\"hula\"")));
     }
 
@@ -139,10 +139,12 @@ public class HeaderTest extends HighlevelTestBase {
 
     @Test
     public void missingRequiredResponseHeader() throws Exception {
+        final MockHttpServletResponse res = jsonResponse(200, "\"hula\"");
+        res.addHeader("rep","x");
         assertOneResponseViolationThat(test(aggregator,
                 header,
                 get("/resheader"),
-                jsonResponse(200, "\"hula\"")),
+                res),
                 equalTo("Header 'req' on action(GET /resheader) response(200) is required but not found")
         );
     }
@@ -153,6 +155,7 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("x-bla", "1");
         response.addHeader("x-hula", "2");
         response.addHeader("req", "3");
+        response.addHeader("rep", "x");
         assertNoViolations(test(aggregator,
                 header,
                 get("/resheader"),
