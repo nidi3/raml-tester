@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.v08;
 
+import guru.nidi.ramltester.HighlevelTestBase;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.core.RamlReport;

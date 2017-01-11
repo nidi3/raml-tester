@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.v10;
+package guru.nidi.ramltester;
 
 import guru.nidi.loader.Loader;
 import guru.nidi.ramltester.RamlDefinition;
@@ -137,7 +137,7 @@ public class HighlevelTestBase {
         }
     }
 
-    protected static class DefaultOkSchemaValidator implements SchemaValidator {
+    public static class DefaultOkSchemaValidator implements SchemaValidator {
         @Override
         public boolean supports(MediaType mediaType) {
             return mediaType.isCompatibleWith(MediaType.valueOf("application/default"));
@@ -154,7 +154,7 @@ public class HighlevelTestBase {
         }
     }
 
-    protected static class FormEncodedSchemaValidator implements SchemaValidator {
+    public static class FormEncodedSchemaValidator implements SchemaValidator {
         @Override
         public boolean supports(MediaType mediaType) {
             return mediaType.isCompatibleWith(MediaType.valueOf("application/x-www-form-urlencoded"));

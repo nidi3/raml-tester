@@ -15,11 +15,11 @@
  */
 package guru.nidi.ramltester.v10;
 
+import guru.nidi.ramltester.HighlevelTestBase;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolationException;
-import guru.nidi.ramltester.core.RamlViolations;
 import org.junit.Test;
 
 import java.util.Iterator;
