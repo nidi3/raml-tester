@@ -40,6 +40,7 @@ public class SchemaTest extends HighlevelTestBase {
     @Test
     public void matchingXmlSchema() throws UnsupportedEncodingException {
         assertNoViolations(simple, get("/schema"), response(208, "<api-request><input>str</input></api-request>", "text/xml"));
+        assertNoViolations(simple, get("/schema"), response(211, "<api-request><input>str</input></api-request>", "text/xml"));
     }
 
     @Test

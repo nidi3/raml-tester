@@ -48,7 +48,6 @@ public class UsageTest extends HighlevelTestBase {
         assertEquals(set("POST /data", "GET /uuWithAction"), usage.getUnusedActions());
         assertEquals(set("uuQuery in GET /data"), usage.getUnusedQueryParameters());
         assertEquals(set("uuReqHeader in GET /data"), usage.getUnusedRequestHeaders());
-        assertEquals(set("uuFormParam in POST /data (application/x-www-form-urlencoded)"), usage.getUnusedFormParameters());
         assertEquals(set("uuResHeader in GET /data -> 200"), usage.getUnusedResponseHeaders());
         assertEquals(set("201 in GET /data"), usage.getUnusedResponseCodes());
     }
