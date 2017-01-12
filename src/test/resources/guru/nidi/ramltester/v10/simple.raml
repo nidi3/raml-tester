@@ -9,7 +9,7 @@ schemas:
     schema: !include string.json
   invalid:
     schema: |
-      {"type": "null"}
+      {"type": "hula"}
   Xml:
     schema: |
       <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
@@ -58,10 +58,6 @@ schemas:
         body:
           application/json:
             schema: String
-#      203:
-#        body:
-#          application/json:
-#            schema: undefined
       204:
         body:
           application/json:

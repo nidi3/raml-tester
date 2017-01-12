@@ -84,17 +84,17 @@ public class ValidatorTest extends HighlevelTestBase {
         final RamlReport report = example.validator().withChecks(EXAMPLE).validate();
         assertEquals(5, report.getValidationViolations().size());
         final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("example of queryParameter 'q' in action(POST /ok) - Value '10' is bigger than maximum 8", it.next());
-        assertEquals("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4", it.next());
-        assertEquals("example of queryParameter 'u' in action (POST / ok) - Value '{\"name\":\"n\"}\n':" +
+        assertEquals("example of queryParameter 'q' in action(POST /ok) - Value '10': Expected number between 4 and 8", it.next());
+        assertEquals("default value of queryParameter 'q' in action(POST /ok) - Value '2': Expected number between 4 and 8", it.next());
+        assertEquals("example of queryParameter 'u' in action(POST /ok) - Value '{\"name\":\"n\"}\n': " +
                 "Error validating JSON. Error: - Missing required field \"firstname\"\n" +
                 "- Missing required field \"lastname\"\n" +
                 "- Missing required field \"age\"",it.next());
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
-                "Content: 42\n" +
+                "Content: 42\n\n" +
                 "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) response(200) mime-type('application/json')\n" +
-                "Content: 42\n" +
+                "Content: 42\n\n" +
                 "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
     }
 

@@ -19,10 +19,10 @@ import guru.nidi.ramltester.HighlevelTestBase;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
 import org.junit.Test;
-import org.raml.v2.api.model.v08.api.Api;
-import org.raml.v2.api.model.v08.bodies.Response;
-import org.raml.v2.api.model.v08.methods.Method;
-import org.raml.v2.api.model.v08.parameters.Parameter;
+import org.raml.v2.api.model.v10.api.Api;
+import org.raml.v2.api.model.v10.bodies.Response;
+import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
+import org.raml.v2.api.model.v10.methods.Method;
 
 import java.util.List;
 
@@ -35,16 +35,16 @@ public class IncludeTest extends HighlevelTestBase {
 
     @Test
     public void load() throws Exception {
-        final Api raml = api.getModel().getApiV08();
+        final Api raml = api.getModel().getApiV10();
         final Method get = raml.resources().get(0).methods().get(0);
-        assertNull(paramByName(get.queryParameters(),"string.json"));
+        assertNull(paramByName(get.queryParameters(), "string.json"));
         assertNotEquals("string.json", responseByCode(get.responses(), "200").body().get(0).example());
-        assertNotEquals("string.json", responseByCode(get.responses(), "201").body().get(0).schema());
+        assertNotEquals("string.json", responseByCode(get.responses(), "201").body().get(0).type());
         assertNotEquals("string.json", responseByCode(get.responses(), "201").body().get(0).example());
     }
 
-    private Parameter paramByName(List<Parameter> parameters, String name) {
-        for (final Parameter parameter : parameters) {
+    private TypeDeclaration paramByName(List<TypeDeclaration> parameters, String name) {
+        for (final TypeDeclaration parameter : parameters) {
             if (parameter.name().equals(name)) {
                 return parameter;
             }
