@@ -74,9 +74,11 @@ public class TypeValidator {
                 violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)), namedMsg.withMessageParam("undefined"));
             } else {
                 for (final UnifiedType parameter : ps) {
-                    violations.addIf(!parameter.repeat() && entry.getValue().size() > 1, namedMsg.withMessageParam("repeat.superfluous"));
-                    for (final Object value : entry.getValue()) {
-                        parameter.validate(value, violations, namedMsg);
+                    if (entry.getValue().size() == 1) {
+                        parameter.validate(entry.getValue().get(0), violations, namedMsg);
+                    } else {
+                        violations.addIf(!parameter.repeat(), namedMsg.withMessageParam("repeat.superfluous"));
+                        parameter.validate(entry.getValue(), violations, namedMsg);
                     }
                 }
                 found.add(paramName);

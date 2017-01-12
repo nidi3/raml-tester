@@ -18,11 +18,12 @@ package guru.nidi.ramltester.model;
 import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.util.Message;
 import org.raml.v2.api.model.common.ValidationResult;
+import org.raml.v2.api.model.v10.datamodel.ArrayTypeDeclaration;
 import org.raml.v2.api.model.v10.datamodel.ExampleSpec;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
-import org.raml.v2.internal.impl.v10.type.TypeId;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -74,14 +75,43 @@ public class Type10 implements UnifiedType {
 
     @Override
     public boolean repeat() {
-        return type.name().endsWith("[]") || TypeId.ARRAY.getType().equals(type.type());
+        return type instanceof ArrayTypeDeclaration;
+    }
+
+    private String elementType() {
+        final String t = type.type();
+        if (t.endsWith("[]")) {
+            return t.substring(0, t.length() - 2);
+        }
+        if (type instanceof ArrayTypeDeclaration) {
+            final String items = ((ArrayTypeDeclaration) type).items().type();
+            return items.equals("array") ? "string" : items;
+        }
+        return null;
     }
 
     @Override
     public void validate(Object payload, RamlViolations violations, Message message) {
-        for (final ValidationResult res : type.validate((String) payload)) {
+        String value;
+        if (payload instanceof Collection) {
+            if (elementType() == null) {
+                return; //repeat payload without array type -> just caller's error message
+            }
+            value = join((Collection<?>) payload, elementType().equals("string") ? "\"" : "");
+        } else {
+            value = payload.toString();
+        }
+        for (final ValidationResult res : type.validate(value)) {
             violations.add(message.withInnerParam(new Message("value10", payload, res.getMessage())));
         }
+    }
+
+    private String join(Collection<?> coll, String quote) {
+        final StringBuilder sb = new StringBuilder("[");
+        for (final Object c : coll) {
+            sb.append(quote).append(c.toString()).append(quote).append(",");
+        }
+        return sb.replace(sb.length() - 1, sb.length(), "]").toString();
     }
 
 }

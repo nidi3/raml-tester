@@ -19,8 +19,23 @@ schemas:
 /header:
   get:
     headers:
-      rep:
+      string-array:
         type: string[]
+        required: false
+      int-array:
+        type: integer[]
+        required: false
+      array-of-string:
+        type: array
+        items: string
+        required: false
+      array-of-int:
+        type: array
+        items: integer
+        required: false
+      array:
+        type: array
+        required: false
       req:
       x-{?}:
         required: false
@@ -55,6 +70,7 @@ schemas:
         headers:
           rep:
             type: string[]
+            required: false
           req:
           x-{?}:
             required: false

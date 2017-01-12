@@ -157,13 +157,17 @@ class ParameterChecker08 {
                 name.endsWith(key.substring(wildcardPos + WILDCARD.length()));
     }
 
-    public void checkParameters(Parameter param, List<Object> values, Message message) {
-        for (final Object val : values) {
-            checkParameter(param, val, message);
+    public void checkParameter(Parameter param, Object value, Message message) {
+        if (value instanceof Collection) {
+            for (final Object v : (Collection<?>) value) {
+                doCheckParameter(param, v, message);
+            }
+        } else {
+            doCheckParameter(param, value, message);
         }
     }
 
-    public void checkParameter(Parameter param, Object value, Message message) {
+    private void doCheckParameter(Parameter param, Object value, Message message) {
         if (value == null) {
             final Message detail = message.withInnerParam(new Message("value", "empty"));
             checkNullParameter(param, detail);

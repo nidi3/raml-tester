@@ -61,7 +61,12 @@ public class HeaderTest extends HighlevelTestBase {
     public void allowedRepeatRequestHeader() throws Exception {
         assertNoViolations(test(aggregator,
                 header,
-                get("/header").header("rep", "1").header("rep", "2").header("req", "xxx"),
+                get("/header").header("req", "xxx")
+                        .header("string-array", "s1").header("string-array", "s2")
+                        .header("int-array", "1").header("int-array", "2")
+                        .header("array-of-string", "s1").header("array-of-string", "s2")
+                        .header("array-of-int", "1").header("array-of-int", "2")
+                        .header("array", "s1").header("array", "s2"),
                 jsonResponse(200, "\"hula\"")));
     }
 
@@ -79,7 +84,7 @@ public class HeaderTest extends HighlevelTestBase {
     public void wildcardRequestHeader() throws Exception {
         assertNoViolations(test(aggregator,
                 header,
-                get("/header").header("x-bla", "1").header("x-hula", "2").header("req", "3").header("rep","x"),
+                get("/header").header("x-bla", "1").header("x-hula", "2").header("req", "3"),
                 jsonResponse(200, "\"hula\"")));
     }
 
@@ -140,12 +145,10 @@ public class HeaderTest extends HighlevelTestBase {
 
     @Test
     public void missingRequiredResponseHeader() throws Exception {
-        final MockHttpServletResponse res = jsonResponse(200, "\"hula\"");
-        res.addHeader("rep","x");
         assertOneResponseViolationThat(test(aggregator,
                 header,
                 get("/resheader"),
-                res),
+                jsonResponse(200, "\"hula\"")),
                 equalTo("Header 'req' on action(GET /resheader) response(200) is required but not found")
         );
     }
@@ -156,7 +159,6 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("x-bla", "1");
         response.addHeader("x-hula", "2");
         response.addHeader("req", "3");
-        response.addHeader("rep", "x");
         assertNoViolations(test(aggregator,
                 header,
                 get("/resheader"),
