@@ -16,10 +16,12 @@
 package guru.nidi.ramltester.model;
 
 import org.raml.v2.api.model.v10.datamodel.ExampleSpec;
+import org.raml.v2.api.model.v10.datamodel.ExternalTypeDeclaration;
 import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 import org.raml.v2.internal.impl.v10.type.TypeId;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +49,7 @@ public class Body10 implements UnifiedBody {
 
     @Override
     public List<UnifiedType> formParameters() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -57,7 +59,7 @@ public class Body10 implements UnifiedBody {
 
     @Override
     public String typeDefinition() {
-        return type(); //TODO
+        return type instanceof ExternalTypeDeclaration ? ((ExternalTypeDeclaration) type).schemaContent() : type();
     }
 
     @Override
@@ -65,6 +67,9 @@ public class Body10 implements UnifiedBody {
         final List<String> res = new ArrayList<>();
         for (final ExampleSpec ex : type.examples()) {
             res.add(ex.value());
+        }
+        if (type.example() != null) {
+            res.add(type.example().value());
         }
         return res;
     }

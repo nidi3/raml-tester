@@ -55,7 +55,7 @@ public class Type08 implements UnifiedType {
 
     @Override
     public List<String> examples() {
-        return parameter.example()==null? Collections.<String>emptyList(): singletonList(parameter.example());
+        return parameter.example() == null ? Collections.<String>emptyList() : singletonList(parameter.example());
     }
 
     @Override

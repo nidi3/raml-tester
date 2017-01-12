@@ -60,6 +60,9 @@ public class Type10 implements UnifiedType {
         for (final ExampleSpec ex : type.examples()) {
             res.add(ex.value());
         }
+        if (type.example() != null) {
+            res.add(type.example().value());
+        }
         return res;
     }
 
@@ -92,17 +95,25 @@ public class Type10 implements UnifiedType {
 
     @Override
     public void validate(Object payload, RamlViolations violations, Message message) {
-        String value;
         if (payload instanceof Collection) {
-            if (elementType() == null) {
-                return; //repeat payload without array type -> just caller's error message
+            //repeat payload without array type -> just caller's error message
+            if (elementType() != null) {
+                doValidate(join((Collection<?>) payload, elementType().equals("string") ? "\"" : ""), violations, message);
             }
-            value = join((Collection<?>) payload, elementType().equals("string") ? "\"" : "");
+        } else if (payload == null) {
+            if (type.type().equals("string")) {
+                doValidate("", violations, message);
+            } else {
+                violations.add(message.withInnerParam(new Message("value", "empty").withMessageParam("value.empty")));
+            }
         } else {
-            value = payload.toString();
+            doValidate(payload.toString(), violations, message);
         }
+    }
+
+    private void doValidate(String value, RamlViolations violations, Message message) {
         for (final ValidationResult res : type.validate(value)) {
-            violations.add(message.withInnerParam(new Message("value10", payload, res.getMessage())));
+            violations.add(message.withInnerParam(new Message("value10", value, res.getMessage())));
         }
     }
 

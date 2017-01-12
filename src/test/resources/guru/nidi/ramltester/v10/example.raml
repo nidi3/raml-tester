@@ -20,10 +20,10 @@ schemas:
 /ok:
   post:
     queryParameters:
-      t:
-        type: string
-        example:
-          value: 10
+#      t:
+#        type: string
+#        example:
+#          value: 10
       a:
       b:
         type: boolean
@@ -51,16 +51,16 @@ schemas:
         schema: |
           {"type":"string"}
         example: |
-          "42"
+          "s42"
     responses:
       200:
 /okref:
   post:
     body:
       application/json:
-        schema: string
+        schema: String
         example: |
-          "42"
+          "s42"
     responses:
       200:
 
@@ -68,17 +68,22 @@ schemas:
   post:
     body:
       application/json:
-        schema: string
+        type: String
         example:
           strict: false
-          value: 42
+          value: |
+            42
     responses:
       200:
         body:
           application/json:
-            schema: string
-            example: "42"
+            type: String
+            example:
+              strict: false
+              value: |
+                42
       201:
         body:
           application/json:
-            example: 42
+            example: |
+              42
