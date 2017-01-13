@@ -23,7 +23,7 @@ import java.util.List;
  *
  */
 public class SecSchemeSettings10 implements UnifiedSecSchemeSettings {
-    private SecuritySchemeSettings settings;
+    private final SecuritySchemeSettings settings;
 
     public SecSchemeSettings10(SecuritySchemeSettings settings) {
         this.settings = settings;

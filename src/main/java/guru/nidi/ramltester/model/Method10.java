@@ -27,7 +27,7 @@ import static java.util.Collections.emptyList;
  *
  */
 public class Method10 implements UnifiedMethod {
-    private Method method;
+    private final Method method;
 
     public Method10(Method method) {
         this.method = method;

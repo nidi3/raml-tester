@@ -28,12 +28,12 @@ import guru.nidi.codeassert.junit.CodeAssertTest;
 import guru.nidi.codeassert.model.ModelAnalyzer;
 import guru.nidi.codeassert.model.ModelResult;
 import guru.nidi.codeassert.pmd.*;
+import guru.nidi.ramltester.core.RamlChecker;
 import guru.nidi.ramltester.core.Type08CheckerTest;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.MediaTypeTest;
 import guru.nidi.ramltester.v08.UriTest;
 import net.sourceforge.pmd.RulePriority;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static guru.nidi.codeassert.junit.CodeAssertMatchers.packagesMatchExactly;
@@ -43,7 +43,6 @@ import static org.junit.Assert.assertThat;
 /**
  *
  */
-@Ignore
 public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
@@ -120,8 +119,8 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("it's checked and correct",
                         In.locs("RelativeJsonSchemaAwareRamlDocumentBuilder", "MediaType", "ServletRamlMessageTest").ignore("CompareObjectsWithEquals"),
                         In.locs("JsRegex", "MediaType").ignore("PreserveStackTrace"),
-                        In.locs("JsRegex","Usage").ignore("AvoidCatchingGenericException"),
-                        In.classes(UriTest.class, Type08CheckerTest.class, MediaTypeTest.class).ignore("JUnitTestsShouldIncludeAssert"))
+                        In.locs("JsRegex", "Usage").ignore("AvoidCatchingGenericException"),
+                        In.classes(UriTest.class, guru.nidi.ramltester.v10.UriTest.class, Type08CheckerTest.class, MediaTypeTest.class).ignore("JUnitTestsShouldIncludeAssert"))
                 .because("it's style",
                         In.loc("RamlValidatorChecker").ignore("CollapsibleIfStatements"))
                 .because("TODO",                 //TODO
@@ -133,13 +132,14 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("It's standard config",
                         In.loc("CodeCoverage").ignore("NoPackage"))
                 .because("is in test",
-                        In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"));
+                        In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"),
+                        In.clazz(Type08CheckerTest.class).ignore("GodClass"));
         return new PmdAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector)
                 .withRuleSets(basic(), braces(), design(), exceptions(), imports(), junit(),
                         optimizations(), strings(), sunSecure(), typeResolution(), unnecessary(), unused(),
                         codesize().tooManyMethods(35),
                         empty().allowCommentedEmptyCatch(true),
-                        naming().variableLen(1, 25))
+                        naming().variableLen(1, 25).methodLen(2))
                 .analyze();
     }
 
@@ -153,7 +153,10 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .just(
                         In.loc("UsageCollector").ignore("static final UsageCollector"),
                         In.loc("SecurityExtractor").ignore("for (final SecurityScheme scheme : schemes)"),
+                        In.clazz(RamlChecker.class).ignore("//TODO usage is multiplied by security schemes"),
                         In.everywhere().ignore("public boolean equals(Object o) {"))
+                .because("Same code for 08 and 10, but not unifiable",
+                        In.loc("guru.nidi.ramltester.model").ignoreAll())
                 .because("Similar but not same",
                         In.locs("*Request", "*Response").ignoreAll(),
                         In.clazz(RamlHttpClient.class).ignoreAll());

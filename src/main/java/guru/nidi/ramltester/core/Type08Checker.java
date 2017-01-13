@@ -126,7 +126,7 @@ class Type08Checker {
     private void checkNumber(Parameter param, String value, Message detail) {
         if (NUMBER.matcher(value).matches()) {
             if (param instanceof NumberTypeDeclaration) {
-                NumberTypeDeclaration numeric = (NumberTypeDeclaration) param;
+                final NumberTypeDeclaration numeric = (NumberTypeDeclaration) param;
                 checkNumericLimits(numeric, Double.parseDouble(value), detail);
             }
         } else {

@@ -24,7 +24,7 @@ import java.util.List;
  *
  */
 public class Resource08 implements UnifiedResource {
-    private Resource resource;
+    private final Resource resource;
 
     public Resource08(Resource resource) {
         this.resource = resource;

@@ -275,7 +275,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void multiTypeOk() throws Exception {
-        for (String value : new String[]{"5", "666", "a", "b"}) {
+        for (final String value : new String[]{"5", "666", "a", "b"}) {
             assertNoViolations(
                     type,
                     get("/type?multi=" + value),
@@ -285,7 +285,7 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void multiTypeNok() throws Exception {
-        for (String value : new String[]{"4", "4.5", "c"}) {
+        for (final String value : new String[]{"4", "4.5", "c"}) {
             assertOneRequestViolationThat(
                     type,
                     get("/type?multi=" + value),

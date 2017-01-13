@@ -25,7 +25,7 @@ import java.util.List;
  *
  */
 public class SecSchemeSettings08 implements UnifiedSecSchemeSettings {
-    private SecuritySchemeSettings settings;
+    private final SecuritySchemeSettings settings;
 
     public SecSchemeSettings08(SecuritySchemeSettings settings) {
         this.settings = settings;

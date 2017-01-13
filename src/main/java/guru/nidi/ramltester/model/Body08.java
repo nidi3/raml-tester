@@ -26,7 +26,7 @@ import static java.util.Collections.singletonList;
  *
  */
 public class Body08 implements UnifiedBody {
-    private BodyLike body;
+    private final BodyLike body;
 
     public Body08(BodyLike body) {
         this.body = body;

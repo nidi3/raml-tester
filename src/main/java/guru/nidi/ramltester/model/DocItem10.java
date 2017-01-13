@@ -24,7 +24,7 @@ import java.util.List;
  *
  */
 public class DocItem10 implements UnifiedDocItem {
-    private DocumentationItem item;
+    private final DocumentationItem item;
 
     public DocItem10(DocumentationItem item) {
         this.item = item;

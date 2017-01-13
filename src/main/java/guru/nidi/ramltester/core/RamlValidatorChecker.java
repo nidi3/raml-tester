@@ -33,9 +33,6 @@ import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
  *
  */
 class RamlValidatorChecker {
-
-    private static final String PARAM_CONDITION_ILLEGAL = "parameter.condition.illegal";
-
     enum ParamName {
         BASE_URI("baseUriParameter"),
         URI("uriParameter"),

@@ -28,7 +28,7 @@ import java.util.List;
  *
  */
 public class Body10 implements UnifiedBody {
-    private TypeDeclaration type;
+    private final TypeDeclaration type;
 
     public Body10(TypeDeclaration type) {
         this.type = type;

@@ -26,7 +26,7 @@ import java.util.List;
  *
  */
 public class Type10 implements UnifiedType {
-    private TypeDeclaration type;
+    private final TypeDeclaration type;
 
     public Type10(TypeDeclaration type) {
         this.type = type;

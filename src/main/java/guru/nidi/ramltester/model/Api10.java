@@ -23,7 +23,7 @@ import java.util.List;
  *
  */
 public class Api10 implements UnifiedApi {
-    private Api api;
+    private final Api api;
 
     public Api10(Api api) {
         this.api = api;

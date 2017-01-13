@@ -26,7 +26,7 @@ import static java.util.Collections.emptyList;
  *
  */
 public class Resource10 implements UnifiedResource {
-    private Resource resource;
+    private final Resource resource;
 
     public Resource10(Resource resource) {
         this.resource = resource;

@@ -21,7 +21,7 @@ import java.util.List;
 /**
  *
  */
-public class UnifiedModel {
+public final class UnifiedModel {
     private UnifiedModel() {
     }
 

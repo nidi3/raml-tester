@@ -27,7 +27,7 @@ import static java.util.Collections.singletonList;
  *
  */
 public class Type08 implements UnifiedType {
-    private Parameter parameter;
+    private final Parameter parameter;
 
     public Type08(Parameter parameter) {
         this.parameter = parameter;

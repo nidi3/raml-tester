@@ -23,7 +23,7 @@ import java.util.List;
  *
  */
 public class SecSchemePart08 implements UnifiedSecSchemePart{
-    private SecuritySchemePart part;
+    private final SecuritySchemePart part;
 
     public SecSchemePart08(SecuritySchemePart part) {
         this.part = part;

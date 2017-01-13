@@ -24,7 +24,7 @@ import java.util.List;
  *
  */
 public class SecScheme10 implements UnifiedSecScheme {
-    private SecurityScheme scheme;
+    private final SecurityScheme scheme;
 
     public SecScheme10(SecurityScheme scheme) {
         this.scheme = scheme;

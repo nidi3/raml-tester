@@ -16,7 +16,6 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.*;
-import guru.nidi.ramltester.util.Message;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -105,11 +104,11 @@ class SecurityExtractor {
         public List<UnifiedSecScheme> securedBy(UnifiedMethod action) {
             final List<UnifiedSecScheme> res = new ArrayList<>();
             if (!action.securedBy().isEmpty()) {
-                res.addAll(securitySchemes(action.securedBy(), new Message("securityScheme.undefined", new Locator(action))));
+                res.addAll(securitySchemes(action.securedBy()));
             } else if (!action.resource().securedBy().isEmpty()) {
-                res.addAll(securitySchemes(action.resource().securedBy(), new Message("securityScheme.undefined", new Locator(action.resource()))));
+                res.addAll(securitySchemes(action.resource().securedBy()));
             } else if (!raml.securedBy().isEmpty()) {
-                res.addAll(securitySchemes(raml.securedBy(), new Message("securityScheme.undefined", new Locator())));
+                res.addAll(securitySchemes(raml.securedBy()));
             }
             if (res.isEmpty()) {
                 res.add(NULL_SCHEMA);
@@ -117,7 +116,7 @@ class SecurityExtractor {
             return res;
         }
 
-        private List<UnifiedSecScheme> securitySchemes(List<UnifiedSecSchemeRef> refs, Message message) {
+        private List<UnifiedSecScheme> securitySchemes(List<UnifiedSecSchemeRef> refs) {
             final List<UnifiedSecScheme> res = new ArrayList<>();
             for (final UnifiedSecSchemeRef ref : refs) {
                 res.add(ref.securityScheme() == null ? NULL_SCHEMA : ref.securityScheme());

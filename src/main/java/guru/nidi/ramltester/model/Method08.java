@@ -25,7 +25,7 @@ import java.util.Locale;
  *
  */
 public class Method08 implements UnifiedMethod {
-    private Method method;
+    private final Method method;
 
     public Method08(Method method) {
         this.method = method;

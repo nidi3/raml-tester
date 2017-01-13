@@ -24,7 +24,7 @@ import java.util.List;
  *
  */
 public class Response10 implements UnifiedResponse {
-    private Response response;
+    private final Response response;
 
     public Response10(Response response) {
         this.response = response;

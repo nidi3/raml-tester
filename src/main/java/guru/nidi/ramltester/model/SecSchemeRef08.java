@@ -24,7 +24,7 @@ import java.util.List;
  *
  */
 public class SecSchemeRef08 implements UnifiedSecSchemeRef {
-    private SecuritySchemeRef ref;
+    private final SecuritySchemeRef ref;
 
     public SecSchemeRef08(SecuritySchemeRef ref) {
         this.ref = ref;
