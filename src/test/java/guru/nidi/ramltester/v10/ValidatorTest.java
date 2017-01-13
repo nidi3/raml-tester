@@ -27,7 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import static guru.nidi.ramltester.core.Validation.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 
 /**
@@ -89,7 +90,7 @@ public class ValidatorTest extends HighlevelTestBase {
         assertEquals("example of queryParameter 'u' in action(POST /ok) - Value '{\"name\":\"n\"}\n': " +
                 "Error validating JSON. Error: - Missing required field \"firstname\"\n" +
                 "- Missing required field \"lastname\"\n" +
-                "- Missing required field \"age\"",it.next());
+                "- Missing required field \"age\"", it.next());
         assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
                 "Content: 42\n\n" +
                 "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
@@ -160,7 +161,8 @@ public class ValidatorTest extends HighlevelTestBase {
         final RamlReport report = example.validator().withChecks(EMPTY).validate();
         assertEquals(Arrays.asList(
                 "resource(/empty) is empty",
-                "action(GET /nonEmpty/sub) is empty"),
+                "action(GET /nonEmpty/sub) is empty",
+                "action(GET /nonEmpty) is empty"),
                 report.getValidationViolations().asList());
     }
 }

@@ -23,7 +23,6 @@ import guru.nidi.ramltester.core.RamlViolationException;
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
@@ -43,7 +42,8 @@ public class SimpleTest extends HighlevelTestBase {
     private static final RamlDefinition noBaseUri = RamlLoaders.fromClasspath(SimpleTest.class).load("noBaseUri.raml");
     private static final MultiReportAggregator aggregator = new MultiReportAggregator();
 
-    @ClassRule
+
+//    @ClassRule
     public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(simple), RESOURCE);
 
     @Test

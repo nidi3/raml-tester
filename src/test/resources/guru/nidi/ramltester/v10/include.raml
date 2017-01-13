@@ -21,11 +21,11 @@ resourceTypes:
   type:
     myCollection:
       param: !include string.json
-      exampleCollection: !include string.json
+      exampleCollection: !include hula.json
   get:
     responses:
       201:
         body:
           application/json:
             schema: !include string.json
-            example: !include string.json
+            example: !include hula.json

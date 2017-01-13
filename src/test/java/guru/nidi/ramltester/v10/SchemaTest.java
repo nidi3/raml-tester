@@ -18,6 +18,7 @@ package guru.nidi.ramltester.v10;
 import guru.nidi.ramltester.HighlevelTestBase;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -44,6 +45,7 @@ public class SchemaTest extends HighlevelTestBase {
     }
 
     @Test
+    @Ignore
     public void matchingReferencedJsonSchema() throws UnsupportedEncodingException {
         assertNoViolations(simple, get("/schema"), jsonResponse(204, "\"str\""));
         assertNoViolations(simple, get("/schema"), jsonResponse(205, "\"str\""));
