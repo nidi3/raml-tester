@@ -17,6 +17,7 @@ package guru.nidi.ramltester.restassured;
 
 import com.jayway.restassured.filter.FilterContext;
 import com.jayway.restassured.specification.FilterableRequestSpecification;
+import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.Values;
 
@@ -41,8 +42,17 @@ class RestAssuredRamlRequest extends RestAssuredRamlMessage implements RamlReque
 
     @Override
     public byte[] getContent() {
-        final String body = requestSpec.getBody();
-        return body == null ? null : body.getBytes();
+        final Object body = requestSpec.getBody();
+        if (body == null) {
+            return null;
+        }
+        if (body instanceof String) {
+            return ((String) body).getBytes();
+        }
+        if (body instanceof byte[]) {
+            return (byte[]) body;
+        }
+        throw new RamlCheckerException("Cannot process body of type " + body.getClass());
     }
 
     @Override

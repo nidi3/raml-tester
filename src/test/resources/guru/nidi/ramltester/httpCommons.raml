@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 ---
 title: http commons
 baseUri: http://nidi.guru/raml/{version}
@@ -9,6 +9,7 @@ version: v1
     get:
       queryParameters:
         empty:
+          required: false
       responses:
         200:
           body:
@@ -16,7 +17,7 @@ version: v1
               schema: |
                 {"type":"string"}
         204:
-  post:
+  put:
     responses:
       405:
         body:

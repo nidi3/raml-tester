@@ -107,16 +107,16 @@ public class UriTest extends HighlevelTestBase {
     @Test
     public void overwrittenBaseUriParametersNok() throws Exception {
         final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/bu")).andReturn();
-        assertOneViolationThat(
-                api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult).getRequestViolations(),
+        assertOneRequestViolationThat(
+                api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult),
                 equalTo("BaseUri parameter 'host' on action(GET /bu) - Value 'nidi.guru' is not a member of enum '[bu-host]'"));
     }
 
     @Test
     public void overwrittenBaseUriParametersNok2() throws Exception {
         final MvcResult result = mockMvc.perform(get("/sub-raml/v1/undefd/bu/sub")).andReturn();
-        assertOneViolationThat(
-                api.assumingBaseUri("http://sub-host").testAgainst(result).getRequestViolations(),
+        assertOneRequestViolationThat(
+                api.assumingBaseUri("http://sub-host").testAgainst(result),
                 equalTo("BaseUri parameter 'host' on action(GET /bu/sub) - Value 'sub-host' is not a member of enum '[sub-host-get]'"));
     }
 
@@ -139,7 +139,20 @@ public class UriTest extends HighlevelTestBase {
     @Test
     public void notAllowedProtocol() throws Exception {
         final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/type")).andReturn();
-        assertOneViolationThat(api.assumingBaseUri("https://nidi.guru").testAgainst(mvcResult).getRequestViolations(),
+        assertOneRequestViolationThat(api.assumingBaseUri("https://nidi.guru").testAgainst(mvcResult),
                 equalTo("Protocol https is not defined on action(GET /type)"));
+    }
+
+    @Test
+    public void ambigousUriParam() throws Exception {
+        final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/ambigous/x")).andReturn();
+        assertOneRequestViolationThat(api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult),
+                equalTo("Path '/ambigous/x' is matched by both resources '/ambigous/{a}' and '/ambigous/{b}'"));
+    }
+
+    @Test
+    public void matchResourceWithLessUriParams() throws Exception {
+        final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/multi4-2?c=x")).andReturn();
+        assertNoViolations(api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult).getRequestViolations());
     }
 }

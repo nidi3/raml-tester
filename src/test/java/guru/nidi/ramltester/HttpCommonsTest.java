@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.v10;
+package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.SimpleReportAggregator;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.util.ServerTest;
@@ -25,7 +23,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.util.EntityUtils;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -43,7 +41,7 @@ public class HttpCommonsTest extends ServerTest {
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
     private static RamlHttpClient client = RamlLoaders
-            .fromClasspath(SimpleTest.class).load("httpCommons.raml")
+            .fromClasspath(HttpCommonsTest.class).load("httpCommons.raml")
             .assumingBaseUri("http://nidi.guru/raml/v1")
             .createHttpClient()
             .aggregating(aggregator);
@@ -95,8 +93,8 @@ public class HttpCommonsTest extends ServerTest {
 
     @Test
     public void emptyPostRequest() throws IOException {
-        final HttpPost post = new HttpPost(url("base"));
-        client.execute(post);
+        final HttpPut put = new HttpPut(url("base"));
+        client.execute(put);
         assertThat(client.getLastReport(), checks());
     }
 
