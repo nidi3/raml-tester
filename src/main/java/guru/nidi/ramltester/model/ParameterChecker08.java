@@ -32,9 +32,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-//import static guru.nidi.ramltester.core.CheckerHelper.paramNamesOf;
-//import static guru.nidi.ramltester.core.CheckerHelper.paramsByName;
-
 /**
  *
  */
@@ -87,17 +84,8 @@ class ParameterChecker08 {
     }
 
     public Set<String> checkParameters(List<Parameter> params, Values values, Message message) {
-        final List<Parameter> listParams = new ArrayList<>();
-//        addToMapOfList(params, listParams);
-//        return checkListParameters(listParams, values, message);
         return checkListParameters(params, values, message);
     }
-
-//    private void addToMapOfList(List<Parameter> params, Map<String, List<? extends AbstractParam>> listParams) {
-//        for (final Map.Entry<String, ? extends AbstractParam> entry : params.entrySet()) {
-//            listParams.put(entry.getKey(), Collections.singletonList(entry.getValue()));
-//        }
-//    }
 
     private boolean acceptUndefined(String name) {
         return acceptUndefined || predefined.contains(name) || (ignoreX && name.startsWith("x-"));
@@ -124,9 +112,7 @@ class ParameterChecker08 {
         }
         for (final Parameter parameter : params) {
             final Message namedMsg = message.withParam(parameter.name());
-//            for (final AbstractParam parameter : entry.getValue()) {
             violations.addIf(parameter.required() && !found.contains(parameter.name()), namedMsg.withMessageParam("required.missing"));
-//            }
         }
         return found;
     }

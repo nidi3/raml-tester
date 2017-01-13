@@ -121,29 +121,8 @@ class SecurityExtractor {
             final List<UnifiedSecScheme> res = new ArrayList<>();
             for (final UnifiedSecSchemeRef ref : refs) {
                 res.add(ref.securityScheme() == null ? NULL_SCHEMA : ref.securityScheme());
-//                final String name = ref.name();
-//                if ("null".equals(name)) {
-//                    res.add(NULL_SCHEMA);
-//                } else {
-//
-//                    final SecurityScheme ss = securityScheme(name);
-//                    if (ss == null) {
-//                        violations.add(message.withParam(name));
-//                    } else {
-//                        res.add(ss);
-//                    }
-//                }
             }
             return res;
         }
-
-//        private SecurityScheme securityScheme(String name) {
-//            for (final AbstractSecurityScheme scheme: raml.securitySchemes()) {
-//                if (map.containsKey(name)) {
-//                    return map.get(name);
-//                }
-//            }
-//            return null;
-//        }
     }
 }

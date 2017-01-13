@@ -101,9 +101,7 @@ public class TypeValidator {
         }
         for (final UnifiedType parameter : params) {
             final Message namedMsg = message.withParam(parameter.name());
-//            for (final AbstractParam parameter : entry.getValue()) {
             violations.addIf(parameter.required() && !ignoreRequired && !found.contains(parameter.name()), namedMsg.withMessageParam("required.missing"));
-//            }
         }
         return found;
     }

@@ -133,22 +133,6 @@ final class CheckerHelper {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static List<UnifiedType> paramEntries(List<UnifiedType> params) {
-//        final List<Map.Entry<String, AbstractParam>> res = new ArrayList<>();
-//        for (final Parameter param : params) {
-//            if (param.getValue() instanceof List) {
-//                for (final AbstractParam p : (List<AbstractParam>) param.getValue()) {
-//                    res.add(new AbstractMap.SimpleEntry<>(param.getKey(), p));
-//                }
-//            } else {
-//                res.add(param);
-//            }
-//        }
-//        return res;
-        return params;
-    }
-
     public static Reader resolveSchema(String type, String typeDef) {
         if (typeDef == null) {
             return new NamedReader(type, new Message("schema.inline").toString());

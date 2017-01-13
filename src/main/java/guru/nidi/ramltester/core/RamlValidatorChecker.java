@@ -18,8 +18,6 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
-import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +25,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static guru.nidi.ramltester.core.CheckerHelper.*;
+import static guru.nidi.ramltester.core.CheckerHelper.findSchemaValidator;
+import static guru.nidi.ramltester.core.CheckerHelper.resolveSchema;
 import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
 /**
@@ -116,7 +115,7 @@ class RamlValidatorChecker {
 
     public void description(List<UnifiedType> params, ParamName paramName) {
         if (has(Validation.DESCRIPTION)) {
-            for (final UnifiedType param : paramEntries(params)) {
+            for (final UnifiedType param : params) {
                 description(param.name(), param, paramName);
             }
         }
@@ -218,12 +217,8 @@ class RamlValidatorChecker {
                 }
             }
         }
-        if (has(Validation.PARAMETER)) {
-            parameterDef(params, paramName);
-        }
         if (has(Validation.EXAMPLE)) {
-//            final ParameterChecker08 checker = new ParameterChecker08(violations);
-            for (final UnifiedType param : paramEntries(params)) {
+            for (final UnifiedType param : params) {
                 parameterValues(param, new Message("parameter.condition", locator, param.name(), paramName));
             }
         }
@@ -238,44 +233,12 @@ class RamlValidatorChecker {
         }
     }
 
-    private void parameterDef(List<UnifiedType> params, ParamName paramName) {
-//        for (final Parameter param : paramEntries(params)) {
-//            final String name = param.name();
-//            final String type = param.type() == null ? "string": param.type();
-//            if (param instanceof StringTypeDeclaration) {
-//                minMaxNotAllowed((NumberTypeDeclaration) param, name, paramName);
-//            } else {
-//                stringConstraintsNotAllowed(param, name, paramName);
-//                if (type != ParamType.INTEGER && type != ParamType.NUMBER) {
-//                    minMaxNotAllowed(param, name, paramName);
-//                }
-//                if (type == ParamType.FILE) {
-//                    violations.addIf(paramName != ParamName.FORM, new Message("parameter.file.illegal", locator, name, paramName));
-//                }
-//            }
-//        }
-    }
-
-    private void stringConstraintsNotAllowed(StringTypeDeclaration param, String name, ParamName paramName) {
-        violations.addIf(param.enumValues() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "enum"));
-        violations.addIf(param.pattern() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "pattern"));
-        violations.addIf(param.minLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minLength"));
-        violations.addIf(param.maxLength() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maxLength"));
-    }
-
-    private void minMaxNotAllowed(NumberTypeDeclaration param, String name, ParamName paramName) {
-        violations.addIf(param.minimum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "minimum"));
-        violations.addIf(param.maximum() != null, new Message(PARAM_CONDITION_ILLEGAL, locator, name, paramName, "maximum"));
-    }
-
     private void parameterValues(UnifiedType param, Message message) {
         for (final String example : param.examples()) {
             param.validate(example, violations, message.withParam("example"));
-//            checker.checkParameter(param.<Parameter>delegate(), param.examples(), message.withParam("example"));
         }
         if (param.defaultValue() != null) {
             param.validate(param.defaultValue(), violations, message.withParam("default value"));
-//            checker.checkParameter(param.<Parameter>delegate(), param.defaultValue(), message.withParam("default value"));
         }
     }
 
