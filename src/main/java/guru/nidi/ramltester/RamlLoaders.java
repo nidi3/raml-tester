@@ -67,11 +67,12 @@ public class RamlLoaders {
         return new UrlLoader(baseUrl);
     }
 
-    private static Loader githubLoader(String token, String user, String project) {
+    private static Loader githubLoader(String token, String user, String project, String ref) {
         final int pos = project.indexOf('/');
-        return pos < 0
+        final GithubLoader loader = pos < 0
                 ? GithubLoader.forPrivate(token, user, project)
-                : GithubLoader.forPrivate(token, user, project.substring(0, pos), project.substring(pos));
+                : GithubLoader.forPrivate(token, user, project.substring(0, pos)).resourceBase(project.substring(pos + 1));
+        return loader.ref(ref);
     }
 
     private static Loader apiPortalLoader(String user, String password) {
@@ -107,11 +108,11 @@ public class RamlLoaders {
     }
 
     public static RamlLoaders fromGithub(String user, String project) {
-        return fromGithub(null, user, project);
+        return fromGithub(null, user, project, null);
     }
 
-    public static RamlLoaders fromGithub(String token, String user, String project) {
-        return using(githubLoader(token, user, project));
+    public static RamlLoaders fromGithub(String token, String user, String project, String ref) {
+        return using(githubLoader(token, user, project, ref));
     }
 
     public static RamlLoaders fromApiPortal(String user, String password) {
@@ -166,11 +167,11 @@ public class RamlLoaders {
     }
 
     public RamlLoaders andFromGithub(String user, String project) {
-        return andFromGithub(null, user, project);
+        return andFromGithub(null, user, project, null);
     }
 
-    public RamlLoaders andFromGithub(String token, String user, String project) {
-        return andUsing(githubLoader(token, user, project));
+    public RamlLoaders andFromGithub(String token, String user, String project, String ref) {
+        return andUsing(githubLoader(token, user, project, ref));
     }
 
     public RamlLoaders andFromApiPortal(String user, String password) {

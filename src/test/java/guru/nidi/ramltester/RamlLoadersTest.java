@@ -16,7 +16,6 @@
 package guru.nidi.ramltester;
 
 import guru.nidi.Base;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -53,15 +52,13 @@ public class RamlLoadersTest {
     }
 
     @Test
-    @Ignore //TODO remove
     public void url() {
-        assertTitle(RamlLoaders.fromUrl("https://raw.githubusercontent.com/nidi3/raml-tester/master/src/test/resources/guru/nidi/ramltester"), "simple.raml", "simple");
+        assertTitle(RamlLoaders.fromUrl("https://raw.githubusercontent.com/nidi3/raml-tester/raml-parser-2/src/test/resources/guru/nidi/ramltester/v08"), "simple.raml", "simple");
     }
 
     @Test
-    @Ignore
     public void github() {
-        assertTitle(RamlLoaders.fromGithub("nidi3", "raml-tester"), "src/test/resources/guru/nidi/ramltester/simple.raml", "simple");
+        assertTitle(RamlLoaders.fromGithub(null, "nidi3", "raml-tester", "raml-parser-2"), "src/test/resources/guru/nidi/ramltester/v08/simple.raml", "simple");
     }
 
     @Test
@@ -93,19 +90,17 @@ public class RamlLoadersTest {
     }
 
     @Test
-    @Ignore //TODO remove
     public void classpathAndUrl() {
-        final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromUrl("https://raw.githubusercontent.com/nidi3/raml-tester/master/src/test/resources/guru/nidi");
+        final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromUrl("https://raw.githubusercontent.com/nidi3/raml-tester/raml-parser-2/src/test/resources/guru/nidi");
         assertTitle(loaders, "v08/simple.raml", "simple");
-        assertTitle(loaders, "ramltester/simple.raml", "simple");
+        assertTitle(loaders, "ramltester/v08/simple.raml", "simple");
     }
 
     @Test
-    @Ignore
     public void classpathAndGithub() {
-        final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromGithub("nidi3", "raml-tester/src/test/resources/guru/nidi");
-        assertTitle(loaders, "simple.raml", "simple");
-        assertTitle(loaders, "ramltester/simple.raml", "simple");
+        final RamlLoaders loaders = RamlLoaders.fromClasspath(RamlLoaders.class).andFromGithub(null, "nidi3", "raml-tester/src/test/resources/guru/nidi", "raml-parser-2");
+        assertTitle(loaders, "v08/simple.raml", "simple");
+        assertTitle(loaders, "ramltester/v08/simple.raml", "simple");
     }
 
     private void assertTitle(RamlLoaders loaders, String raml, String expected) {
