@@ -44,7 +44,7 @@ public class SchemaTest extends HighlevelTestBase {
     }
 
     @Test
-    @Ignore
+    @Ignore("https://github.com/nidi3/raml-tester/issues/79")
     public void matchingReferencedJsonSchema() throws UnsupportedEncodingException {
         assertNoViolations(simple, get("/schema"), jsonResponse(204, "\"str\""));
         assertNoViolations(simple, get("/schema"), jsonResponse(205, "\"str\""));

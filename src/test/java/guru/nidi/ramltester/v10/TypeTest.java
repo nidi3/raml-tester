@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.util.Locale;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -272,26 +273,26 @@ public class TypeTest extends HighlevelTestBase {
         }
     }
 
-//    @Test
-//    public void multiTypeOk() throws Exception {
-//        for (String value : new String[]{"5", "666", "a", "b"}) {
-//            assertNoViolation(
-//                    type,
-//                    get("/type?multi=" + value),
-//                    response(200, "\"hula\""));
-//        }
-//    }
-//
-//    @Test
-//    public void multiTypeNok() throws Exception {
-//        for (String value : new String[]{"4", "4.5", "c"}) {
-//            assertOneRequestViolationThat(
-//                    type,
-//                    get("/type?multi=" + value),
-//                    response(200, "\"hula\""),
-//                    startsWith("Query parameter 'enum' : Value '" + value + "' is not a member of enum '[a, b]'"));
-//        }
-//    }
+    @Test
+    public void multiTypeOk() throws Exception {
+        for (String value : new String[]{"5", "666", "a", "b"}) {
+            assertNoViolations(
+                    type,
+                    get("/type?multi=" + value),
+                    jsonResponse(200, "\"hula\""));
+        }
+    }
+
+    @Test
+    public void multiTypeNok() throws Exception {
+        for (String value : new String[]{"4", "4.5", "c"}) {
+            assertOneRequestViolationThat(
+                    type,
+                    get("/type?multi=" + value),
+                    jsonResponse(200, "\"hula\""),
+                    startsWith("Query parameter 'multi' on action(GET /type) - Value '" + value + "': Invalid element " + value + "."));
+        }
+    }
 
     @Test
     public void simplePattern() throws Exception {

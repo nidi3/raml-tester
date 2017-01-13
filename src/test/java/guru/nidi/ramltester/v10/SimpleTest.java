@@ -42,7 +42,6 @@ public class SimpleTest extends HighlevelTestBase {
     private static final RamlDefinition noBaseUri = RamlLoaders.fromClasspath(SimpleTest.class).load("noBaseUri.raml");
     private static final MultiReportAggregator aggregator = new MultiReportAggregator();
 
-
 //    @ClassRule
     public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(simple), RESOURCE);
 

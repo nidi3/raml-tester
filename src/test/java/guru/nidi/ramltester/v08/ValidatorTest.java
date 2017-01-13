@@ -58,7 +58,6 @@ public class ValidatorTest extends HighlevelTestBase {
 
     @Test
     public void missingDocTitle() {
-        //TODO remove check, done by parser now
         try {
             RAML_LOADERS.load("description-no-title.raml");
             fail("Invalid RAML");
@@ -70,7 +69,6 @@ public class ValidatorTest extends HighlevelTestBase {
 
     @Test
     public void missingDocContent() {
-        //TODO remove check, done by parser now
         try {
             RAML_LOADERS.load("description-no-content.raml");
             fail("Invalid RAML");

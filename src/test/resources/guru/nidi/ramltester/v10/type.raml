@@ -3,6 +3,13 @@
 title: type
 baseUri: http://nidi.guru/raml/{version}
 version: v1
+types:
+  MyString:
+    type: string
+    enum: [a,b]
+  MyInt:
+    type: integer
+    minimum: 5
 
 /type:
   get:
@@ -50,6 +57,8 @@ version: v1
       pattern1:
         pattern: \d{2}/[a-y]
         required: false
+      multi:
+        type: MyString | MyInt
     responses:
       200:
         body:
