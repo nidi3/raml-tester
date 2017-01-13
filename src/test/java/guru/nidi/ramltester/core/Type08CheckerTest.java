@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.model;
+package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.core.CoreTestBase;
-import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.model.Type08;
+import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
@@ -38,7 +38,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 /**
  *
  */
-public class ParameterChecker08Test extends CoreTestBase {
+public class Type08CheckerTest extends CoreTestBase {
 
     @BeforeClass
     public static void init() {
@@ -230,25 +230,25 @@ public class ParameterChecker08Test extends CoreTestBase {
 
     private void assertNoViolation(Parameter param, String value) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker08(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new TypeChecker(violations).check(new Type08(param), value, new Message("baseUriParam", "action", "xxx"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(Parameter param, String value, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker08(violations).checkParameter(param, value, new Message("baseUriParam", "action", "xxx"));
+        new TypeChecker(violations).check(new Type08(param), value, new Message("baseUriParam", "action", "xxx"));
         assertOneViolationThat(violations, matcher);
     }
 
     private void assertNoViolation(List<Parameter> params, Values values) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker08(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
+        new TypeChecker(violations).check(Type08.of(params), values, new Message("baseUriParam", "action"));
         assertNoViolations(violations);
     }
 
     private void assertOneViolationThat(List<Parameter> params, Values values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new ParameterChecker08(violations).checkParameters(params, values, new Message("baseUriParam", "action"));
+        new TypeChecker(violations).check(Type08.of(params), values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);
     }
 

@@ -34,46 +34,36 @@ public class UnifiedModel {
         return null;
     }
 
-    public static UnifiedType typeByName(List<UnifiedType> parameters, String name) {
-        final List<UnifiedType> res = typesByName(parameters, name);
+    public static UnifiedType typeByName(List<UnifiedType> types, String name) {
+        final List<UnifiedType> res = typesByName(types, name);
         if (res.size() > 1) {
             throw new IllegalArgumentException("Expected only one parameter with given name " + name);
         }
         return res.isEmpty() ? null : res.get(0);
     }
 
-    public static List<UnifiedType> typesByName(List<UnifiedType> parameters, String name) {
+    public static List<UnifiedType> typesByName(List<UnifiedType> types, String name) {
         final List<UnifiedType> res = new ArrayList<>();
-        for (final UnifiedType parameter : parameters) {
-            if (parameter.name().equals(name)) {
-                res.add(parameter);
+        for (final UnifiedType type : types) {
+            if (type.name().equals(name)) {
+                res.add(type);
             }
         }
         return res;
     }
 
-    public static List<String> typeNamesOf(List<UnifiedType> params) {
+    public static List<String> typeNamesOf(List<UnifiedType> types) {
         final List<String> res = new ArrayList<>();
-        for (final UnifiedType param : params) {
-            res.add(param.name());
+        for (final UnifiedType type : types) {
+            res.add(type.name());
         }
         return res;
     }
 
-    public static List<UnifiedType> typeNamesOf(List<UnifiedType> parameters, String name) {
-        final List<UnifiedType> res = new ArrayList<>();
-        for (final UnifiedType parameter : parameters) {
-            if (parameter.name().equals(name)) {
-                res.add(parameter);
-            }
-        }
-        return res;
-    }
-
-    public static List<String> codesOf(List<UnifiedResponse> params) {
+    public static List<String> codesOf(List<UnifiedResponse> responses) {
         final List<String> res = new ArrayList<>();
-        for (final UnifiedResponse param : params) {
-            res.add(param.code());
+        for (final UnifiedResponse response : responses) {
+            res.add(response.code());
         }
         return res;
     }

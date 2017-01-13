@@ -234,11 +234,12 @@ class RamlValidatorChecker {
     }
 
     private void parameterValues(UnifiedType param, Message message) {
+        final TypeChecker checker = new TypeChecker(violations);
         for (final String example : param.examples()) {
-            param.validate(example, violations, message.withParam("example"));
+            checker.check(param, example, message.withParam("example"));
         }
         if (param.defaultValue() != null) {
-            param.validate(param.defaultValue(), violations, message.withParam("default value"));
+            checker.check(param, param.defaultValue(), message.withParam("default value"));
         }
     }
 

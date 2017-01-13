@@ -164,14 +164,14 @@ public class RamlChecker {
 
     private void checkFormParametersValues(UnifiedMethod action, UnifiedBody mimeType, Values values, List<UnifiedType> formParameters) {
         final Usage.MimeType mt = mimeTypeUsage(usage, action, mimeType);
-        mt.addFormParameters(new TypeValidator(requestViolations).validate(formParameters, values, new Message("formParam", locator)));
+        mt.addFormParameters(new TypeChecker(requestViolations).check(formParameters, values, new Message("formParam", locator)));
     }
 
     private void checkQueryParameters(Values values, UnifiedMethod action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
         for (final UnifiedSecScheme scheme : security.getSchemes()) {
             final Usage.Action a = actionUsage(usage, action);
-            a.addQueryParameters(new TypeValidator(violationsPerSecurity.requestViolations(scheme)).validate(mergeLists(action.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
+            a.addQueryParameters(new TypeChecker(violationsPerSecurity.requestViolations(scheme)).check(mergeLists(action.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
         }
     }
 
@@ -180,20 +180,20 @@ public class RamlChecker {
         for (final UnifiedSecScheme scheme : security.getSchemes()) {
             final Usage.Action a = actionUsage(usage, action);
             a.addRequestHeaders(
-                    new TypeValidator(violationsPerSecurity.requestViolations(scheme))
+                    new TypeChecker(violationsPerSecurity.requestViolations(scheme))
                             .acceptWildcard()
                             .ignoreX(config.ignoreXheaders)
                             .caseSensitive(false)
                             .predefined(DefaultHeaders.REQUEST)
-                            .validate(mergeLists(action.headers(), security.headers(scheme)), values, new Message("headerParam", locator)));
+                            .check(mergeLists(action.headers(), security.headers(scheme)), values, new Message("headerParam", locator)));
         }
     }
 
     private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, UnifiedMethod action) {
-        final TypeValidator validator = new TypeValidator(requestViolations).acceptUndefined().ignoreRequired();
+        final TypeChecker checker = new TypeChecker(requestViolations).acceptUndefined().ignoreRequired();
         final List<UnifiedType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
-        validator.validate(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", locator));
-        validator.validate(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", locator));
+        checker.check(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", locator));
+        checker.check(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", locator));
     }
 
     private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
@@ -235,7 +235,7 @@ public class RamlChecker {
             final UnifiedType uriParam = findUriParam(entry.getKey(), resource);
             final Message message = new Message("uriParam", locator, entry.getKey());
             if (uriParam != null) {
-                uriParam.validate(entry.getValue().get(0), requestViolations, message);
+                new TypeChecker(requestViolations).check(uriParam, entry.getValue().get(0), message);
             }
         }
     }
@@ -301,12 +301,12 @@ public class RamlChecker {
     private void checkResponseHeaderParameters(RamlViolations violations, Values values, UnifiedMethod action, String responseCode, UnifiedResponse response) {
         final Usage.Response r = responseUsage(usage, action, responseCode);
         r.addResponseHeaders(
-                new TypeValidator(violations)
+                new TypeChecker(violations)
                         .acceptWildcard()
                         .ignoreX(config.ignoreXheaders)
                         .caseSensitive(false)
                         .predefined(DefaultHeaders.RESPONSE)
-                        .validate(response.headers(), values, new Message("headerParam", locator)));
+                        .check(response.headers(), values, new Message("headerParam", locator)));
     }
 }
 
