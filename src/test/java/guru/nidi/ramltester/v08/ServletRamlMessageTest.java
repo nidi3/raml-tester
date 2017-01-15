@@ -57,9 +57,6 @@ import java.util.zip.GZIPOutputStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-/**
- *
- */
 public class ServletRamlMessageTest extends ServerTest {
     private CloseableHttpClient client;
     private static TestFilter testFilter;

@@ -30,9 +30,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 
-/**
- *
- */
 public class ServletRamlResponse extends HttpServletResponseWrapper implements RamlResponse {
     private String characterEncoding = "iso-8859-1";
     private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);

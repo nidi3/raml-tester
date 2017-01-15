@@ -23,9 +23,6 @@ import java.io.File;
 import static guru.nidi.ramltester.util.TestUtils.assumeEnv;
 import static org.junit.Assert.assertEquals;
 
-/**
- *
- */
 public class RamlLoadersTest {
     @Test
     public void fileString() {

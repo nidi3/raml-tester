@@ -21,9 +21,6 @@ import org.hamcrest.core.IsEqual;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-/**
- *
- */
 public class CoreTestBase {
     protected void assertNoViolations(RamlReport report) {
         assertTrue("Expected no violations, but found: " + report, report.isEmpty());

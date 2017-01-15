@@ -19,9 +19,6 @@ import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- *
- */
 class DelegatingServletOutputStream extends ServletOutputStream {
     private final OutputStream delegate1;
     private final OutputStream delegate2;

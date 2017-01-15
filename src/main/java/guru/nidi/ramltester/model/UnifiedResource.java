@@ -17,9 +17,6 @@ package guru.nidi.ramltester.model;
 
 import java.util.List;
 
-/**
- *
- */
 public interface UnifiedResource {
     String description();
 

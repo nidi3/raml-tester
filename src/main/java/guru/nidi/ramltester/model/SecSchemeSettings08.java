@@ -21,9 +21,6 @@ import org.raml.v2.api.model.v08.security.SecuritySchemeSettings;
 
 import java.util.List;
 
-/**
- *
- */
 public class SecSchemeSettings08 implements UnifiedSecSchemeSettings {
     private final SecuritySchemeSettings settings;
 

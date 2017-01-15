@@ -27,9 +27,6 @@ import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 import static guru.nidi.ramltester.model.UnifiedModel.typesByName;
 
 
-/**
- *
- */
 public class TypeChecker {
     private static final String WILDCARD = "{?}";
 

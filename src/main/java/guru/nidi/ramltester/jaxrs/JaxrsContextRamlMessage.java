@@ -21,9 +21,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 class JaxrsContextRamlMessage {
     protected Values headersOf(MultivaluedMap<String, ?> headers) {
         final Values values = new Values();

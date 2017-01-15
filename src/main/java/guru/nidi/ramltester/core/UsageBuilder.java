@@ -23,9 +23,6 @@ import static guru.nidi.ramltester.model.UnifiedModel.codesOf;
 import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
 
-/**
- *
- */
 public final class UsageBuilder {
     private UsageBuilder() {
     }

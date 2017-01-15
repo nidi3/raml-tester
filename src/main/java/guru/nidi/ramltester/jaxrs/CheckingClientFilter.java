@@ -21,9 +21,6 @@ import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
 import java.io.IOException;
 
-/**
- *
- */
 class CheckingClientFilter implements ClientRequestFilter, ClientResponseFilter {
     private final CheckingWebTarget target;
 

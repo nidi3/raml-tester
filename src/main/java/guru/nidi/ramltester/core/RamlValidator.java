@@ -22,9 +22,6 @@ import java.util.List;
 import static guru.nidi.ramltester.core.RamlValidatorChecker.ParamName.*;
 import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
-/**
- *
- */
 public class RamlValidator {
     private final UnifiedApi raml;
     private final List<SchemaValidator> schemaValidators;

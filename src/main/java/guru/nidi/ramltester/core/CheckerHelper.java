@@ -25,9 +25,6 @@ import java.util.*;
 import static guru.nidi.ramltester.model.UnifiedModel.typeByName;
 import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
-/**
- *
- */
 final class CheckerHelper {
     private CheckerHelper() {
     }

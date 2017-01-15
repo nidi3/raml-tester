@@ -36,9 +36,6 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- */
 public abstract class ServerTest {
     protected static final int PORT = 18765;
     private static Tomcat tomcat;

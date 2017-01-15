@@ -18,9 +18,6 @@ package guru.nidi.ramltester.servlet;
 import java.io.IOException;
 import java.io.Writer;
 
-/**
- *
- */
 class DelegatingWriter extends Writer {
     private final Writer delegate1;
     private final Writer delegate2;

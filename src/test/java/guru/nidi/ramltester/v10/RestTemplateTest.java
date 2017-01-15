@@ -43,9 +43,6 @@ import static guru.nidi.ramltester.util.TestUtils.violations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- *
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = RestTemplateTest.class)
 @Controller

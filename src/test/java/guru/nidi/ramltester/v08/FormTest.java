@@ -28,9 +28,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-/**
- *
- */
 public class FormTest extends HighlevelTestBase {
     private static final RamlDefinition form = RamlLoaders.fromClasspath(QueryParameterTest.class).load("form.raml");
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();

@@ -15,8 +15,5 @@
  */
 package guru.nidi;
 
-/**
- *
- */
 public class Base {
 }

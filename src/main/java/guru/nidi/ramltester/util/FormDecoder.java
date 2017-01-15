@@ -28,9 +28,6 @@ import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- */
 public class FormDecoder {
     private static final String DEFAULT_CHARSET = "iso-8859-1";
     private static final MediaType MULTIPART = MediaType.valueOf("multipart/form-data");

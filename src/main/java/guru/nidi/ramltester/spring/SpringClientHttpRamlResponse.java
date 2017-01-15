@@ -26,9 +26,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- *
- */
 public class SpringClientHttpRamlResponse extends SpringHttpRamlMessage implements ClientHttpResponse, RamlResponse {
     private final ClientHttpResponse response;
 

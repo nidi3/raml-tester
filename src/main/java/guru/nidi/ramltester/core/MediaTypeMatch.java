@@ -25,9 +25,6 @@ import java.util.*;
 
 import static guru.nidi.ramltester.core.CheckerHelper.*;
 
-/**
- *
- */
 final class MediaTypeMatch {
     private final MediaType targetType;
     private final Collection<MediaType> definedTypes;

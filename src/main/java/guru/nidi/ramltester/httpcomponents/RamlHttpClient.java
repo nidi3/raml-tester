@@ -31,9 +31,6 @@ import org.apache.http.protocol.HttpContext;
 import java.io.Closeable;
 import java.io.IOException;
 
-/**
- *
- */
 public class RamlHttpClient implements HttpClient, Closeable {
     private static final String RAML_TESTED = "raml.tested";
     private static final BasicHttpResponse DUMMY_RESPONSE = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_NO_CONTENT, "not sending");

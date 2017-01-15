@@ -15,9 +15,6 @@
  */
 package guru.nidi.ramltester.core;
 
-/**
- *
- */
 public class AggregatingReportStore implements ReportStore {
     private final ReportStore delegate;
     private final ReportAggregator aggregator;

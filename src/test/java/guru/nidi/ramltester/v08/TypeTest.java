@@ -29,9 +29,6 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-/**
- *
- */
 public class TypeTest extends HighlevelTestBase {
     private final RamlDefinition type = RamlLoaders.fromClasspath(getClass()).load("type.raml");
 

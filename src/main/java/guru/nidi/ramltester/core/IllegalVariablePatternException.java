@@ -15,9 +15,6 @@
  */
 package guru.nidi.ramltester.core;
 
-/**
- *
- */
 class IllegalVariablePatternException extends RuntimeException {
     private final String pattern;
 

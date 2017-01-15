@@ -15,9 +15,6 @@
  */
 package guru.nidi.ramltester.core;
 
-/**
- *
- */
 public class RamlViolationException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

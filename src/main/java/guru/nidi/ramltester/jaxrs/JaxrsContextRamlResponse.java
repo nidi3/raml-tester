@@ -24,9 +24,6 @@ import javax.ws.rs.client.ClientResponseContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-/**
- *
- */
 public class JaxrsContextRamlResponse extends JaxrsContextRamlMessage implements RamlResponse {
     private final ClientResponseContext context;
     private final byte[] content;

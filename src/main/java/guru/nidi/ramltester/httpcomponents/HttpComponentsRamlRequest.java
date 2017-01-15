@@ -24,9 +24,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
 
-/**
- *
- */
 public class HttpComponentsRamlRequest extends HttpComponentsRamlMessage implements RamlRequest {
     private final String path;
     private final String url;

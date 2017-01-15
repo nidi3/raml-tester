@@ -34,9 +34,6 @@ import static guru.nidi.ramltester.junit.RamlMatchers.checks;
 import static guru.nidi.ramltester.util.TestUtils.violations;
 import static org.junit.Assert.*;
 
-/**
- *
- */
 public class HttpCommonsTest extends ServerTest {
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 

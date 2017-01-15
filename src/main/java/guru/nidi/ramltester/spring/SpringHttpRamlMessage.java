@@ -22,9 +22,6 @@ import org.springframework.http.MediaType;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 class SpringHttpRamlMessage {
 
     protected String contentTypeOf(HttpHeaders headers) {

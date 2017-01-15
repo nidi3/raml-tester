@@ -27,9 +27,6 @@ import org.springframework.mock.http.client.MockClientHttpResponse;
 
 import java.io.IOException;
 
-/**
- *
- */
 public class RamlRequestInterceptor implements ClientHttpRequestInterceptor {
     private final RamlChecker checker;
     private final boolean notSending;

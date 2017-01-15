@@ -26,9 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
 class ContentNegotiationChecker {
     private final RamlViolations requestViolations, responseViolations;
 

@@ -17,9 +17,6 @@ package guru.nidi.ramltester.core;
 
 import java.io.StringReader;
 
-/**
- *
- */
 final class NamedReader extends StringReader {
     private final String source;
 

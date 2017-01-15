@@ -24,9 +24,6 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-/**
- *
- */
 public class JsonSchemaViolationCause {
     private final List<ProcessingMessage> messages;
 

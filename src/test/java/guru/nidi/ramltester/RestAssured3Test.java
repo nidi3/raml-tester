@@ -35,9 +35,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- *
- */
 public class RestAssured3Test extends ServerTest {
     private RestAssuredClient restAssured;
     private RamlDefinition api;

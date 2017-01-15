@@ -15,8 +15,5 @@
  */
 package guru.nidi.ramltester.snippets;
 
-/**
- *
- */
 public class Application {
 }

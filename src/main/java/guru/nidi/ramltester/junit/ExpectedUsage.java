@@ -26,9 +26,6 @@ import java.util.EnumSet;
 
 import static org.junit.Assert.assertThat;
 
-/**
- *
- */
 public class ExpectedUsage extends Verifier {
     private final UsageProvider usageProvider;
     private final EnumSet<UsageItem> items;

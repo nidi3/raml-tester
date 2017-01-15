@@ -17,9 +17,6 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.Values;
 
-/**
- *
- */
 final class VariableMatcher {
     private final boolean matches;
     private final boolean completeMatch;

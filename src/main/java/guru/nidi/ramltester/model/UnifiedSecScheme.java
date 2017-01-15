@@ -15,9 +15,6 @@
  */
 package guru.nidi.ramltester.model;
 
-/**
- *
- */
 public interface UnifiedSecScheme {
     String name();
 

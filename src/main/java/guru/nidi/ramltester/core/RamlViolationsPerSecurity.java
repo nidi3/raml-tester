@@ -19,9 +19,6 @@ import guru.nidi.ramltester.model.UnifiedSecScheme;
 
 import java.util.*;
 
-/**
- *
- */
 class RamlViolationsPerSecurity {
     private static final Comparator<UnifiedSecScheme> SCHEME_COMPARATOR = new Comparator<UnifiedSecScheme>() {
         @Override

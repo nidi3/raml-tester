@@ -19,9 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- *
- */
 class SavingOutputStream extends OutputStream {
     private final OutputStream delegate;
     private final ByteArrayOutputStream saved;

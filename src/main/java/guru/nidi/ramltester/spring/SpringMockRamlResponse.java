@@ -19,9 +19,6 @@ import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-/**
- *
- */
 public class SpringMockRamlResponse implements RamlResponse {
     private final MockHttpServletResponse delegate;
 

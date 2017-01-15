@@ -17,9 +17,6 @@ package guru.nidi.ramltester.model;
 
 import java.util.*;
 
-/**
- *
- */
 public final class Values implements Iterable<Map.Entry<String, List<Object>>> {
     private final Map<String, List<Object>> values = new HashMap<>();
 

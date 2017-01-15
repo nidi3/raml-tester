@@ -35,9 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-/**
- *
- */
 public class SchemaTest extends HighlevelTestBase {
     private final RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
     private final ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);

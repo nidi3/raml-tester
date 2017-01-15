@@ -24,9 +24,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 
-/**
- *
- */
 public class RamlRestTemplate extends RestTemplate {
     private final RamlChecker ramlChecker;
     private final boolean notSending;

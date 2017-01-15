@@ -38,9 +38,6 @@ import javax.servlet.ServletResponse;
 import javax.ws.rs.client.WebTarget;
 import java.io.IOException;
 
-/**
- *
- */
 public class RamlDefinition {
     private final CheckerConfig config;
 

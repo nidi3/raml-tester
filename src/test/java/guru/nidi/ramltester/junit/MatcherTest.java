@@ -24,9 +24,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/**
- *
- */
 public class MatcherTest {
     private final RamlReport reportNix = report(null, null, null);
     private final RamlReport reportVal = report("bla\nblu", null, null);

@@ -22,9 +22,6 @@ import guru.nidi.ramltester.core.ReportAggregator;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-/**
- *
- */
 public class RamlMatcher implements ResultMatcher {
     private final RamlChecker checker;
     private final ReportAggregator aggregator;

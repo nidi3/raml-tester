@@ -34,9 +34,6 @@ import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-/**
- *
- */
 @Controller
 public class SpringMockRamlMessageTest {
     private MockMvc mockMvc;

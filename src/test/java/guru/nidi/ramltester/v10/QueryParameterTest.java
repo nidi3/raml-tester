@@ -26,9 +26,6 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-/**
- *
- */
 public class QueryParameterTest extends HighlevelTestBase {
     private static final RamlDefinition query = RamlLoaders.fromClasspath(QueryParameterTest.class).load("query.raml");
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();

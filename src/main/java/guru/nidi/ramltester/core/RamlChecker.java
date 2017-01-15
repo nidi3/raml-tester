@@ -27,9 +27,6 @@ import static guru.nidi.ramltester.core.CheckerHelper.*;
 import static guru.nidi.ramltester.core.UsageBuilder.*;
 import static guru.nidi.ramltester.model.UnifiedModel.responseByCode;
 
-/**
- *
- */
 public class RamlChecker {
     private final CheckerConfig config;
     private final UnifiedApi api;

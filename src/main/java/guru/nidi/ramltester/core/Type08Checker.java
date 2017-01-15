@@ -31,9 +31,6 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-/**
- *
- */
 class Type08Checker {
     private static final Pattern INTEGER = Pattern.compile("0|-?[1-9][0-9]*");
     private static final Pattern NUMBER = Pattern.compile("0|inf|-inf|nan|-?(((0?|[1-9][0-9]*)\\.[0-9]*[1-9])|([1-9][0-9]*))(e[-+]?[1-9][0-9]*)?");

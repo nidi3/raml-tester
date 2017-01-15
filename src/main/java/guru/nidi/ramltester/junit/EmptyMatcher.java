@@ -20,9 +20,6 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.Collection;
 
-/**
- *
- */
 class EmptyMatcher extends TypeSafeMatcher<Collection<?>> {
     private final String desc;
 

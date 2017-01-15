@@ -23,9 +23,6 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-/**
- *
- */
 public class ContentNegotiationTest extends HighlevelTestBase {
 
     private static RamlDefinition simple = RamlLoaders.fromClasspath(ContentNegotiationTest.class).load("simple.raml");

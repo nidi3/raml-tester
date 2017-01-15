@@ -22,9 +22,6 @@ import org.raml.v2.api.RamlModelResult;
 
 import java.util.List;
 
-/**
- *
- */
 public class CheckerConfig {
     public final RamlModelResult raml;
     public final List<SchemaValidator> schemaValidators;

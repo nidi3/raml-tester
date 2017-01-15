@@ -23,9 +23,6 @@ import java.util.Locale;
 
 import static java.util.Collections.emptyList;
 
-/**
- *
- */
 public class Method10 implements UnifiedMethod {
     private final Method method;
 

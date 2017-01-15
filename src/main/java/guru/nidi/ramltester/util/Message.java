@@ -19,9 +19,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Properties;
 
-/**
- *
- */
 public class Message {
     private static final Properties MESSAGES;
 

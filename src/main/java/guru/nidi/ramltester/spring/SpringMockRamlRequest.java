@@ -32,9 +32,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 public class SpringMockRamlRequest implements RamlRequest {
     private final MockHttpServletRequest delegate;
 

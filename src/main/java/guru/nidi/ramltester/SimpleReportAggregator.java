@@ -23,9 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 public class SimpleReportAggregator implements ReportAggregator, UsageProvider {
     private UnifiedApi raml;
     private final List<RamlReport> reports = new ArrayList<>();

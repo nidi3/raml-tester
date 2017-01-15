@@ -17,9 +17,6 @@ package guru.nidi.ramltester.core;
 
 import java.util.*;
 
-/**
- *
- */
 class CountSet<T> extends AbstractSet<T> {
     private final Map<T, Integer> map = new HashMap<>();
 

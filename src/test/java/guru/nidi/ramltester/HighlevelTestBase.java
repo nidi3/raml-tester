@@ -36,9 +36,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.*;
 
-/**
- *
- */
 public class HighlevelTestBase {
     protected MockHttpServletResponse response(int code, String body, String contentType) throws UnsupportedEncodingException {
         final MockHttpServletResponse response = new MockHttpServletResponse();

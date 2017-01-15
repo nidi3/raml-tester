@@ -23,9 +23,6 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-/**
- *
- */
 public class XmlSchemaViolationCause {
     private final List<Message> messages;
 

@@ -20,9 +20,6 @@ import guru.nidi.ramltester.model.UnifiedMethod;
 import guru.nidi.ramltester.model.UnifiedResource;
 import guru.nidi.ramltester.util.Message;
 
-/**
- *
- */
 final class Locator {
     private UnifiedResource resource;
     private UnifiedMethod action;

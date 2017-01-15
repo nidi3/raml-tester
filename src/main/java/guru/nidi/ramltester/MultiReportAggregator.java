@@ -22,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 public class MultiReportAggregator implements ReportAggregator {
     private final Map<String, List<RamlReport>> reports = new HashMap<>();
 

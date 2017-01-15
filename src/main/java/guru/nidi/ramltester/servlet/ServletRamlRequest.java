@@ -31,9 +31,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 
-/**
- *
- */
 public class ServletRamlRequest extends HttpServletRequestWrapper implements RamlRequest {
     private byte[] content;
 

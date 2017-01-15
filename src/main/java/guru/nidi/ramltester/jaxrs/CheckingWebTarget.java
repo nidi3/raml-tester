@@ -30,9 +30,6 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.Map;
 
-/**
- *
- */
 public class CheckingWebTarget implements WebTarget {
     private final RamlChecker checker;
     private final WebTarget target;

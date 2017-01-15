@@ -17,9 +17,6 @@ package guru.nidi.ramltester.core;
 
 import java.util.Set;
 
-/**
- *
- */
 public enum UsageItem {
     RESOURCE {
         @Override

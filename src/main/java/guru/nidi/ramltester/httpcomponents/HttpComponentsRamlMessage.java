@@ -23,9 +23,6 @@ import org.apache.http.entity.BufferedHttpEntity;
 
 import java.io.IOException;
 
-/**
- *
- */
 class HttpComponentsRamlMessage {
     protected String contentTypeOf(HttpMessage message) {
         final Header contentType = message.getFirstHeader("Content-Type");

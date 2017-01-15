@@ -20,9 +20,6 @@ import org.raml.v2.api.model.v08.security.SecurityScheme;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public class SecScheme08 implements UnifiedSecScheme {
     private final SecurityScheme scheme;
 

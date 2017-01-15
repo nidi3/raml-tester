@@ -17,9 +17,6 @@ package guru.nidi.ramltester.core;
 
 import java.util.*;
 
-/**
- *
- */
 public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     private final Map<String, Resource> resources = new HashMap<>();
 

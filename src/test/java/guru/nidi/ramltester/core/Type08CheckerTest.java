@@ -35,9 +35,6 @@ import java.util.Locale;
 import static guru.nidi.ramltester.util.TestUtils.valuesOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-/**
- *
- */
 public class Type08CheckerTest extends CoreTestBase {
 
     @BeforeClass

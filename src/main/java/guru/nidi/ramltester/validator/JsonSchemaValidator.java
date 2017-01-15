@@ -35,9 +35,6 @@ import guru.nidi.ramltester.util.Message;
 import java.io.IOException;
 import java.io.Reader;
 
-/**
- *
- */
 public class JsonSchemaValidator implements SchemaValidator {
     private JsonSchemaFactory factory;
     private final LoadingConfiguration loadingConfiguration;

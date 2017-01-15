@@ -18,9 +18,6 @@ package guru.nidi.ramltester.util;
 
 import java.util.*;
 
-/**
- *
- */
 public final class MediaType {
     public static final Comparator<MediaType> QUALITY_COMPARATOR = new Comparator<MediaType>() {
         @Override

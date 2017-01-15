@@ -29,9 +29,6 @@ import static guru.nidi.ramltester.core.CheckerHelper.findSchemaValidator;
 import static guru.nidi.ramltester.core.CheckerHelper.resolveSchema;
 import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
-/**
- *
- */
 class RamlValidatorChecker {
     enum ParamName {
         BASE_URI("baseUriParameter"),

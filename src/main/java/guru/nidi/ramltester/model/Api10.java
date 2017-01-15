@@ -19,9 +19,6 @@ import org.raml.v2.api.model.v10.api.Api;
 
 import java.util.List;
 
-/**
- *
- */
 public class Api10 implements UnifiedApi {
     private final Api api;
 

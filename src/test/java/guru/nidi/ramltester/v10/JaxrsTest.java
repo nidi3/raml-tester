@@ -48,9 +48,6 @@ import static guru.nidi.ramltester.util.TestUtils.valuesOf;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 
-/**
- *
- */
 @RunWith(Parameterized.class)
 public class JaxrsTest extends ServerTest {
     private static final RamlDefinition raml = RamlLoaders.fromClasspath(JaxrsTest.class).load("jaxrs.raml");

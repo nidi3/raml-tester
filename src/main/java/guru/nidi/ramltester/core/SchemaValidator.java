@@ -21,9 +21,6 @@ import guru.nidi.ramltester.util.Message;
 
 import java.io.Reader;
 
-/**
- *
- */
 public interface SchemaValidator {
     boolean supports(MediaType mediaType);
 

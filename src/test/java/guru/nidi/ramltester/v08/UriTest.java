@@ -34,9 +34,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 
-/**
- *
- */
 @Controller
 public class UriTest extends HighlevelTestBase {
     private final RamlDefinition api = RamlLoaders.fromClasspath(getClass()).load("uri.raml");

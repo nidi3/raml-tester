@@ -18,9 +18,6 @@ package guru.nidi.ramltester.junit;
 import guru.nidi.ramltester.core.RamlReport;
 import org.hamcrest.Matcher;
 
-/**
- *
- */
 public final class RamlMatchers {
     private RamlMatchers() {
     }

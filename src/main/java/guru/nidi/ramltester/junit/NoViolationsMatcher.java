@@ -21,9 +21,6 @@ import guru.nidi.ramltester.core.RamlViolations;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
-/**
- *
- */
 class NoViolationsMatcher extends TypeSafeMatcher<RamlReport> {
     private final boolean validation, request, response;
 

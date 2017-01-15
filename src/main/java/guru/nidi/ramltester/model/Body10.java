@@ -24,9 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
 public class Body10 implements UnifiedBody {
     private final TypeDeclaration type;
 

@@ -35,9 +35,6 @@ import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-/**
- *
- */
 public class SimpleTest extends HighlevelTestBase {
     private static final RamlDefinition simple = RamlLoaders.fromClasspath(SimpleTest.class).load("simple.raml");
     private static final RamlDefinition noBaseUri = RamlLoaders.fromClasspath(SimpleTest.class).load("noBaseUri.raml");

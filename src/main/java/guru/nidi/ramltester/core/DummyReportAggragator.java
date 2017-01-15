@@ -18,9 +18,6 @@ package guru.nidi.ramltester.core;
 import java.util.Collections;
 import java.util.Map;
 
-/**
- *
- */
 public class DummyReportAggragator implements ReportAggregator {
     @Override
     public RamlReport addReport(RamlReport report) {

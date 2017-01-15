@@ -33,9 +33,6 @@ import org.raml.v2.api.RamlModelResult;
 
 import java.io.File;
 
-/**
- *
- */
 public class RamlLoaders {
     private final Loader loader;
     private final SchemaValidators schemaValidators;

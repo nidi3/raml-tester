@@ -19,9 +19,6 @@ import org.raml.v2.api.model.v10.security.SecuritySchemePart;
 
 import java.util.List;
 
-/**
- *
- */
 public class SecSchemePart10 implements UnifiedSecSchemePart{
     private final SecuritySchemePart part;
 

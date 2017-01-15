@@ -18,9 +18,6 @@ package guru.nidi.ramltester.model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public final class UnifiedModel {
     private UnifiedModel() {
     }

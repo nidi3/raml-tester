@@ -20,9 +20,6 @@ import org.raml.v2.api.model.v08.security.SecuritySchemeRef;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public class SecSchemeRef08 implements UnifiedSecSchemeRef {
     private final SecuritySchemeRef ref;
 

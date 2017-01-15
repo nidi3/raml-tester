@@ -35,9 +35,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public class JavaXmlSchemaValidator implements SchemaValidator {
     private static final MediaType APPLICATION_XML = MediaType.valueOf("application/xml");
     private static final MediaType TEXT_XML = MediaType.valueOf("text/xml");

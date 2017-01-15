@@ -15,9 +15,6 @@
  */
 package guru.nidi.ramltester.core;
 
-/**
- *
- */
 public class RamlCheckerException extends RuntimeException {
     public RamlCheckerException(String message) {
         super(message);

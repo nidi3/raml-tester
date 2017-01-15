@@ -20,9 +20,6 @@ import org.raml.v2.api.model.v08.bodies.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public class Response08 implements UnifiedResponse {
     private final Response response;
 

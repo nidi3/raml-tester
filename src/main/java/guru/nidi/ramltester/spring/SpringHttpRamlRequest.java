@@ -21,9 +21,6 @@ import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.UriComponents;
 import org.springframework.http.HttpRequest;
 
-/**
- *
- */
 public class SpringHttpRamlRequest extends SpringHttpRamlMessage implements RamlRequest {
     private final HttpRequest request;
     private final byte[] body;

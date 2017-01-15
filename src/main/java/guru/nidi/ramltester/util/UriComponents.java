@@ -21,9 +21,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- */
 public final class UriComponents {
     private final String scheme;
     private final String userInfo;

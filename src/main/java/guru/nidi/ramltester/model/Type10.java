@@ -22,9 +22,6 @@ import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public class Type10 implements UnifiedType {
     private final TypeDeclaration type;
 

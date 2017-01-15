@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 abstract class SecuritySchemeType {
     private static final Map<String, SecuritySchemeType> INSTANCES = new HashMap<>();
 

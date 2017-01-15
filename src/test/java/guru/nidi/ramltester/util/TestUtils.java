@@ -26,9 +26,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeThat;
 
-/**
- *
- */
 public class TestUtils {
     private TestUtils() {
     }

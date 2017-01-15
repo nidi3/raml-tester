@@ -22,9 +22,6 @@ import org.raml.v2.api.model.common.ValidationResult;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-/**
- *
- */
 public class RamlReport {
     private final UnifiedApi raml;
     private final Usage usage = new Usage();

@@ -27,9 +27,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-/**
- *
- */
 public class HeaderTest extends HighlevelTestBase {
     private static final RamlDefinition header = RamlLoaders.fromClasspath(HeaderTest.class).load("header.raml");
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();

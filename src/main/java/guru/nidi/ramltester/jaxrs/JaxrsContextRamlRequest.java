@@ -22,9 +22,6 @@ import guru.nidi.ramltester.util.UriComponents;
 
 import javax.ws.rs.client.ClientRequestContext;
 
-/**
- *
- */
 public class JaxrsContextRamlRequest extends JaxrsContextRamlMessage implements RamlRequest {
     private final ClientRequestContext context;
     private final UriComponents uriComponents;
