@@ -61,7 +61,6 @@ public class RamlChecker {
         try {
             final RamlMethod action = findAction(request);
             final SecurityExtractor security = new SecurityExtractor(api, action, requestViolations);
-            security.check(requestViolations);
             violationsPerSecurity = new RamlViolationsPerSecurity(security);
             checkRequest(request, action, security);
             if (response != null) {

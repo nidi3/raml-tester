@@ -22,21 +22,10 @@ import java.util.Collections;
 import java.util.List;
 
 class SecurityExtractor {
-    private final RamlApi raml;
     private final List<RamlSecScheme> schemes;
 
     public SecurityExtractor(RamlApi raml, RamlMethod action, RamlViolations violations) {
-        this.raml = raml;
         schemes = new SchemeFinder(raml, violations).securedBy(action);
-    }
-
-    public void check(RamlViolations violations) {
-        for (final RamlSecScheme scheme : raml.securitySchemes()) {
-            final SecuritySchemeType type = SecuritySchemeType.of(scheme);
-            if (type != null) {
-                type.check(scheme, violations);
-            }
-        }
     }
 
     public List<RamlSecScheme> getSchemes() {
