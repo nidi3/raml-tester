@@ -17,6 +17,7 @@ package guru.nidi.ramltester.model.internal;
 
 import org.raml.v2.api.model.v08.api.Api;
 
+import java.util.Collections;
 import java.util.List;
 
 public class Api08 implements RamlApi {
@@ -69,6 +70,11 @@ public class Api08 implements RamlApi {
     @Override
     public String description() {
         return "No description in RAML 0.8";
+    }
+
+    @Override
+    public List<RamlType> annotationTypes() {
+        return Collections.emptyList();
     }
 
     @Override

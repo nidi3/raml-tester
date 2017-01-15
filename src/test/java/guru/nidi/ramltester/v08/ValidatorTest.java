@@ -97,8 +97,8 @@ public class ValidatorTest extends HighlevelTestBase {
     public void validUriParameters() {
         final RamlReport report = uriParams.validator().withChecks(URI_PARAMETER).validate();
         assertViolationsThat(report.getValidationViolations(),
-                equalTo("The baseUri has no variable 'invalid' in Root definition"),
-                equalTo("baseUriParameter with name 'version' is not allowed in Root definition"),
+                equalTo("The baseUri has no variable 'invalid' in root definition"),
+                equalTo("baseUriParameter with name 'version' is not allowed in root definition"),
                 equalTo("The uri has no variable 'uriInvalid' in resource(/bla/{param})"),
                 equalTo("uriParameter with name 'version' is not allowed in resource(/bla/{param})"),
                 equalTo("The baseUri has no variable 'subInvalid' in resource(/bla/{param})"),
@@ -136,8 +136,8 @@ public class ValidatorTest extends HighlevelTestBase {
     public void description() {
         final RamlReport report = description.validator().withChecks(DESCRIPTION).validate();
         assertViolationsThat(report.getValidationViolations(),
-                equalTo("Root definition has no documentation"),
-                equalTo("baseUriParameter 'path' in Root definition has no description"),
+                equalTo("root definition has no documentation"),
+                equalTo("baseUriParameter 'path' in root definition has no description"),
                 equalTo("resource(/bla/{param}) has no description"),
                 equalTo("baseUriParameter 'path' in resource(/bla/{param}) has no description"),
                 equalTo("uriParameter 'param' in resource(/bla/{param}) has no description"),

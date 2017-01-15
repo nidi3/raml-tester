@@ -88,6 +88,7 @@ public class ValidatorTest extends HighlevelTestBase {
     public void example() {
         final RamlReport report = example.validator().withChecks(EXAMPLE).validate();
         assertViolationsThat(report.getValidationViolations(),
+                equalTo("example of annotationType 'simple' in root definition - Value 'bla': Invalid type String, expected Integer"),
                 equalTo("example of queryParameter 'q' in action(POST /ok) - Value '10': Expected number between 4 and 8"),
                 equalTo("default value of queryParameter 'q' in action(POST /ok) - Value '2': Expected number between 4 and 8"),
                 equalTo("example of queryParameter 'u' in action(POST /ok) - Value '{\"name\":\"n\"}\n': " +
@@ -106,8 +107,8 @@ public class ValidatorTest extends HighlevelTestBase {
     public void validUriParameters() {
         final RamlReport report = uriParams.validator().withChecks(URI_PARAMETER).validate();
         assertViolationsThat(report.getValidationViolations(),
-                equalTo("The baseUri has no variable 'invalid' in Root definition"),
-                equalTo("baseUriParameter with name 'version' is not allowed in Root definition"),
+                equalTo("The baseUri has no variable 'invalid' in root definition"),
+                equalTo("baseUriParameter with name 'version' is not allowed in root definition"),
                 equalTo("The uri has no variable 'uriInvalid' in resource(/bla/{param})"),
                 equalTo("uriParameter with name 'version' is not allowed in resource(/bla/{param})"),
                 equalTo("The uri has no variable 'subinvalid' in resource(/bla/{param}/subA/{p})"));
@@ -141,9 +142,10 @@ public class ValidatorTest extends HighlevelTestBase {
     public void description() {
         final RamlReport report = description.validator().withChecks(DESCRIPTION).validate();
         assertViolationsThat(report.getValidationViolations(),
-                equalTo("Root definition has no documentation"),
-                equalTo("Root definition has no description"),
-                equalTo("baseUriParameter 'path' in Root definition has no description"),
+                equalTo("root definition has no documentation"),
+                equalTo("root definition has no description"),
+                equalTo("baseUriParameter 'path' in root definition has no description"),
+                equalTo("annotationType 'simple' in root definition has no description"),
                 equalTo("resource(/bla/{param}) has no description"),
                 equalTo("uriParameter 'param' in resource(/bla/{param}) has no description"),
                 equalTo("action(GET /bla/{param}) has no description"),

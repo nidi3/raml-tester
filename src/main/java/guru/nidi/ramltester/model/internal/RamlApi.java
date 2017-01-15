@@ -28,6 +28,8 @@ public interface RamlApi {
 
     String description();
 
+    List<RamlType> annotationTypes();
+
     List<String> protocols();
 
     String ramlVersion();

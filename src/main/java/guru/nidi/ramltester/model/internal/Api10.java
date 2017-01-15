@@ -72,6 +72,11 @@ public class Api10 implements RamlApi {
     }
 
     @Override
+    public List<RamlType> annotationTypes() {
+        return Type10.of(api.annotationTypes());
+    }
+
+    @Override
     public List<RamlSecScheme> securitySchemes() {
         return SecScheme10.of(api.securitySchemes());
     }

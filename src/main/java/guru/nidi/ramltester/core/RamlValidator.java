@@ -57,9 +57,11 @@ public class RamlValidator {
 
     public RamlReport validate() {
         checker.parameters(raml.baseUriParameters(), BASE_URI);
+        checker.parameters(raml.annotationTypes(), ANNOTATION);
         checker.description(raml.documentation());
         checker.description(raml.description());
         checker.description(raml.baseUriParameters(), BASE_URI);
+        checker.description(raml.annotationTypes(), ANNOTATION);
         for (final RamlResource resource : raml.resources()) {
             resource(resource);
         }

@@ -33,7 +33,8 @@ class RamlValidatorChecker {
         URI("uriParameter"),
         QUERY("queryParameter"),
         HEADER("header"),
-        FORM("formParameter");
+        FORM("formParameter"),
+        ANNOTATION("annotationType");
         private final String value;
 
         ParamName(String value) {
