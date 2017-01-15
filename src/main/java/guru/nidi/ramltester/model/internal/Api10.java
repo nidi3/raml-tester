@@ -67,6 +67,11 @@ public class Api10 implements RamlApi {
     }
 
     @Override
+    public String description() {
+        return api.description() == null ? null : api.description().value();
+    }
+
+    @Override
     public List<RamlSecScheme> securitySchemes() {
         return SecScheme10.of(api.securitySchemes());
     }

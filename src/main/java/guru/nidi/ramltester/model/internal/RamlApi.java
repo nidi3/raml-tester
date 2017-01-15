@@ -26,6 +26,8 @@ public interface RamlApi {
 
     List<RamlDocItem> documentation();
 
+    String description();
+
     List<String> protocols();
 
     String ramlVersion();

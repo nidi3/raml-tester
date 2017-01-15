@@ -67,6 +67,11 @@ public class Api08 implements RamlApi {
     }
 
     @Override
+    public String description() {
+        return "No description in RAML 0.8";
+    }
+
+    @Override
     public List<RamlSecScheme> securitySchemes() {
         return SecScheme08.of(api.securitySchemes());
     }

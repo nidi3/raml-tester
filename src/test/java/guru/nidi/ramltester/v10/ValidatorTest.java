@@ -130,6 +130,7 @@ public class ValidatorTest extends HighlevelTestBase {
         final RamlReport report = description.validator().withChecks(DESCRIPTION).validate();
         assertViolationsThat(report.getValidationViolations(),
                 equalTo("Root definition has no documentation"),
+                equalTo("Root definition has no description"),
                 equalTo("baseUriParameter 'path' in Root definition has no description"),
                 equalTo("resource(/bla/{param}) has no description"),
                 equalTo("uriParameter 'param' in resource(/bla/{param}) has no description"),
