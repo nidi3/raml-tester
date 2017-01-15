@@ -23,23 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeThat;
 
 public class TestUtils {
     private TestUtils() {
-    }
-
-    public static String getEnv(String name) {
-        final String env = System.getenv(name);
-        assumeThat("Environment variable " + name + " is not set, skipping test", env, notNullValue());
-        return env;
-    }
-
-    public static void assumeEnv(String name, String value) {
-        assumeThat("Environment variable " + name + " has not value " + value + ", skipping test", getEnv(name), equalTo(value));
     }
 
     public static void assertValuesEquals(Object[] expected, Values actual) {
