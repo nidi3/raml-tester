@@ -119,8 +119,8 @@ public class SchemaTest extends HighlevelTestBase {
         assertThat(message.getCause(), instanceOf(XmlSchemaViolationCause.class));
         final Map<?, ?> json = mapper.readValue(mapper.writeValueAsString(message.getCause()), Map.class);
         assertEquals(map("messages", Arrays.asList(
-                map("message", "cvc-complex-type.2.3: Element `api-request` cannot have character [children], because the type`s content type is element-only.", "line", 1, "column", 31),
-                map("message", "cvc-complex-type.2.4.b: The content of element `api-request` is not complete. One of `{input}` is expected.", "line", 1, "column", 31))),
+                map("message", "cvc-complex-type.2.3: Element 'api-request' cannot have character [children], because the type's content type is element-only.", "line", 1, "column", 31),
+                map("message", "cvc-complex-type.2.4.b: The content of element 'api-request' is not complete. One of '{input}' is expected.", "line", 1, "column", 31))),
                 json);
     }
 
