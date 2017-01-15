@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.v08;
+package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.MultiReportAggregator;
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
 import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.jaxrs.JaxrsContextRamlRequest;
 import guru.nidi.ramltester.jaxrs.JaxrsContextRamlResponse;
