@@ -20,7 +20,7 @@ import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.jaxrs.CheckingWebTarget;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
-import guru.nidi.ramltester.model.UnifiedApi;
+import guru.nidi.ramltester.model.internal.RamlApi;
 import guru.nidi.ramltester.restassured.RestAssuredClient;
 import guru.nidi.ramltester.servlet.ServletTester;
 import guru.nidi.ramltester.spring.RamlMatcher;
@@ -73,7 +73,7 @@ public class RamlDefinition {
         return new RamlDefinition(config.includeServletPath(includeServletPath));
     }
 
-    public UnifiedApi getRaml() {
+    public RamlApi getRaml() {
         return config.getRaml();
     }
 

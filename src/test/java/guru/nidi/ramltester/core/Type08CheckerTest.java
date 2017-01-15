@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.Type08;
 import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.internal.Type08;
 import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;

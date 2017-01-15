@@ -15,17 +15,16 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.Type08;
-import guru.nidi.ramltester.model.Type10;
-import guru.nidi.ramltester.model.UnifiedType;
 import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.internal.RamlType;
+import guru.nidi.ramltester.model.internal.Type08;
+import guru.nidi.ramltester.model.internal.Type10;
 import guru.nidi.ramltester.util.Message;
 
 import java.util.*;
 
-import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
-import static guru.nidi.ramltester.model.UnifiedModel.typesByName;
-
+import static guru.nidi.ramltester.core.CheckerHelper.typeNamesOf;
+import static guru.nidi.ramltester.core.CheckerHelper.typesByName;
 
 public class TypeChecker {
     private static final String WILDCARD = "{?}";
@@ -76,7 +75,7 @@ public class TypeChecker {
         return new TypeChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
     }
 
-    public void check(UnifiedType type, Object value, Message message) {
+    public void check(RamlType type, Object value, Message message) {
         if (type instanceof Type08) {
             new Type08Checker(violations).check(((Type08) type).getDelegate(), value, message);
         } else if (type instanceof Type10) {
@@ -84,17 +83,17 @@ public class TypeChecker {
         }
     }
 
-    public Set<String> check(List<UnifiedType> types, Values values, Message message) {
+    public Set<String> check(List<RamlType> types, Values values, Message message) {
         final Set<String> found = new HashSet<>();
         final TypeChecker checker = new TypeChecker(violations);
         for (final Map.Entry<String, List<Object>> entry : values) {
             final Message namedMsg = message.withParam(entry.getKey());
             final String typeName = findMatchingTypeName(typeNamesOf(types), entry.getKey());
-            final List<UnifiedType> ts = typesByName(types, typeName);
+            final List<RamlType> ts = typesByName(types, typeName);
             if (ts == null || ts.isEmpty()) {
                 violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)), namedMsg.withMessageParam("undefined"));
             } else {
-                for (final UnifiedType t : ts) {
+                for (final RamlType t : ts) {
                     if (entry.getValue().size() == 1) {
                         checker.check(t, entry.getValue().get(0), namedMsg);
                     } else {
@@ -105,7 +104,7 @@ public class TypeChecker {
                 found.add(typeName);
             }
         }
-        for (final UnifiedType type : types) {
+        for (final RamlType type : types) {
             final Message namedMsg = message.withParam(type.name());
             violations.addIf(type.required() && !ignoreRequired && !found.contains(type.name()), namedMsg.withMessageParam("required.missing"));
         }

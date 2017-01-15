@@ -15,22 +15,22 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.UnifiedApi;
+import guru.nidi.ramltester.model.internal.RamlApi;
 import org.raml.v2.api.RamlModelResult;
 import org.raml.v2.api.model.common.ValidationResult;
 
 public class RamlReport {
-    private final UnifiedApi raml;
+    private final RamlApi raml;
     private final Usage usage = new Usage();
     private final RamlViolations requestViolations = new RamlViolations();
     private final RamlViolations responseViolations = new RamlViolations();
     private final RamlViolations validationViolations = new RamlViolations();
 
-    public RamlReport(UnifiedApi raml) {
+    public RamlReport(RamlApi raml) {
         this.raml = raml;
     }
 
-    public static RamlReport fromModelResult(UnifiedApi raml, RamlModelResult modelResult) {
+    public static RamlReport fromModelResult(RamlApi raml, RamlModelResult modelResult) {
         final RamlReport report = new RamlReport(raml);
         for (final ValidationResult result : modelResult.getValidationResults()) {
             report.getValidationViolations().add("checking.exception", result.toString());
@@ -55,7 +55,7 @@ public class RamlReport {
         return usage;
     }
 
-    public UnifiedApi getRaml() {
+    public RamlApi getRaml() {
         return raml;
     }
 

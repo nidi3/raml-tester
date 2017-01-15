@@ -15,23 +15,23 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.*;
+import guru.nidi.ramltester.model.internal.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 class SecurityExtractor {
-    private final UnifiedApi raml;
-    private final List<UnifiedSecScheme> schemes;
+    private final RamlApi raml;
+    private final List<RamlSecScheme> schemes;
 
-    public SecurityExtractor(UnifiedApi raml, UnifiedMethod action, RamlViolations violations) {
+    public SecurityExtractor(RamlApi raml, RamlMethod action, RamlViolations violations) {
         this.raml = raml;
         schemes = new SchemeFinder(raml, violations).securedBy(action);
     }
 
     public void check(RamlViolations violations) {
-        for (final UnifiedSecScheme scheme : raml.securitySchemes()) {
+        for (final RamlSecScheme scheme : raml.securitySchemes()) {
             final SecuritySchemeType type = SecuritySchemeType.of(scheme);
             if (type != null) {
                 type.check(scheme, violations);
@@ -39,30 +39,30 @@ class SecurityExtractor {
         }
     }
 
-    public List<UnifiedSecScheme> getSchemes() {
+    public List<RamlSecScheme> getSchemes() {
         return schemes;
     }
 
-    public List<UnifiedType> queryParameters(UnifiedSecScheme scheme) {
+    public List<RamlType> queryParameters(RamlSecScheme scheme) {
         return scheme.describedBy() == null
-                ? Collections.<UnifiedType>emptyList()
+                ? Collections.<RamlType>emptyList()
                 : scheme.describedBy().queryParameters();
     }
 
-    public List<UnifiedType> headers(UnifiedSecScheme scheme) {
+    public List<RamlType> headers(RamlSecScheme scheme) {
         return scheme.describedBy() == null
-                ? Collections.<UnifiedType>emptyList()
+                ? Collections.<RamlType>emptyList()
                 : scheme.describedBy().headers();
     }
 
-    public List<UnifiedResponse> responses(UnifiedSecScheme scheme) {
+    public List<RamlApiResponse> responses(RamlSecScheme scheme) {
         return scheme.describedBy() == null
-                ? Collections.<UnifiedResponse>emptyList()
+                ? Collections.<RamlApiResponse>emptyList()
                 : scheme.describedBy().responses();
     }
 
     private static final class SchemeFinder {
-        private static final UnifiedSecScheme NULL_SCHEMA = new UnifiedSecScheme() {
+        private static final RamlSecScheme NULL_SCHEMA = new RamlSecScheme() {
 
             @Override
             public String description() {
@@ -80,26 +80,26 @@ class SecurityExtractor {
             }
 
             @Override
-            public UnifiedSecSchemePart describedBy() {
+            public RamlSecSchemePart describedBy() {
                 return null;
             }
 
             @Override
-            public UnifiedSecSchemeSettings settings() {
+            public RamlSecSchemeSettings settings() {
                 return null;
             }
         };
 
-        private final UnifiedApi raml;
+        private final RamlApi raml;
         private final RamlViolations violations;
 
-        public SchemeFinder(UnifiedApi raml, RamlViolations violations) {
+        public SchemeFinder(RamlApi raml, RamlViolations violations) {
             this.raml = raml;
             this.violations = violations;
         }
 
-        public List<UnifiedSecScheme> securedBy(UnifiedMethod action) {
-            final List<UnifiedSecScheme> res = new ArrayList<>();
+        public List<RamlSecScheme> securedBy(RamlMethod action) {
+            final List<RamlSecScheme> res = new ArrayList<>();
             if (!action.securedBy().isEmpty()) {
                 res.addAll(securitySchemes(action.securedBy()));
             } else if (!action.resource().securedBy().isEmpty()) {
@@ -113,9 +113,9 @@ class SecurityExtractor {
             return res;
         }
 
-        private List<UnifiedSecScheme> securitySchemes(List<UnifiedSecSchemeRef> refs) {
-            final List<UnifiedSecScheme> res = new ArrayList<>();
-            for (final UnifiedSecSchemeRef ref : refs) {
+        private List<RamlSecScheme> securitySchemes(List<RamlSecSchemeRef> refs) {
+            final List<RamlSecScheme> res = new ArrayList<>();
+            for (final RamlSecSchemeRef ref : refs) {
                 res.add(ref.securityScheme() == null ? NULL_SCHEMA : ref.securityScheme());
             }
             return res;

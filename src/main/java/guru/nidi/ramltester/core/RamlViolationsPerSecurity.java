@@ -15,19 +15,19 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.UnifiedSecScheme;
+import guru.nidi.ramltester.model.internal.RamlSecScheme;
 
 import java.util.*;
 
 class RamlViolationsPerSecurity {
-    private static final Comparator<UnifiedSecScheme> SCHEME_COMPARATOR = new Comparator<UnifiedSecScheme>() {
+    private static final Comparator<RamlSecScheme> SCHEME_COMPARATOR = new Comparator<RamlSecScheme>() {
         @Override
-        public int compare(UnifiedSecScheme s1, UnifiedSecScheme s2) {
+        public int compare(RamlSecScheme s1, RamlSecScheme s2) {
             return s1.type().compareToIgnoreCase(s2.type());
         }
     };
 
-    private final List<UnifiedSecScheme> schemes;
+    private final List<RamlSecScheme> schemes;
     private final Map<String, RamlViolations> requestViolations, responseViolations;
 
     public RamlViolationsPerSecurity(SecurityExtractor security) {
@@ -35,24 +35,24 @@ class RamlViolationsPerSecurity {
         Collections.sort(schemes, SCHEME_COMPARATOR);
         requestViolations = new HashMap<>();
         responseViolations = new HashMap<>();
-        for (final UnifiedSecScheme scheme : schemes) {
+        for (final RamlSecScheme scheme : schemes) {
             requestViolations.put(scheme.type(), new RamlViolations());
             responseViolations.put(scheme.type(), new RamlViolations());
         }
     }
 
-    public RamlViolations requestViolations(UnifiedSecScheme scheme) {
+    public RamlViolations requestViolations(RamlSecScheme scheme) {
         return requestViolations.get(scheme.type());
     }
 
-    public RamlViolations responseViolations(UnifiedSecScheme scheme) {
+    public RamlViolations responseViolations(RamlSecScheme scheme) {
         return responseViolations.get(scheme.type());
     }
 
-    public List<UnifiedSecScheme> leastViolations() {
+    public List<RamlSecScheme> leastViolations() {
         int best = Integer.MAX_VALUE;
-        final List<UnifiedSecScheme> res = new ArrayList<>();
-        for (final UnifiedSecScheme scheme : schemes) {
+        final List<RamlSecScheme> res = new ArrayList<>();
+        for (final RamlSecScheme scheme : schemes) {
             final int violations = requestViolations(scheme).size() + responseViolations(scheme).size();
             if (violations <= best) {
                 if (violations < best) {
@@ -66,13 +66,13 @@ class RamlViolationsPerSecurity {
     }
 
     public void addLeastViolations(RamlViolations request, RamlViolations response) {
-        for (final UnifiedSecScheme scheme : leastViolations()) {
+        for (final RamlSecScheme scheme : leastViolations()) {
             addAll(scheme, requestViolations(scheme), request);
             addAll(scheme, responseViolations(scheme), response);
         }
     }
 
-    private void addAll(UnifiedSecScheme scheme, RamlViolations source, RamlViolations target) {
+    private void addAll(RamlSecScheme scheme, RamlViolations source, RamlViolations target) {
         if (schemes.size() == 1) {
             target.addAll(source);
         } else {

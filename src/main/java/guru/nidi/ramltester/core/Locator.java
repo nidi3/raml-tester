@@ -15,34 +15,34 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.UnifiedBody;
-import guru.nidi.ramltester.model.UnifiedMethod;
-import guru.nidi.ramltester.model.UnifiedResource;
+import guru.nidi.ramltester.model.internal.RamlBody;
+import guru.nidi.ramltester.model.internal.RamlMethod;
+import guru.nidi.ramltester.model.internal.RamlResource;
 import guru.nidi.ramltester.util.Message;
 
 final class Locator {
-    private UnifiedResource resource;
-    private UnifiedMethod action;
-    private UnifiedBody requestMime;
+    private RamlResource resource;
+    private RamlMethod action;
+    private RamlBody requestMime;
     private String responseCode;
-    private UnifiedBody responseMime;
+    private RamlBody responseMime;
 
     public Locator() {
     }
 
-    public Locator(UnifiedResource resource) {
+    public Locator(RamlResource resource) {
         resource(resource);
     }
 
-    public Locator(UnifiedMethod action) {
+    public Locator(RamlMethod action) {
         action(action);
     }
 
-    public Locator(UnifiedBody mimeType) {
+    public Locator(RamlBody mimeType) {
         requestMime(mimeType);
     }
 
-    public void resource(UnifiedResource resource) {
+    public void resource(RamlResource resource) {
         this.resource = resource;
         action = null;
         requestMime = null;
@@ -50,7 +50,7 @@ final class Locator {
         responseMime = null;
     }
 
-    public void action(UnifiedMethod action) {
+    public void action(RamlMethod action) {
         this.resource = action.resource();
         this.action = action;
         requestMime = null;
@@ -58,7 +58,7 @@ final class Locator {
         responseMime = null;
     }
 
-    public void requestMime(UnifiedBody requestMime) {
+    public void requestMime(RamlBody requestMime) {
         this.requestMime = requestMime;
         responseCode = null;
         responseMime = null;
@@ -70,7 +70,7 @@ final class Locator {
         responseMime = null;
     }
 
-    public void responseMime(UnifiedBody responseMime) {
+    public void responseMime(RamlBody responseMime) {
         this.responseMime = responseMime;
         requestMime = null;
     }

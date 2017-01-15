@@ -15,24 +15,24 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.*;
+import guru.nidi.ramltester.model.internal.*;
 
 import java.util.List;
 
+import static guru.nidi.ramltester.core.CheckerHelper.typeNamesOf;
 import static guru.nidi.ramltester.core.RamlValidatorChecker.ParamName.*;
-import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
 public class RamlValidator {
-    private final UnifiedApi raml;
+    private final RamlApi raml;
     private final List<SchemaValidator> schemaValidators;
     private final Locator locator;
     private final RamlValidatorChecker checker;
 
-    public RamlValidator(UnifiedApi raml, List<SchemaValidator> schemaValidators) {
+    public RamlValidator(RamlApi raml, List<SchemaValidator> schemaValidators) {
         this(raml, schemaValidators, new RamlValidatorChecker(raml, schemaValidators));
     }
 
-    private RamlValidator(UnifiedApi raml, List<SchemaValidator> schemaValidators, RamlValidatorChecker checker) {
+    private RamlValidator(RamlApi raml, List<SchemaValidator> schemaValidators, RamlValidatorChecker checker) {
         this.raml = raml;
         this.schemaValidators = schemaValidators;
         this.checker = checker;
@@ -59,13 +59,13 @@ public class RamlValidator {
         checker.parameters(raml.baseUriParameters(), BASE_URI);
         checker.description(raml.documentation());
         checker.description(raml.baseUriParameters(), BASE_URI);
-        for (final UnifiedResource resource : raml.resources()) {
+        for (final RamlResource resource : raml.resources()) {
             resource(resource);
         }
         return checker.getReport();
     }
 
-    private void resource(UnifiedResource resource) {
+    private void resource(RamlResource resource) {
         locator.resource(resource);
         checker.resourcePattern(resource);
         checker.uriParameters(typeNamesOf(resource.uriParameters()), resource);
@@ -75,15 +75,15 @@ public class RamlValidator {
         checker.description(resource.baseUriParameters(), BASE_URI);
         checker.description(resource.uriParameters(), URI);
         checker.empty(resource);
-        for (final UnifiedResource res : resource.resources()) {
+        for (final RamlResource res : resource.resources()) {
             resource(res);
         }
-        for (final UnifiedMethod action : resource.methods()) {
+        for (final RamlMethod action : resource.methods()) {
             action(action);
         }
     }
 
-    private void action(UnifiedMethod action) {
+    private void action(RamlMethod action) {
         locator.action(action);
         checker.parameters(action.baseUriParameters(), BASE_URI);
         checker.parameters(action.queryParameters(), QUERY);
@@ -94,18 +94,18 @@ public class RamlValidator {
         checker.description(action.headers(), HEADER);
         checker.empty(action);
         if (action.body() != null) {
-            for (final UnifiedBody mimeType : action.body()) {
+            for (final RamlBody mimeType : action.body()) {
                 locator.requestMime(mimeType);
                 mimeType(mimeType);
             }
         }
-        for (final UnifiedResponse response : action.responses()) {
+        for (final RamlApiResponse response : action.responses()) {
             locator.responseCode(response.code());
             response(response);
         }
     }
 
-    private void mimeType(UnifiedBody mimeType) {
+    private void mimeType(RamlBody mimeType) {
         if (!mimeType.formParameters().isEmpty()) {
             checker.formParameters(mimeType);
             checker.parameters(mimeType.formParameters(), FORM);
@@ -114,12 +114,12 @@ public class RamlValidator {
         checker.exampleSchema(mimeType);
     }
 
-    private void response(UnifiedResponse response) {
+    private void response(RamlApiResponse response) {
         checker.headerPattern(typeNamesOf(response.headers()));
         checker.description(response.description());
         checker.description(response.headers(), HEADER);
         if (response.body() != null) {
-            for (final UnifiedBody mimeType : response.body()) {
+            for (final RamlBody mimeType : response.body()) {
                 locator.responseMime(mimeType);
                 mimeType(mimeType);
             }

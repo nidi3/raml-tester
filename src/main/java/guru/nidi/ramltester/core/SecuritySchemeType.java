@@ -15,8 +15,8 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.UnifiedSecScheme;
-import guru.nidi.ramltester.model.UnifiedSecSchemeSettings;
+import guru.nidi.ramltester.model.internal.RamlSecScheme;
+import guru.nidi.ramltester.model.internal.RamlSecSchemeSettings;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,17 +26,17 @@ import java.util.Map;
 abstract class SecuritySchemeType {
     private static final Map<String, SecuritySchemeType> INSTANCES = new HashMap<>();
 
-    public static SecuritySchemeType of(UnifiedSecScheme scheme) {
+    public static SecuritySchemeType of(RamlSecScheme scheme) {
         return INSTANCES.get(scheme.type());
     }
 
-    public abstract void check(UnifiedSecScheme scheme, RamlViolations violations);
+    public abstract void check(RamlSecScheme scheme, RamlViolations violations);
 
     static {
         INSTANCES.put("oauth_2_0", new SecuritySchemeType() {
             @Override
-            public void check(UnifiedSecScheme scheme, RamlViolations violations) {
-                final UnifiedSecSchemeSettings settings = scheme.settings();
+            public void check(RamlSecScheme scheme, RamlViolations violations) {
+                final RamlSecSchemeSettings settings = scheme.settings();
                 violations.addIf(settings == null || settings.requestTokenUri() == null, "oauth10.requestTokenUri.missing");
                 violations.addIf(settings == null || settings.authorizationUri() == null, "oauth10.authorizationUri.missing");
                 violations.addIf(settings == null || settings.tokenCredentialsUri() == null, "oauth10.tokenCredentialsUri.missing");
@@ -46,8 +46,8 @@ abstract class SecuritySchemeType {
             private final List<String> GRANTS = Arrays.asList("code", "token", "owner", "credentials");
 
             @Override
-            public void check(UnifiedSecScheme scheme, RamlViolations violations) {
-                final UnifiedSecSchemeSettings settings = scheme.settings();
+            public void check(RamlSecScheme scheme, RamlViolations violations) {
+                final RamlSecSchemeSettings settings = scheme.settings();
                 violations.addIf(settings == null || settings.authorizationUri() == null, "oauth20.authorizationUri.missing");
                 violations.addIf(settings == null || settings.accessTokenUri() == null, "oauth20.accessTokenUri.missing");
                 violations.addIf(settings == null || settings.authorizationGrants().isEmpty(), "oauth20.authorizationGrants.missing");
@@ -59,12 +59,12 @@ abstract class SecuritySchemeType {
             }
         });
         INSTANCES.put("basic", new SecuritySchemeType() {
-            public void check(UnifiedSecScheme scheme, RamlViolations violations) {
+            public void check(RamlSecScheme scheme, RamlViolations violations) {
 
             }
         });
         INSTANCES.put("digest", new SecuritySchemeType() {
-            public void check(UnifiedSecScheme scheme, RamlViolations violations) {
+            public void check(RamlSecScheme scheme, RamlViolations violations) {
 
             }
         });

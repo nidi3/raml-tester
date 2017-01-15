@@ -45,11 +45,12 @@ public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
         class GuruNidiRamltester extends DependencyRuler {
-            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit, validator, model, servlet, spring, jaxrs, util;
+            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit,
+                    validator, model, modelInternal, servlet, spring, jaxrs, util;
 
             public void defineRules() {
-                $self.mayUse(model, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
-                core.mayUse(model, util);
+                $self.mayUse(model, modelInternal, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
+                core.mayUse(model, modelInternal, util);
                 util.mayUse(model);
                 servlet.mayUse(model, util, core);
                 httpcomponents.mayUse(model, util, core);
@@ -156,7 +157,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.clazz(RamlChecker.class).ignore("//TODO usage is multiplied by security schemes"),
                         In.everywhere().ignore("public boolean equals(Object o) {"))
                 .because("Same code for 08 and 10, but not unifiable",
-                        In.loc("guru.nidi.ramltester.model").ignoreAll())
+                        In.loc("guru.nidi.ramltester.model.internal").ignoreAll())
                 .because("Similar but not same",
                         In.locs("*Request", "*Response").ignoreAll(),
                         In.clazz(RamlHttpClient.class).ignoreAll())

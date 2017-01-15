@@ -15,35 +15,35 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.*;
+import guru.nidi.ramltester.model.internal.*;
 
 import java.util.List;
 
-import static guru.nidi.ramltester.model.UnifiedModel.codesOf;
-import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
+import static guru.nidi.ramltester.core.CheckerHelper.codesOf;
+import static guru.nidi.ramltester.core.CheckerHelper.typeNamesOf;
 
 
 public final class UsageBuilder {
     private UsageBuilder() {
     }
 
-    static Usage.Resource resourceUsage(Usage usage, UnifiedResource resource) {
+    static Usage.Resource resourceUsage(Usage usage, RamlResource resource) {
         return usage.resource(resource.resourcePath());
     }
 
-    static Usage.Action actionUsage(Usage usage, UnifiedMethod action) {
+    static Usage.Action actionUsage(Usage usage, RamlMethod action) {
         return usage.resource(action.resource().resourcePath()).action(action.method());
     }
 
-    static Usage.Response responseUsage(Usage usage, UnifiedMethod action, String responseCode) {
+    static Usage.Response responseUsage(Usage usage, RamlMethod action, String responseCode) {
         return actionUsage(usage, action).response(responseCode);
     }
 
-    static Usage.MimeType mimeTypeUsage(Usage usage, UnifiedMethod action, UnifiedBody mimeType) {
+    static Usage.MimeType mimeTypeUsage(Usage usage, RamlMethod action, RamlBody mimeType) {
         return actionUsage(usage, action).mimeType(mimeType.name());
     }
 
-    public static Usage usage(UnifiedApi raml, List<RamlReport> reports) {
+    public static Usage usage(RamlApi raml, List<RamlReport> reports) {
         final Usage usage = new Usage();
         createTotalUsage(usage, raml.resources());
         for (final RamlReport report : reports) {
@@ -52,21 +52,21 @@ public final class UsageBuilder {
         return usage;
     }
 
-    private static void createTotalUsage(Usage usage, List<UnifiedResource> resources) {
-        for (final UnifiedResource resource : resources) {
+    private static void createTotalUsage(Usage usage, List<RamlResource> resources) {
+        for (final RamlResource resource : resources) {
             resourceUsage(usage, resource);
-            for (final UnifiedMethod action : resource.methods()) {
+            for (final RamlMethod action : resource.methods()) {
                 actionUsage(usage, action).initQueryParameters(typeNamesOf(action.queryParameters()));
                 actionUsage(usage, action).initResponseCodes(codesOf(action.responses()));
                 actionUsage(usage, action).initRequestHeaders(typeNamesOf(action.headers()));
                 if (action.body() != null) {
-                    for (final UnifiedBody mimeType : action.body()) {
+                    for (final RamlBody mimeType : action.body()) {
                         if (!mimeType.formParameters().isEmpty()) {
                             UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(typeNamesOf(mimeType.formParameters()));
                         }
                     }
                 }
-                for (final UnifiedResponse response : action.responses()) {
+                for (final RamlApiResponse response : action.responses()) {
                     responseUsage(usage, action, response.code()).initResponseHeaders(typeNamesOf(response.headers()));
                 }
             }

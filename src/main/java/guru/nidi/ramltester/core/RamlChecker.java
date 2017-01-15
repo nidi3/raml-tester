@@ -15,7 +15,10 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.*;
+import guru.nidi.ramltester.model.RamlRequest;
+import guru.nidi.ramltester.model.RamlResponse;
+import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.internal.*;
 import guru.nidi.ramltester.util.FormDecoder;
 import guru.nidi.ramltester.util.Message;
 import guru.nidi.ramltester.util.UriComponents;
@@ -25,11 +28,10 @@ import java.util.*;
 
 import static guru.nidi.ramltester.core.CheckerHelper.*;
 import static guru.nidi.ramltester.core.UsageBuilder.*;
-import static guru.nidi.ramltester.model.UnifiedModel.responseByCode;
 
 public class RamlChecker {
     private final CheckerConfig config;
-    private final UnifiedApi api;
+    private final RamlApi api;
     private RamlViolations requestViolations;
     private RamlViolationsPerSecurity violationsPerSecurity;
     private Locator locator;
@@ -57,7 +59,7 @@ public class RamlChecker {
         final RamlViolations responseViolations = report.getResponseViolations();
         locator = new Locator();
         try {
-            final UnifiedMethod action = findAction(request);
+            final RamlMethod action = findAction(request);
             final SecurityExtractor security = new SecurityExtractor(api, action, requestViolations);
             security.check(requestViolations);
             violationsPerSecurity = new RamlViolationsPerSecurity(security);
@@ -77,7 +79,7 @@ public class RamlChecker {
         return report;
     }
 
-    public UnifiedMethod findAction(RamlRequest request) {
+    public RamlMethod findAction(RamlRequest request) {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(config.baseUri, config.includeServletPath));
         if (api.baseUri() == null) {
             final UriComponents ramlUri = UriComponents.fromHttpUrl("http://server"); //dummy url as we only match paths
@@ -90,17 +92,17 @@ public class RamlChecker {
         final VariableMatcher hostMatch = getHostMatch(requestUri, ramlUri);
         final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
 
-        final UnifiedMethod action = findAction(pathMatch.getSuffix(), request.getMethod());
+        final RamlMethod action = findAction(pathMatch.getSuffix(), request.getMethod());
         checkProtocol(action, requestUri, ramlUri);
         checkBaseUriParameters(hostMatch, pathMatch, action);
 
         return action;
     }
 
-    private UnifiedMethod findAction(String path, String method) {
-        final UnifiedResource resource = findResourceByPath(path);
+    private RamlMethod findAction(String path, String method) {
+        final RamlResource resource = findResourceByPath(path);
         resourceUsage(usage, resource).incUses(1);
-        final UnifiedMethod action = findAction(resource, method);
+        final RamlMethod action = findAction(resource, method);
         if (action == null) {
             requestViolations.add("action.undefined", locator, method);
             throw new RamlViolationException();
@@ -110,8 +112,8 @@ public class RamlChecker {
         return action;
     }
 
-    private UnifiedMethod findAction(UnifiedResource resource, String method) {
-        for (final UnifiedMethod action : resource.methods()) {
+    private RamlMethod findAction(RamlResource resource, String method) {
+        for (final RamlMethod action : resource.methods()) {
             if (action.method().equals(method)) {
                 return action;
             }
@@ -119,7 +121,7 @@ public class RamlChecker {
         return null;
     }
 
-    private UnifiedResource findResourceByPath(String resourcePath) {
+    private RamlResource findResourceByPath(String resourcePath) {
         final Values values = new Values();
         final List<ResourceMatch> matches = findResource(resourcePath, api.resources(), values);
         if (matches.isEmpty()) {
@@ -130,13 +132,13 @@ public class RamlChecker {
             requestViolations.add("resource.ambiguous", resourcePath, matches.get(0).resource.relativeUri(), matches.get(1).resource.relativeUri());
             throw new RamlViolationException();
         }
-        final UnifiedResource resource = matches.get(0).resource;
+        final RamlResource resource = matches.get(0).resource;
         locator.resource(resource);
         checkUriParams(values, resource);
         return resource;
     }
 
-    public void checkRequest(RamlRequest request, UnifiedMethod action, SecurityExtractor security) {
+    public void checkRequest(RamlRequest request, RamlMethod action, SecurityExtractor security) {
         checkQueryParameters(request.getQueryValues(), action, security);
         checkRequestHeaderParameters(request.getHeaderValues(), action, security);
 
@@ -151,12 +153,12 @@ public class RamlChecker {
         }
     }
 
-    private void checkFormParameters(UnifiedMethod action, Values values, UnifiedBody mimeType) {
+    private void checkFormParameters(RamlMethod action, Values values, RamlBody mimeType) {
         if (mimeType.type() != null) {
             requestViolations.add("schema.superfluous", locator);
         }
         @SuppressWarnings("unchecked")
-        final List<UnifiedType> formParameters = mimeType.formParameters();
+        final List<RamlType> formParameters = mimeType.formParameters();
         if (formParameters.isEmpty()) {
             requestViolations.add("formParameters.missing", locator);
         } else {
@@ -164,22 +166,22 @@ public class RamlChecker {
         }
     }
 
-    private void checkFormParametersValues(UnifiedMethod action, UnifiedBody mimeType, Values values, List<UnifiedType> formParameters) {
+    private void checkFormParametersValues(RamlMethod action, RamlBody mimeType, Values values, List<RamlType> formParameters) {
         final Usage.MimeType mt = mimeTypeUsage(usage, action, mimeType);
         mt.addFormParameters(new TypeChecker(requestViolations).check(formParameters, values, new Message("formParam", locator)));
     }
 
-    private void checkQueryParameters(Values values, UnifiedMethod action, SecurityExtractor security) {
+    private void checkQueryParameters(Values values, RamlMethod action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
-        for (final UnifiedSecScheme scheme : security.getSchemes()) {
+        for (final RamlSecScheme scheme : security.getSchemes()) {
             final Usage.Action a = actionUsage(usage, action);
             a.addQueryParameters(new TypeChecker(violationsPerSecurity.requestViolations(scheme)).check(mergeLists(action.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
         }
     }
 
-    private void checkRequestHeaderParameters(Values values, UnifiedMethod action, SecurityExtractor security) {
+    private void checkRequestHeaderParameters(Values values, RamlMethod action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
-        for (final UnifiedSecScheme scheme : security.getSchemes()) {
+        for (final RamlSecScheme scheme : security.getSchemes()) {
             final Usage.Action a = actionUsage(usage, action);
             a.addRequestHeaders(
                     new TypeChecker(violationsPerSecurity.requestViolations(scheme))
@@ -191,9 +193,9 @@ public class RamlChecker {
         }
     }
 
-    private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, UnifiedMethod action) {
+    private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, RamlMethod action) {
         final TypeChecker checker = new TypeChecker(requestViolations).acceptUndefined().ignoreRequired();
-        final List<UnifiedType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
+        final List<RamlType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
         checker.check(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", locator));
         checker.check(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", locator));
     }
@@ -216,12 +218,12 @@ public class RamlChecker {
         return hostMatch;
     }
 
-    private void checkProtocol(UnifiedMethod action, UriComponents requestUri, UriComponents ramlUri) {
+    private void checkProtocol(RamlMethod action, UriComponents requestUri, UriComponents ramlUri) {
         final List<String> protocols = findProtocols(action, ramlUri.getScheme().toUpperCase());
         requestViolations.addIf(!protocols.contains(requestUri.getScheme().toUpperCase()), "protocol.undefined", locator, requestUri.getScheme());
     }
 
-    private List<String> findProtocols(UnifiedMethod action, String fallback) {
+    private List<String> findProtocols(RamlMethod action, String fallback) {
         List<String> protocols = action.protocols();
         if (protocols == null || protocols.isEmpty()) {
             protocols = api.protocols();
@@ -232,9 +234,9 @@ public class RamlChecker {
         return protocols;
     }
 
-    private void checkUriParams(Values values, UnifiedResource resource) {
+    private void checkUriParams(Values values, RamlResource resource) {
         for (final Map.Entry<String, List<Object>> entry : values) {
-            final UnifiedType uriParam = findUriParam(entry.getKey(), resource);
+            final RamlType uriParam = findUriParam(entry.getKey(), resource);
             final Message message = new Message("uriParam", locator, entry.getKey());
             if (uriParam != null) {
                 new TypeChecker(requestViolations).check(uriParam, entry.getValue().get(0), message);
@@ -242,9 +244,9 @@ public class RamlChecker {
         }
     }
 
-    public void checkResponse(RamlRequest request, RamlResponse response, UnifiedMethod action, SecurityExtractor security) {
+    public void checkResponse(RamlRequest request, RamlResponse response, RamlMethod action, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
-        for (final UnifiedSecScheme scheme : security.getSchemes()) {
+        for (final RamlSecScheme scheme : security.getSchemes()) {
             final RamlViolations requestViolations = violationsPerSecurity.requestViolations(scheme);
             final RamlViolations responseViolations = violationsPerSecurity.responseViolations(scheme);
             final MediaTypeMatch typeMatch = doCheckReponse(responseViolations, response, action, security.responses(scheme));
@@ -255,9 +257,9 @@ public class RamlChecker {
         }
     }
 
-    private MediaTypeMatch doCheckReponse(RamlViolations violations, RamlResponse response, UnifiedMethod action, List<UnifiedResponse> securityResponses) {
-        final List<UnifiedResponse> responseMap = mergeLists(action.responses(), securityResponses);
-        final UnifiedResponse res = responseByCode(responseMap, Integer.toString(response.getStatus()));
+    private MediaTypeMatch doCheckReponse(RamlViolations violations, RamlResponse response, RamlMethod action, List<RamlApiResponse> securityResponses) {
+        final List<RamlApiResponse> responseMap = mergeLists(action.responses(), securityResponses);
+        final RamlApiResponse res = responseByCode(responseMap, Integer.toString(response.getStatus()));
         if (res == null) {
             violations.add("responseCode.undefined", locator, response.getStatus());
             return null;
@@ -300,7 +302,7 @@ public class RamlChecker {
         }
     }
 
-    private void checkResponseHeaderParameters(RamlViolations violations, Values values, UnifiedMethod action, String responseCode, UnifiedResponse response) {
+    private void checkResponseHeaderParameters(RamlViolations violations, Values values, RamlMethod action, String responseCode, RamlApiResponse response) {
         final Usage.Response r = responseUsage(usage, action, responseCode);
         r.addResponseHeaders(
                 new TypeChecker(violations)

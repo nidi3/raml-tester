@@ -15,21 +15,23 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.*;
+import guru.nidi.ramltester.model.RamlMessage;
+import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.internal.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 
 import java.io.Reader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static guru.nidi.ramltester.model.UnifiedModel.typeByName;
-import static guru.nidi.ramltester.model.UnifiedModel.typeNamesOf;
 
 final class CheckerHelper {
     private CheckerHelper() {
     }
 
-    public static boolean isNoOrEmptyBodies(List<UnifiedBody> bodies) {
+    public static boolean isNoOrEmptyBodies(List<RamlBody> bodies) {
         return bodies == null || bodies.isEmpty();
     }
 
@@ -37,8 +39,8 @@ final class CheckerHelper {
         return message.getContent() != null && message.getContent().length > 0;
     }
 
-    public static boolean existSchemalessBody(List<UnifiedBody> bodies) {
-        for (final UnifiedBody mimeType : bodies) {
+    public static boolean existSchemalessBody(List<RamlBody> bodies) {
+        for (final RamlBody mimeType : bodies) {
             if (mimeType.type() == null) {
                 return true;
             }
@@ -46,8 +48,8 @@ final class CheckerHelper {
         return false;
     }
 
-    public static UnifiedType findUriParam(String uriParam, UnifiedResource resource) {
-        final UnifiedType param = typeByName(resource.uriParameters(), uriParam);
+    public static RamlType findUriParam(String uriParam, RamlResource resource) {
+        final RamlType param = typeByName(resource.uriParameters(), uriParam);
         if (param != null) {
             return param;
         }
@@ -57,9 +59,9 @@ final class CheckerHelper {
         return null;
     }
 
-    public static List<ResourceMatch> findResource(String resourcePath, List<UnifiedResource> resources, Values values) {
+    public static List<ResourceMatch> findResource(String resourcePath, List<RamlResource> resources, Values values) {
         final List<ResourceMatch> matches = new ArrayList<>();
-        for (final UnifiedResource resource : resources) {
+        for (final RamlResource resource : resources) {
             final VariableMatcher pathMatch = VariableMatcher.match(resource.relativeUri(), resourcePath);
             if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
                 matches.add(new ResourceMatch(pathMatch, resource));
@@ -81,9 +83,9 @@ final class CheckerHelper {
 
     static final class ResourceMatch implements Comparable<ResourceMatch> {
         final VariableMatcher match;
-        final UnifiedResource resource;
+        final RamlResource resource;
 
-        public ResourceMatch(VariableMatcher match, UnifiedResource resource) {
+        public ResourceMatch(VariableMatcher match, RamlResource resource) {
             this.match = match;
             this.resource = resource;
         }
@@ -103,14 +105,14 @@ final class CheckerHelper {
         return null;
     }
 
-    public static List<UnifiedType> getEffectiveBaseUriParams(List<UnifiedType> baseUriParams, UnifiedMethod action) {
-        final List<UnifiedType> params = new ArrayList<>();
+    public static List<RamlType> getEffectiveBaseUriParams(List<RamlType> baseUriParams, RamlMethod action) {
+        final List<RamlType> params = new ArrayList<>();
         if (action.baseUriParameters() != null) {
             params.addAll(action.baseUriParameters());
         }
         addNotSetBaseUriParams(action.resource(), params);
         if (baseUriParams != null) {
-            for (final UnifiedType parameter : baseUriParams) {
+            for (final RamlType parameter : baseUriParams) {
                 if (!typeNamesOf(params).contains(parameter.name())) {
                     params.add(parameter);
                 }
@@ -119,8 +121,8 @@ final class CheckerHelper {
         return params;
     }
 
-    private static void addNotSetBaseUriParams(UnifiedResource resource, List<UnifiedType> params) {
-        for (final UnifiedType parameter : resource.baseUriParameters()) {
+    private static void addNotSetBaseUriParams(RamlResource resource, List<RamlType> params) {
+        for (final RamlType parameter : resource.baseUriParameters()) {
             if (!typeNamesOf(params).contains(parameter.name())) {
                 params.add(parameter);
             }
@@ -139,17 +141,53 @@ final class CheckerHelper {
                 : new NamedReader(typeDef, new Message("schema", type).toString());
     }
 
-    public static <T> Map<String, T> mergeMaps(Map<String, T> map1, Map<String, T> map2) {
-        final Map<String, T> res = new HashMap<>();
-        res.putAll(map1);
-        res.putAll(map2);
-        return res;
-    }
-
     public static <T> List<T> mergeLists(List<T> list1, List<T> list2) {
         final List<T> res = new ArrayList<>();
         res.addAll(list1);
         res.addAll(list2);
+        return res;
+    }
+
+    public static RamlApiResponse responseByCode(List<RamlApiResponse> responses, String code) {
+        for (final RamlApiResponse response : responses) {
+            if (response.code().equals(code)) {
+                return response;
+            }
+        }
+        return null;
+    }
+
+    public static RamlType typeByName(List<RamlType> types, String name) {
+        final List<RamlType> res = typesByName(types, name);
+        if (res.size() > 1) {
+            throw new IllegalArgumentException("Expected only one parameter with given name " + name);
+        }
+        return res.isEmpty() ? null : res.get(0);
+    }
+
+    public static List<RamlType> typesByName(List<RamlType> types, String name) {
+        final List<RamlType> res = new ArrayList<>();
+        for (final RamlType type : types) {
+            if (type.name().equals(name)) {
+                res.add(type);
+            }
+        }
+        return res;
+    }
+
+    public static List<String> typeNamesOf(List<RamlType> types) {
+        final List<String> res = new ArrayList<>();
+        for (final RamlType type : types) {
+            res.add(type.name());
+        }
+        return res;
+    }
+
+    public static List<String> codesOf(List<RamlApiResponse> responses) {
+        final List<String> res = new ArrayList<>();
+        for (final RamlApiResponse response : responses) {
+            res.add(response.code());
+        }
         return res;
     }
 
