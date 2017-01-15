@@ -19,7 +19,9 @@ import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.model.Values;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -64,8 +66,15 @@ public class TestUtils {
         return violations;
     }
 
-    private static class SimpleMessage extends Message {
+    public static Map<String, Object> map(Object... keysAndValues) {
+        final Map<String, Object> res = new HashMap<>();
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            res.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+        return res;
+    }
 
+    private static class SimpleMessage extends Message {
         public SimpleMessage(String key, Object... params) {
             super(key, params);
         }

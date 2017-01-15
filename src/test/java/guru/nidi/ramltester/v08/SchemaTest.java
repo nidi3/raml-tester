@@ -28,8 +28,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
 
+import static guru.nidi.ramltester.util.TestUtils.map;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -74,11 +77,11 @@ public class SchemaTest extends HighlevelTestBase {
         final RamlReport report = test(simple, get("/schema"), jsonResponse(200, "{\"s\":{},\"i\":true}"));
         final RamlViolationMessage message = report.getResponseViolations().iterator().next();
         assertThat(message.getCause(), instanceOf(JsonSchemaViolationCause.class));
-        final String json = mapper.writeValueAsString(message.getCause());
-        assertEquals(("{'messages':[" +
-                "{'message':'instance type (boolean) does not match any allowed primitive type (allowed: [\\'integer\\'])','logLevel':'ERROR'}," +
-                "{'message':'instance type (object) does not match any allowed primitive type (allowed: [\\'string\\'])','logLevel':'ERROR'}" +
-                "]}").replace("'", "\""), json);
+        final Map<?, ?> json = mapper.readValue(mapper.writeValueAsString(message.getCause()), Map.class);
+        assertEquals(map("messages", Arrays.asList(
+                map("message", "instance type (boolean) does not match any allowed primitive type (allowed: [\"integer\"])", "logLevel", "ERROR"),
+                map("message", "instance type (object) does not match any allowed primitive type (allowed: [\"string\"])", "logLevel", "ERROR"))),
+                json);
     }
 
     @Test
@@ -113,11 +116,11 @@ public class SchemaTest extends HighlevelTestBase {
         final RamlReport report = test(simple, get("/schema"), response(208, "<api-request>str</api-request>", "text/xml"));
         final RamlViolationMessage message = report.getResponseViolations().iterator().next();
         assertThat(message.getCause(), instanceOf(XmlSchemaViolationCause.class));
-        final String json = mapper.writeValueAsString(message.getCause());
-        assertEquals(("{'messages':[" +
-                "{'message':'cvc-complex-type.2.3: Element `api-request` cannot have character [children], because the type`s content type is element-only.','line':1,'column':31}," +
-                "{'message':'cvc-complex-type.2.4.b: The content of element `api-request` is not complete. One of `{input}` is expected.','line':1,'column':31}" +
-                "]}").replace("'", "\"").replace("`", "'"), json);
+        final Map<?, ?> json = mapper.readValue(mapper.writeValueAsString(message.getCause()), Map.class);
+        assertEquals(map("messages", Arrays.asList(
+                map("message", "cvc-complex-type.2.3: Element `api-request` cannot have character [children], because the type`s content type is element-only.", "line", 1, "column", 31),
+                map("message", "cvc-complex-type.2.4.b: The content of element `api-request` is not complete. One of `{input}` is expected.", "line", 1, "column", 31))),
+                json);
     }
 
     @Test
