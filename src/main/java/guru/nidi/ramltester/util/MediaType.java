@@ -138,8 +138,7 @@ public final class MediaType {
 
     public int similarity(MediaType other) {
         int s = 0;
-        final int init = 3 * 3 * 3 * 3;
-        int factor = init;
+        int factor = 3 * 3 * 3 * 3;
         final Object[] myParts = parts();
         final Object[] otherParts = other.parts();
         int i = 0;

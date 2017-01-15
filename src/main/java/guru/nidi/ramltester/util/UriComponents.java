@@ -35,7 +35,7 @@ public final class UriComponents {
                 HTTP = "(?i)(http|https):",
                 USERINFO = "([^@/]*)",
                 HOST_IPV4 = "[^\\[/?#:]*",
-                HOST_IPV6 = "\\[[\\p{XDigit}:\\.]*[%\\p{Alnum}]*\\]",
+                HOST_IPV6 = "\\[[\\p{XDigit}:.]*[%\\p{Alnum}]*]",
                 HOST = "(" + HOST_IPV6 + "|" + HOST_IPV4 + ")",
                 PORT = "(\\d*)",
                 PATH = "([^?#]*)",

@@ -23,7 +23,7 @@ import java.util.List;
 public class DocItem08 implements RamlDocItem {
     private final DocumentationItem item;
 
-    public DocItem08(DocumentationItem item) {
+    DocItem08(DocumentationItem item) {
         this.item = item;
     }
 

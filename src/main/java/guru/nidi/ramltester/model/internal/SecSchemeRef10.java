@@ -23,7 +23,7 @@ import java.util.List;
 public class SecSchemeRef10 implements RamlSecSchemeRef {
     private final SecuritySchemeRef ref;
 
-    public SecSchemeRef10(SecuritySchemeRef ref) {
+    SecSchemeRef10(SecuritySchemeRef ref) {
         this.ref = ref;
     }
 

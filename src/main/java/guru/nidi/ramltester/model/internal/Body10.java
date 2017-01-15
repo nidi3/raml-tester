@@ -27,7 +27,7 @@ import java.util.List;
 public class Body10 implements RamlBody {
     private final TypeDeclaration type;
 
-    public Body10(TypeDeclaration type) {
+    Body10(TypeDeclaration type) {
         this.type = type;
     }
 

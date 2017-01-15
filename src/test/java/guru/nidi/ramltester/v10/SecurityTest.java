@@ -27,8 +27,8 @@ import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class SecurityTest extends HighlevelTestBase {
-    private static RamlLoaders base = RamlLoaders.fromClasspath(SecurityTest.class);
-    private static RamlDefinition
+    private static final RamlLoaders base = RamlLoaders.fromClasspath(SecurityTest.class);
+    private static final RamlDefinition
             global = base.load("global-security.raml"),
             local = base.load("local-security.raml");
 

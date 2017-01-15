@@ -22,10 +22,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class CoreTestBase {
-    protected void assertNoViolations(RamlReport report) {
-        assertTrue("Expected no violations, but found: " + report, report.isEmpty());
-    }
-
     protected void assertNoViolations(RamlViolations violations) {
         assertTrue("Expected no violations, but found: " + violations, violations.isEmpty());
     }

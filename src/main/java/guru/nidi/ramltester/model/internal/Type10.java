@@ -25,7 +25,7 @@ import java.util.List;
 public class Type10 implements RamlType {
     private final TypeDeclaration type;
 
-    public Type10(TypeDeclaration type) {
+    Type10(TypeDeclaration type) {
         this.type = type;
     }
 

@@ -23,13 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 class SpringHttpRamlMessage {
-
-    protected String contentTypeOf(HttpHeaders headers) {
+    String contentTypeOf(HttpHeaders headers) {
         final MediaType contentType = headers.getContentType();
         return contentType == null ? null : contentType.toString();
     }
 
-    protected Values headerValuesOf(HttpHeaders headers) {
+    Values headerValuesOf(HttpHeaders headers) {
         final Values values = new Values();
         for (final Map.Entry<String, List<String>> entry : headers.entrySet()) {
             values.addValues(entry.getKey(), entry.getValue());

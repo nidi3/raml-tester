@@ -189,7 +189,7 @@ class RamlValidatorChecker {
 
     public void resourcePattern(RamlResource resource) {
         if (resourcePattern != null) {
-            final String uri = resource.relativeUri().replaceAll("\\{[^}/]+\\}", "");
+            final String uri = resource.relativeUri().replaceAll("\\{[^}/]+}", "");
             for (final String part : uri.split("/")) {
                 if (part != null && part.length() > 0 && !resourcePattern.matcher(part).matches()) {
                     violation("resource.name.invalid", locator, resourcePattern.pattern());

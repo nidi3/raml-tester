@@ -23,7 +23,7 @@ import java.util.List;
 public class Response08 implements RamlApiResponse {
     private final Response response;
 
-    public Response08(Response response) {
+    Response08(Response response) {
         this.response = response;
     }
 

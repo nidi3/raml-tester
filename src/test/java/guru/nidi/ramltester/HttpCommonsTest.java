@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
 public class HttpCommonsTest extends ServerTest {
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
-    private static RamlHttpClient client = RamlLoaders
+    private static final RamlHttpClient client = RamlLoaders
             .fromClasspath(HttpCommonsTest.class).load("httpCommons.raml")
             .assumingBaseUri("http://nidi.guru/raml/v1")
             .createHttpClient()

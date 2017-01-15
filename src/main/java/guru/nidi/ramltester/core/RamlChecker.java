@@ -123,7 +123,7 @@ public class RamlChecker {
 
     private RamlResource findResourceByPath(String resourcePath) {
         final Values values = new Values();
-        final List<ResourceMatch> matches = findResource(resourcePath, api.resources(), values);
+        final List<ResourceMatch> matches = ResourceMatch.find(resourcePath, api.resources(), values);
         if (matches.isEmpty()) {
             requestViolations.add("resource.undefined", resourcePath);
             throw new RamlViolationException();

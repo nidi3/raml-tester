@@ -24,7 +24,7 @@ import java.util.Locale;
 public class Method08 implements RamlMethod {
     private final Method method;
 
-    public Method08(Method method) {
+    Method08(Method method) {
         this.method = method;
     }
 

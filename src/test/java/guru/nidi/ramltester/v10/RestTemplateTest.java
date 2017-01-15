@@ -51,7 +51,7 @@ public class RestTemplateTest extends ServerTest {
 
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
 
-    private static RamlRestTemplate restTemplate = RamlLoaders
+    private static final RamlRestTemplate restTemplate = RamlLoaders
             .fromClasspath(RestTemplateTest.class)
             .load("template.raml")
             .assumingBaseUri("http://nidi.guru/raml/v1")

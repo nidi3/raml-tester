@@ -39,7 +39,7 @@ import java.util.Set;
 public abstract class ServerTest {
     protected static final int PORT = 18765;
     private static Tomcat tomcat;
-    private static Set<Class<?>> inited = new HashSet<>();
+    private static final Set<Class<?>> inited = new HashSet<>();
     private final static JarScanner NO_SCAN = new JarScanner() {
         @Override
         public void scan(ServletContext context, ClassLoader classloader, JarScannerCallback callback, Set<String> jarsToSkip) {

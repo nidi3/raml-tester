@@ -16,14 +16,12 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlMessage;
-import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.model.internal.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -57,43 +55,6 @@ final class CheckerHelper {
             return findUriParam(uriParam, resource.parentResource());
         }
         return null;
-    }
-
-    public static List<ResourceMatch> findResource(String resourcePath, List<RamlResource> resources, Values values) {
-        final List<ResourceMatch> matches = new ArrayList<>();
-        for (final RamlResource resource : resources) {
-            final VariableMatcher pathMatch = VariableMatcher.match(resource.relativeUri(), resourcePath);
-            if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
-                matches.add(new ResourceMatch(pathMatch, resource));
-            }
-        }
-        Collections.sort(matches);
-        final List<ResourceMatch> found = new ArrayList<>();
-        for (final ResourceMatch match : matches) {
-            if (match.match.isCompleteMatch()) {
-                values.addValues(match.match.getVariables());
-                found.add(match);
-            } else if (match.match.isMatch()) {
-                values.addValues(match.match.getVariables());
-                found.addAll(findResource(match.match.getSuffix(), match.resource.resources(), values));
-            }
-        }
-        return found;
-    }
-
-    static final class ResourceMatch implements Comparable<ResourceMatch> {
-        final VariableMatcher match;
-        final RamlResource resource;
-
-        public ResourceMatch(VariableMatcher match, RamlResource resource) {
-            this.match = match;
-            this.resource = resource;
-        }
-
-        @Override
-        public int compareTo(ResourceMatch o) {
-            return match.getVariables().size() - o.match.getVariables().size();
-        }
     }
 
     public static SchemaValidator findSchemaValidator(List<SchemaValidator> validators, MediaType mediaType) {

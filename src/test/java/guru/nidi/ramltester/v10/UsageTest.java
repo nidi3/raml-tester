@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class UsageTest extends HighlevelTestBase {
-    private static RamlDefinition api = RamlLoaders.fromClasspath(SimpleTest.class).load("usage.raml");
+    private static final RamlDefinition api = RamlLoaders.fromClasspath(SimpleTest.class).load("usage.raml");
 
     @Test
     public void findUnused() throws Exception {

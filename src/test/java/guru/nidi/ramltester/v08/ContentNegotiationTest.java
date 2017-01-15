@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 public class ContentNegotiationTest extends HighlevelTestBase {
 
-    private static RamlDefinition simple = RamlLoaders.fromClasspath(ContentNegotiationTest.class).load("simple.raml");
+    private static final RamlDefinition simple = RamlLoaders.fromClasspath(ContentNegotiationTest.class).load("simple.raml");
 
     @Test
     public void noAcceptHeaderIsOk() throws Exception {

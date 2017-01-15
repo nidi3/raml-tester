@@ -24,12 +24,12 @@ import org.apache.http.entity.BufferedHttpEntity;
 import java.io.IOException;
 
 class HttpComponentsRamlMessage {
-    protected String contentTypeOf(HttpMessage message) {
+    String contentTypeOf(HttpMessage message) {
         final Header contentType = message.getFirstHeader("Content-Type");
         return contentType == null ? null : contentType.getValue();
     }
 
-    protected Values headerValuesOf(HttpMessage message) {
+    Values headerValuesOf(HttpMessage message) {
         final Values headers = new Values();
         for (final Header header : message.getAllHeaders()) {
             headers.addValue(header.getName(), header.getValue());
@@ -37,7 +37,7 @@ class HttpComponentsRamlMessage {
         return headers;
     }
 
-    protected HttpResponse buffered(HttpResponse response) {
+    HttpResponse buffered(HttpResponse response) {
         final HttpEntity entity = response.getEntity();
         if (entity != null && !entity.isRepeatable()) {
             response.setEntity(buffered(entity));
@@ -45,7 +45,7 @@ class HttpComponentsRamlMessage {
         return response;
     }
 
-    protected HttpEntityEnclosingRequest buffered(HttpEntityEnclosingRequest request) {
+    HttpEntityEnclosingRequest buffered(HttpEntityEnclosingRequest request) {
         final HttpEntity entity = request.getEntity();
         if (entity != null && !entity.isRepeatable()) {
             request.setEntity(buffered(entity));
@@ -61,7 +61,7 @@ class HttpComponentsRamlMessage {
         }
     }
 
-    protected byte[] contentOf(HttpEntity entity) {
+    byte[] contentOf(HttpEntity entity) {
         try {
             return entity == null ? null : IoUtils.readIntoByteArray(entity.getContent());
         } catch (IOException e) {

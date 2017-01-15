@@ -25,7 +25,7 @@ import static java.util.Collections.singletonList;
 public class Body08 implements RamlBody {
     private final BodyLike body;
 
-    public Body08(BodyLike body) {
+    Body08(BodyLike body) {
         this.body = body;
     }
 

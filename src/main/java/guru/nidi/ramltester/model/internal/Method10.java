@@ -26,7 +26,7 @@ import static java.util.Collections.emptyList;
 public class Method10 implements RamlMethod {
     private final Method method;
 
-    public Method10(Method method) {
+     Method10(Method method) {
         this.method = method;
     }
 

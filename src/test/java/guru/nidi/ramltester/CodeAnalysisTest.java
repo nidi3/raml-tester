@@ -91,7 +91,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("They are snippets",
                         In.loc("guru.nidi.ramltester.snippets*").ignoreAll())
                 .because("it's class private and only used in 1 occasion",
-                        In.loc("CheckerHelper$ResourceMatch").ignore("EQ_COMPARETO_USE_OBJECT_EQUALS"));
+                        In.loc("ResourceMatch").ignore("EQ_COMPARETO_USE_OBJECT_EQUALS"));
         return new FindBugsAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector).analyze();
     }
 

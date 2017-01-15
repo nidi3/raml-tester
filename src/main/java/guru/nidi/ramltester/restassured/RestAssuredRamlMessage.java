@@ -24,8 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 class RestAssuredRamlMessage {
-
-    protected Values headersToValues(Headers headers) {
+    Values headersToValues(Headers headers) {
         final Values headerValues = new Values();
         for (final Header header : headers) {
             headerValues.addValue(header.getName(), header.getValue());
@@ -33,7 +32,7 @@ class RestAssuredRamlMessage {
         return headerValues;
     }
 
-    protected Values mapToValues(Map<String, ?> map) {
+    Values mapToValues(Map<String, ?> map) {
         final Values values = new Values();
         for (final Entry<String, ?> param : map.entrySet()) {
             if (param.getValue() instanceof Collection) {

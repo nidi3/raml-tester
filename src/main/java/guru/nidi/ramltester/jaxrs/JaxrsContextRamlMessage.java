@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 class JaxrsContextRamlMessage {
-    protected Values headersOf(MultivaluedMap<String, ?> headers) {
+    Values headersOf(MultivaluedMap<String, ?> headers) {
         final Values values = new Values();
         for (final Map.Entry<String, ? extends List<?>> entry : headers.entrySet()) {
             values.addValues(entry.getKey(), entry.getValue());
