@@ -165,10 +165,9 @@ public class SchemaTest extends HighlevelTestBase {
                 simple,
                 get("/schema"),
                 jsonResponse(210, "5"),
-                equalTo("Body does not match schema for action(GET /schema) response(210) mime-type('application/json')\n" +
+                startsWith("Body does not match schema for action(GET /schema) response(210) mime-type('application/json')\n" +
                         "Content: 5\n" +
-                        "Messages:\n- Schema invalid: Unrecognized token 'xxx': was expecting ('true', 'false' or 'null')\n" +
-                        " at [Source: Schema 'invalid'; line: 1, column: 7]")
+                        "Messages:\n- Schema invalid: fatal: invalid JSON Schema, cannot continue")
         );
     }
 

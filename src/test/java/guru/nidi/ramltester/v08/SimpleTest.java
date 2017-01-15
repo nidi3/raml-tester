@@ -100,7 +100,7 @@ public class SimpleTest extends HighlevelTestBase {
         assertOneResponseViolationThat(test(aggregator, simple, get("/schema"), jsonResponse(203, "5")),
                 equalTo("Body does not match schema for action(GET /schema) response(203) mime-type('application/json')\n"
                         + "Content: 5\n"
-                        + "Message: Schema invalid: Unrecognized token 'undefined': was expecting ('true', 'false' or 'null')\n"
+                        + "Messages:\n- Schema invalid: Unrecognized token 'undefined': was expecting ('true', 'false' or 'null')\n"
                         + " at [Source: Inline schema definition; line: 1, column: 19]"));
     }
 
@@ -112,7 +112,7 @@ public class SimpleTest extends HighlevelTestBase {
                                 "simple.raml"),
                         get("/mediaType"), response(200, "\"hula\"", "application/default")),
                 equalTo("Body does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n"
-                        + "Content: \"hula\"\n" + "Message: ok"));
+                        + "Content: \"hula\"\n" + "Messages:\nok"));
     }
 
     @Test

@@ -32,7 +32,10 @@ schemas:
         body:
           application/json:
             schema: |
-              {"type":"string"}
+              {"type":"object", "properties":{
+                "s":{"type":"string"},
+                "i":{"type":"integer"}
+              }}
       201:
         body:
           application/json:

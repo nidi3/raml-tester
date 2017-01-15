@@ -102,7 +102,7 @@ public class SimpleTest extends HighlevelTestBase {
                                 "simple.raml"),
                         get("/mediaType"), response(200, "\"hula\"", "application/default")),
                 equalTo("Body does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n"
-                        + "Content: \"hula\"\n" + "Message: ok"));
+                        + "Content: \"hula\"\n" + "Messages:\nok"));
     }
 
     @Test

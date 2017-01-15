@@ -87,10 +87,10 @@ public class ValidatorTest extends HighlevelTestBase {
                         "- Missing required field \"age\""),
                 startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
                         "Content: 42\n\n" +
-                        "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"),
+                        "Messages:\n- error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"),
                 startsWith("Example does not match schema for action(POST /nok) response(200) mime-type('application/json')\n" +
                         "Content: 42\n\n" +
-                        "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
+                        "Messages:\n- error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
     }
 
     @Test

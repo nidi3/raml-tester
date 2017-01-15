@@ -15,17 +15,24 @@
  */
 package guru.nidi.ramltester.v10;
 
-import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import guru.nidi.ramltester.HighlevelTestBase;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.core.JsonSchemaViolationCause;
+import guru.nidi.ramltester.core.RamlReport;
+import guru.nidi.ramltester.core.RamlViolationMessage;
+import guru.nidi.ramltester.core.XmlSchemaViolationCause;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
@@ -33,10 +40,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  */
 public class SchemaTest extends HighlevelTestBase {
     private final RamlDefinition simple = RamlLoaders.fromClasspath(getClass()).load("simple.raml");
+    private final ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
 
     @Test
     public void matchingJsonSchema() throws UnsupportedEncodingException {
-        assertNoViolations(simple, get("/schema"), jsonResponse(200, "\"str\""));
+        assertNoViolations(simple, get("/schema"), jsonResponse(200, "{\"s\":\"str\",\"i\":42}"));
+    }
+
+    @Test
+    public void multiNonMatchingJsonSchema() throws UnsupportedEncodingException {
+        assertOneResponseViolationThat(simple, get("/schema"), jsonResponse(200, "{\"s\":{},\"i\":true}"), allOf(
+                containsString("error: instance type (boolean) does not match any allowed primitive type (allowed: [\"integer\"])"),
+                containsString("error: instance type (object) does not match any allowed primitive type (allowed: [\"string\"])")));
     }
 
     @Test
@@ -60,15 +75,14 @@ public class SchemaTest extends HighlevelTestBase {
 
     @Test
     public void notMatchingJsonSchemaInline() throws Exception {
-        assertOneResponseViolationThat(
-                simple,
-                get("/schema"),
-                jsonResponse(200, "5"),
-                startsWith("Body does not match schema for action(GET /schema) response(200) mime-type('application/json')\n" +
-                        "Content: 5\n" +
-                        "Message: "),
-                instanceOf(ProcessingReport.class)
-        );
+        final RamlReport report = test(simple, get("/schema"), jsonResponse(200, "{\"s\":{},\"i\":true}"));
+        final RamlViolationMessage message = report.getResponseViolations().iterator().next();
+        assertThat(message.getCause(), instanceOf(JsonSchemaViolationCause.class));
+        final String json = mapper.writeValueAsString(message.getCause());
+        assertEquals(("{'messages':[" +
+                "{'message':'instance type (boolean) does not match any allowed primitive type (allowed: [\\'integer\\'])','logLevel':'ERROR'}," +
+                "{'message':'instance type (object) does not match any allowed primitive type (allowed: [\\'string\\'])','logLevel':'ERROR'}" +
+                "]}").replace("'", "\""), json);
     }
 
     @Test
@@ -79,8 +93,8 @@ public class SchemaTest extends HighlevelTestBase {
                 jsonResponse(201, "5"),
                 startsWith("Body does not match schema for action(GET /schema) response(201) mime-type('application/json')\n" +
                         "Content: 5\n" +
-                        "Message: "),
-                instanceOf(ProcessingReport.class)
+                        "Messages:\n"),
+                instanceOf(JsonSchemaViolationCause.class)
         );
     }
 
@@ -92,22 +106,22 @@ public class SchemaTest extends HighlevelTestBase {
                 jsonResponse(202, "5"),
                 startsWith("Body does not match schema for action(GET /schema) response(202) mime-type('application/json')\n" +
                         "Content: 5\n" +
-                        "Message: "),
-                instanceOf(ProcessingReport.class)
+                        "Messages:\n"),
+                instanceOf(JsonSchemaViolationCause.class)
         );
     }
 
     @Test
     public void notMatchingXmlSchemaInline() throws Exception {
-        assertResponseViolationsThat(
-                simple,
-                get("/schema"),
-                response(208, "<api-request>str</api-request>", "text/xml"),
-                startsWith("Body does not match schema for action(GET /schema) response(208) mime-type('text/xml')\n" +
-                        "Content: <api-request>str</api-request>\n" +
-                        "Message: "),
-                instanceOf(SAXException.class)
-        );
+        Locale.setDefault(Locale.ENGLISH);
+        final RamlReport report = test(simple, get("/schema"), response(208, "<api-request>str</api-request>", "text/xml"));
+        final RamlViolationMessage message = report.getResponseViolations().iterator().next();
+        assertThat(message.getCause(), instanceOf(XmlSchemaViolationCause.class));
+        final String json = mapper.writeValueAsString(message.getCause());
+        assertEquals(("{'messages':[" +
+                "{'message':'cvc-complex-type.2.3: Element `api-request` cannot have character [children], because the type`s content type is element-only.','line':1,'column':31}," +
+                "{'message':'cvc-complex-type.2.4.b: The content of element `api-request` is not complete. One of `{input}` is expected.','line':1,'column':31}" +
+                "]}").replace("'", "\"").replace("`", "'"), json);
     }
 
     @Test
@@ -118,8 +132,8 @@ public class SchemaTest extends HighlevelTestBase {
                 response(206, "5", "application/xml"),
                 startsWith("Body does not match schema for action(GET /schema) response(206) mime-type('application/xml')\n" +
                         "Content: 5\n" +
-                        "Message: "),
-                instanceOf(SAXException.class)
+                        "Messages:\n"),
+                instanceOf(XmlSchemaViolationCause.class)
         );
     }
 
@@ -131,8 +145,8 @@ public class SchemaTest extends HighlevelTestBase {
                 response(207, "5", "application/xml"),
                 startsWith("Body does not match schema for action(GET /schema) response(207) mime-type('application/xml')\n" +
                         "Content: 5\n" +
-                        "Message: "),
-                instanceOf(SAXException.class)
+                        "Messages:\n"),
+                instanceOf(XmlSchemaViolationCause.class)
         );
     }
 
@@ -154,7 +168,7 @@ public class SchemaTest extends HighlevelTestBase {
                 jsonResponse(210, "5"),
                 startsWith("Body does not match schema for action(GET /schema) response(210) mime-type('application/json')\n" +
                         "Content: 5\n" +
-                        "Message: Schema invalid: fatal: invalid JSON Schema, cannot continue\nSyntax errors:\n")
+                        "Messages:\n- Schema invalid: fatal: invalid JSON Schema, cannot continue")
         );
     }
 
