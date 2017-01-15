@@ -22,10 +22,7 @@ import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolationException;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -80,10 +77,9 @@ public class SecurityTest extends HighlevelTestBase {
                 local,
                 get("/optSec").header("AuthorizationOpt", "blu"),
                 response(200, "", null));
-        assertEquals(Arrays.asList(
-                "Assuming security scheme 'null': Header 'AuthorizationOpt' on action(GET /optSec) is not defined",
-                "Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /optSec) is required but not found"),
-                report.getRequestViolations().asList());
+        assertViolationsThat(report.getRequestViolations(),
+                equalTo("Assuming security scheme 'null': Header 'AuthorizationOpt' on action(GET /optSec) is not defined"),
+                equalTo("Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /optSec) is required but not found"));
     }
 
     @Test
@@ -92,10 +88,9 @@ public class SecurityTest extends HighlevelTestBase {
                 local,
                 get("/doubleSec").header("AuthorizationOpt", "blu"),
                 response(200, "", null));
-        assertEquals(Arrays.asList(
-                "Assuming security scheme 'OAuth 2.0': Header 'AuthorizationOpt' on action(GET /doubleSec) is not defined",
-                "Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /doubleSec) is required but not found"),
-                report.getRequestViolations().asList());
+        assertViolationsThat(report.getRequestViolations(),
+                equalTo("Assuming security scheme 'OAuth 2.0': Header 'AuthorizationOpt' on action(GET /doubleSec) is not defined"),
+                equalTo("Assuming security scheme 'x-other': Header 'AuthorizationReq' on action(GET /doubleSec) is required but not found"));
     }
 
     @Test
@@ -158,11 +153,10 @@ public class SecurityTest extends HighlevelTestBase {
             base.load("undefined-security.raml");
             fail();
         } catch (RamlViolationException e) {
-            assertEquals(Arrays.asList(
-                    "Exception during RAML check: Invalid reference 'b' -- undefined-security.raml [line=6, col=13]",
-                    "Exception during RAML check: Invalid reference 'c' -- undefined-security.raml [line=9, col=15]",
-                    "Exception during RAML check: Invalid reference 'd' -- undefined-security.raml [line=11, col=17]"),
-                    e.getReport().getValidationViolations().asList());
+            assertViolationsThat(e.getReport().getValidationViolations(),
+                    equalTo("Exception during RAML check: Invalid reference 'b' -- undefined-security.raml [line=6, col=13]"),
+                    equalTo("Exception during RAML check: Invalid reference 'c' -- undefined-security.raml [line=9, col=15]"),
+                    equalTo("Exception during RAML check: Invalid reference 'd' -- undefined-security.raml [line=11, col=17]"));
         }
     }
 

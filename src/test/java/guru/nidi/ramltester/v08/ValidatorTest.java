@@ -22,14 +22,10 @@ import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolationException;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import static guru.nidi.ramltester.core.Validation.*;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -47,12 +43,12 @@ public class ValidatorTest extends HighlevelTestBase {
             RAML_LOADERS.load("wrong-types.raml");
             fail("Invalid RAML");
         } catch (RamlViolationException e) {
-            final List<String> violations = e.getReport().getValidationViolations().asList();
-            assertThat(violations.get(0), containsString("Duplicated key '/nonEmpty'"));
-            assertThat(violations.get(1), containsString("Unexpected key 'minimum'"));
-            assertThat(violations.get(2), containsString("Unexpected key 'pattern'"));
-            assertThat(violations.get(3), containsString("Unexpected key 'minimum'"));
-            assertThat(violations.get(4), containsString("Unexpected key 'pattern'"));
+            assertViolationsThat(e.getReport().getValidationViolations(),
+                    containsString("Duplicated key '/nonEmpty'"),
+                    containsString("Unexpected key 'minimum'"),
+                    containsString("Unexpected key 'pattern'"),
+                    containsString("Unexpected key 'minimum'"),
+                    containsString("Unexpected key 'pattern'"));
         }
     }
 
@@ -62,8 +58,8 @@ public class ValidatorTest extends HighlevelTestBase {
             RAML_LOADERS.load("description-no-title.raml");
             fail("Invalid RAML");
         } catch (RamlViolationException e) {
-            final List<String> violations = e.getReport().getValidationViolations().asList();
-            assertThat(violations.get(0), containsString("Missing required field \"title\""));
+            assertViolationsThat(e.getReport().getValidationViolations(),
+                    containsString("Missing required field \"title\""));
         }
     }
 
@@ -73,8 +69,8 @@ public class ValidatorTest extends HighlevelTestBase {
             RAML_LOADERS.load("description-no-content.raml");
             fail("Invalid RAML");
         } catch (RamlViolationException e) {
-            final List<String> violations = e.getReport().getValidationViolations().asList();
-            assertThat(violations.get(0), containsString("Missing required field \"content\""));
+            assertViolationsThat(e.getReport().getValidationViolations(),
+                    containsString("Missing required field \"content\""));
         }
     }
 
@@ -82,95 +78,88 @@ public class ValidatorTest extends HighlevelTestBase {
     public void example() {
         final RamlReport report = example.validator().withChecks(EXAMPLE).validate();
         assertEquals(4, report.getValidationViolations().size());
-        final Iterator<String> it = report.getValidationViolations().iterator();
-        assertEquals("example of queryParameter 'q' in action(POST /ok) - Value '10' is bigger than maximum 8", it.next());
-        assertEquals("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4", it.next());
-        assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
-                "Content: 42\n" +
-                "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
-        assertThat(it.next(), startsWith("Example does not match schema for action(POST /nok) response(200) mime-type('application/json')\n" +
-                "Content: 42\n" +
-                "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("example of queryParameter 'q' in action(POST /ok) - Value '10' is bigger than maximum 8"),
+                equalTo("default value of queryParameter 'q' in action(POST /ok) - Value '2' is smaller than minimum 4"),
+                startsWith("Example does not match schema for action(POST /nok) mime-type('application/json')\n" +
+                        "Content: 42\n" +
+                        "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"),
+                startsWith("Example does not match schema for action(POST /nok) response(200) mime-type('application/json')\n" +
+                        "Content: 42\n" +
+                        "Message: error: instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"));
     }
 
     @Test
     public void parameter() {
         final RamlReport report = example.validator().withChecks(PARAMETER).validate();
-        assertEquals(Arrays.asList(
-                "No formParameter allowed in action(POST /ok) mime-type('application/json') (only allowed with 'application/x-www-form-urlencoded' or 'multipart/form-data')"),
-                report.getValidationViolations().asList());
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("No formParameter allowed in action(POST /ok) mime-type('application/json') (only allowed with 'application/x-www-form-urlencoded' or 'multipart/form-data')"));
     }
 
     @Test
     public void validUriParameters() {
         final RamlReport report = uriParams.validator().withChecks(URI_PARAMETER).validate();
-        assertEquals(Arrays.asList(
-                "The baseUri has no variable 'invalid' in Root definition",
-                "baseUriParameter with name 'version' is not allowed in Root definition",
-                "The uri has no variable 'uriInvalid' in resource(/bla/{param})",
-                "uriParameter with name 'version' is not allowed in resource(/bla/{param})",
-                "The baseUri has no variable 'subInvalid' in resource(/bla/{param})",
-                "The uri has no variable 'subinvalid' in resource(/bla/{param}/subA/{p})",
-                "The baseUri has no variable 'actioninvalid' in action(GET /bla/{param})"),
-                report.getValidationViolations().asList());
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("The baseUri has no variable 'invalid' in Root definition"),
+                equalTo("baseUriParameter with name 'version' is not allowed in Root definition"),
+                equalTo("The uri has no variable 'uriInvalid' in resource(/bla/{param})"),
+                equalTo("uriParameter with name 'version' is not allowed in resource(/bla/{param})"),
+                equalTo("The baseUri has no variable 'subInvalid' in resource(/bla/{param})"),
+                equalTo("The uri has no variable 'subinvalid' in resource(/bla/{param}/subA/{p})"),
+                equalTo("The baseUri has no variable 'actioninvalid' in action(GET /bla/{param})"));
     }
 
     @Test
     public void resourcePattern() {
         final RamlReport report = uriParams.validator().withChecks().withResourcePattern("[a-z]+").validate();
-        assertEquals(Arrays.asList(
-                "Name of resource(/bla/{param}/subA/{p}) does not match pattern '[a-z]+'"),
-                report.getValidationViolations().asList());
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("Name of resource(/bla/{param}/subA/{p}) does not match pattern '[a-z]+'"));
 
     }
 
     @Test
     public void parameterPattern() {
         final RamlReport report = uriParams.validator().withChecks().withParameterPattern("[a-z]+").validate();
-        assertEquals(Arrays.asList(
-                "baseUriParameter name 'subInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'",
-                "uriParameter name 'uriInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'",
-                "queryParameter name 'Nok' in action(GET /bla/{param}) does not match pattern '[a-z]+'",
-                "formParameter name 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') does not match pattern '[a-z]+'"),
-                report.getValidationViolations().asList());
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("baseUriParameter name 'subInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'"),
+                equalTo("uriParameter name 'uriInvalid' in resource(/bla/{param}) does not match pattern '[a-z]+'"),
+                equalTo("queryParameter name 'Nok' in action(GET /bla/{param}) does not match pattern '[a-z]+'"),
+                equalTo("formParameter name 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') does not match pattern '[a-z]+'"));
     }
 
     @Test
     public void headerPattern() {
         final RamlReport report = uriParams.validator().withChecks().withHeaderPattern("[a-z]+").validate();
-        assertEquals(Arrays.asList(
-                "header name 'Hok' in action(GET /bla/{param}) does not match pattern '[a-z]+'",
-                "header name 'Rok' in action(GET /bla/{param}) response(200) does not match pattern '[a-z]+'"),
-                report.getValidationViolations().asList());
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("header name 'Hok' in action(GET /bla/{param}) does not match pattern '[a-z]+'"),
+                equalTo("header name 'Rok' in action(GET /bla/{param}) response(200) does not match pattern '[a-z]+'"));
     }
 
     @Test
     public void description() {
         final RamlReport report = description.validator().withChecks(DESCRIPTION).validate();
-        assertEquals(Arrays.asList(
-                "Root definition has no documentation",
-                "baseUriParameter 'path' in Root definition has no description",
-                "resource(/bla/{param}) has no description",
-                "baseUriParameter 'path' in resource(/bla/{param}) has no description",
-                "uriParameter 'param' in resource(/bla/{param}) has no description",
-                "action(GET /bla/{param}) has no description",
-                "baseUriParameter 'actioninvalid' in action(GET /bla/{param}) has no description",
-                "queryParameter 'ok' in action(GET /bla/{param}) has no description",
-                "header 'ok' in action(GET /bla/{param}) has no description",
-                "formParameter 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') has no description",
-                "action(GET /bla/{param}) response(200) has no description",
-                "header 'ok' in action(GET /bla/{param}) response(200) has no description"),
-                report.getValidationViolations().asList());
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("Root definition has no documentation"),
+                equalTo("baseUriParameter 'path' in Root definition has no description"),
+                equalTo("resource(/bla/{param}) has no description"),
+                equalTo("baseUriParameter 'path' in resource(/bla/{param}) has no description"),
+                equalTo("uriParameter 'param' in resource(/bla/{param}) has no description"),
+                equalTo("action(GET /bla/{param}) has no description"),
+                equalTo("baseUriParameter 'actioninvalid' in action(GET /bla/{param}) has no description"),
+                equalTo("queryParameter 'ok' in action(GET /bla/{param}) has no description"),
+                equalTo("header 'ok' in action(GET /bla/{param}) has no description"),
+                equalTo("formParameter 'Form' in action(GET /bla/{param}) mime-type('application/x-www-form-urlencoded') has no description"),
+                equalTo("action(GET /bla/{param}) response(200) has no description"),
+                equalTo("header 'ok' in action(GET /bla/{param}) response(200) has no description"));
     }
 
 
     @Test
     public void empty() {
         final RamlReport report = example.validator().withChecks(EMPTY).validate();
-        assertEquals(Arrays.asList(
-                "resource(/empty) is empty",
-                "action(GET /nonEmpty/sub) is empty",
-                "action(GET /nonEmpty) is empty"),
-                report.getValidationViolations().asList());
+        assertViolationsThat(report.getValidationViolations(),
+                equalTo("resource(/empty) is empty"),
+                equalTo("action(GET /nonEmpty/sub) is empty"),
+                equalTo("action(GET /nonEmpty) is empty"));
     }
 }
