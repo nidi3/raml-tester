@@ -18,6 +18,7 @@ public class CodeCoverage {
                 .just(For.packge("*.jaxrs").setMinima(50, 60, 50))
                 .just(For.packge("*.servlet").setMinima(70, 60, 75))
                 .just(For.packge("*.validator").setMinima(70, 75, 75))
+                .just(For.packge("*.ramltester").setMinima(65, 70, 65))
         );
         assertThat(analyzer.analyze(), hasEnoughCoverage());
     }
