@@ -28,9 +28,6 @@ import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
-/**
- *
- */
 public class MultiReportAggregatorTest {
     @Test
     public void simple() {

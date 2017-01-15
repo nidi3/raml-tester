@@ -19,9 +19,6 @@ import guru.nidi.ramltester.model.UnifiedApi;
 import org.raml.v2.api.RamlModelResult;
 import org.raml.v2.api.model.common.ValidationResult;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 public class RamlReport {
     private final UnifiedApi raml;
     private final Usage usage = new Usage();
@@ -38,14 +35,6 @@ public class RamlReport {
         for (final ValidationResult result : modelResult.getValidationResults()) {
             report.getValidationViolations().add("checking.exception", result.toString());
         }
-        return report;
-    }
-
-    public static RamlReport fromException(UnifiedApi raml, Exception cause) {
-        final RamlReport report = new RamlReport(raml);
-        final StringWriter out = new StringWriter();
-        cause.printStackTrace(new PrintWriter(out));
-        report.getValidationViolations().add("checking.exception", out.toString());
         return report;
     }
 

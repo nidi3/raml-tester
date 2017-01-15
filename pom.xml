@@ -25,9 +25,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:https://github.com/nidi3/raml-tester/tree/raml-parser-2</connection>
-        <developerConnection>scm:git:https://github.com/nidi3/raml-tester/tree/raml-parser-2</developerConnection>
-        <url>https://github.com/nidi3/raml-tester/tree/raml-parser-2</url>
+        <connection>scm:git:https://github.com/nidi3/raml-tester</connection>
+        <developerConnection>scm:git:https://github.com/nidi3/raml-tester</developerConnection>
+        <url>https://github.com/nidi3/raml-tester</url>
         <tag>HEAD</tag>
     </scm>
 
