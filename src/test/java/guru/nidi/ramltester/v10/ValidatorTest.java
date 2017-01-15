@@ -40,11 +40,23 @@ public class ValidatorTest extends HighlevelTestBase {
             fail("Invalid RAML");
         } catch (RamlViolationException e) {
             assertViolationsThat(e.getReport().getValidationViolations(),
+                    containsString("Unexpected key 'string'"),
                     containsString("Duplicated key '/nonEmpty'"),
                     containsString("Unexpected key 'minimum'"),
                     containsString("Unexpected key 'pattern'"),
                     containsString("Unexpected key 'minimum'"),
                     containsString("Unexpected key 'pattern'"));
+        }
+    }
+
+    @Test
+    public void typesAndSchemas() {
+        try {
+            RAML_LOADERS.load("types-and-schemas.raml");
+            fail("Invalid RAML");
+        } catch (RamlViolationException e) {
+            assertViolationsThat(e.getReport().getValidationViolations(),
+                    containsString("Exception during RAML check: \"types\" and \"schemas\" are mutually exclusive."));
         }
     }
 
