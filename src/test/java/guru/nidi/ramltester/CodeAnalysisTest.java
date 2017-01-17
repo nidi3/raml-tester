@@ -109,6 +109,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                                 "AvoidSynchronizedAtMethodLevel", "UseStringBufferForStringAppends"),
                         In.loc("SecurityExtractor$SchemeFinder").ignore("ConfusingTernary"),
                         In.clazz(RamlViolationMessage.class).ignore("ConfusingTernary", "LocalVariableCouldBeFinal"),
+                        In.loc("VariableMatcher").ignore("AccessorClassGeneration"),
                         In.loc("UriComponents#getServer").ignore("NPathComplexity"))
                 .because("arrays are only used internally",
                         In.locs("*Response", "*Request").ignore("MethodReturnsInternalArray", "ArrayIsStoredDirectly"))

@@ -18,7 +18,6 @@ public class CodeCoverage {
                 .just(For.packge("*.httpcomponents").setMinima(55, 60, 65))
                 .just(For.packge("*.jaxrs").setMinima(55, 60, 55))
                 .just(For.packge("*.servlet").setMinima(70, 60, 75))
-                .just(For.packge("*.model.internal").setMinima(65, 75, 75))
         );
         assertThat(analyzer.analyze(), hasEnoughCoverage());
     }

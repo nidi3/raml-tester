@@ -23,42 +23,64 @@ import static org.junit.Assert.assertEquals;
 public class VariableMatcherTest extends CoreTestBase {
     @Test
     public void noVariables() {
-        assertMatch(VariableMatcher.match("abc", "abc"), true, true, "");
-        assertMatch(VariableMatcher.match("abc", "abcde"), true, false, "de");
-        assertMatch(VariableMatcher.match("abc", "ade"), false, false, "");
+        assertMatch("abc", "abc", true, true, "");
+        assertMatch("abc", "abcde", true, false, "de");
+        assertMatch("abc", "ade", false, false, "");
     }
 
     @Test
     public void oneVariable() {
-        assertMatch(VariableMatcher.match("abc{var}xyz", "abc123xyz"), true, true, "", "var", "123");
-        assertMatch(VariableMatcher.match("abc{var}xyz", "abc123xy"), false, false, "", "var", "123");
-        assertMatch(VariableMatcher.match("abc{var}xyz", "abc123xyz000"), true, false, "000", "var", "123");
-        assertMatch(VariableMatcher.match("abc{var}", "abc123xyz"), true, true, "", "var", "123xyz");
-        assertMatch(VariableMatcher.match("abc{var}", "abc123/xyz"), true, false, "/xyz", "var", "123");
+        assertMatch("abc{var}xyz", "abc123xyz", true, true, "", "var", "123");
+        assertMatch("abc{var}xyz", "abc123xy", false, false, "", "var", "123");
+        assertMatch("abc{var}xyz", "abc123xyz000", true, false, "000", "var", "123");
+        assertMatch("abc{var}", "abc123xyz", true, true, "", "var", "123xyz");
+        assertMatch("abc{var}", "abc123/xyz", true, false, "/xyz", "var", "123");
+        assertMatch("abc{var}", "abc123&xyz", true, false, "&xyz", "var", "123");
+        assertMatch("abc{var}&", "abc123&xyz", true, false, "xyz", "var", "123");
+        assertMatch("abc{var}", "abc123-._~;", true, false, ";", "var", "123-._~");
+        assertMatch("abc{var}x", "abc12/x", false, false, "");
+    }
+
+    @Test
+    public void reserved(){
+        assertMatch("abc{+var}x", "abc123&xyz", true, false, "yz", "var", "123&");
+        assertMatch("abc{+var}x", "abc123/xyz", true, false, "yz", "var", "123/");
+        assertMatch("abc{+var}x", "abc123%xyz", false, false, "");
+    }
+
+    @Test
+    public void hashed() {
+        assertMatch("abc{#var}xyz", "abc#123xyz", true, true, "", "var", "123");
+        assertMatch("abc{#var}xyz", "abc#123&xyz", true, true, "", "var", "123&");
+        assertMatch("abc{#var}", "abc#123xyz", true, true, "", "var", "123xyz");
+        assertMatch("abc{#var}", "abc#123%xyz", true, false, "%xyz", "var", "123");
+        assertMatch("abc{#var}", "abc123xyz", false, false, "");
     }
 
     @Test
     public void multiVariables() {
-        assertMatch(VariableMatcher.match("abc{var}/{two}", "abc123/xyz"), true, true, "", "var", "123", "two", "xyz");
-        assertMatch(VariableMatcher.match("abc{var}/{two}", "abc123/xyz/abc"), true, false, "/abc", "var", "123", "two", "xyz");
+        assertMatch("abc{var}/{two}", "abc123/xyz", true, true, "", "var", "123", "two", "xyz");
+        assertMatch("abc{var}/{two}", "abc123/xyz/abc", true, false, "/abc", "var", "123", "two", "xyz");
     }
 
     @Test
     public void multiValues() {
-        assertMatch(VariableMatcher.match("abc{var}/{var}", "abc123/xyz"), true, true, "", "var", new String[]{"123", "xyz"});
+        assertMatch("abc{var}/{var}", "abc123/xyz", true, true, "", "var", new String[]{"123", "xyz"});
     }
 
     @Test(expected = IllegalVariablePatternException.class)
     public void invalidPattern() {
-        VariableMatcher.match("abc{var", "abc123xyz");
+        new VariableMatcher("abc{var", "abc123xyz").match();
     }
 
-    private void assertMatch(VariableMatcher vm, boolean matches, boolean completeMatch, String suffix, Object... variables) {
-        assertEquals(matches, vm.isMatch());
-        assertEquals(completeMatch, vm.isCompleteMatch());
-        assertEquals(suffix, vm.getSuffix());
-        assertValuesEquals(variables, vm.getVariables());
+    private void assertMatch(String pattern, String value, boolean matches, boolean completeMatch, String suffix, Object... variables) {
+        doAssertMatch(new VariableMatcher(pattern, value).match(), matches, completeMatch, suffix, variables);
     }
 
-
+    private void doAssertMatch(VariableMatcher.Match vm, boolean matches, boolean completeMatch, String suffix, Object... variables) {
+        assertEquals(matches, vm.matches);
+        assertEquals(completeMatch, vm.completeMatch);
+        assertEquals(suffix, vm.suffix);
+        assertValuesEquals(variables, vm.variables);
+    }
 }

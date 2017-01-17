@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.core.VariableMatcher.Match;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.Values;
@@ -82,16 +83,16 @@ public class RamlChecker {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(config.baseUri, config.includeServletPath));
         if (api.baseUri() == null) {
             final UriComponents ramlUri = UriComponents.fromHttpUrl("http://server"); //dummy url as we only match paths
-            final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
-            return findAction(pathMatch.getSuffix(), request.getMethod());
+            final Match pathMatch = getPathMatch(requestUri, ramlUri);
+            return findAction(pathMatch.suffix, request.getMethod());
         }
 
         final UriComponents ramlUri = UriComponents.fromHttpUrl(api.baseUri());
 
-        final VariableMatcher hostMatch = getHostMatch(requestUri, ramlUri);
-        final VariableMatcher pathMatch = getPathMatch(requestUri, ramlUri);
+        final Match hostMatch = getHostMatch(requestUri, ramlUri);
+        final Match pathMatch = getPathMatch(requestUri, ramlUri);
 
-        final RamlMethod action = findAction(pathMatch.getSuffix(), request.getMethod());
+        final RamlMethod action = findAction(pathMatch.suffix, request.getMethod());
         checkProtocol(action, requestUri, ramlUri);
         checkBaseUriParameters(hostMatch, pathMatch, action);
 
@@ -192,25 +193,25 @@ public class RamlChecker {
         }
     }
 
-    private void checkBaseUriParameters(VariableMatcher hostMatch, VariableMatcher pathMatch, RamlMethod action) {
+    private void checkBaseUriParameters(Match hostMatch, Match pathMatch, RamlMethod action) {
         final TypeChecker checker = new TypeChecker(requestViolations).acceptUndefined().ignoreRequired();
         final List<RamlType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
-        checker.check(baseUriParams, hostMatch.getVariables(), new Message("baseUriParam", locator));
-        checker.check(baseUriParams, pathMatch.getVariables(), new Message("baseUriParam", locator));
+        checker.check(baseUriParams, hostMatch.variables, new Message("baseUriParam", locator));
+        checker.check(baseUriParams, pathMatch.variables, new Message("baseUriParam", locator));
     }
 
-    private VariableMatcher getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
-        final VariableMatcher pathMatch = VariableMatcher.match(ramlUri.getPath(), requestUri.getPath());
-        if (!pathMatch.isMatch()) {
+    private Match getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
+        final Match pathMatch = new VariableMatcher(ramlUri.getPath(), requestUri.getPath()).match();
+        if (!pathMatch.matches) {
             requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri());
             throw new RamlViolationException();
         }
         return pathMatch;
     }
 
-    private VariableMatcher getHostMatch(UriComponents requestUri, UriComponents ramlUri) {
-        final VariableMatcher hostMatch = VariableMatcher.match(ramlUri.getHost(), requestUri.getHost());
-        if (!hostMatch.isCompleteMatch()) {
+    private Match getHostMatch(UriComponents requestUri, UriComponents ramlUri) {
+        final Match hostMatch = new VariableMatcher(ramlUri.getHost(), requestUri.getHost()).match();
+        if (!hostMatch.completeMatch) {
             requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri());
             throw new RamlViolationException();
         }

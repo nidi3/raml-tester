@@ -17,67 +17,99 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.Values;
 
+/**
+ * Match variables against RFC6570 level 2.
+ */
 final class VariableMatcher {
-    private final boolean matches;
-    private final boolean completeMatch;
-    private final String suffix;
-    private final Values variables;
+    private int patternPos, valuePos;
+    private final String pattern, value;
 
-    private VariableMatcher(boolean matches, boolean completeMatch, String suffix, Values variables) {
-        this.matches = matches;
-        this.completeMatch = completeMatch;
-        this.suffix = suffix;
-        this.variables = variables;
+    public VariableMatcher(String pattern, String value) {
+        this.pattern = pattern;
+        this.value = value;
     }
 
-    public static VariableMatcher match(String pattern, String value) {
+    public Match match() {
         final Values variables = new Values();
-        int patternPos = 0, valuePos = 0;
         while (patternPos < pattern.length() && valuePos < value.length()) {
             if (pattern.charAt(patternPos) == '{') {
-                final StringBuilder varName = new StringBuilder();
                 patternPos++;
-                while (patternPos < pattern.length() && pattern.charAt(patternPos) != '}') {
-                    varName.append(pattern.charAt(patternPos));
+                final char operator = pattern.charAt(patternPos);
+                final boolean reserved = operator == '+';
+                final boolean hashed = operator == '#';
+                if (reserved || hashed) {
                     patternPos++;
                 }
-                if (patternPos == pattern.length() && pattern.charAt(patternPos - 1) != '}') {
-                    throw new IllegalVariablePatternException("Unclosed variable " + varName, pattern);
+                final String varName = extractVarName();
+                final Character end = patternPos < pattern.length() ? pattern.charAt(patternPos) : null;
+                final String varValue = extractVarValue(reserved || hashed, end);
+                if (hashed) {
+                    if (varValue.startsWith("#")) {
+                        variables.addValue(varName, varValue.substring(1));
+                    } else {
+                        return new Match(false, false, "", new Values());
+                    }
+                } else {
+                    variables.addValue(varName, varValue);
                 }
-                patternPos++;
-                final char next = patternPos < pattern.length() ? pattern.charAt(patternPos) : '/';
-                final StringBuilder varValue = new StringBuilder();
-                while (valuePos < value.length() && value.charAt(valuePos) != next) {
-                    varValue.append(value.charAt(valuePos));
-                    valuePos++;
-                }
-                variables.addValue(varName.toString(), varValue.toString());
             } else {
                 if (pattern.charAt(patternPos) != value.charAt(valuePos)) {
-                    return new VariableMatcher(false, false, "", new Values());
+                    return new Match(false, false, "", new Values());
                 }
                 patternPos++;
                 valuePos++;
             }
         }
         final boolean match = patternPos == pattern.length();
-        return new VariableMatcher(match, match && valuePos == value.length(), value.substring(valuePos), variables);
+        return new Match(match, match && valuePos == value.length(), value.substring(valuePos), variables);
     }
 
-
-    public boolean isMatch() {
-        return matches;
+    private String extractVarName() {
+        final StringBuilder varName = new StringBuilder();
+        while (patternPos < pattern.length() && pattern.charAt(patternPos) != '}') {
+            varName.append(pattern.charAt(patternPos));
+            patternPos++;
+        }
+        if (patternPos == pattern.length() && pattern.charAt(patternPos - 1) != '}') {
+            throw new IllegalVariablePatternException("Unclosed variable " + varName, pattern);
+        }
+        patternPos++;
+        return varName.toString();
     }
 
-    public boolean isCompleteMatch() {
-        return completeMatch;
+    private String extractVarValue(boolean reserved, Character end) {
+        final StringBuilder varValue = new StringBuilder();
+        while (valuePos < value.length() && isOk(reserved, value.charAt(valuePos)) && (end == null || value.charAt(valuePos) != end)) {
+            varValue.append(value.charAt(valuePos));
+            valuePos++;
+        }
+        return varValue.toString();
     }
 
-    public String getSuffix() {
-        return suffix;
+    private static boolean isOk(boolean reserved, char c) {
+        return reserved ? isUnreserved(c) || isReserved(c) : isUnreserved(c);
     }
 
-    public Values getVariables() {
-        return variables;
+    private static boolean isUnreserved(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' || c == '~';
     }
+
+    private static boolean isReserved(char c) {
+        return ":/?#[]@!$&'()*+,;=".indexOf(c) >= 0;
+    }
+
+    public static class Match {
+        public final boolean matches;
+        public final boolean completeMatch;
+        public final String suffix;
+        public final Values variables;
+
+        private Match(boolean matches, boolean completeMatch, String suffix, Values variables) {
+            this.matches = matches;
+            this.completeMatch = completeMatch;
+            this.suffix = suffix;
+            this.variables = variables;
+        }
+    }
+
 }

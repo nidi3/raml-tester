@@ -15,6 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
+import guru.nidi.ramltester.core.VariableMatcher.Match;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.model.internal.RamlResource;
 
@@ -23,10 +24,10 @@ import java.util.Collections;
 import java.util.List;
 
 final class ResourceMatch implements Comparable<ResourceMatch> {
-    final VariableMatcher match;
+    final Match match;
     final RamlResource resource;
 
-    private ResourceMatch(VariableMatcher match, RamlResource resource) {
+    private ResourceMatch(Match match, RamlResource resource) {
         this.match = match;
         this.resource = resource;
     }
@@ -34,20 +35,20 @@ final class ResourceMatch implements Comparable<ResourceMatch> {
     public static List<ResourceMatch> find(String resourcePath, List<RamlResource> resources, Values values) {
         final List<ResourceMatch> matches = new ArrayList<>();
         for (final RamlResource resource : resources) {
-            final VariableMatcher pathMatch = VariableMatcher.match(resource.relativeUri(), resourcePath);
-            if (pathMatch.isCompleteMatch() || (pathMatch.isMatch() && pathMatch.getSuffix().startsWith("/"))) {
+            final Match pathMatch = new VariableMatcher(resource.relativeUri(), resourcePath).match();
+            if (pathMatch.completeMatch || (pathMatch.matches && pathMatch.suffix.startsWith("/"))) {
                 matches.add(new ResourceMatch(pathMatch, resource));
             }
         }
         Collections.sort(matches);
         final List<ResourceMatch> found = new ArrayList<>();
         for (final ResourceMatch match : matches) {
-            if (match.match.isCompleteMatch()) {
-                values.addValues(match.match.getVariables());
+            if (match.match.completeMatch) {
+                values.addValues(match.match.variables);
                 found.add(match);
-            } else if (match.match.isMatch()) {
-                values.addValues(match.match.getVariables());
-                found.addAll(find(match.match.getSuffix(), match.resource.resources(), values));
+            } else if (match.match.matches) {
+                values.addValues(match.match.variables);
+                found.addAll(find(match.match.suffix, match.resource.resources(), values));
             }
         }
         return found;
@@ -55,6 +56,6 @@ final class ResourceMatch implements Comparable<ResourceMatch> {
 
     @Override
     public int compareTo(ResourceMatch o) {
-        return match.getVariables().size() - o.match.getVariables().size();
+        return match.variables.size() - o.match.variables.size();
     }
 }
