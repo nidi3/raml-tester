@@ -28,10 +28,11 @@ import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static guru.nidi.ramltester.util.MediaType.FORM_URL_ENCODED;
+import static guru.nidi.ramltester.util.MediaType.MULTIPART;
+
 public class FormDecoder {
     private static final String DEFAULT_CHARSET = "iso-8859-1";
-    private static final MediaType MULTIPART = MediaType.valueOf("multipart/form-data");
-    private static final MediaType URL_ENCODED = MediaType.valueOf("application/x-www-form-urlencoded");
     private static final Pattern QUERY_PARAM = Pattern.compile("([^&=]+)(=?)([^&]+)?");
     private static final int
             GROUP_NAME = 1,
@@ -39,7 +40,7 @@ public class FormDecoder {
             GROUP_VALUE = 3;
 
     public static boolean supportsFormParameters(MediaType mediaType) {
-        return mediaType.isCompatibleWith(URL_ENCODED) || mediaType.isCompatibleWith(MULTIPART);
+        return mediaType.isCompatibleWith(FORM_URL_ENCODED) || mediaType.isCompatibleWith(MULTIPART);
     }
 
     public Values decode(RamlRequest request) {
@@ -52,7 +53,7 @@ public class FormDecoder {
         } catch (InvalidMediaTypeException e) {
             return new Values();
         }
-        if (type.isCompatibleWith(URL_ENCODED)) {
+        if (type.isCompatibleWith(FORM_URL_ENCODED)) {
             final String charset = type.getCharset(DEFAULT_CHARSET);
             try {
                 final String content = IoUtils.readIntoString(new InputStreamReader(new ByteArrayInputStream(request.getContent()), charset));

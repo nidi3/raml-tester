@@ -35,10 +35,10 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JavaXmlSchemaValidator implements SchemaValidator {
-    private static final MediaType APPLICATION_XML = MediaType.valueOf("application/xml");
-    private static final MediaType TEXT_XML = MediaType.valueOf("text/xml");
+import static guru.nidi.ramltester.util.MediaType.APPLICATION_XML;
+import static guru.nidi.ramltester.util.MediaType.TEXT_XML;
 
+public class JavaXmlSchemaValidator implements SchemaValidator {
     private final Loader loader;
 
     private JavaXmlSchemaValidator(Loader loader) {

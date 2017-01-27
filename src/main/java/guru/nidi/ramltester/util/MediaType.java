@@ -29,7 +29,9 @@ public final class MediaType {
     public static final MediaType
             JSON = valueOf("application/json"),
             FORM_URL_ENCODED = valueOf("application/x-www-form-urlencoded"),
-            MULTIPART = valueOf("multipart/form-data");
+            MULTIPART = valueOf("multipart/form-data"),
+            APPLICATION_XML = MediaType.valueOf("application/xml"),
+            TEXT_XML = MediaType.valueOf("text/xml");
 
     private static final String CHARSET = "charset";
     private static final String WILDCARD_TYPE = "*";
