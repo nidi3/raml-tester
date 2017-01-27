@@ -30,7 +30,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
+import static guru.nidi.ramltester.junit.RamlMatchers.requestChecks;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 
@@ -78,14 +81,8 @@ public class UriTest extends HighlevelTestBase {
 
     @Test
     public void preferSubResourceWithLessVariables() throws Exception {
-        assertNoViolations(
-                api,
-                get("/undefined/type/sub"),
-                jsonResponse(201));
-        assertNoViolations(
-                api,
-                get("/undefined/type/1"),
-                jsonResponse(202));
+        assertThat(test(api, get("/undefined/type/sub"), jsonResponse(201)), hasNoViolations());
+        assertThat(test(api, get("/undefined/type/1"), jsonResponse(202)), hasNoViolations());
     }
 
     @Test
@@ -95,17 +92,14 @@ public class UriTest extends HighlevelTestBase {
                 get("/undefined/type/other"),
                 jsonResponse(202),
                 equalTo("URI parameter 'undefined' on resource(/type/{undefined}) - Value 'other': Invalid type String, expected Integer"));
-        assertNoViolations(
-                api,
-                get("/undefined/type/other/sub"),
-                jsonResponse(203));
+        assertThat(test(api, get("/undefined/type/other/sub"), jsonResponse(203)), hasNoViolations());
     }
 
     @Test
     public void allowedProtocol() throws Exception {
         final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/type/sub")).andReturn();
-        assertNoViolations(api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult).getRequestViolations());
-        assertNoViolations(api.assumingBaseUri("https://nidi.guru").testAgainst(mvcResult).getRequestViolations());
+        assertThat(api.assumingBaseUri("http://nidi.guru").testAgainst(mvcResult), requestChecks());
+        assertThat(api.assumingBaseUri("https://nidi.guru").testAgainst(mvcResult), requestChecks());
     }
 
     @Test

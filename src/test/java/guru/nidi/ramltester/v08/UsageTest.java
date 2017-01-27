@@ -26,7 +26,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class UsageTest extends HighlevelTestBase {
@@ -35,10 +37,8 @@ public class UsageTest extends HighlevelTestBase {
     @Test
     public void findUnused() throws Exception {
         final SimpleReportAggregator aggregator = new SimpleReportAggregator();
-        assertNoViolations(test(aggregator,
-                api,
-                get("/data"),
-                jsonResponse(200, "\"hula\"")));
+        assertThat(test(aggregator, api, get("/data"), jsonResponse(200, "\"hula\"")),
+                hasNoViolations());
 
         final Usage usage = aggregator.getUsage();
         assertEquals(set("/uuWithAction"), usage.getUnusedResources());

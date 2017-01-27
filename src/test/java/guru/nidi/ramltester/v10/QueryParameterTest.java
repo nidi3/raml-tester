@@ -23,7 +23,9 @@ import guru.nidi.ramltester.junit.ExpectedUsage;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class QueryParameterTest extends HighlevelTestBase {
@@ -55,10 +57,8 @@ public class QueryParameterTest extends HighlevelTestBase {
 
     @Test
     public void allowedRepeatQueryParameter() throws Exception {
-        assertNoViolations(test(aggregator,
-                query,
-                get("/query?rep=1&rep=2&req=3"),
-                jsonResponse(200, "\"hula\"")));
+        assertThat(test(aggregator, query, get("/query?rep=1&rep=2&req=3"), jsonResponse(200, "\"hula\"")),
+                hasNoViolations());
     }
 
     @Test
@@ -93,9 +93,7 @@ public class QueryParameterTest extends HighlevelTestBase {
 
     @Test
     public void validEmptyParam() throws Exception {
-        assertNoViolations(test(aggregator,
-                query,
-                get("/query?req"),
-                jsonResponse(200, "\"hula\"")));
+        assertThat(test(aggregator, query, get("/query?req"), jsonResponse(200, "\"hula\"")),
+                hasNoViolations());
     }
 }

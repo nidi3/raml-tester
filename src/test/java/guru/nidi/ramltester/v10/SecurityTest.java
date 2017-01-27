@@ -22,7 +22,9 @@ import guru.nidi.ramltester.core.RamlReport;
 import guru.nidi.ramltester.core.RamlViolationException;
 import org.junit.Test;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -34,18 +36,14 @@ public class SecurityTest extends HighlevelTestBase {
 
     @Test
     public void allowSecurityElementsInGlobalSecured() throws Exception {
-        assertNoViolations(test(
-                global,
-                get("/sec2?access_token=bla").header("Authorization2", "blu"),
-                response(401, "", null)));
+        assertThat(test(global, get("/sec2?access_token=bla").header("Authorization2", "blu"), response(401, "", null)),
+                hasNoViolations());
     }
 
     @Test
     public void allowSecurityElementsInLocalGlobalSecured() throws Exception {
-        assertNoViolations(test(
-                global,
-                get("/sec12").header("AuthorizationOpt", "blu"),
-                response(200, "", null)));
+        assertThat(test(global, get("/sec12").header("AuthorizationOpt", "blu"), response(200, "", null)),
+                hasNoViolations());
     }
 
     @Test
@@ -101,10 +99,8 @@ public class SecurityTest extends HighlevelTestBase {
 
     @Test
     public void allowSecurityElementsInLocalSecured() throws Exception {
-        assertNoViolations(test(
-                local,
-                get("/sec?access_token=bla").header("Authorization2", "blu"),
-                response(401, "", null)));
+        assertThat(test(local, get("/sec?access_token=bla").header("Authorization2", "blu"), response(401, "", null)),
+                hasNoViolations());
     }
 
     @Test
@@ -127,10 +123,8 @@ public class SecurityTest extends HighlevelTestBase {
 
     @Test
     public void allowSecurityWithoutDescribedBy() throws Exception {
-        assertNoViolations(test(
-                global,
-                get("/undesc"),
-                response(200, "", null)));
+        assertThat(test(global, get("/undesc"), response(200, "", null)),
+                hasNoViolations());
     }
 
     @Test

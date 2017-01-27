@@ -24,7 +24,9 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class HeaderTest extends HighlevelTestBase {
@@ -56,15 +58,16 @@ public class HeaderTest extends HighlevelTestBase {
 
     @Test
     public void allowedRepeatRequestHeader() throws Exception {
-        assertNoViolations(test(aggregator,
-                header,
-                get("/header").header("req", "xxx")
-                        .header("string-array", "s1").header("string-array", "s2")
-                        .header("int-array", "1").header("int-array", "2")
-                        .header("array-of-string", "s1").header("array-of-string", "s2")
-                        .header("array-of-int", "1").header("array-of-int", "2")
-                        .header("array", "s1").header("array", "s2"),
-                jsonResponse(200, "\"hula\"")));
+        assertThat(
+                test(aggregator, header,
+                        get("/header").header("req", "xxx")
+                                .header("string-array", "s1").header("string-array", "s2")
+                                .header("int-array", "1").header("int-array", "2")
+                                .header("array-of-string", "s1").header("array-of-string", "s2")
+                                .header("array-of-int", "1").header("array-of-int", "2")
+                                .header("array", "s1").header("array", "s2"),
+                        jsonResponse(200, "\"hula\"")),
+                hasNoViolations());
     }
 
     @Test
@@ -79,10 +82,11 @@ public class HeaderTest extends HighlevelTestBase {
 
     @Test
     public void wildcardRequestHeader() throws Exception {
-        assertNoViolations(test(aggregator,
-                header,
-                get("/header").header("x-bla", "1").header("x-hula", "2").header("req", "3"),
-                jsonResponse(200, "\"hula\"")));
+        assertThat(
+                test(aggregator, header,
+                        get("/header").header("x-bla", "1").header("x-hula", "2").header("req", "3"),
+                        jsonResponse(200, "\"hula\"")),
+                hasNoViolations());
     }
 
     @Test
@@ -97,10 +101,11 @@ public class HeaderTest extends HighlevelTestBase {
 
     @Test
     public void existingRequiredWildcardRequestHeader() throws Exception {
-        assertNoViolations(test(aggregator,
-                header,
-                get("/header/reqwild").header("x-", "w"),
-                jsonResponse(200)));
+        assertThat(
+                test(aggregator, header,
+                        get("/header/reqwild").header("x-", "w"),
+                        jsonResponse(200)),
+                hasNoViolations());
     }
 
     @Test
@@ -134,10 +139,8 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("rep", "1");
         response.addHeader("rep", "2");
         response.addHeader("req", "xxx");
-        assertNoViolations(test(aggregator,
-                header,
-                get("/resheader"),
-                response));
+        assertThat(test(aggregator, header, get("/resheader"), response),
+                hasNoViolations());
     }
 
     @Test
@@ -156,10 +159,8 @@ public class HeaderTest extends HighlevelTestBase {
         response.addHeader("x-bla", "1");
         response.addHeader("x-hula", "2");
         response.addHeader("req", "3");
-        assertNoViolations(test(aggregator,
-                header,
-                get("/resheader"),
-                response));
+        assertThat(test(aggregator, header, get("/resheader"), response),
+                hasNoViolations());
     }
 
     @Test
@@ -176,30 +177,24 @@ public class HeaderTest extends HighlevelTestBase {
     public void existingRequiredWildcardResponseHeader() throws Exception {
         final MockHttpServletResponse response = jsonResponse(200);
         response.addHeader("x-", "w");
-        assertNoViolations(test(aggregator,
-                header,
-                get("/resheader/reqwild"),
-                response));
+        assertThat(test(aggregator, header, get("/resheader/reqwild"), response),
+                hasNoViolations());
     }
 
     @Test
     public void ignoreXheaders() throws Exception {
         final MockHttpServletResponse response = jsonResponse(200, "\"hula\"");
         response.addHeader("x-hula", "hop");
-        assertNoViolations(test(aggregator,
-                header.ignoringXheaders(),
-                get("/data").header("x-bla", "blu"),
-                response));
+        assertThat(test(aggregator, header.ignoringXheaders(), get("/data").header("x-bla", "blu"), response),
+                hasNoViolations());
     }
 
     @Test
     public void caseInsensitiveNames() throws Exception {
         final MockHttpServletResponse response = jsonResponse(200);
         response.addHeader("x-INT", "6");
-        assertNoViolations(test(aggregator,
-                header,
-                get("/header/xint").header("x-INT", "5"),
-                response));
+        assertThat(test(aggregator, header, get("/header/xint").header("x-INT", "5"), response),
+                hasNoViolations());
     }
 
     @Test

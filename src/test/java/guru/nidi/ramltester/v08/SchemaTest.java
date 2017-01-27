@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static guru.nidi.ramltester.util.TestUtils.map;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
@@ -44,7 +45,8 @@ public class SchemaTest extends HighlevelTestBase {
 
     @Test
     public void matchingJsonSchema() throws UnsupportedEncodingException {
-        assertNoViolations(simple, get("/schema"), jsonResponse(200, "{\"s\":\"str\",\"i\":42}"));
+        assertThat(test(simple, get("/schema"), jsonResponse(200, "{\"s\":\"str\",\"i\":42}")),
+                hasNoViolations());
     }
 
     @Test
@@ -56,20 +58,21 @@ public class SchemaTest extends HighlevelTestBase {
 
     @Test
     public void matchingXmlSchema() throws UnsupportedEncodingException {
-        assertNoViolations(simple, get("/schema"), response(208, "<api-request><input>str</input></api-request>", "text/xml"));
+        assertThat(test(simple, get("/schema"), response(208, "<api-request><input>str</input></api-request>", "text/xml")),
+                hasNoViolations());
     }
 
     @Test
     @Ignore("https://github.com/nidi3/raml-tester/issues/79")
     public void matchingReferencedJsonSchema() throws UnsupportedEncodingException {
-        assertNoViolations(simple, get("/schema"), jsonResponse(204, "\"str\""));
-        assertNoViolations(simple, get("/schema"), jsonResponse(205, "\"str\""));
+        assertThat(test(simple, get("/schema"), jsonResponse(204, "\"str\"")), hasNoViolations());
+        assertThat(test(simple, get("/schema"), jsonResponse(205, "\"str\"")), hasNoViolations());
     }
 
     @Test
     public void matchingReferencedXmlSchema() throws UnsupportedEncodingException {
-        assertNoViolations(simple, get("/schema"), response(206, "<api-request><input>str</input></api-request>", "application/xml"));
-        assertNoViolations(simple, get("/schema"), response(207, "<api-request><input>str</input></api-request>", "application/xml"));
+        assertThat(test(simple, get("/schema"), response(206, "<api-request><input>str</input></api-request>", "application/xml")), hasNoViolations());
+        assertThat(test(simple, get("/schema"), response(207, "<api-request><input>str</input></api-request>", "application/xml")), hasNoViolations());
     }
 
     @Test

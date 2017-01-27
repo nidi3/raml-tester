@@ -24,8 +24,10 @@ import org.junit.Test;
 
 import java.util.Locale;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -40,10 +42,8 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void booleanOk() throws Exception {
         for (final String value : new String[]{"true", "false"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?boolean=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?boolean=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -62,16 +62,12 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void integerOk() throws Exception {
         for (final String value : new String[]{"-0", "0", "+1", "-1", "123456789"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?integer=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?integer=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
         for (final String value : new String[]{"-5", "0", "666"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?integerLimit=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?integerLimit=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -100,16 +96,12 @@ public class TypeTest extends HighlevelTestBase {
     @Ignore("https://github.com/raml-org/raml-java-parser/issues/322")
     public void numberOk() throws Exception {
         for (final String value : new String[]{"-0", "0", "-1", "-.1", "1.", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?number=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?number=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
         for (final String value : new String[]{"5e-2", "0.05", "666.5"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?numberLimit=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?numberLimit=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -142,10 +134,8 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void dateOnlyOk() throws Exception {
         for (final String value : new String[]{"2016-02-03", "16-02-03"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?date-only=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?date-only=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -164,10 +154,8 @@ public class TypeTest extends HighlevelTestBase {
     @Ignore("https://github.com/raml-org/raml-java-parser/issues/324")
     public void timeOnlyOk() throws Exception {
         for (final String value : new String[]{"01:02:03", "01:02:03.4", "01:02:03.45", "01:02:03.456"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?time-only=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?time-only=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -186,10 +174,8 @@ public class TypeTest extends HighlevelTestBase {
     @Ignore("https://github.com/raml-org/raml-java-parser/issues/314")
     public void datetimeOnlyOk() throws Exception {
         for (final String value : new String[]{"2016-02-03T01:02:03", "2016-02-03T01:02:03.4", "2016-02-03T01:02:03.45", "2016-02-03T01:02:03.456"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?datetime-only=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?datetime-only=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -207,10 +193,8 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void datetimeOk() throws Exception {
         for (final String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?datetime=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?datetime=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -228,10 +212,8 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void stringOk() throws Exception {
         for (final String value : new String[]{"aa", "12345"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?string=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?string=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -252,10 +234,8 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void enumOk() throws Exception {
         for (final String value : new String[]{"a", "b"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?enum=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?enum=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -273,10 +253,8 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void multiTypeOk() throws Exception {
         for (final String value : new String[]{"5", "666", "a", "b"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?multi=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?multi=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
     }
 
@@ -294,10 +272,8 @@ public class TypeTest extends HighlevelTestBase {
     @Test
     public void simplePattern() throws Exception {
         for (final String value : new String[]{"12/a", "00/y"}) {
-            assertNoViolations(
-                    type,
-                    get("/type?pattern1=" + value),
-                    jsonResponse(200, "\"hula\""));
+            assertThat(test(type, get("/type?pattern1=" + value), jsonResponse(200, "\"hula\"")),
+                    hasNoViolations());
         }
         for (final String value : new String[]{"", "12/z", "1/a", "99/A"}) {
             assertOneRequestViolationThat(
@@ -319,14 +295,10 @@ public class TypeTest extends HighlevelTestBase {
 
     @Test
     public void emptyResponseMediaTypeAllowed() throws Exception {
-        assertNoViolations(
-                type,
-                post("/empty"),
-                response(201, "", null));
-        assertNoViolations(
-                type,
-                post("/empty"),
-                response(202, "", "a/b"));
+        assertThat(test(type, post("/empty"), response(201, "", null)),
+                hasNoViolations());
+        assertThat(test(type, post("/empty"), response(202, "", "a/b")),
+                hasNoViolations());
     }
 
     @Test

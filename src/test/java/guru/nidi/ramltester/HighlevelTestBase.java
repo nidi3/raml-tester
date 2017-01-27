@@ -32,9 +32,12 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.requestChecks;
+import static guru.nidi.ramltester.junit.RamlMatchers.responseChecks;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class HighlevelTestBase {
     protected MockHttpServletResponse response(int code, String body, String contentType) throws UnsupportedEncodingException {
@@ -53,30 +56,18 @@ public class HighlevelTestBase {
         return response(code, "", "application/json");
     }
 
-    protected void assertNoViolations(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response) {
-        assertNoViolations(test(raml, request, response));
-    }
-
-    protected void assertNoViolations(RamlReport report) {
-        assertTrue("Expected no violations, but found: " + report, report.isEmpty());
-    }
-
-    protected void assertNoViolations(RamlViolations violations) {
-        assertTrue("Expected no violations, but found: " + violations, violations.isEmpty());
-    }
-
     protected void assertOneRequestViolationThat(RamlDefinition raml, MockHttpServletRequestBuilder request, MockHttpServletResponse response, Matcher<String> matcher) {
         assertOneRequestViolationThat(test(raml, request, response), matcher);
     }
 
     protected void assertOneRequestViolationThat(RamlReport report, Matcher<String> matcher) {
-        assertNoViolations(report.getResponseViolations());
+        assertThat(report, responseChecks());
         assertOneViolationThat(report.getRequestViolations(), matcher);
     }
 
     @SafeVarargs
     protected final void assertRequestViolationsThat(RamlReport report, Matcher<String>... matcher) {
-        assertNoViolations(report.getResponseViolations());
+        assertThat(report, responseChecks());
         assertViolationsThat(report.getRequestViolations(), matcher);
     }
 
@@ -89,12 +80,12 @@ public class HighlevelTestBase {
     }
 
     protected void assertOneResponseViolationThat(RamlReport report, Matcher<String> matcher) {
-        assertNoViolations(report.getRequestViolations());
+        assertThat(report, requestChecks());
         assertOneViolationThat(report.getResponseViolations(), matcher);
     }
 
     protected void assertOneResponseViolationThat(RamlReport report, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
-        assertNoViolations(report.getRequestViolations());
+        assertThat(report, requestChecks());
         assertOneViolationThat(report.getResponseViolations(), messageMatcher, messageObjectMatcher);
     }
 
@@ -107,12 +98,12 @@ public class HighlevelTestBase {
     }
 
     protected void assertResponseViolationsThat(RamlReport report, Matcher<String> matcher) {
-        assertNoViolations(report.getRequestViolations());
+        assertThat(report, requestChecks());
         assertViolationsThat(report.getResponseViolations(), matcher);
     }
 
     protected void assertResponseViolationsThat(RamlReport report, Matcher<String> messageMatcher, Matcher<Object> messageObjectMatcher) {
-        assertNoViolations(report.getRequestViolations());
+        assertThat(report, requestChecks());
         for (final RamlViolationMessage message : report.getResponseViolations()) {
             assertThat(message.getMessage(), messageMatcher);
             assertThat(message.getCause(), messageObjectMatcher);
@@ -145,7 +136,7 @@ public class HighlevelTestBase {
         assertThat(message.getCause(), messageObjectMatcher);
     }
 
-    protected Matcher<String> containsInOrder(String... parts){
+    protected Matcher<String> containsInOrder(String... parts) {
         return stringContainsInOrder(Arrays.asList(parts));
     }
 
@@ -178,7 +169,7 @@ public class HighlevelTestBase {
     public static class FormEncodedSchemaValidator implements SchemaValidator {
         @Override
         public boolean supports(MediaType mediaType) {
-            return mediaType.isCompatibleWith(MediaType.valueOf("application/x-www-form-urlencoded"));
+            return mediaType.isCompatibleWith(MediaType.FORM_URL_ENCODED);
         }
 
         @Override

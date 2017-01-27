@@ -24,7 +24,9 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -37,10 +39,11 @@ public class FormTest extends HighlevelTestBase {
 
     @Test
     public void formTest() throws Exception {
-        assertNoViolations(test(aggregator,
-                form,
-                post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("param", "a+b"),
-                response(200, "", null)));
+        assertThat(
+                test(aggregator, form,
+                        post("/form").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("param", "a+b"),
+                        response(200, "", null)),
+                hasNoViolations());
     }
 
     @Test
@@ -92,7 +95,7 @@ public class FormTest extends HighlevelTestBase {
 
         assertOneRequestViolationThat(test(aggregator,
                 form,
-                post("/form/schema").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("param","a"),
+                post("/form/schema").contentType(MediaType.APPLICATION_FORM_URLENCODED).param("param", "a"),
                 response(200, "", null)),
                 equalTo("No schema allowed on action(POST /form/schema) mime-type('application/x-www-form-urlencoded')")
         );
@@ -100,21 +103,21 @@ public class FormTest extends HighlevelTestBase {
 
     @Test
     public void multipartForm() throws Exception {
-        assertNoViolations(test(aggregator,
-                form,
-                fileUpload("/form/multi").file("file", new byte[]{1, 2, 3})
-                        .contentType(MediaType.MULTIPART_FORM_DATA).param("param", "a +b"),
-                response(200, "", null)
-        ));
+        assertThat(
+                test(aggregator, form,
+                        fileUpload("/form/multi").file("file", new byte[]{1, 2, 3})
+                                .contentType(MediaType.MULTIPART_FORM_DATA).param("param", "a +b"),
+                        response(200, "", null)),
+                hasNoViolations());
     }
 
     @Test
     public void noFormMimeType() throws Exception {
-        assertNoViolations(test(aggregator,
-                form,
-                post("/noForm").contentType(MediaType.APPLICATION_JSON).content("\"hula\""),
-                jsonResponse(200)
-        ));
+        assertThat(
+                test(aggregator, form,
+                        post("/noForm").contentType(MediaType.APPLICATION_JSON).content("\"hula\""),
+                        jsonResponse(200)),
+                hasNoViolations());
     }
 
 }

@@ -19,7 +19,6 @@ import guru.nidi.ramltester.HighlevelTestBase;
 import guru.nidi.ramltester.MultiReportAggregator;
 import guru.nidi.ramltester.RamlDefinition;
 import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.core.RamlViolationException;
 import guru.nidi.ramltester.junit.ExpectedUsage;
 import guru.nidi.ramltester.spring.SpringMockRamlRequest;
 import guru.nidi.ramltester.spring.SpringMockRamlResponse;
@@ -28,9 +27,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
 
 import static guru.nidi.ramltester.core.UsageItem.RESOURCE;
-import static guru.nidi.ramltester.util.TestUtils.violations;
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -39,14 +38,14 @@ public class SimpleTest extends HighlevelTestBase {
     private static final RamlDefinition noBaseUri = RamlLoaders.fromClasspath(SimpleTest.class).load("noBaseUri.raml");
     private static final MultiReportAggregator aggregator = new MultiReportAggregator();
 
-//    @ClassRule
+    //    @ClassRule
     public static final ExpectedUsage expectedUsage = new ExpectedUsage(aggregator.usageProvider(simple), RESOURCE);
 
     @Test
     public void simpleOk() throws Exception {
-        assertNoViolations(test(aggregator, simple, get("/"), jsonResponse(200)));
-        assertNoViolations(test(aggregator, simple, get("/d"), jsonResponse(200)));
-        assertNoViolations(test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"")));
+        assertThat(test(aggregator, simple, get("/"), jsonResponse(200)), hasNoViolations());
+        assertThat(test(aggregator, simple, get("/d"), jsonResponse(200)), hasNoViolations());
+        assertThat(test(aggregator, simple, get("/data"), jsonResponse(200, "\"hula\"")), hasNoViolations());
     }
 
     @Test
@@ -87,8 +86,9 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void compatibleMediaType() throws Exception {
-        assertNoViolations(
-                test(aggregator, simple, get("/data"), response(200, "\"hula\"", "application/json;charset=utf-8")));
+        assertThat(
+                test(aggregator, simple, get("/data"), response(200, "\"hula\"", "application/json;charset=utf-8")),
+                hasNoViolations());
     }
 
     @Test
@@ -118,30 +118,20 @@ public class SimpleTest extends HighlevelTestBase {
 
     @Test
     public void acceptNoBaseUri() throws Exception {
-        assertNoViolations(noBaseUri.testAgainst(
-                new SpringMockRamlRequest(get("/base/path").buildRequest(new MockServletContext())),
-                new SpringMockRamlResponse(jsonResponse(200))));
+        assertThat(
+                noBaseUri.testAgainst(
+                        new SpringMockRamlRequest(get("/base/path").buildRequest(new MockServletContext())),
+                        new SpringMockRamlResponse(jsonResponse(200))),
+                hasNoViolations());
     }
 
     @Test
     public void acceptNoBaseUriAssumingBaseUri() throws Exception {
-        assertNoViolations(noBaseUri.assumingBaseUri("http://server/base").testAgainst(
-                new SpringMockRamlRequest(get("/path").buildRequest(new MockServletContext())),
-                new SpringMockRamlResponse(jsonResponse(200))));
+        assertThat(
+                noBaseUri.assumingBaseUri("http://server/base").testAgainst(
+                        new SpringMockRamlRequest(get("/path").buildRequest(new MockServletContext())),
+                        new SpringMockRamlResponse(jsonResponse(200))),
+                hasNoViolations());
     }
 
-    @Test
-    public void failFastTest() throws Exception {
-        try {
-            simple.failFast().testAgainst(
-                    new SpringMockRamlRequest(get("/base/path/noexisting").buildRequest(new MockServletContext())),
-                    new SpringMockRamlResponse(jsonResponse(200)));
-            fail("Should throw exception");
-        } catch (RamlViolationException e) {
-            assertEquals(violations("Request URL http://localhost/base/path/noexisting does not match base URI http://nidi.guru/raml/{version}"),
-                    e.getReport().getRequestViolations());
-            assertTrue(e.getReport().getResponseViolations().isEmpty());
-            assertTrue(e.getReport().getValidationViolations().isEmpty());
-        }
-    }
 }

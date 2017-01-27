@@ -134,7 +134,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("It's standard config",
                         In.loc("CodeCoverage").ignore("NoPackage"))
                 .because("is in test",
-                        In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"),
+                        In.locs("*Test", "*Test$*", "HighlevelTestBase").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"),
                         In.clazz(Type08CheckerTest.class).ignore("GodClass"));
         return new PmdAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector)
                 .withRuleSets(basic(), braces(), design(), exceptions(), imports(), junit(),
