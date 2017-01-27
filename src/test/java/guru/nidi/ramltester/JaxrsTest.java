@@ -41,6 +41,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static guru.nidi.ramltester.util.TestUtils.valuesOf;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
@@ -107,7 +108,7 @@ public class JaxrsTest extends ServerTest {
         checking.path("/app/path").queryParam("qp", "true")
                 .request().header("h", "h2")
                 .post(Entity.entity("data", "text/plain"));
-        assertTrue(checking.getLastReport().isEmpty());
+        assertThat(checking.getLastReport(), hasNoViolations());
     }
 
     @Override

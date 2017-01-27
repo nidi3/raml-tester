@@ -39,7 +39,7 @@ public class ExpectedUsage extends Verifier {
     protected void verify() throws Throwable {
         final Usage usage = usageProvider.getUsage();
         for (final UsageItem item : items) {
-            assertThat(item.get(usage), new EmptyMatcher(new Message("usage." + item.name()).toString()));
+            assertThat(item.get(usage), new EmptyIterableMatcher(new Message("usage." + item.name()).toString()));
         }
     }
 }

@@ -22,7 +22,6 @@ import guru.nidi.ramltester.restassured.RestAssuredClient;
 import guru.nidi.ramltester.util.ServerTest;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +31,8 @@ import java.io.IOException;
 import static guru.nidi.ramltester.junit.RamlMatchers.*;
 import static guru.nidi.ramltester.util.TestUtils.violations;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class RestAssuredTest extends ServerTest {
     private RestAssuredClient restAssured;
@@ -90,7 +89,7 @@ public class RestAssuredTest extends ServerTest {
     public void emptyResponse() throws IOException {
         final Response response = restAssured.given().get("/base/data?empty=yes").andReturn();
         assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
-        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(response.getBody().asString(),isEmptyOrNullString());
         assertThat(restAssured.getLastReport(), checks());
     }
 
@@ -98,7 +97,7 @@ public class RestAssuredTest extends ServerTest {
     public void repeatingQueryParameter() throws IOException {
         final Response response = restAssured.given().get("/base/data?empty=yes&empty=ja").andReturn();
         assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
-        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(response.getBody().asString(),isEmptyOrNullString());
         assertThat(restAssured.getLastReport(), responseChecks());
         assertEquals(violations("Query parameter 'empty' on action(GET /base/data) is not repeat but found repeatedly"),
                 restAssured.getLastReport().getRequestViolations());
@@ -108,7 +107,7 @@ public class RestAssuredTest extends ServerTest {
     public void stringBody() throws IOException {
         final Response response = restAssured.given().content("\"42\"").contentType(ContentType.JSON).post("/data").andReturn();
         assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
-        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(response.getBody().asString(),isEmptyOrNullString());
         assertThat(restAssured.getLastReport(), requestChecks());
         assertThat(restAssured.getLastReport(), responseChecks());
     }
@@ -117,7 +116,7 @@ public class RestAssuredTest extends ServerTest {
     public void byteArrayBody() throws IOException {
         final Response response = restAssured.given().content("\"42\"".getBytes()).contentType(ContentType.JSON).post("/data").andReturn();
         assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode());
-        assertTrue(StringUtils.isBlank(response.getBody().asString()));
+        assertThat(response.getBody().asString(), isEmptyOrNullString());
         assertThat(restAssured.getLastReport(), requestChecks());
         assertThat(restAssured.getLastReport(), responseChecks());
     }

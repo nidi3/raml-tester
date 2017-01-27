@@ -24,8 +24,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.isEmpty;
+import static guru.nidi.ramltester.junit.RamlMatchers.isExhausted;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 
 public class SimpleReportAggregatorTest {
     @Test
@@ -37,7 +39,7 @@ public class SimpleReportAggregatorTest {
         assertEquals("simple", usageEntry.getKey());
         assertEquals(new HashSet<>(Arrays.asList("/mediaType", "/schema")),
                 usageEntry.getValue().getUnusedResources());
-        assertFalse(usages.hasNext());
+        assertThat(usages, isExhausted());
     }
 
     @Test
@@ -45,7 +47,7 @@ public class SimpleReportAggregatorTest {
         final SimpleReportAggregator aggregator = new SimpleReportAggregator();
         aggregator.addReport(SimpleReport.report("simple.raml", "/data", "/d", "/"));
         aggregator.clear();
-        assertFalse(aggregator.usages().iterator().hasNext());
+        assertThat(aggregator.usages(), isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)

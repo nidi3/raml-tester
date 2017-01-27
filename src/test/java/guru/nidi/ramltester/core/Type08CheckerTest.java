@@ -32,8 +32,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.isEmpty;
 import static guru.nidi.ramltester.util.TestUtils.valuesOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class Type08CheckerTest extends CoreTestBase {
 
@@ -228,7 +230,7 @@ public class Type08CheckerTest extends CoreTestBase {
     private void assertNoViolation(Parameter param, String value) {
         final RamlViolations violations = new RamlViolations();
         new TypeChecker(violations).check(new Type08(param), value, new Message("baseUriParam", "action", "xxx"));
-        assertNoViolations(violations);
+        assertThat(violations, isEmpty());
     }
 
     private void assertOneViolationThat(Parameter param, String value, Matcher<String> matcher) {
@@ -240,7 +242,7 @@ public class Type08CheckerTest extends CoreTestBase {
     private void assertNoViolation(List<Parameter> params, Values values) {
         final RamlViolations violations = new RamlViolations();
         new TypeChecker(violations).check(Type08.of(params), values, new Message("baseUriParam", "action"));
-        assertNoViolations(violations);
+        assertThat(violations, isEmpty());
     }
 
     private void assertOneViolationThat(List<Parameter> params, Values values, Matcher<String> matcher) {

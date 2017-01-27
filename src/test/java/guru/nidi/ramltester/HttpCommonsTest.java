@@ -31,8 +31,10 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static guru.nidi.ramltester.junit.RamlMatchers.checks;
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static guru.nidi.ramltester.util.TestUtils.violations;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class HttpCommonsTest extends ServerTest {
     private static final SimpleReportAggregator aggregator = new SimpleReportAggregator();
@@ -51,7 +53,7 @@ public class HttpCommonsTest extends ServerTest {
         final HttpGet get = new HttpGet(url("base/data"));
         final HttpResponse response = client.execute(get);
         assertEquals("\"json string\"", EntityUtils.toString(response.getEntity()));
-        assertTrue(client.getLastReport().isEmpty());
+        assertThat(client.getLastReport(),hasNoViolations());
     }
 
     @Test
@@ -76,7 +78,7 @@ public class HttpCommonsTest extends ServerTest {
         final HttpResponse response = client.notSending().execute(get);
         assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
         assertEquals(null, response.getEntity());
-        assertTrue(client.getLastReport().isEmpty());
+        assertThat(client.getLastReport(), hasNoViolations());
     }
 
     @Test
@@ -85,7 +87,7 @@ public class HttpCommonsTest extends ServerTest {
         final HttpResponse response = client.execute(get);
         assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
         assertEquals(null, response.getEntity());
-        assertTrue(client.getLastReport().isEmpty());
+        assertThat(client.getLastReport(), hasNoViolations());
     }
 
     @Test

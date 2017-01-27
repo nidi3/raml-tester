@@ -18,22 +18,16 @@ package guru.nidi.ramltester.junit;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
-import java.util.Collection;
+import java.util.Iterator;
 
-class EmptyMatcher extends TypeSafeMatcher<Collection<?>> {
-    private final String desc;
-
-    public EmptyMatcher(String desc) {
-        this.desc = desc;
-    }
-
+class EmptyIteratorMatcher extends TypeSafeMatcher<Iterator<?>> {
     @Override
-    protected boolean matchesSafely(Collection<?> item) {
-        return item.isEmpty();
+    protected boolean matchesSafely(Iterator<?> item) {
+        return !item.hasNext();
     }
 
     @Override
     public void describeTo(Description description) {
-        description.appendText(desc + " to be empty");
+        description.appendText(" to have no more elements");
     }
 }

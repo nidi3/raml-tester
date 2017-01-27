@@ -18,6 +18,8 @@ package guru.nidi.ramltester.junit;
 import guru.nidi.ramltester.core.RamlReport;
 import org.hamcrest.Matcher;
 
+import java.util.Iterator;
+
 public final class RamlMatchers {
     private RamlMatchers() {
     }
@@ -55,5 +57,19 @@ public final class RamlMatchers {
      */
     public static Matcher<RamlReport> responseChecks() {
         return new NoViolationsMatcher(false, false, true);
+    }
+
+    /**
+     * @return A Matcher checking that an iterable has no elements.
+     */
+    public static Matcher<Iterable<?>> isEmpty() {
+        return new EmptyIterableMatcher("");
+    }
+
+    /**
+     * @return A Matcher checking that an iterator has no more elements.
+     */
+    public static Matcher<Iterator<?>> isExhausted() {
+        return new EmptyIteratorMatcher();
     }
 }

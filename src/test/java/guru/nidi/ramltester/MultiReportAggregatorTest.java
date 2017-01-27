@@ -24,9 +24,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.isEmpty;
+import static guru.nidi.ramltester.junit.RamlMatchers.isExhausted;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class MultiReportAggregatorTest {
     @Test
@@ -38,7 +41,7 @@ public class MultiReportAggregatorTest {
         assertEquals("simple", usageEntry.getKey());
         assertEquals(new HashSet<>(Arrays.asList("/mediaType", "/schema")),
                 usageEntry.getValue().getUnusedResources());
-        assertFalse(usages.hasNext());
+        assertThat(usages, isExhausted());
     }
 
     @Test
@@ -46,7 +49,7 @@ public class MultiReportAggregatorTest {
         final MultiReportAggregator aggregator = new MultiReportAggregator();
         aggregator.addReport(SimpleReport.report("simple.raml", "/data", "/d", "/"));
         aggregator.clear();
-        assertFalse(aggregator.usages().iterator().hasNext());
+        assertThat(aggregator.usages(), isEmpty());
     }
 
     @Test
@@ -57,6 +60,6 @@ public class MultiReportAggregatorTest {
         final Iterator<Map.Entry<String, Usage>> usages = aggregator.usages().iterator();
         assertThat(usages.next().getKey(), either(equalTo("simple")).or(equalTo("header")));
         assertThat(usages.next().getKey(), either(equalTo("simple")).or(equalTo("header")));
-        assertFalse(usages.hasNext());
+        assertThat(usages, isExhausted());
     }
 }

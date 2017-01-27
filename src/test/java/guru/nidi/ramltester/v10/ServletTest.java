@@ -39,9 +39,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static guru.nidi.ramltester.util.TestUtils.violations;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 public class ServletTest extends ServerTest {
     private CloseableHttpClient client;
@@ -62,7 +63,7 @@ public class ServletTest extends ServerTest {
         final HttpGet get = new HttpGet(url("data"));
         final CloseableHttpResponse response = client.execute(get);
         assertEquals("\"json string\"", EntityUtils.toString(response.getEntity()));
-        assertTrue(testFilter.report.isEmpty());
+        assertThat(testFilter.report, hasNoViolations());
     }
 
     @Test

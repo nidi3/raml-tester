@@ -39,9 +39,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
+import static guru.nidi.ramltester.junit.RamlMatchers.hasNoViolations;
 import static guru.nidi.ramltester.util.TestUtils.violations;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = RestTemplateTest.class)
@@ -82,7 +83,7 @@ public class RestTemplateTest extends ServerTest {
     public void testRestTemplateOk() {
         final String res = restTemplate.getForObject(url("data"), String.class);
         assertEquals("\"json string\"", res);
-        assertTrue(restTemplate.getLastReport().isEmpty());
+        assertThat(restTemplate.getLastReport(), hasNoViolations());
     }
 
     @Test

@@ -13,16 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package guru.nidi.ramltester.core;
+package guru.nidi.ramltester.junit;
 
-import org.hamcrest.Matcher;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 
-import static org.junit.Assert.assertThat;
+class EmptyIterableMatcher extends TypeSafeMatcher<Iterable<?>> {
+    private final String desc;
 
-public class CoreTestBase {
-    protected void assertOneViolationThat(RamlViolations violations, Matcher<String> matcher) {
-        assertThat("Expected exactly one violation", 1, new IsEqual<>(violations.size()));
-        assertThat(violations.iterator().next().getMessage(), matcher);
+    public EmptyIterableMatcher(String desc) {
+        this.desc = desc;
+    }
+
+    @Override
+    protected boolean matchesSafely(Iterable<?> item) {
+        return !item.iterator().hasNext();
+    }
+
+    @Override
+    public void describeTo(Description description) {
+        description.appendText(desc + " to be empty");
     }
 }

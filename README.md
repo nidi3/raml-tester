@@ -187,7 +187,7 @@ public class RestAssuredTest {
 
         RestAssuredClient restAssured = api.createRestAssured();
         restAssured.given().get("/base/data").andReturn();
-        Assert.assertTrue(restAssured.getLastReport().isEmpty());
+        Assert.assertThat(restAssured.getLastReport(), hasNoViolations());
     }
 }
 ```
