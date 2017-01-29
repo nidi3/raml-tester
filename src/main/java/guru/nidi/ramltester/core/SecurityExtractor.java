@@ -24,8 +24,8 @@ import java.util.List;
 class SecurityExtractor {
     private final List<RamlSecScheme> schemes;
 
-    public SecurityExtractor(RamlApi raml, RamlMethod action, RamlViolations violations) {
-        schemes = new SchemeFinder(raml, violations).securedBy(action);
+    public SecurityExtractor(RamlApi raml, RamlMethod method, RamlViolations violations) {
+        schemes = new SchemeFinder(raml, violations).securedBy(method);
     }
 
     public List<RamlSecScheme> getSchemes() {
@@ -87,12 +87,12 @@ class SecurityExtractor {
             this.violations = violations;
         }
 
-        public List<RamlSecScheme> securedBy(RamlMethod action) {
+        public List<RamlSecScheme> securedBy(RamlMethod method) {
             final List<RamlSecScheme> res = new ArrayList<>();
-            if (!action.securedBy().isEmpty()) {
-                res.addAll(securitySchemes(action.securedBy()));
-            } else if (!action.resource().securedBy().isEmpty()) {
-                res.addAll(securitySchemes(action.resource().securedBy()));
+            if (!method.securedBy().isEmpty()) {
+                res.addAll(securitySchemes(method.securedBy()));
+            } else if (!method.resource().securedBy().isEmpty()) {
+                res.addAll(securitySchemes(method.resource().securedBy()));
             } else if (!raml.securedBy().isEmpty()) {
                 res.addAll(securitySchemes(raml.securedBy()));
             }

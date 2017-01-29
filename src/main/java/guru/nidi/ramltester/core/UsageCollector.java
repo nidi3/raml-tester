@@ -20,10 +20,10 @@ import java.util.Map;
 import java.util.Set;
 
 abstract class UsageCollector {
-    static final UsageCollector ACTION = new UsageCollector() {
+    static final UsageCollector METHOD = new UsageCollector() {
         @Override
-        public void collect(String key, Usage.Action action, Set<String> result) {
-            if (action.getUses() == 0) {
+        public void collect(String key, Usage.Method method, Set<String> result) {
+            if (method.getUses() == 0) {
                 result.add(key);
             }
         }
@@ -31,8 +31,8 @@ abstract class UsageCollector {
 
     static final UsageCollector QUERY_PARAM = new UsageCollector() {
         @Override
-        public void collect(String key, Usage.Action action, Set<String> result) {
-            for (final Map.Entry<String, Integer> queryEntry : action.getQueryParameters().values()) {
+        public void collect(String key, Usage.Method method, Set<String> result) {
+            for (final Map.Entry<String, Integer> queryEntry : method.getQueryParameters().values()) {
                 if (queryEntry.getValue() == 0) {
                     add(result, queryEntry.getKey(), key);
                 }
@@ -40,13 +40,13 @@ abstract class UsageCollector {
         }
     };
 
-    static final UsageCollector FORM_PARAM = new UsageCollector() {
+    static final UsageCollector BODY_PARAM = new UsageCollector() {
         @Override
-        public void collect(String key, Usage.Action action, Set<String> result) {
-            for (final Map.Entry<String, Usage.MimeType> mimeTypeEntry : action.mimeTypes()) {
-                for (final Map.Entry<String, Integer> formEntry : mimeTypeEntry.getValue().getFormParameters().values()) {
+        public void collect(String key, Usage.Method method, Set<String> result) {
+            for (final Map.Entry<String, Usage.Body> bodyEntry : method.bodies()) {
+                for (final Map.Entry<String, Integer> formEntry : bodyEntry.getValue().getParameters().values()) {
                     if (formEntry.getValue() == 0) {
-                        add(result, formEntry.getKey(), key + " (" + mimeTypeEntry.getKey() + ")");
+                        add(result, formEntry.getKey(), key + " (" + bodyEntry.getKey() + ")");
                     }
                 }
             }
@@ -55,8 +55,8 @@ abstract class UsageCollector {
 
     static final UsageCollector REQUEST_HEADER = new UsageCollector() {
         @Override
-        public void collect(String key, Usage.Action action, Set<String> result) {
-            for (final Map.Entry<String, Integer> requestEntry : action.getRequestHeaders().values()) {
+        public void collect(String key, Usage.Method method, Set<String> result) {
+            for (final Map.Entry<String, Integer> requestEntry : method.getRequestHeaders().values()) {
                 if (requestEntry.getValue() == 0) {
                     add(result, requestEntry.getKey(), key);
                 }
@@ -66,8 +66,8 @@ abstract class UsageCollector {
 
     static final UsageCollector RESPONSE_HEADER = new UsageCollector() {
         @Override
-        public void collect(String key, Usage.Action action, Set<String> result) {
-            for (final Map.Entry<String, Usage.Response> responseEntry : action.responses()) {
+        public void collect(String key, Usage.Method method, Set<String> result) {
+            for (final Map.Entry<String, Usage.Response> responseEntry : method.responses()) {
                 for (final Map.Entry<String, Integer> headerEntry : responseEntry.getValue().getResponseHeaders().values()) {
                     if (headerEntry.getValue() == 0) {
                         add(result, headerEntry.getKey(), key + " -> " + responseEntry.getKey());
@@ -79,8 +79,8 @@ abstract class UsageCollector {
 
     static final UsageCollector RESPONSE_CODE = new UsageCollector() {
         @Override
-        public void collect(String key, Usage.Action action, Set<String> result) {
-            for (final Map.Entry<String, Integer> responseCodeEntry : action.getResponseCodes().values()) {
+        public void collect(String key, Usage.Method method, Set<String> result) {
+            for (final Map.Entry<String, Integer> responseCodeEntry : method.getResponseCodes().values()) {
                 if (responseCodeEntry.getValue() == 0) {
                     add(result, responseCodeEntry.getKey(), key);
                 }
@@ -91,13 +91,13 @@ abstract class UsageCollector {
     private UsageCollector() {
     }
 
-    abstract void collect(String key, Usage.Action action, Set<String> result);
+    abstract void collect(String key, Usage.Method method, Set<String> result);
 
     public Set<String> collect(Usage usage) {
         final Set<String> res = new HashSet<>();
         for (final Map.Entry<String, Usage.Resource> resourceEntry : usage) {
-            for (final Map.Entry<String, Usage.Action> actionEntry : resourceEntry.getValue()) {
-                collect(actionEntry.getKey() + " " + resourceEntry.getKey(), actionEntry.getValue(), res);
+            for (final Map.Entry<String, Usage.Method> methodEntry : resourceEntry.getValue()) {
+                collect(methodEntry.getKey() + " " + resourceEntry.getKey(), methodEntry.getValue(), res);
             }
         }
         return res;

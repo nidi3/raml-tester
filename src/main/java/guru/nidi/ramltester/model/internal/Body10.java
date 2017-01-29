@@ -40,6 +40,11 @@ public class Body10 implements RamlBody {
     }
 
     @Override
+    public TypeDeclaration getDelegate() {
+        return type;
+    }
+
+    @Override
     public String name() {
         return type.name();
     }

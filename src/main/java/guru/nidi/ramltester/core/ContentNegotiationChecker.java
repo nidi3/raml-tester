@@ -34,7 +34,7 @@ class ContentNegotiationChecker {
         this.responseViolations = responseViolations;
     }
 
-    public void check(RamlRequest request, RamlResponse response, RamlMethod action, MediaTypeMatch typeMatch) {
+    public void check(RamlRequest request, RamlResponse response, RamlMethod method, MediaTypeMatch typeMatch) {
         final String accept = acceptHeader(request, response, typeMatch);
         if (accept == null) {
             return;
@@ -49,7 +49,7 @@ class ContentNegotiationChecker {
                     }
                     if (typeMatch.getMatchingMedia().equals(modelType)) {
                         if (acceptType.getQualityParameter() < bestMatch.getQualityParameter()) {
-                            final Locator locator = new Locator(action);
+                            final Locator locator = new Locator(method);
                             locator.responseCode(Integer.toString(response.getStatus()));
                             responseViolations.add(new Message("mediaType.better", locator, accept, bestMatch, response.getContentType()));
                         }

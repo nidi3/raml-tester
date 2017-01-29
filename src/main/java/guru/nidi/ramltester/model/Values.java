@@ -78,6 +78,54 @@ public final class Values implements Iterable<Map.Entry<String, List<Object>>> {
         return values;
     }
 
+    public String asJson() {
+        final StringBuilder s = new StringBuilder("{");
+        boolean first = true;
+        for (final Map.Entry<String, List<Object>> entry : this) {
+            if (first) {
+                first = false;
+            } else {
+                s.append(',');
+            }
+            addLine(s, entry.getKey(), entry.getValue(), true, ": ");
+        }
+        return s.append('}').toString();
+    }
+
+    public String asYaml() {
+        return toString(": ");
+    }
+
+    public String toSimpleString() {
+        return toString(" = ");
+    }
+
+    private String toString(String sep) {
+        final StringBuilder s = new StringBuilder("\n");
+        for (final Map.Entry<String, List<Object>> entry : this) {
+            addLine(s, entry.getKey(), entry.getValue(), false, sep);
+        }
+        return s.toString();
+    }
+
+    private void addLine(StringBuilder s, String key, List<Object> value, boolean escKey, String sep) {
+        if (escKey) {
+            s.append('"').append(key).append('"');
+        } else {
+            s.append(key);
+        }
+        s.append(sep);
+        final boolean isList = value.size() > 1;
+        if (isList) {
+            s.append('[');
+        }
+        s.append('"').append(value.get(0).toString()).append('"');
+        if (isList) {
+            s.append(']');
+        }
+        s.append('\n');
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

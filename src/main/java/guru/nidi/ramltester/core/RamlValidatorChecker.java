@@ -152,9 +152,9 @@ class RamlValidatorChecker {
         }
     }
 
-    public void empty(RamlMethod action) {
+    public void empty(RamlMethod method) {
         if (has(Validation.EMPTY)) {
-            if (action.responses().isEmpty()) {
+            if (method.responses().isEmpty()) {
                 violation("empty", locator);
             }
         }
@@ -217,10 +217,10 @@ class RamlValidatorChecker {
         }
     }
 
-    public void formParameters(RamlBody mimeType) {
+    public void formParameters(RamlBody body) {
         if (has(Validation.PARAMETER)) {
-            if (!MediaType.valueOf(mimeType.name()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
-                    !MediaType.valueOf(mimeType.name()).isCompatibleWith(MediaType.MULTIPART)) {
+            if (!MediaType.valueOf(body.name()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
+                    !MediaType.valueOf(body.name()).isCompatibleWith(MediaType.MULTIPART)) {
                 violation("formParameter.illegal", locator);
             }
         }
@@ -246,13 +246,13 @@ class RamlValidatorChecker {
         }
     }
 
-    public void exampleSchema(RamlBody mimeType) {
+    public void exampleSchema(RamlBody body) {
         if (has(Validation.EXAMPLE)) {
-            final String typeDef = mimeType.typeDefinition();
-            final String type = mimeType.type();
-            final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(mimeType.name()));
+            final String typeDef = body.typeDefinition();
+            final String type = body.type();
+            final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(body.name()));
             if ((typeDef != null || type != null) && validator != null) {
-                for (final String example : mimeType.examples()) {
+                for (final String example : body.examples()) {
                     validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(type, typeDef), violations,
                             new Message("schema.example.mismatch", locator, example));
                 }

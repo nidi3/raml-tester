@@ -130,6 +130,16 @@ schemas:
         schema: String
       abc/xyz+json:
         schema: String
+      multipart/form-data:
+        properties:
+          name:
+      application/x-www-form-urlencoded:
+        properties:
+          name:
+          age:
+            type: integer
+          list:
+            type: array
     responses:
       201:
         body:

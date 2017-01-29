@@ -86,4 +86,8 @@ public class Api10 implements RamlApi {
         return SecSchemeRef10.of(api.securedBy());
     }
 
+    @Override
+    public boolean supportsFormParameters() {
+        return false;
+    }
 }

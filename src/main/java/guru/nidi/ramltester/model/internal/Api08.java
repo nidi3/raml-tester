@@ -87,4 +87,8 @@ public class Api08 implements RamlApi {
         return SecSchemeRef08.of(api.securedBy());
     }
 
+    @Override
+    public boolean supportsFormParameters() {
+        return true;
+    }
 }

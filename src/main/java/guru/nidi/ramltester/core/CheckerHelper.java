@@ -38,8 +38,8 @@ final class CheckerHelper {
     }
 
     public static boolean existSchemalessBody(List<RamlBody> bodies) {
-        for (final RamlBody mimeType : bodies) {
-            if (mimeType.type() == null) {
+        for (final RamlBody body : bodies) {
+            if (body.type() == null) {
                 return true;
             }
         }
@@ -66,12 +66,12 @@ final class CheckerHelper {
         return null;
     }
 
-    public static List<RamlType> getEffectiveBaseUriParams(List<RamlType> baseUriParams, RamlMethod action) {
+    public static List<RamlType> getEffectiveBaseUriParams(List<RamlType> baseUriParams, RamlMethod method) {
         final List<RamlType> params = new ArrayList<>();
-        if (action.baseUriParameters() != null) {
-            params.addAll(action.baseUriParameters());
+        if (method.baseUriParameters() != null) {
+            params.addAll(method.baseUriParameters());
         }
-        addNotSetBaseUriParams(action.resource(), params);
+        addNotSetBaseUriParams(method.resource(), params);
         if (baseUriParams != null) {
             for (final RamlType parameter : baseUriParams) {
                 if (!typeNamesOf(params).contains(parameter.name())) {

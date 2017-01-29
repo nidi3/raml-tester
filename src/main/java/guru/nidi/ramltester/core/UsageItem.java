@@ -24,10 +24,10 @@ public enum UsageItem {
             return usage.getUnusedResources();
         }
     },
-    ACTION {
+    METHOD {
         @Override
         public Set<String> get(Usage usage) {
-            return usage.getUnusedActions();
+            return usage.getUnusedMethods();
         }
     },
     QUERY_PARAMETER {
@@ -39,7 +39,7 @@ public enum UsageItem {
     FORM_PARAMETER {
         @Override
         public Set<String> get(Usage usage) {
-            return usage.getUnusedFormParameters();
+            return usage.getUnusedBodyParameters();
         }
     },
     REQUEST_HEADER {

@@ -60,12 +60,12 @@ public class RamlChecker {
         final RamlViolations responseViolations = report.getResponseViolations();
         locator = new Locator();
         try {
-            final RamlMethod action = findAction(request);
-            final SecurityExtractor security = new SecurityExtractor(api, action, requestViolations);
+            final RamlMethod method = findMethod(request);
+            final SecurityExtractor security = new SecurityExtractor(api, method, requestViolations);
             violationsPerSecurity = new RamlViolationsPerSecurity(security);
-            checkRequest(request, action, security);
+            checkRequest(request, method, security);
             if (response != null) {
-                checkResponse(request, response, action, security);
+                checkResponse(request, response, method, security);
             }
             violationsPerSecurity.addLeastViolations(requestViolations, responseViolations);
         } catch (RamlViolationException e) {
@@ -79,12 +79,12 @@ public class RamlChecker {
         return report;
     }
 
-    public RamlMethod findAction(RamlRequest request) {
+    public RamlMethod findMethod(RamlRequest request) {
         final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(config.baseUri, config.includeServletPath));
         if (api.baseUri() == null) {
             final UriComponents ramlUri = UriComponents.fromHttpUrl("http://server"); //dummy url as we only match paths
             final Match pathMatch = getPathMatch(requestUri, ramlUri);
-            return findAction(pathMatch.suffix, request.getMethod());
+            return findMethod(pathMatch.suffix, request.getMethod());
         }
 
         final UriComponents ramlUri = UriComponents.fromHttpUrl(api.baseUri());
@@ -92,30 +92,30 @@ public class RamlChecker {
         final Match hostMatch = getHostMatch(requestUri, ramlUri);
         final Match pathMatch = getPathMatch(requestUri, ramlUri);
 
-        final RamlMethod action = findAction(pathMatch.suffix, request.getMethod());
-        checkProtocol(action, requestUri, ramlUri);
-        checkBaseUriParameters(hostMatch, pathMatch, action);
+        final RamlMethod method = findMethod(pathMatch.suffix, request.getMethod());
+        checkProtocol(method, requestUri, ramlUri);
+        checkBaseUriParameters(hostMatch, pathMatch, method);
 
-        return action;
+        return method;
     }
 
-    private RamlMethod findAction(String path, String method) {
+    private RamlMethod findMethod(String path, String methodName) {
         final RamlResource resource = findResourceByPath(path);
         resourceUsage(usage, resource).incUses(1);
-        final RamlMethod action = findAction(resource, method);
-        if (action == null) {
-            requestViolations.add("action.undefined", locator, method);
+        final RamlMethod method = findMethod(resource, methodName);
+        if (method == null) {
+            requestViolations.add("action.undefined", locator, methodName);
             throw new RamlViolationException();
         }
-        actionUsage(usage, action).incUses(1);
-        locator.action(action);
-        return action;
+        methodUsage(usage, method).incUses(1);
+        locator.method(method);
+        return method;
     }
 
-    private RamlMethod findAction(RamlResource resource, String method) {
-        for (final RamlMethod action : resource.methods()) {
-            if (action.method().equals(method)) {
-                return action;
+    private RamlMethod findMethod(RamlResource resource, String methodName) {
+        for (final RamlMethod method : resource.methods()) {
+            if (method.method().equals(methodName)) {
+                return method;
             }
         }
         return null;
@@ -138,64 +138,71 @@ public class RamlChecker {
         return resource;
     }
 
-    public void checkRequest(RamlRequest request, RamlMethod action, SecurityExtractor security) {
-        checkQueryParameters(request.getQueryValues(), action, security);
-        checkRequestHeaderParameters(request.getHeaderValues(), action, security);
+    public void checkRequest(RamlRequest request, RamlMethod method, SecurityExtractor security) {
+        checkQueryParameters(request.getQueryValues(), method, security);
+        checkRequestHeaderParameters(request.getHeaderValues(), method, security);
 
-        final MediaTypeMatch typeMatch = MediaTypeMatch.find(requestViolations, request, action.body(), locator);
+        final MediaTypeMatch typeMatch = MediaTypeMatch.find(requestViolations, request, method.body(), locator);
         if (typeMatch != null) {
-            locator.requestMime(typeMatch.getMatchingMime());
+            final RamlBody body = typeMatch.getMatchingBody();
+            locator.requestBody(body);
             if (FormDecoder.supportsFormParameters(typeMatch.getTargetType())) {
-                checkFormParameters(action, request.getFormValues(), typeMatch.getMatchingMime());
+                if (api.supportsFormParameters()) {
+                    checkFormParameters(method, request.getFormValues(), body);
+                } else {
+                    final Values formValues = request.getFormValues();
+                    bodyUsage(usage, method, body).addParameters(formValues.asMap().keySet());
+                    new TypeChecker(requestViolations).check(body, formValues, new Message("messageBody", locator));
+                }
             } else {
                 checkSchema(requestViolations, request.getContent(), typeMatch);
             }
         }
     }
 
-    private void checkFormParameters(RamlMethod action, Values values, RamlBody mimeType) {
-        if (mimeType.type() != null) {
+    private void checkFormParameters(RamlMethod method, Values values, RamlBody body) {
+        if (body.type() != null) {
             requestViolations.add("schema.superfluous", locator);
         }
         @SuppressWarnings("unchecked")
-        final List<RamlType> formParameters = mimeType.formParameters();
+        final List<RamlType> formParameters = body.formParameters();
         if (formParameters.isEmpty()) {
             requestViolations.add("formParameters.missing", locator);
         } else {
-            checkFormParametersValues(action, mimeType, values, formParameters);
+            checkFormParametersValues(method, body, values, formParameters);
         }
     }
 
-    private void checkFormParametersValues(RamlMethod action, RamlBody mimeType, Values values, List<RamlType> formParameters) {
-        final Usage.MimeType mt = mimeTypeUsage(usage, action, mimeType);
-        mt.addFormParameters(new TypeChecker(requestViolations).check(formParameters, values, new Message("formParam", locator)));
+    private void checkFormParametersValues(RamlMethod method, RamlBody body, Values values, List<RamlType> formParameters) {
+        bodyUsage(usage, method, body).addParameters(
+                new TypeChecker(requestViolations).check(formParameters, values, new Message("formParam", locator)));
     }
 
-    private void checkQueryParameters(Values values, RamlMethod action, SecurityExtractor security) {
+    private void checkQueryParameters(Values values, RamlMethod method, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
         for (final RamlSecScheme scheme : security.getSchemes()) {
-            final Usage.Action a = actionUsage(usage, action);
-            a.addQueryParameters(new TypeChecker(violationsPerSecurity.requestViolations(scheme)).check(mergeLists(action.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
+            final Usage.Method a = methodUsage(usage, method);
+            a.addQueryParameters(new TypeChecker(violationsPerSecurity.requestViolations(scheme)).check(mergeLists(method.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
         }
     }
 
-    private void checkRequestHeaderParameters(Values values, RamlMethod action, SecurityExtractor security) {
+    private void checkRequestHeaderParameters(Values values, RamlMethod method, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
         for (final RamlSecScheme scheme : security.getSchemes()) {
-            final Usage.Action a = actionUsage(usage, action);
+            final Usage.Method a = methodUsage(usage, method);
             a.addRequestHeaders(
                     new TypeChecker(violationsPerSecurity.requestViolations(scheme))
                             .acceptWildcard()
                             .ignoreX(config.ignoreXheaders)
                             .caseSensitive(false)
                             .predefined(DefaultHeaders.REQUEST)
-                            .check(mergeLists(action.headers(), security.headers(scheme)), values, new Message("headerParam", locator)));
+                            .check(mergeLists(method.headers(), security.headers(scheme)), values, new Message("headerParam", locator)));
         }
     }
 
-    private void checkBaseUriParameters(Match hostMatch, Match pathMatch, RamlMethod action) {
+    private void checkBaseUriParameters(Match hostMatch, Match pathMatch, RamlMethod method) {
         final TypeChecker checker = new TypeChecker(requestViolations).acceptUndefined().ignoreRequired();
-        final List<RamlType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), action);
+        final List<RamlType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), method);
         checker.check(baseUriParams, hostMatch.variables, new Message("baseUriParam", locator));
         checker.check(baseUriParams, pathMatch.variables, new Message("baseUriParam", locator));
     }
@@ -218,13 +225,13 @@ public class RamlChecker {
         return hostMatch;
     }
 
-    private void checkProtocol(RamlMethod action, UriComponents requestUri, UriComponents ramlUri) {
-        final List<String> protocols = findProtocols(action, ramlUri.getScheme().toUpperCase());
+    private void checkProtocol(RamlMethod method, UriComponents requestUri, UriComponents ramlUri) {
+        final List<String> protocols = findProtocols(method, ramlUri.getScheme().toUpperCase());
         requestViolations.addIf(!protocols.contains(requestUri.getScheme().toUpperCase()), "protocol.undefined", locator, requestUri.getScheme());
     }
 
-    private List<String> findProtocols(RamlMethod action, String fallback) {
-        List<String> protocols = action.protocols();
+    private List<String> findProtocols(RamlMethod method, String fallback) {
+        List<String> protocols = method.protocols();
         if (protocols == null || protocols.isEmpty()) {
             protocols = api.protocols();
         }
@@ -244,42 +251,42 @@ public class RamlChecker {
         }
     }
 
-    public void checkResponse(RamlRequest request, RamlResponse response, RamlMethod action, SecurityExtractor security) {
+    public void checkResponse(RamlRequest request, RamlResponse response, RamlMethod method, SecurityExtractor security) {
         //TODO usage is multiplied by security schemes
         for (final RamlSecScheme scheme : security.getSchemes()) {
             final RamlViolations requestViolations = violationsPerSecurity.requestViolations(scheme);
             final RamlViolations responseViolations = violationsPerSecurity.responseViolations(scheme);
-            final MediaTypeMatch typeMatch = doCheckReponse(responseViolations, response, action, security.responses(scheme));
+            final MediaTypeMatch typeMatch = doCheckReponse(responseViolations, response, method, security.responses(scheme));
             if (typeMatch != null) {
                 new ContentNegotiationChecker(requestViolations, responseViolations)
-                        .check(request, response, action, typeMatch);
+                        .check(request, response, method, typeMatch);
             }
         }
     }
 
-    private MediaTypeMatch doCheckReponse(RamlViolations violations, RamlResponse response, RamlMethod action, List<RamlApiResponse> securityResponses) {
-        final List<RamlApiResponse> responseMap = mergeLists(action.responses(), securityResponses);
+    private MediaTypeMatch doCheckReponse(RamlViolations violations, RamlResponse response, RamlMethod method, List<RamlApiResponse> securityResponses) {
+        final List<RamlApiResponse> responseMap = mergeLists(method.responses(), securityResponses);
         final RamlApiResponse res = responseByCode(responseMap, Integer.toString(response.getStatus()));
         if (res == null) {
             violations.add("responseCode.undefined", locator, response.getStatus());
             return null;
         }
         final String statusStr = Integer.toString(response.getStatus());
-        actionUsage(usage, action).addResponseCode(statusStr);
+        methodUsage(usage, method).addResponseCode(statusStr);
         locator.responseCode(statusStr);
-        checkResponseHeaderParameters(violations, response.getHeaderValues(), action, statusStr, res);
+        checkResponseHeaderParameters(violations, response.getHeaderValues(), method, statusStr, res);
 
         final MediaTypeMatch typeMatch = MediaTypeMatch.find(violations, response, res.body(), locator);
         if (typeMatch != null) {
-            locator.responseMime(typeMatch.getMatchingMime());
+            locator.responseBody(typeMatch.getMatchingBody());
             checkSchema(violations, response.getContent(), typeMatch);
         }
         return typeMatch;
     }
 
     private void checkSchema(RamlViolations violations, byte[] body, MediaTypeMatch typeMatch) {
-        final String typeDef = typeMatch.getMatchingMime().typeDefinition();
-        final String type = typeMatch.getMatchingMime().type();
+        final String typeDef = typeMatch.getMatchingBody().typeDefinition();
+        final String type = typeMatch.getMatchingBody().type();
         if (typeDef == null && type == null) {
             return;
         }
@@ -302,8 +309,8 @@ public class RamlChecker {
         }
     }
 
-    private void checkResponseHeaderParameters(RamlViolations violations, Values values, RamlMethod action, String responseCode, RamlApiResponse response) {
-        final Usage.Response r = responseUsage(usage, action, responseCode);
+    private void checkResponseHeaderParameters(RamlViolations violations, Values values, RamlMethod method, String responseCode, RamlApiResponse response) {
+        final Usage.Response r = responseUsage(usage, method, responseCode);
         r.addResponseHeaders(
                 new TypeChecker(violations)
                         .acceptWildcard()

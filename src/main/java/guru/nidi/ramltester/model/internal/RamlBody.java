@@ -18,6 +18,8 @@ package guru.nidi.ramltester.model.internal;
 import java.util.List;
 
 public interface RamlBody {
+    Object getDelegate();
+
     String name();
 
     List<RamlType> formParameters();

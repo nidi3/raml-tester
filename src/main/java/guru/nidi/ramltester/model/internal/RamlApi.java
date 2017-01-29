@@ -41,4 +41,6 @@ public interface RamlApi {
     List<RamlSecScheme> securitySchemes();
 
     List<RamlSecSchemeRef> securedBy();
+
+    boolean supportsFormParameters();
 }

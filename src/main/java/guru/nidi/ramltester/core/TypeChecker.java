@@ -16,9 +16,7 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.Values;
-import guru.nidi.ramltester.model.internal.RamlType;
-import guru.nidi.ramltester.model.internal.Type08;
-import guru.nidi.ramltester.model.internal.Type10;
+import guru.nidi.ramltester.model.internal.*;
 import guru.nidi.ramltester.util.Message;
 
 import java.util.*;
@@ -73,6 +71,21 @@ public class TypeChecker {
 
     public TypeChecker predefined(Set<String> predefined) {
         return new TypeChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
+    }
+
+    public void check(RamlBody body, Values values, Message message) {
+        //body08 is checked via formParameters
+        if (body instanceof Body10) {
+            //TODO use asYaml when resolved: https://github.com/raml-org/raml-java-parser/issues/294
+            final RamlViolations jsonMsg = new RamlViolations();
+            final String json = values.asJson();
+            new Type10Checker(jsonMsg).check(((Body10) body).getDelegate(), json, message);
+            for (final RamlViolationMessage msg : jsonMsg) {
+                violations.addRaw(msg.getMessage()
+                        .replace("Error validating JSON. ", "")
+                        .replace(json, values.toSimpleString()), msg.getCause());
+            }
+        }
     }
 
     public void check(RamlType type, Object value, Message message) {

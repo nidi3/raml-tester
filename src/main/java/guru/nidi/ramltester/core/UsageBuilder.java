@@ -31,16 +31,16 @@ public final class UsageBuilder {
         return usage.resource(resource.resourcePath());
     }
 
-    static Usage.Action actionUsage(Usage usage, RamlMethod action) {
-        return usage.resource(action.resource().resourcePath()).action(action.method());
+    static Usage.Method methodUsage(Usage usage, RamlMethod method) {
+        return usage.resource(method.resource().resourcePath()).method(method.method());
     }
 
-    static Usage.Response responseUsage(Usage usage, RamlMethod action, String responseCode) {
-        return actionUsage(usage, action).response(responseCode);
+    static Usage.Response responseUsage(Usage usage, RamlMethod method, String responseCode) {
+        return methodUsage(usage, method).response(responseCode);
     }
 
-    static Usage.MimeType mimeTypeUsage(Usage usage, RamlMethod action, RamlBody mimeType) {
-        return actionUsage(usage, action).mimeType(mimeType.name());
+    static Usage.Body bodyUsage(Usage usage, RamlMethod method, RamlBody body) {
+        return methodUsage(usage, method).body(body.name());
     }
 
     public static Usage usage(RamlApi raml, List<RamlReport> reports) {
@@ -55,19 +55,19 @@ public final class UsageBuilder {
     private static void createTotalUsage(Usage usage, List<RamlResource> resources) {
         for (final RamlResource resource : resources) {
             resourceUsage(usage, resource);
-            for (final RamlMethod action : resource.methods()) {
-                actionUsage(usage, action).initQueryParameters(typeNamesOf(action.queryParameters()));
-                actionUsage(usage, action).initResponseCodes(codesOf(action.responses()));
-                actionUsage(usage, action).initRequestHeaders(typeNamesOf(action.headers()));
-                if (action.body() != null) {
-                    for (final RamlBody mimeType : action.body()) {
-                        if (!mimeType.formParameters().isEmpty()) {
-                            UsageBuilder.mimeTypeUsage(usage, action, mimeType).initFormParameters(typeNamesOf(mimeType.formParameters()));
+            for (final RamlMethod method : resource.methods()) {
+                methodUsage(usage, method).initQueryParameters(typeNamesOf(method.queryParameters()));
+                methodUsage(usage, method).initResponseCodes(codesOf(method.responses()));
+                methodUsage(usage, method).initRequestHeaders(typeNamesOf(method.headers()));
+                if (method.body() != null) {
+                    for (final RamlBody body : method.body()) {
+                        if (!body.formParameters().isEmpty()) {
+                            UsageBuilder.bodyUsage(usage, method, body).initParameters(typeNamesOf(body.formParameters()));
                         }
                     }
                 }
-                for (final RamlApiResponse response : action.responses()) {
-                    responseUsage(usage, action, response.code()).initResponseHeaders(typeNamesOf(response.headers()));
+                for (final RamlApiResponse response : method.responses()) {
+                    responseUsage(usage, method, response.code()).initResponseHeaders(typeNamesOf(response.headers()));
                 }
             }
             createTotalUsage(usage, resource.resources());

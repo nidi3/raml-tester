@@ -42,7 +42,7 @@ public class UsageTest extends HighlevelTestBase {
 
         final Usage usage = aggregator.getUsage();
         assertEquals(set("/uuWithAction"), usage.getUnusedResources());
-        assertEquals(set("POST /data", "GET /uuWithAction"), usage.getUnusedActions());
+        assertEquals(set("POST /data", "GET /uuWithAction"), usage.getUnusedMethods());
         assertEquals(set("uuQuery in GET /data"), usage.getUnusedQueryParameters());
         assertEquals(set("uuReqHeader in GET /data"), usage.getUnusedRequestHeaders());
         assertEquals(set("uuResHeader in GET /data -> 200"), usage.getUnusedResponseHeaders());

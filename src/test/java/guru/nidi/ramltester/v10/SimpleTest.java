@@ -95,8 +95,7 @@ public class SimpleTest extends HighlevelTestBase {
     public void defaultMediaType() throws Exception {
         assertOneResponseViolationThat(
                 test(aggregator,
-                        RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DefaultOkSchemaValidator()).load(
-                                "simple.raml"),
+                        RamlLoaders.fromClasspath(getClass()).addSchemaValidator(new DefaultOkSchemaValidator()).load("simple.raml"),
                         get("/mediaType"), response(200, "\"hula\"", "application/default")),
                 equalTo("Body does not match schema for action(GET /mediaType) response(200) mime-type('application/default')\n"
                         + "Content: \"hula\"\n" + "Messages:\nok"));
@@ -132,6 +131,33 @@ public class SimpleTest extends HighlevelTestBase {
                         new SpringMockRamlRequest(get("/path").buildRequest(new MockServletContext())),
                         new SpringMockRamlResponse(jsonResponse(200))),
                 hasNoViolations());
+    }
+
+    @Test
+    public void noFormParametersOk() throws Exception {
+        assertThat(
+                test(aggregator, simple, post("/mediaType").param("name", "hula").param("age", "42").param("list", "a", "b")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED), jsonResponse(201)),
+                hasNoViolations());
+        assertThat(
+                test(aggregator, simple, post("/mediaType").param("name", "hula").param("age", "42")
+                        .contentType(MediaType.MULTIPART_FORM_DATA), jsonResponse(201)),
+                hasNoViolations());
+    }
+
+    @Test
+    public void noFormParametersNok() throws Exception {
+        assertOneRequestViolationThat(
+                test(aggregator, simple, post("/mediaType").param("age", "a").contentType(MediaType.APPLICATION_FORM_URLENCODED), jsonResponse(201)),
+                equalTo("Body on action(POST /mediaType) mime-type('application/x-www-form-urlencoded') - Value '\n" +
+                        "age = \"a\"\n" +
+                        "': Error: - Invalid type String, expected Integer\n" +
+                        "- Missing required field \"name\"\n" +
+                        "- Missing required field \"list\""));
+        assertOneRequestViolationThat(
+                test(aggregator, simple, post("/mediaType").contentType(MediaType.MULTIPART_FORM_DATA), jsonResponse(201)),
+                equalTo("Body on action(POST /mediaType) mime-type('multipart/form-data') - Value '\n" +
+                        "': Error: - Missing required field \"name\""));
     }
 
 }

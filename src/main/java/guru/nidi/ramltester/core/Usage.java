@@ -41,20 +41,20 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
         for (final Map.Entry<String, Resource> resourceEntry : usage) {
             final Resource resource = resource(resourceEntry.getKey());
             resource.incUses(resourceEntry.getValue().getUses());
-            for (final Map.Entry<String, Action> actionEntry : resourceEntry.getValue()) {
-                final Action action = resource.action(actionEntry.getKey());
-                final Action usageAction = actionEntry.getValue();
-                action.incUses(usageAction.getUses());
-                action.addQueryParameters(usageAction.getQueryParameters());
-                action.addRequestHeaders(usageAction.getRequestHeaders());
-                action.addResponseCodes(usageAction.getResponseCodes());
-                for (final Map.Entry<String, Response> responseEntry : usageAction.responses()) {
-                    final Response response = action.response(responseEntry.getKey());
+            for (final Map.Entry<String, Method> methodEntry : resourceEntry.getValue()) {
+                final Method method = resource.method(methodEntry.getKey());
+                final Method usageMethod = methodEntry.getValue();
+                method.incUses(usageMethod.getUses());
+                method.addQueryParameters(usageMethod.getQueryParameters());
+                method.addRequestHeaders(usageMethod.getRequestHeaders());
+                method.addResponseCodes(usageMethod.getResponseCodes());
+                for (final Map.Entry<String, Response> responseEntry : usageMethod.responses()) {
+                    final Response response = method.response(responseEntry.getKey());
                     response.addResponseHeaders(responseEntry.getValue().getResponseHeaders());
                 }
-                for (final Map.Entry<String, MimeType> mimeTypeEntry : usageAction.mimeTypes()) {
-                    final MimeType mimeType = action.mimeType(mimeTypeEntry.getKey());
-                    mimeType.addFormParameters(mimeTypeEntry.getValue().getFormParameters());
+                for (final Map.Entry<String, Body> bodyEntry : usageMethod.bodies()) {
+                    final Body body = method.body(bodyEntry.getKey());
+                    body.addParameters(bodyEntry.getValue().getParameters());
                 }
             }
         }
@@ -73,23 +73,23 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
     public Set<String> getUnusedResources() {
         final Set<String> res = new HashSet<>();
         for (final Map.Entry<String, Resource> resourceEntry : this) {
-            if (resourceEntry.getValue().getUses() == 0 && !resourceEntry.getValue().actions.isEmpty()) {
+            if (resourceEntry.getValue().getUses() == 0 && !resourceEntry.getValue().methods.isEmpty()) {
                 res.add(resourceEntry.getKey());
             }
         }
         return res;
     }
 
-    public Set<String> getUnusedActions() {
-        return UsageCollector.ACTION.collect(this);
+    public Set<String> getUnusedMethods() {
+        return UsageCollector.METHOD.collect(this);
     }
 
     public Set<String> getUnusedQueryParameters() {
         return UsageCollector.QUERY_PARAM.collect(this);
     }
 
-    public Set<String> getUnusedFormParameters() {
-        return UsageCollector.FORM_PARAM.collect(this);
+    public Set<String> getUnusedBodyParameters() {
+        return UsageCollector.BODY_PARAM.collect(this);
     }
 
     public Set<String> getUnusedRequestHeaders() {
@@ -116,27 +116,27 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
         }
     }
 
-    static class Resource extends UsageBase implements Iterable<Map.Entry<String, Action>> {
-        private final Map<String, Action> actions = new HashMap<>();
+    static class Resource extends UsageBase implements Iterable<Map.Entry<String, Method>> {
+        private final Map<String, Method> methods = new HashMap<>();
 
-        public Action action(String name) {
-            return getOrCreate(Action.class, actions, name);
+        public Method method(String name) {
+            return getOrCreate(Method.class, methods, name);
         }
 
         @Override
         public String toString() {
-            return "Resource" + actions;
+            return "Resource" + methods;
         }
 
         @Override
-        public Iterator<Map.Entry<String, Action>> iterator() {
-            return actions.entrySet().iterator();
+        public Iterator<Map.Entry<String, Method>> iterator() {
+            return methods.entrySet().iterator();
         }
     }
 
-    static class Action extends UsageBase {
+    static class Method extends UsageBase {
         private final Map<String, Response> responses = new HashMap<>();
-        private final Map<String, MimeType> mimeTypes = new HashMap<>();
+        private final Map<String, Body> bodies = new HashMap<>();
         private final CountSet<String> queryParameters = new CountSet<>();
         private final CountSet<String> requestHeaders = new CountSet<>();
         private final CountSet<String> responseCodes = new CountSet<>();
@@ -149,12 +149,12 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
             return responses.entrySet();
         }
 
-        public MimeType mimeType(String name) {
-            return getOrCreate(MimeType.class, mimeTypes, name);
+        public Body body(String name) {
+            return getOrCreate(Body.class, bodies, name);
         }
 
-        public Iterable<Map.Entry<String, MimeType>> mimeTypes() {
-            return mimeTypes.entrySet();
+        public Iterable<Map.Entry<String, Body>> bodies() {
+            return bodies.entrySet();
         }
 
         public void addQueryParameters(Collection<String> names) {
@@ -199,9 +199,9 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
 
         @Override
         public String toString() {
-            return "Action{" +
+            return "Method{" +
                     "responses=" + responses +
-                    ", mimeTypes=" + mimeTypes +
+                    ", bodies=" + bodies +
                     ", queryParameters=" + queryParameters +
                     ", requestHeaders=" + requestHeaders +
                     ", responseCodes=" + responseCodes +
@@ -232,25 +232,25 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
         }
     }
 
-    static class MimeType {
-        private final CountSet<String> formParameters = new CountSet<>();
+    static class Body {
+        private final CountSet<String> parameters = new CountSet<>();
 
-        public void addFormParameters(Set<String> names) {
-            formParameters.addAll(names);
+        public void addParameters(Set<String> names) {
+            parameters.addAll(names);
         }
 
-        public void initFormParameters(Collection<String> names) {
-            formParameters.addAll(names, 0);
+        public void initParameters(Collection<String> names) {
+            parameters.addAll(names, 0);
         }
 
-        public CountSet<String> getFormParameters() {
-            return formParameters;
+        public CountSet<String> getParameters() {
+            return parameters;
         }
 
         @Override
         public String toString() {
-            return "MimeType{" +
-                    "formParameters=" + formParameters +
+            return "Body{" +
+                    "parameters=" + parameters +
                     '}';
         }
     }

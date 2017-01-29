@@ -29,13 +29,13 @@ final class MediaTypeMatch {
     private final MediaType targetType;
     private final Collection<MediaType> definedTypes;
     private final MediaType matchingMedia;
-    private final RamlBody matchingMime;
+    private final RamlBody matchingBody;
 
-    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia, RamlBody matchingMime) {
+    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia, RamlBody matchingBody) {
         this.targetType = targetType;
         this.definedTypes = definedTypes;
         this.matchingMedia = matchingMedia;
-        this.matchingMime = matchingMime;
+        this.matchingBody = matchingBody;
     }
 
     public MediaType getTargetType() {
@@ -50,8 +50,8 @@ final class MediaTypeMatch {
         return matchingMedia;
     }
 
-    public RamlBody getMatchingMime() {
-        return matchingMime;
+    public RamlBody getMatchingBody() {
+        return matchingBody;
     }
 
     public String getTargetCharset() {

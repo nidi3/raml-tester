@@ -41,6 +41,10 @@ public class RamlViolations implements Iterable<RamlViolationMessage> {
         add(new Message(key, params));
     }
 
+    void addRaw(String message, Object cause) {
+        messages.add(new RamlViolationMessage(message, cause));
+    }
+
     public void addIf(boolean condition, Message message) {
         if (condition) {
             add(message);

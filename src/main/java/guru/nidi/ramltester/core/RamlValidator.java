@@ -81,40 +81,40 @@ public class RamlValidator {
         for (final RamlResource res : resource.resources()) {
             resource(res);
         }
-        for (final RamlMethod action : resource.methods()) {
-            action(action);
+        for (final RamlMethod method : resource.methods()) {
+            method(method);
         }
     }
 
-    private void action(RamlMethod action) {
-        locator.action(action);
-        checker.parameters(action.baseUriParameters(), BASE_URI);
-        checker.parameters(action.queryParameters(), QUERY);
-        checker.headerPattern(typeNamesOf(action.headers()));
-        checker.description(action.description());
-        checker.description(action.baseUriParameters(), BASE_URI);
-        checker.description(action.queryParameters(), QUERY);
-        checker.description(action.headers(), HEADER);
-        checker.empty(action);
-        if (action.body() != null) {
-            for (final RamlBody mimeType : action.body()) {
-                locator.requestMime(mimeType);
-                mimeType(mimeType);
+    private void method(RamlMethod method) {
+        locator.method(method);
+        checker.parameters(method.baseUriParameters(), BASE_URI);
+        checker.parameters(method.queryParameters(), QUERY);
+        checker.headerPattern(typeNamesOf(method.headers()));
+        checker.description(method.description());
+        checker.description(method.baseUriParameters(), BASE_URI);
+        checker.description(method.queryParameters(), QUERY);
+        checker.description(method.headers(), HEADER);
+        checker.empty(method);
+        if (method.body() != null) {
+            for (final RamlBody body : method.body()) {
+                locator.requestBody(body);
+                body(body);
             }
         }
-        for (final RamlApiResponse response : action.responses()) {
+        for (final RamlApiResponse response : method.responses()) {
             locator.responseCode(response.code());
             response(response);
         }
     }
 
-    private void mimeType(RamlBody mimeType) {
-        if (!mimeType.formParameters().isEmpty()) {
-            checker.formParameters(mimeType);
-            checker.parameters(mimeType.formParameters(), FORM);
-            checker.description(mimeType.formParameters(), FORM);
+    private void body(RamlBody body) {
+        if (!body.formParameters().isEmpty()) {
+            checker.formParameters(body);
+            checker.parameters(body.formParameters(), FORM);
+            checker.description(body.formParameters(), FORM);
         }
-        checker.exampleSchema(mimeType);
+        checker.exampleSchema(body);
     }
 
     private void response(RamlApiResponse response) {
@@ -122,9 +122,9 @@ public class RamlValidator {
         checker.description(response.description());
         checker.description(response.headers(), HEADER);
         if (response.body() != null) {
-            for (final RamlBody mimeType : response.body()) {
-                locator.responseMime(mimeType);
-                mimeType(mimeType);
+            for (final RamlBody body : response.body()) {
+                locator.responseBody(body);
+                body(body);
             }
         }
     }

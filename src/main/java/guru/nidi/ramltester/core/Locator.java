@@ -22,10 +22,10 @@ import guru.nidi.ramltester.util.Message;
 
 final class Locator {
     private RamlResource resource;
-    private RamlMethod action;
-    private RamlBody requestMime;
+    private RamlMethod method;
+    private RamlBody requestBody;
     private String responseCode;
-    private RamlBody responseMime;
+    private RamlBody responseBody;
 
     public Locator() {
     }
@@ -34,59 +34,59 @@ final class Locator {
         resource(resource);
     }
 
-    public Locator(RamlMethod action) {
-        action(action);
+    public Locator(RamlMethod method) {
+        method(method);
     }
 
-    public Locator(RamlBody mimeType) {
-        requestMime(mimeType);
+    public Locator(RamlBody body) {
+        requestBody(body);
     }
 
     public void resource(RamlResource resource) {
         this.resource = resource;
-        action = null;
-        requestMime = null;
+        method = null;
+        requestBody = null;
         responseCode = null;
-        responseMime = null;
+        responseBody = null;
     }
 
-    public void action(RamlMethod action) {
-        this.resource = action.resource();
-        this.action = action;
-        requestMime = null;
+    public void method(RamlMethod method) {
+        this.resource = method.resource();
+        this.method = method;
+        requestBody = null;
         responseCode = null;
-        responseMime = null;
+        responseBody = null;
     }
 
-    public void requestMime(RamlBody requestMime) {
-        this.requestMime = requestMime;
+    public void requestBody(RamlBody requestBody) {
+        this.requestBody = requestBody;
         responseCode = null;
-        responseMime = null;
+        responseBody = null;
     }
 
     public void responseCode(String responseCode) {
         this.responseCode = responseCode;
-        requestMime = null;
-        responseMime = null;
+        requestBody = null;
+        responseBody = null;
     }
 
-    public void responseMime(RamlBody responseMime) {
-        this.responseMime = responseMime;
-        requestMime = null;
+    public void responseBody(RamlBody responseBody) {
+        this.responseBody = responseBody;
+        requestBody = null;
     }
 
     @Override
     public String toString() {
         if (responseCode != null) {
-            return (actionString() + " " + new Message("response", responseCode).toString()) +
-                    (responseMime == null ? "" : (" " + new Message("mimeType", responseMime.name()).toString()));
+            return (methodString() + " " + new Message("response", responseCode).toString()) +
+                    (responseBody == null ? "" : (" " + new Message("mimeType", responseBody.name()).toString()));
         }
-        if (requestMime != null) {
-            return (action == null ? "" : (actionString() + " ")) +
-                    new Message("mimeType", requestMime.name()).toString();
+        if (requestBody != null) {
+            return (method == null ? "" : (methodString() + " ")) +
+                    new Message("mimeType", requestBody.name()).toString();
         }
-        if (action != null) {
-            return actionString();
+        if (method != null) {
+            return methodString();
         }
         if (resource != null) {
             return new Message("resource", resource.resourcePath()).toString();
@@ -94,7 +94,7 @@ final class Locator {
         return new Message("root").toString();
     }
 
-    private String actionString() {
-        return new Message("action", action.method(), action.resource().resourcePath()).toString();
+    private String methodString() {
+        return new Message("action", method.method(), method.resource().resourcePath()).toString();
     }
 }

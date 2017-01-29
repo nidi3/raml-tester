@@ -38,6 +38,11 @@ public class Body08 implements RamlBody {
     }
 
     @Override
+    public BodyLike getDelegate() {
+        return body;
+    }
+
+    @Override
     public String name() {
         return body.name();
     }
