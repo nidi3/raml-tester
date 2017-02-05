@@ -24,8 +24,11 @@ import guru.nidi.ramltester.core.XmlSchemaViolationCause;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
 
+import static guru.nidi.ramltester.util.TestUtils.map;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -71,12 +74,11 @@ public class SchemaTest extends HighlevelTestBase {
         final RamlReport report = test(simple, get("/schema"), jsonResponse(200, "{\"s\":{},\"i\":true}"));
         final RamlViolationMessage message = report.getResponseViolations().iterator().next();
         assertThat(message.getCause(), instanceOf(JsonSchemaViolationCause.class));
-        final String boolMessage = "{'message':'instance type (boolean) does not match any allowed primitive type (allowed: [\\'integer\\'])','logLevel':'ERROR'}";
-        final String objMessage = "{'message':'instance type (object) does not match any allowed primitive type (allowed: [\\'string\\'])','logLevel':'ERROR'}";
-        assertThat(mapper.writeValueAsString(message.getCause()), either(
-                equalTo(("{'messages':[" + boolMessage + "," + objMessage + "]}").replace("'", "\""))).or(
-                equalTo(("{'messages':[" + objMessage + "," + boolMessage + "]}").replace("'", "\""))
-        ));
+        final Map<?, ?> json = mapper.readValue(mapper.writeValueAsString(message.getCause()), Map.class);
+        assertEquals(map("messages", Arrays.asList(
+                map("message", "instance type (boolean) does not match any allowed primitive type (allowed: [\"integer\"])", "logLevel", "ERROR"),
+                map("message", "instance type (object) does not match any allowed primitive type (allowed: [\"string\"])", "logLevel", "ERROR"))),
+                json);
     }
 
     @Test
