@@ -19,7 +19,9 @@ import guru.nidi.ramltester.core.RamlViolations;
 import guru.nidi.ramltester.model.Values;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -46,6 +48,14 @@ public class TestUtils {
     public static void assertValuesEquals(Object[] expected, Values actual) {
         final Values v = valuesOf(expected);
         assertEquals(v, actual);
+    }
+
+    public static Map<String, Object> map(Object... keysAndValues) {
+        final Map<String, Object> res = new HashMap<>();
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            res.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+        return res;
     }
 
     public static Values valuesOf(Object... keysAndValues) {

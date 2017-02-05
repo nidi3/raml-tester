@@ -30,6 +30,7 @@ import java.util.Map;
 
 import static guru.nidi.ramltester.util.TestUtils.map;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
