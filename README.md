@@ -2,7 +2,7 @@ raml-tester
 ===========
 [![Build Status](https://travis-ci.org/nidi3/raml-tester.svg?branch=master)](https://travis-ci.org/nidi3/raml-tester)
 [![codecov](https://codecov.io/gh/nidi3/raml-tester/branch/master/graph/badge.svg)](https://codecov.io/gh/nidi3/raml-tester)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache 2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Test if a request/response matches a given raml definition.
 
