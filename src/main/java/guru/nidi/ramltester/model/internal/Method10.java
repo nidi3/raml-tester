@@ -56,7 +56,7 @@ class Method10 implements RamlMethod {
 
     @Override
     public List<RamlType> queryParameters() {
-        return Type10.of(method.queryString() != null ? Collections.singletonList(method.queryString()) : method.queryParameters());
+        return Type10.of(method.queryString() == null ? method.queryParameters() : Collections.singletonList(method.queryString()));
     }
 
     @Override

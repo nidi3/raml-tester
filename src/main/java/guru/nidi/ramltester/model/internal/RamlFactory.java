@@ -17,7 +17,7 @@ package guru.nidi.ramltester.model.internal;
 
 import org.raml.v2.api.RamlModelResult;
 
-public class RamlFactory {
+public final class RamlFactory {
     private RamlFactory() {
     }
 

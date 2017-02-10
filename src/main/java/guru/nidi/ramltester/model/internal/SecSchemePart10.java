@@ -34,7 +34,7 @@ class SecSchemePart10 implements RamlSecSchemePart {
 
     @Override
     public List<RamlType> queryParameters() {
-        return Type10.of(part.queryString() != null ? Collections.singletonList(part.queryString()) : part.queryParameters());
+        return Type10.of(part.queryString() == null ? part.queryParameters() : Collections.singletonList(part.queryString()));
     }
 
     @Override
