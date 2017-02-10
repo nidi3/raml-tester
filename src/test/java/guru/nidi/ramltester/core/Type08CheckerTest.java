@@ -16,16 +16,12 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.Values;
-import guru.nidi.ramltester.model.internal.Type08;
+import guru.nidi.ramltester.model.internal.ParameterTestImpl;
 import guru.nidi.ramltester.util.Message;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.raml.v2.api.model.v08.parameters.IntegerTypeDeclaration;
-import org.raml.v2.api.model.v08.parameters.NumberTypeDeclaration;
 import org.raml.v2.api.model.v08.parameters.Parameter;
-import org.raml.v2.api.model.v08.parameters.StringTypeDeclaration;
-import org.raml.v2.api.model.v08.system.types.MarkdownString;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +42,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void booleanType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("boolean");
         for (final String value : new String[]{"true", "false"}) {
             assertNoViolation(p, value);
@@ -59,7 +55,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void integerType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("integer");
         for (final String value : new String[]{"0", "-1", "123456789"}) {
             assertNoViolation(p, value);
@@ -72,7 +68,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void limitedIntegerType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("integer");
         p.setMinimum(-5);
         p.setMaximum(666);
@@ -85,7 +81,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void numberType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("number");
         for (final String value : new String[]{"0", "-1", "-.1", "1e-1", "1e+1", "1e1", "1.2345e-1123"}) {
             assertNoViolation(p, value);
@@ -98,7 +94,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void limitedNumberType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("number");
         p.setMinimum(.05);
         p.setMaximum(666.6);
@@ -117,7 +113,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void dateType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("date");
         for (final String value : new String[]{"Fri, 28 Feb 2014 12:34:56 GMT"}) {
             assertNoViolation(p, value);
@@ -130,7 +126,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void stringType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("string");
         for (final String value : new String[]{"aa", "12345"}) {
             assertNoViolation(p, value);
@@ -139,7 +135,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void lengthLimitedStringType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("string");
         p.setMinLength(2);
         p.setMaxLength(5);
@@ -149,7 +145,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void enumLimitedStringType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("string");
         p.setEnumeration(Arrays.asList("a", "b"));
         for (final String value : new String[]{"a", "b"}) {
@@ -170,7 +166,7 @@ public class Type08CheckerTest extends CoreTestBase {
     }
 
     private void doPatternLimitedStringType(String pattern) {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("string");
         p.setPattern(pattern);
         for (final String value : new String[]{"12/a", "00/y"}) {
@@ -184,7 +180,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void caseInsensitivePatternLimitedStringType() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setType("string");
         p.setPattern("/\\d{2}/[a-y]/i");
         for (final String value : new String[]{"12/a", "00/y", "99/A"}) {
@@ -204,7 +200,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void illegallyRepeatedParameter() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setName("req");
         assertOneViolationThat(Arrays.<Parameter>asList(p), valuesOf("req", new String[]{"a", "b"}),
                 equalTo("BaseUri parameter 'req' on action is not repeat but found repeatedly"));
@@ -212,7 +208,7 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void allowedRepeatParameter() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setRepeat(true);
         p.setName("rep");
         assertNoViolation(Arrays.<Parameter>asList(p), valuesOf("rep", new String[]{"a", "b"}));
@@ -220,154 +216,35 @@ public class Type08CheckerTest extends CoreTestBase {
 
     @Test
     public void missingRequiredParameter() {
-        final ParameterImpl p = new ParameterImpl();
+        final ParameterTestImpl p = new ParameterTestImpl();
         p.setName("req");
         p.setRequired(true);
         assertOneViolationThat(Arrays.<Parameter>asList(p), valuesOf(),
                 equalTo("BaseUri parameter 'req' on action is required but not found"));
     }
 
-    private void assertNoViolation(Parameter param, String value) {
+    private void assertNoViolation(ParameterTestImpl param, String value) {
         final RamlViolations violations = new RamlViolations();
-        new TypeChecker(violations).check(new Type08(param), value, new Message("baseUriParam", "action", "xxx"));
+        new TypeChecker(violations).check(param.asType08(), value, new Message("baseUriParam", "action", "xxx"));
         assertThat(violations, isEmpty());
     }
 
-    private void assertOneViolationThat(Parameter param, String value, Matcher<String> matcher) {
+    private void assertOneViolationThat(ParameterTestImpl param, String value, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new TypeChecker(violations).check(new Type08(param), value, new Message("baseUriParam", "action", "xxx"));
+        new TypeChecker(violations).check(param.asType08(), value, new Message("baseUriParam", "action", "xxx"));
         assertOneViolationThat(violations, matcher);
     }
 
     private void assertNoViolation(List<Parameter> params, Values values) {
         final RamlViolations violations = new RamlViolations();
-        new TypeChecker(violations).check(Type08.of(params), values, new Message("baseUriParam", "action"));
+        new TypeChecker(violations).check(ParameterTestImpl.asType08(params), values, new Message("baseUriParam", "action"));
         assertThat(violations, isEmpty());
     }
 
     private void assertOneViolationThat(List<Parameter> params, Values values, Matcher<String> matcher) {
         final RamlViolations violations = new RamlViolations();
-        new TypeChecker(violations).check(Type08.of(params), values, new Message("baseUriParam", "action"));
+        new TypeChecker(violations).check(ParameterTestImpl.asType08(params), values, new Message("baseUriParam", "action"));
         assertOneViolationThat(violations, matcher);
     }
 
-    private static class ParameterImpl implements Parameter, IntegerTypeDeclaration, NumberTypeDeclaration, StringTypeDeclaration {
-        private String type;
-        private Double minimum, maximum;
-        private Integer minLength, maxLength;
-        private List<String> enumeration;
-        private String pattern;
-        private boolean required, repeat;
-        private String name;
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public void setMinimum(double minimum) {
-            this.minimum = minimum;
-        }
-
-        public void setMaximum(double maximum) {
-            this.maximum = maximum;
-        }
-
-        public void setMinLength(int minLength) {
-            this.minLength = minLength;
-        }
-
-        public void setMaxLength(int maxLength) {
-            this.maxLength = maxLength;
-        }
-
-        public void setEnumeration(List<String> enumeration) {
-            this.enumeration = enumeration;
-        }
-
-        public void setPattern(String pattern) {
-            this.pattern = pattern;
-        }
-
-        public void setRequired(boolean required) {
-            this.required = required;
-        }
-
-        public void setRepeat(boolean repeat) {
-            this.repeat = repeat;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String name() {
-            return name;
-        }
-
-        @Override
-        public String displayName() {
-            return null;
-        }
-
-        @Override
-        public String type() {
-            return type;
-        }
-
-        @Override
-        public Boolean required() {
-            return required;
-        }
-
-        @Override
-        public String defaultValue() {
-            return null;
-        }
-
-        @Override
-        public String example() {
-            return null;
-        }
-
-        @Override
-        public Boolean repeat() {
-            return repeat;
-        }
-
-        @Override
-        public MarkdownString description() {
-            return null;
-        }
-
-        @Override
-        public Double minimum() {
-            return minimum;
-        }
-
-        @Override
-        public Double maximum() {
-            return maximum;
-        }
-
-        @Override
-        public String pattern() {
-            return pattern;
-        }
-
-        @Override
-        public List<String> enumValues() {
-            return enumeration;
-        }
-
-        @Override
-        public Integer minLength() {
-            return minLength;
-        }
-
-        @Override
-        public Integer maxLength() {
-            return maxLength;
-        }
-    }
 }

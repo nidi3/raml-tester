@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Body10 implements RamlBody {
+class Body10 implements RamlBody {
     private final TypeDeclaration type;
 
     Body10(TypeDeclaration type) {

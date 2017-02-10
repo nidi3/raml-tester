@@ -20,7 +20,7 @@ import org.raml.v2.api.model.v10.bodies.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Response10 implements RamlApiResponse {
+class Response10 implements RamlApiResponse {
     private final Response response;
 
     Response10(Response response) {

@@ -182,7 +182,8 @@ public class RamlChecker {
         //TODO usage is multiplied by security schemes
         for (final RamlSecScheme scheme : security.getSchemes()) {
             final Usage.Method a = methodUsage(usage, method);
-            a.addQueryParameters(new TypeChecker(violationsPerSecurity.requestViolations(scheme)).check(mergeLists(method.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
+            a.addQueryParameters(new TypeChecker(violationsPerSecurity.requestViolations(scheme))
+                    .check(mergeLists(method.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
         }
     }
 

@@ -19,7 +19,7 @@ import org.raml.v2.api.model.v10.security.SecuritySchemeSettings;
 
 import java.util.List;
 
-public class SecSchemeSettings10 implements RamlSecSchemeSettings {
+class SecSchemeSettings10 implements RamlSecSchemeSettings {
     private final SecuritySchemeSettings settings;
 
     public SecSchemeSettings10(SecuritySchemeSettings settings) {

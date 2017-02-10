@@ -19,7 +19,7 @@ import org.raml.v2.api.model.v10.api.Api;
 
 import java.util.List;
 
-public class Api10 implements RamlApi {
+class Api10 implements RamlApi {
     private final Api api;
 
     public Api10(Api api) {

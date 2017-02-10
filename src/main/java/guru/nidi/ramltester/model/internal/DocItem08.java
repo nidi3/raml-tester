@@ -20,7 +20,7 @@ import org.raml.v2.api.model.v08.api.DocumentationItem;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DocItem08 implements RamlDocItem {
+class DocItem08 implements RamlDocItem {
     private final DocumentationItem item;
 
     DocItem08(DocumentationItem item) {

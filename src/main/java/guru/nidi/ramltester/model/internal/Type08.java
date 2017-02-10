@@ -23,7 +23,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-public class Type08 implements RamlType {
+class Type08 implements RamlType {
     private final Parameter parameter;
 
     public Type08(Parameter parameter) {

@@ -20,7 +20,7 @@ import org.raml.v2.api.model.v10.security.SecurityScheme;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SecScheme10 implements RamlSecScheme {
+class SecScheme10 implements RamlSecScheme {
     private final SecurityScheme scheme;
 
     public SecScheme10(SecurityScheme scheme) {

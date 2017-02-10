@@ -20,7 +20,7 @@ import org.raml.v2.api.model.v10.security.SecuritySchemeRef;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SecSchemeRef10 implements RamlSecSchemeRef {
+class SecSchemeRef10 implements RamlSecSchemeRef {
     private final SecuritySchemeRef ref;
 
     SecSchemeRef10(SecuritySchemeRef ref) {

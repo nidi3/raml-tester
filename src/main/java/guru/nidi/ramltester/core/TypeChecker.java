@@ -16,8 +16,11 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.Values;
-import guru.nidi.ramltester.model.internal.*;
+import guru.nidi.ramltester.model.internal.RamlBody;
+import guru.nidi.ramltester.model.internal.RamlType;
 import guru.nidi.ramltester.util.Message;
+import org.raml.v2.api.model.v08.parameters.Parameter;
+import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 
 import java.util.*;
 
@@ -75,11 +78,12 @@ public class TypeChecker {
 
     public void check(RamlBody body, Values values, Message message) {
         //body08 is checked via formParameters
-        if (body instanceof Body10) {
+        final Object delegate = body.getDelegate();
+        if (delegate instanceof TypeDeclaration) {
             //TODO use asYaml when resolved: https://github.com/raml-org/raml-java-parser/issues/294
             final RamlViolations jsonMsg = new RamlViolations();
             final String json = values.asJson();
-            new Type10Checker(jsonMsg).check(((Body10) body).getDelegate(), json, message);
+            new Type10Checker(jsonMsg).check((TypeDeclaration) delegate, json, message);
             for (final RamlViolationMessage msg : jsonMsg) {
                 violations.addRaw(msg.getMessage()
                         .replace("Error validating JSON. ", "")
@@ -89,13 +93,17 @@ public class TypeChecker {
     }
 
     public void check(RamlType type, Object value, Message message) {
-        if (type instanceof Type08) {
-            new Type08Checker(violations).check(((Type08) type).getDelegate(), value, message);
-        } else if (type instanceof Type10) {
-            new Type10Checker(violations).check(((Type10) type).getDelegate(), value, message);
+        final Object delegate = type.getDelegate();
+        if (delegate instanceof Parameter) {
+            new Type08Checker(violations).check((Parameter) delegate, value, message);
+        } else if (delegate instanceof TypeDeclaration) {
+            new Type10Checker(violations).check((TypeDeclaration) delegate, value, message);
         }
     }
 
+    //    public Set<String> check(List<RamlType> types, Values values, Message message) {
+//
+//    }
     public Set<String> check(List<RamlType> types, Values values, Message message) {
         final Set<String> found = new HashSet<>();
         final TypeChecker checker = new TypeChecker(violations);

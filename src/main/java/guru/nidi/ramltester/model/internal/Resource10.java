@@ -22,7 +22,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 
-public class Resource10 implements RamlResource {
+class Resource10 implements RamlResource {
     private final Resource resource;
 
     public Resource10(Resource resource) {

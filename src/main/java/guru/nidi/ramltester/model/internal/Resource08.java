@@ -20,7 +20,7 @@ import org.raml.v2.api.model.v08.resources.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Resource08 implements RamlResource {
+class Resource08 implements RamlResource {
     private final Resource resource;
 
     public Resource08(Resource resource) {

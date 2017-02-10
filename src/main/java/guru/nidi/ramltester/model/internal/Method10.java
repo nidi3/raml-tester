@@ -18,15 +18,16 @@ package guru.nidi.ramltester.model.internal;
 import org.raml.v2.api.model.v10.methods.Method;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 import static java.util.Collections.emptyList;
 
-public class Method10 implements RamlMethod {
+class Method10 implements RamlMethod {
     private final Method method;
 
-     Method10(Method method) {
+    Method10(Method method) {
         this.method = method;
     }
 
@@ -55,7 +56,7 @@ public class Method10 implements RamlMethod {
 
     @Override
     public List<RamlType> queryParameters() {
-        return Type10.of(method.queryParameters());
+        return Type10.of(method.queryString() != null ? Collections.singletonList(method.queryString()) : method.queryParameters());
     }
 
     @Override

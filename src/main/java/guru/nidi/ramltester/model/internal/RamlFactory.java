@@ -15,28 +15,16 @@
  */
 package guru.nidi.ramltester.model.internal;
 
-import org.raml.v2.api.model.v08.security.SecuritySchemeRef;
+import org.raml.v2.api.RamlModelResult;
 
-import java.util.ArrayList;
-import java.util.List;
-
-class SecSchemeRef08 implements RamlSecSchemeRef {
-    private final SecuritySchemeRef ref;
-
-    SecSchemeRef08(SecuritySchemeRef ref) {
-        this.ref = ref;
+public class RamlFactory {
+    private RamlFactory() {
     }
 
-    static List<RamlSecSchemeRef> of(List<SecuritySchemeRef> refs) {
-        final List<RamlSecSchemeRef> res = new ArrayList<>();
-        for (final SecuritySchemeRef r : refs) {
-            res.add(new SecSchemeRef08(r));
-        }
-        return res;
+    public static RamlApi getRaml(RamlModelResult raml) {
+        return raml.isVersion08()
+                ? new Api08(raml.getApiV08())
+                : new Api10(raml.getApiV10());
     }
 
-    @Override
-    public RamlSecScheme securityScheme() {
-        return ref == null ? null : new SecScheme08(ref.securityScheme());
-    }
 }

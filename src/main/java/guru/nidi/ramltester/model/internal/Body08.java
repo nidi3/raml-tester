@@ -22,7 +22,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-public class Body08 implements RamlBody {
+class Body08 implements RamlBody {
     private final BodyLike body;
 
     Body08(BodyLike body) {

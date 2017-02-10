@@ -17,9 +17,10 @@ package guru.nidi.ramltester.model.internal;
 
 import org.raml.v2.api.model.v10.security.SecuritySchemePart;
 
+import java.util.Collections;
 import java.util.List;
 
-public class SecSchemePart10 implements RamlSecSchemePart {
+class SecSchemePart10 implements RamlSecSchemePart {
     private final SecuritySchemePart part;
 
     public SecSchemePart10(SecuritySchemePart part) {
@@ -33,7 +34,7 @@ public class SecSchemePart10 implements RamlSecSchemePart {
 
     @Override
     public List<RamlType> queryParameters() {
-        return Type10.of(part.queryParameters());
+        return Type10.of(part.queryString() != null ? Collections.singletonList(part.queryString()) : part.queryParameters());
     }
 
     @Override

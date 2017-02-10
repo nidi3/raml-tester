@@ -22,7 +22,7 @@ import org.raml.v2.api.model.v10.datamodel.TypeDeclaration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Type10 implements RamlType {
+class Type10 implements RamlType {
     private final TypeDeclaration type;
 
     Type10(TypeDeclaration type) {
