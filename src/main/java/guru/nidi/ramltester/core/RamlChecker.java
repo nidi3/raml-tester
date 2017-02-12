@@ -146,7 +146,7 @@ public class RamlChecker {
         if (typeMatch != null) {
             final RamlBody body = typeMatch.getMatchingBody();
             locator.requestBody(body);
-            if (FormDecoder.supportsFormParameters(typeMatch.getTargetType())) {
+            if (new FormDecoder(null, typeMatch.getTargetType()).supportsFormParameters()) {
                 if (api.supportsFormParameters()) {
                     checkFormParameters(method, request.getFormValues(), body);
                 } else {

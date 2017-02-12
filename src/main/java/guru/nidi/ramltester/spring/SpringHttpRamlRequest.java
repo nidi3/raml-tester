@@ -49,7 +49,7 @@ public class SpringHttpRamlRequest extends SpringHttpRamlMessage implements Raml
 
     @Override
     public Values getFormValues() {
-        return new FormDecoder().decode(this);
+        return new FormDecoder(getContent(),getContentType()).decode();
     }
 
     @Override

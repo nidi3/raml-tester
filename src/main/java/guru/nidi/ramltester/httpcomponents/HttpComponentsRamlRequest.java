@@ -59,7 +59,7 @@ public class HttpComponentsRamlRequest extends HttpComponentsRamlMessage impleme
 
     @Override
     public Values getFormValues() {
-        return new FormDecoder().decode(this);
+        return new FormDecoder(getContent(),getContentType()).decode();
     }
 
     @Override

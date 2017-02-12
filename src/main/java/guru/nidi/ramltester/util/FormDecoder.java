@@ -15,7 +15,6 @@
  */
 package guru.nidi.ramltester.util;
 
-import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.Values;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -39,97 +38,49 @@ public class FormDecoder {
             GROUP_EQUAL = 2,
             GROUP_VALUE = 3;
 
-    public static boolean supportsFormParameters(MediaType mediaType) {
-        return mediaType.isCompatibleWith(FORM_URL_ENCODED) || mediaType.isCompatibleWith(MULTIPART);
+    private final byte[] content;
+    private final MediaType contentType;
+
+    public FormDecoder(byte[] content, String contentType) {
+        this(content, parseContentType(contentType));
     }
 
-    public Values decode(RamlRequest request) {
-        if (request.getContentType() == null) {
-            return new Values();
-        }
-        final MediaType type;
+    public FormDecoder(byte[] content, MediaType contentType) {
+        this.content = content;
+        this.contentType = contentType;
+    }
+
+    private static MediaType parseContentType(String contentType) {
         try {
-            type = MediaType.valueOf(request.getContentType());
+            return MediaType.valueOf(contentType);
         } catch (InvalidMediaTypeException e) {
+            return null;
+        }
+    }
+
+    public boolean supportsFormParameters() {
+        return contentType.isCompatibleWith(FORM_URL_ENCODED) || contentType.isCompatibleWith(MULTIPART);
+    }
+
+    public Values decode() {
+        if (contentType == null) {
             return new Values();
         }
-        if (type.isCompatibleWith(FORM_URL_ENCODED)) {
-            final String charset = type.getCharset(DEFAULT_CHARSET);
+        if (contentType.isCompatibleWith(FORM_URL_ENCODED)) {
+            final String charset = contentType.getCharset(DEFAULT_CHARSET);
             try {
-                final String content = IoUtils.readIntoString(new InputStreamReader(new ByteArrayInputStream(request.getContent()), charset));
-                return decodeUrlEncoded(content, charset);
+                final String data = IoUtils.readIntoString(new InputStreamReader(new ByteArrayInputStream(content), charset));
+                return decodeUrlEncoded(data, charset);
             } catch (UnsupportedEncodingException e) {
                 throw new IllegalArgumentException("Unknown charset " + charset, e);
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
         }
-        if (type.isCompatibleWith(MULTIPART)) {
-            return decodeMultipart(request);
+        if (contentType.isCompatibleWith(MULTIPART)) {
+            return decodeMultipart();
         }
         return new Values();
-    }
-
-    private static String charset(String contentType) {
-        if (contentType == null) {
-            return DEFAULT_CHARSET;
-        }
-        try {
-            return MediaType.valueOf(contentType).getCharset(DEFAULT_CHARSET);
-        } catch (InvalidMediaTypeException e) {
-            return DEFAULT_CHARSET;
-        }
-    }
-
-    private Values decodeMultipart(RamlRequest request) {
-        try {
-            final Values values = new Values();
-            final RamlRequestFileUploadContext context = new RamlRequestFileUploadContext(request);
-            final FileItemIterator iter = new ServletFileUpload().getItemIterator(context);
-            while (iter.hasNext()) {
-                final FileItemStream itemStream = iter.next();
-                values.addValue(itemStream.getFieldName(), valueOf(itemStream));
-            }
-            return values;
-        } catch (IOException | FileUploadException e) {
-            throw new IllegalArgumentException("Could not parse multipart request", e);
-        }
-    }
-
-    private Object valueOf(FileItemStream itemStream) throws IOException {
-        if (itemStream.isFormField()) {
-            final String charset = charset(itemStream.getContentType());
-            return IoUtils.readIntoString(new InputStreamReader(itemStream.openStream(), charset));
-        }
-        return new FileValue();
-    }
-
-    private static class RamlRequestFileUploadContext implements RequestContext {
-        private final RamlRequest request;
-
-        public RamlRequestFileUploadContext(RamlRequest request) {
-            this.request = request;
-        }
-
-        @Override
-        public String getCharacterEncoding() {
-            return charset(request.getContentType());
-        }
-
-        @Override
-        public String getContentType() {
-            return request.getContentType();
-        }
-
-        @Override
-        public int getContentLength() {
-            return request.getContent().length;
-        }
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return new ByteArrayInputStream(request.getContent());
-        }
     }
 
     private Values decodeUrlEncoded(String content, String charset) {
@@ -154,4 +105,56 @@ public class FormDecoder {
         }
     }
 
+    private Values decodeMultipart() {
+        try {
+            final Values values = new Values();
+            final RamlRequestFileUploadContext context = new RamlRequestFileUploadContext();
+            final FileItemIterator iter = new ServletFileUpload().getItemIterator(context);
+            while (iter.hasNext()) {
+                final FileItemStream itemStream = iter.next();
+                values.addValue(itemStream.getFieldName(), valueOf(itemStream));
+            }
+            return values;
+        } catch (IOException | FileUploadException e) {
+            throw new IllegalArgumentException("Could not parse multipart request", e);
+        }
+    }
+
+    private Object valueOf(FileItemStream itemStream) throws IOException {
+        if (itemStream.isFormField()) {
+            final String charset = charset(itemStream.getContentType());
+            return IoUtils.readIntoString(new InputStreamReader(itemStream.openStream(), charset));
+        }
+        return new FileValue();
+    }
+
+    private static String charset(String contentType) {
+        try {
+            return MediaType.valueOf(contentType).getCharset(DEFAULT_CHARSET);
+        } catch (InvalidMediaTypeException e) {
+            return DEFAULT_CHARSET;
+        }
+    }
+
+    private class RamlRequestFileUploadContext implements RequestContext {
+        @Override
+        public String getCharacterEncoding() {
+            return charset(contentType.toString());
+        }
+
+        @Override
+        public String getContentType() {
+            return contentType.toString();
+        }
+
+        @Override
+        public int getContentLength() {
+            return content.length;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return new ByteArrayInputStream(content);
+        }
+    }
 }

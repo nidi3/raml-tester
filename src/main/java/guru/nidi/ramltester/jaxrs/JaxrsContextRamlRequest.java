@@ -48,7 +48,7 @@ public class JaxrsContextRamlRequest extends JaxrsContextRamlMessage implements 
 
     @Override
     public Values getFormValues() {
-        return new FormDecoder().decode(this);
+        return new FormDecoder(getContent(),getContentType()).decode();
     }
 
     @Override

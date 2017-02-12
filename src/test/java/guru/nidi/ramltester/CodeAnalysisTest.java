@@ -87,7 +87,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("TODO",                 //TODO
                         In.locs("RestAssuredRamlRequest", "ServletRamlRequest", "ServletRamlResponse").ignore("DM_DEFAULT_ENCODING"))
                 .because("arrays are only used internally",
-                        In.locs("*Response", "*Request").ignore("EI_EXPOSE_REP", "EI_EXPOSE_REP2"))
+                        In.locs("*Response", "*Request", "FormDecoder").ignore("EI_EXPOSE_REP", "EI_EXPOSE_REP2"))
                 .because("They are snippets",
                         In.loc("guru.nidi.ramltester.snippets*").ignoreAll())
                 .because("it's class private and only used in 1 occasion",
@@ -112,7 +112,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.loc("VariableMatcher").ignore("AccessorClassGeneration"),
                         In.loc("UriComponents#getServer").ignore("NPathComplexity"))
                 .because("arrays are only used internally",
-                        In.locs("*Response", "*Request").ignore("MethodReturnsInternalArray", "ArrayIsStoredDirectly"))
+                        In.locs("*Response", "*Request", "FormDecoder").ignore("MethodReturnsInternalArray", "ArrayIsStoredDirectly"))
                 .because("not urgent and too many occasions",
                         In.everywhere().ignore(
                                 "AvoidInstantiatingObjectsInLoops", "JUnitAssertionsShouldIncludeMessage", "JUnitTestContainsTooManyAsserts", "MethodArgumentCouldBeFinal"))
