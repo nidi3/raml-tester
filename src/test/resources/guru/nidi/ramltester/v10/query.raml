@@ -7,6 +7,11 @@ mediaType: application/default
 schemas:
   String:
     schema: !include string.json
+  User:
+    properties:
+      names:
+        type: string[]
+      age:
 
 /data:
   get:
@@ -32,3 +37,7 @@ schemas:
           application/json:
             schema: |
               {"type":"string"}
+/queryString:
+  get:
+    queryString:
+      type: User
