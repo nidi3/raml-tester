@@ -45,11 +45,11 @@ public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
         class GuruNidiRamltester extends DependencyRuler {
-            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit,
+            DependencyRule core, httpcomponents, restassured, restassured3, junit,
                     validator, model, modelInternal, servlet, spring, jaxrs, util;
 
             public void defineRules() {
-                $self.mayUse(model, modelInternal, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
+                base().mayUse(model, modelInternal, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
                 core.mayUse(model, modelInternal, util);
                 util.mayUse(model);
                 servlet.mayUse(model, util, core);
@@ -97,7 +97,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
 
     @Override
     protected PmdResult analyzePmd() {
-        final ViolationCollector collector = new ViolationCollector().minPriority(RulePriority.MEDIUM)
+        final PmdViolationCollector collector = new PmdViolationCollector().minPriority(RulePriority.MEDIUM)
                 .because("makes no sense",
                         In.everywhere().ignore("JUnitSpelling"))
                 .because("does not understand constants (logger is NOT)",
@@ -137,7 +137,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.locs("*Test", "*Test$*", "HighlevelTestBase").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"),
                         In.clazz(Type08CheckerTest.class).ignore("GodClass"));
         return new PmdAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector)
-                .withRuleSets(basic(), braces(), design(), exceptions(), imports(), junit(),
+                .withRulesets(basic(), braces(), design(), exceptions(), imports(), junit(),
                         optimizations(), strings(), sunSecure(), typeResolution(), unnecessary(), unused(),
                         codesize().tooManyMethods(35),
                         empty().allowCommentedEmptyCatch(true),
@@ -147,7 +147,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
 
     @Override
     protected CpdResult analyzeCpd() {
-        final MatchCollector collector = new MatchCollector()
+        final CpdMatchCollector collector = new CpdMatchCollector()
                 .because("there's no common superclass",
                         In.locs("DelegatingServletOutputStream", "DelegatingWriter").ignoreAll())
                 .because("TODO",                 //TODO

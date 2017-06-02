@@ -6,7 +6,8 @@
     <parent>
         <groupId>guru.nidi</groupId>
         <artifactId>guru-nidi-parent-pom</artifactId>
-        <version>1.0.9</version>
+        <version>1.0.12</version>
+        <relativePath />
     </parent>
 
     <groupId>guru.nidi.raml</groupId>
