@@ -96,10 +96,4 @@ public class QueryParameterTest extends HighlevelTestBase {
         assertThat(test(aggregator, query, get("/query?req"), jsonResponse(200, "\"hula\"")),
                 hasNoViolations());
     }
-
-    @Test
-    public void queryString() throws Exception {
-        assertThat(test(aggregator, query, get("/queryString?names=a&names=b&age=42"), jsonResponse(200, "\"hula\"")),
-                hasNoViolations());
-    }
 }
