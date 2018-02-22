@@ -79,9 +79,12 @@ public class SpringMockRamlMessageTest {
         final SpringMockRamlResponse ramlResponse = new SpringMockRamlResponse(result.getResponse());
 
         assertEquals("responsö", new String(ramlResponse.getContent(), "iso-8859-1"));
-        assertEquals("text/dummy", ramlResponse.getContentType());
+        assertEquals("text/dummy;charset=ISO-8859-1", ramlResponse.getContentType());
 
-        final Values resHeaderValues = new Values().addValue("head", "resValue").addValue("Content-Length", Integer.toString("responsö".length())).addValue("Content-Type", "text/dummy");
+        final Values resHeaderValues = new Values()
+                .addValue("head", "resValue")
+                .addValue("Content-Length", Integer.toString("responsö".length()))
+                .addValue("Content-Type", "text/dummy;charset=ISO-8859-1");
         assertEquals(resHeaderValues, ramlResponse.getHeaderValues());
 
         assertEquals(202, ramlResponse.getStatus());
