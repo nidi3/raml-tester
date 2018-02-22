@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ * Copyright © 2014 Stefan Niederhauser (nidin@gmx.ch)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,11 +43,11 @@ public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
         class GuruNidiRamltester extends DependencyRuler {
-            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit,
+            DependencyRule core, httpcomponents, restassured, restassured3, junit,
                     validator, model, modelInternal, servlet, spring, jaxrs, util;
 
             public void defineRules() {
-                $self.mayUse(model, modelInternal, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
+                base().mayUse(model, modelInternal, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
                 core.mayUse(model, modelInternal, util);
                 util.mayUse(model);
                 servlet.mayUse(model, util, core);
