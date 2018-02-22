@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ * Copyright © 2014 Stefan Niederhauser (nidin@gmx.ch)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,10 +30,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.ws.rs.client.WebTarget;
 import java.io.IOException;
 

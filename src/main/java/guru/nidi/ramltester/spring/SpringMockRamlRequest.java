@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ * Copyright © 2014 Stefan Niederhauser (nidin@gmx.ch)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,9 +19,7 @@ import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
-import guru.nidi.ramltester.util.FileValue;
-import guru.nidi.ramltester.util.IoUtils;
-import guru.nidi.ramltester.util.UriComponents;
+import guru.nidi.ramltester.util.*;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;

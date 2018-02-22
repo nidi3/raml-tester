@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ * Copyright © 2014 Stefan Niederhauser (nidin@gmx.ch)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,8 @@ package guru.nidi.ramltester;
 import edu.umd.cs.findbugs.Priorities;
 import guru.nidi.codeassert.config.AnalyzerConfig;
 import guru.nidi.codeassert.config.In;
-import guru.nidi.codeassert.dependency.DependencyRule;
-import guru.nidi.codeassert.dependency.DependencyRuler;
-import guru.nidi.codeassert.dependency.DependencyRules;
-import guru.nidi.codeassert.findbugs.BugCollector;
-import guru.nidi.codeassert.findbugs.FindBugsAnalyzer;
-import guru.nidi.codeassert.findbugs.FindBugsResult;
+import guru.nidi.codeassert.dependency.*;
+import guru.nidi.codeassert.findbugs.*;
 import guru.nidi.codeassert.junit.CodeAssertTest;
 import guru.nidi.codeassert.model.ModelAnalyzer;
 import guru.nidi.codeassert.model.ModelResult;
@@ -46,10 +42,10 @@ public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
         class GuruNidiRamltester extends DependencyRuler {
-            DependencyRule $self, core, httpcomponents, restassured, restassured3, junit, validator, model, servlet, spring, jaxrs, util;
+            DependencyRule core, httpcomponents, restassured, restassured3, junit, validator, model, servlet, spring, jaxrs, util;
 
             public void defineRules() {
-                $self.mayUse(model, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
+                base().mayUse(model, core, servlet, httpcomponents, restassured, restassured3, spring, jaxrs, validator, junit, util);
                 core.mayUse(model, util);
                 util.mayUse(model);
                 servlet.mayUse(model, util, core);
@@ -97,7 +93,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
 
     @Override
     protected PmdResult analyzePmd() {
-        final ViolationCollector collector = new ViolationCollector().minPriority(RulePriority.MEDIUM)
+        final PmdViolationCollector collector = new PmdViolationCollector().minPriority(RulePriority.MEDIUM)
                 .because("makes no sense",
                         In.everywhere().ignore("JUnitSpelling"))
                 .because("does not understand constants (logger is NOT)",
@@ -135,7 +131,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("is in test",
                         In.locs("*Test", "*Test$*").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"));
         return new PmdAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector)
-                .withRuleSets(basic(), braces(), design(), exceptions(), imports(), junit(),
+                .withRulesets(basic(), braces(), design(), exceptions(), imports(), junit(),
                         optimizations(), strings(), sunSecure(), typeResolution(), unnecessary(), unused(),
                         codesize().tooManyMethods(35),
                         empty().allowCommentedEmptyCatch(true),
@@ -145,7 +141,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
 
     @Override
     protected CpdResult analyzeCpd() {
-        final MatchCollector collector = new MatchCollector()
+        final CpdMatchCollector collector = new CpdMatchCollector()
                 .because("there's no common superclass",
                         In.locs("DelegatingServletOutputStream", "DelegatingWriter").ignoreAll())
                 .because("TODO",                 //TODO

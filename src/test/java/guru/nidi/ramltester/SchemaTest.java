@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ * Copyright © 2014 Stefan Niederhauser (nidin@gmx.ch)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,16 +17,11 @@ package guru.nidi.ramltester;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import guru.nidi.ramltester.core.JsonSchemaViolationCause;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolationMessage;
-import guru.nidi.ramltester.core.XmlSchemaViolationCause;
+import guru.nidi.ramltester.core.*;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static guru.nidi.ramltester.util.TestUtils.map;
 import static org.hamcrest.CoreMatchers.*;

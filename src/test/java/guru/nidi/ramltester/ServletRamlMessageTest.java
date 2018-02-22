@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ * Copyright © 2014 Stefan Niederhauser (nidin@gmx.ch)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +15,7 @@
  */
 package guru.nidi.ramltester;
 
-import guru.nidi.ramltester.model.RamlRequest;
-import guru.nidi.ramltester.model.RamlResponse;
-import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.servlet.ServletRamlRequest;
 import guru.nidi.ramltester.servlet.ServletRamlResponse;
 import guru.nidi.ramltester.util.FileValue;
@@ -28,30 +26,22 @@ import org.apache.catalina.deploy.FilterMap;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.servlet.*;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.zip.GZIPOutputStream;
 
 import static org.junit.Assert.assertEquals;

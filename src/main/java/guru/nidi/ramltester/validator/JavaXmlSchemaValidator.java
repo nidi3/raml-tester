@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 Stefan Niederhauser (nidin@gmx.ch)
+ * Copyright © 2014 Stefan Niederhauser (nidin@gmx.ch)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,20 +17,14 @@ package guru.nidi.ramltester.validator;
 
 import guru.nidi.loader.Loader;
 import guru.nidi.loader.use.xml.LoaderLSResourceResolver;
-import guru.nidi.ramltester.core.RamlViolations;
-import guru.nidi.ramltester.core.SchemaValidator;
-import guru.nidi.ramltester.core.XmlSchemaViolationCause;
+import guru.nidi.ramltester.core.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import org.xml.sax.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
+import javax.xml.validation.*;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
