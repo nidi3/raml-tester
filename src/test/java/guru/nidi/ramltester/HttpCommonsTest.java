@@ -69,7 +69,7 @@ public class HttpCommonsTest extends ServerTest {
         assertEquals(violations("Body does not match schema for action(GET /base/data) response(200) mime-type('application/json')\n" +
                         "Content: illegal json\n" +
                         "Messages:\n- Schema invalid: Unrecognized token 'illegal': was expecting ('true', 'false' or 'null')\n" +
-                        " at [Source: Body; line: 1, column: 8]"),
+                        " at [Source: (guru.nidi.ramltester.core.NamedReader); line: 1, column: 8]"),
                 client.getLastReport().getResponseViolations());
     }
 

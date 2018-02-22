@@ -97,7 +97,7 @@ public class SimpleTest extends HighlevelTestBase {
                 equalTo("Body does not match schema for action(GET /schema) response(203) mime-type('application/json')\n"
                         + "Content: 5\n"
                         + "Messages:\n- Schema invalid: Unrecognized token 'undefined': was expecting ('true', 'false' or 'null')\n"
-                        + " at [Source: Inline schema definition; line: 1, column: 19]"));
+                        + " at [Source: (guru.nidi.ramltester.core.NamedReader); line: 1, column: 19]"));
     }
 
     @Test

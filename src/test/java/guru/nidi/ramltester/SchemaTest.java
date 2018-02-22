@@ -162,7 +162,7 @@ public class SchemaTest extends HighlevelTestBase {
                 equalTo("Body does not match schema for action(GET /schema) response(210) mime-type('application/json')\n" +
                         "Content: 5\n" +
                         "Messages:\n- Schema invalid: Unrecognized token 'xxx': was expecting ('true', 'false' or 'null')\n" +
-                        " at [Source: Schema 'invalid'; line: 1, column: 7]")
+                        " at [Source: (guru.nidi.ramltester.core.NamedReader); line: 1, column: 7]")
         );
     }
 
