@@ -6,6 +6,6 @@
     </suppress>
     <suppress>
         <notes>hm</notes>
-        <cpe>cpe:/a:redhat:resteasy:3.1.4</cpe>
+        <cpe>cpe:/a:redhat:resteasy:3.0.24</cpe>
     </suppress>
 </suppressions>
