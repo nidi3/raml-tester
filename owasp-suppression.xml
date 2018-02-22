@@ -4,4 +4,8 @@
         <notes>groovy is a dependency of com.jayway.restassured:rest-assured. Let's hope for the best...</notes>
         <cpe>cpe:/a:apache:groovy:2.4.4</cpe>
     </suppress>
+    <suppress>
+        <notes>hm</notes>
+        <cpe>cpe:/a:redhat:resteasy:3.1.4</cpe>
+    </suppress>
 </suppressions>
