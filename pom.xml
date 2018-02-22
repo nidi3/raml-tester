@@ -96,7 +96,7 @@
         <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser</artifactId>
-            <version>0.8.17</version>
+            <version>0.8.21</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
