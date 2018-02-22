@@ -29,6 +29,12 @@ public final class Values implements Iterable<Map.Entry<String, List<Object>>> {
         }
     }
 
+    public Values(Values values) {
+        for (final Map.Entry<String, List<Object>> entry : values) {
+            addValues(entry.getKey(), entry.getValue());
+        }
+    }
+
     public int size() {
         return values.size();
     }

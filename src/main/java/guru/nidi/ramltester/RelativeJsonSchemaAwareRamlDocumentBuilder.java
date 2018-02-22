@@ -26,7 +26,8 @@ class RelativeJsonSchemaAwareRamlDocumentBuilder{// extends RamlDocumentBuilder 
     private final String protocol;
     private NodeTuple schemaTuple;
 
-    public RelativeJsonSchemaAwareRamlDocumentBuilder(Loader loader, ResourceLoader resourceLoader, TagResolver... tagResolvers) {
+    public RelativeJsonSchemaAwareRamlDocumentBuilder(Loader loader, ResourceLoader resourceLoader,
+    TagResolver... tagResolvers) {
         super(resourceLoader, tagResolvers);
         //this must match with JsonSchemaFactory.loadingConfiguration
         //see guru.nidi.ramltester.validator.JsonSchemaValidator
@@ -67,11 +68,13 @@ class RelativeJsonSchemaAwareRamlDocumentBuilder{// extends RamlDocumentBuilder 
                     final Map<String, Object> json = mapper.readValue(node.getValue(), Map.class);
                     if (json.containsKey("$schema") && !json.containsKey("id")) {
                         json.put("id", protocol + ":/" + includeName);
-                        super.onScalar(new ScalarNode(node.getTag(), node.isResolved(), mapper.writeValueAsString(json), node.getStartMark(), node.getEndMark(), node.getStyle()), tupleType);
+                        super.onScalar(new ScalarNode(node.getTag(), node.isResolved(), mapper.writeValueAsString(json),
+                        node.getStartMark(), node.getEndMark(), node.getStyle()), tupleType);
                         return;
                     }
                 } catch (IOException e) {
-                    log.warn("Line {}: Could not parse json file '{}' as schema. Relative $refs inside might not work: {}",
+                    log.warn("Line {}: Could not parse json file '{}' as schema. "+
+                    "Relative $refs inside might not work: {}",
                             node.getStartMark().getLine() + 1, includeName, e.getMessage());
                 }
             }

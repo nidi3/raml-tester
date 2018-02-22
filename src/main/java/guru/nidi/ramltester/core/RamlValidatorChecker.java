@@ -19,10 +19,7 @@ import guru.nidi.ramltester.model.internal.*;
 import guru.nidi.ramltester.util.MediaType;
 import guru.nidi.ramltester.util.Message;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static guru.nidi.ramltester.core.CheckerHelper.*;
@@ -61,7 +58,9 @@ class RamlValidatorChecker {
         this(raml, new Locator(), schemaValidators, EnumSet.allOf(Validation.class), null, null, null);
     }
 
-    public RamlValidatorChecker(RamlApi raml, Locator locator, List<SchemaValidator> schemaValidators, EnumSet<Validation> validations, Pattern resourcePattern, Pattern parameterPattern, Pattern headerPattern) {
+    public RamlValidatorChecker(RamlApi raml, Locator locator, List<SchemaValidator> schemaValidators,
+                                EnumSet<Validation> validations, Pattern resourcePattern, Pattern parameterPattern,
+                                Pattern headerPattern) {
         this.raml = raml;
         this.locator = locator;
         this.resourcePattern = resourcePattern;
@@ -74,20 +73,26 @@ class RamlValidatorChecker {
     }
 
     public RamlValidatorChecker withChecks(Validation... validations) {
-        final EnumSet<Validation> validationSet = validations.length == 0 ? EnumSet.noneOf(Validation.class) : EnumSet.copyOf(Arrays.asList(validations));
-        return new RamlValidatorChecker(raml, locator, schemaValidators, validationSet, headerPattern, parameterPattern, resourcePattern);
+        final EnumSet<Validation> validationSet = validations.length == 0
+                ? EnumSet.noneOf(Validation.class)
+                : EnumSet.copyOf(Arrays.asList(validations));
+        return new RamlValidatorChecker(raml, locator, schemaValidators, validationSet, headerPattern, parameterPattern,
+                resourcePattern);
     }
 
     public RamlValidatorChecker withResourcePattern(String regex) {
-        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, regex == null ? null : Pattern.compile(regex), parameterPattern, headerPattern);
+        return new RamlValidatorChecker(raml, locator, schemaValidators, validations,
+                regex == null ? null : Pattern.compile(regex), parameterPattern, headerPattern);
     }
 
     public RamlValidatorChecker withParameterPattern(String regex) {
-        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern, regex == null ? null : Pattern.compile(regex), headerPattern);
+        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern,
+                regex == null ? null : Pattern.compile(regex), headerPattern);
     }
 
     public RamlValidatorChecker withHeaderPattern(String regex) {
-        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern, parameterPattern, regex == null ? null : Pattern.compile(regex));
+        return new RamlValidatorChecker(raml, locator, schemaValidators, validations, resourcePattern, parameterPattern,
+                regex == null ? null : Pattern.compile(regex));
     }
 
     public Locator getLocator() {
@@ -219,8 +224,8 @@ class RamlValidatorChecker {
 
     public void formParameters(RamlBody body) {
         if (has(Validation.PARAMETER)) {
-            if (!MediaType.valueOf(body.name()).isCompatibleWith(MediaType.FORM_URL_ENCODED) &&
-                    !MediaType.valueOf(body.name()).isCompatibleWith(MediaType.MULTIPART)) {
+            if (!MediaType.valueOf(body.name()).isCompatibleWith(MediaType.FORM_URL_ENCODED)
+                    && !MediaType.valueOf(body.name()).isCompatibleWith(MediaType.MULTIPART)) {
                 violation("formParameter.illegal", locator);
             }
         }
@@ -253,8 +258,8 @@ class RamlValidatorChecker {
             final SchemaValidator validator = findSchemaValidator(schemaValidators, MediaType.valueOf(body.name()));
             if ((typeDef != null || type != null) && validator != null) {
                 for (final String example : body.examples()) {
-                    validator.validate(new NamedReader(example, new Message("example").toString()), resolveSchema(type, typeDef), violations,
-                            new Message("schema.example.mismatch", locator, example));
+                    validator.validate(new NamedReader(example, new Message("example").toString()),
+                            resolveSchema(type, typeDef), violations, new Message("schema.example.mismatch", locator, example));
                 }
             }
         }

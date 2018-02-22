@@ -17,17 +17,12 @@ package guru.nidi.ramltester;
 
 import guru.nidi.loader.Loader;
 import guru.nidi.loader.apidesigner.ApiLoader;
-import guru.nidi.loader.basic.ClassPathLoader;
-import guru.nidi.loader.basic.CompositeLoader;
-import guru.nidi.loader.basic.FileLoader;
-import guru.nidi.loader.basic.UriLoader;
+import guru.nidi.loader.basic.*;
 import guru.nidi.loader.url.GithubLoader;
 import guru.nidi.loader.url.UrlLoader;
 import guru.nidi.loader.use.raml.LoaderRamlResourceLoader;
 import guru.nidi.loader.use.raml.RamlCache;
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolationException;
-import guru.nidi.ramltester.core.SchemaValidator;
+import guru.nidi.ramltester.core.*;
 import org.raml.v2.api.RamlModelBuilder;
 import org.raml.v2.api.RamlModelResult;
 
@@ -191,7 +186,8 @@ public class RamlLoaders {
         final Loader decorated = new UriLoader(loader);
         final RamlModelResult raml = caching
                 ? new RamlCache(decorated).loadRaml(name)
-//                : new RelativeJsonSchemaAwareRamlDocumentBuilder(decorated, new LoaderRamlResourceLoader(decorated)).build(name);
+                //                : new RelativeJsonSchemaAwareRamlDocumentBuilder(decorated,
+                // new LoaderRamlResourceLoader(decorated)).build(name);
                 : new RamlModelBuilder(new LoaderRamlResourceLoader(decorated)).buildApi(name);
         if (raml.hasErrors()) {
             throw new RamlViolationException(RamlReport.fromModelResult(null, raml));

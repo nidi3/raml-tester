@@ -10,6 +10,15 @@ baseUriParameters:
   root:
     enum: ['raml']
 
+/concat/{name}{extension}:
+  uriParameters:
+    name:
+    extension:
+      enum: [.xml, .json]
+  get:
+    responses:
+      200:
+
 /type:
   get:
     protocols: ['HTTP']

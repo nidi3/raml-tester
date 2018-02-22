@@ -110,10 +110,10 @@ public final class UriComponents {
     }
 
     public String getServer() {
-        return (scheme == null ? "" : (scheme + "://")) +
-                (userInfo == null ? "" : (userInfo + "@")) +
-                (host == null ? "" : host) +
-                (port == null ? "" : (":" + port));
+        return (scheme == null ? "" : (scheme + "://"))
+                + (userInfo == null ? "" : (userInfo + "@"))
+                + (host == null ? "" : host)
+                + (port == null ? "" : (":" + port));
     }
 
     public String getUri() {

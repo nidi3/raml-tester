@@ -16,10 +16,7 @@
 package guru.nidi.ramltester.util;
 
 import guru.nidi.ramltester.model.Values;
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.RequestContext;
+import org.apache.commons.fileupload.*;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import java.io.*;
@@ -27,6 +24,7 @@ import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static guru.nidi.ramltester.util.IoUtils.readIntoString;
 import static guru.nidi.ramltester.util.MediaType.FORM_URL_ENCODED;
 import static guru.nidi.ramltester.util.MediaType.MULTIPART;
 
@@ -69,7 +67,7 @@ public class FormDecoder {
         if (contentType.isCompatibleWith(FORM_URL_ENCODED)) {
             final String charset = contentType.getCharset(DEFAULT_CHARSET);
             try {
-                final String data = IoUtils.readIntoString(new InputStreamReader(new ByteArrayInputStream(content), charset));
+                final String data = readIntoString(new InputStreamReader(new ByteArrayInputStream(content), charset));
                 return decodeUrlEncoded(data, charset);
             } catch (UnsupportedEncodingException e) {
                 throw new IllegalArgumentException("Unknown charset " + charset, e);
@@ -91,7 +89,9 @@ public class FormDecoder {
                 final String name = urlDecode(m.group(GROUP_NAME), charset);
                 final String eq = m.group(GROUP_EQUAL);
                 final String value = m.group(GROUP_VALUE);
-                q.addValue(name, (value == null ? (eq != null && eq.length() > 0 ? "" : null) : urlDecode(value, charset)));
+                q.addValue(name, value == null
+                        ? (eq != null && eq.length() > 0 ? "" : null)
+                        : urlDecode(value, charset));
             }
         }
         return q;
@@ -123,7 +123,7 @@ public class FormDecoder {
     private Object valueOf(FileItemStream itemStream) throws IOException {
         if (itemStream.isFormField()) {
             final String charset = charset(itemStream.getContentType());
-            return IoUtils.readIntoString(new InputStreamReader(itemStream.openStream(), charset));
+            return readIntoString(new InputStreamReader(itemStream.openStream(), charset));
         }
         return new FileValue();
     }

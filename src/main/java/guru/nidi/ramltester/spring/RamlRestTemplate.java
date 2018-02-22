@@ -16,10 +16,7 @@
 package guru.nidi.ramltester.spring;
 
 import guru.nidi.ramltester.core.*;
-import org.springframework.http.client.BufferingClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.InterceptingClientHttpRequestFactory;
+import org.springframework.http.client.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -30,7 +27,8 @@ public class RamlRestTemplate extends RestTemplate {
     private final ReportStore reportStore;
     private final ClientHttpRequestFactory originalRequestFactory;
 
-    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore, ClientHttpRequestFactory requestFactory) {
+    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore,
+                             ClientHttpRequestFactory requestFactory) {
         this.ramlChecker = ramlChecker;
         this.notSending = notSending;
         this.reportStore = reportStore;
@@ -40,12 +38,14 @@ public class RamlRestTemplate extends RestTemplate {
                 new BufferingClientHttpRequestFactory(requestFactory), Collections.<ClientHttpRequestInterceptor>singletonList(interceptor)));
     }
 
-    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore, RamlRestTemplate restTemplate) {
+    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore,
+                             RamlRestTemplate restTemplate) {
         this(ramlChecker, notSending, reportStore, restTemplate.originalRequestFactory);
         init(restTemplate);
     }
 
-    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore, RestTemplate restTemplate) {
+    private RamlRestTemplate(RamlChecker ramlChecker, boolean notSending, ReportStore reportStore,
+                             RestTemplate restTemplate) {
         this(ramlChecker, notSending, reportStore, restTemplate.getRequestFactory());
         init(restTemplate);
     }

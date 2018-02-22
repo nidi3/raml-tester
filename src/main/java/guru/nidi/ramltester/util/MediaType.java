@@ -266,9 +266,9 @@ public final class MediaType {
             return false;
         }
         final MediaType otherType = (MediaType) other;
-        return (this.type.equalsIgnoreCase(otherType.type) &&
-                this.subtype.equalsIgnoreCase(otherType.subtype) &&
-                this.parameters.equals(otherType.parameters));
+        return (this.type.equalsIgnoreCase(otherType.type)
+                && this.subtype.equalsIgnoreCase(otherType.subtype)
+                && this.parameters.equals(otherType.parameters));
     }
 
     @Override

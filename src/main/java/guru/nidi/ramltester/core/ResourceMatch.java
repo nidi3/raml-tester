@@ -16,12 +16,9 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.core.VariableMatcher.Match;
-import guru.nidi.ramltester.model.Values;
 import guru.nidi.ramltester.model.internal.RamlResource;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 final class ResourceMatch implements Comparable<ResourceMatch> {
     final Match match;
@@ -32,23 +29,26 @@ final class ResourceMatch implements Comparable<ResourceMatch> {
         this.resource = resource;
     }
 
-    public static List<ResourceMatch> find(String resourcePath, List<RamlResource> resources, Values values) {
+    public static List<ResourceMatch> find(String resourcePath, List<RamlResource> resources) {
         final List<ResourceMatch> matches = new ArrayList<>();
         for (final RamlResource resource : resources) {
-            final Match pathMatch = new VariableMatcher(resource.relativeUri(), resourcePath).match();
-            if (pathMatch.completeMatch || (pathMatch.matches && pathMatch.suffix.startsWith("/"))) {
-                matches.add(new ResourceMatch(pathMatch, resource));
+            final List<Match> pathMatches = new VariableMatcher(resource.relativeUri(), resourcePath).match();
+            for (final Match pathMatch : pathMatches) {
+                if (pathMatch.isComplete() || pathMatch.suffix.startsWith("/")) {
+                    matches.add(new ResourceMatch(pathMatch, resource));
+                }
             }
         }
         Collections.sort(matches);
         final List<ResourceMatch> found = new ArrayList<>();
         for (final ResourceMatch match : matches) {
-            if (match.match.completeMatch) {
-                values.addValues(match.match.variables);
+            if (match.match.isComplete()) {
+                //                values.addValues(match.match.variables);
                 found.add(match);
-            } else if (match.match.matches) {
-                values.addValues(match.match.variables);
-                found.addAll(find(match.match.suffix, match.resource.resources(), values));
+            } else {
+                //                values.addValues(match.match.variables);
+                //TOOO
+                found.addAll(find(match.match.suffix, match.resource.resources()));
             }
         }
         return found;

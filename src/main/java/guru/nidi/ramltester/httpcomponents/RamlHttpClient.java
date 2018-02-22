@@ -33,7 +33,8 @@ import java.io.IOException;
 
 public class RamlHttpClient implements HttpClient, Closeable {
     private static final String RAML_TESTED = "raml.tested";
-    private static final BasicHttpResponse DUMMY_RESPONSE = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_NO_CONTENT, "not sending");
+    private static final BasicHttpResponse DUMMY_RESPONSE =
+            new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_NO_CONTENT, "not sending");
 
     private final RamlChecker checker;
     private final boolean notSending;
@@ -121,17 +122,20 @@ public class RamlHttpClient implements HttpClient, Closeable {
     }
 
     @Override
-    public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context) throws IOException {
+    public <T> T execute(HttpUriRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context)
+            throws IOException {
         return delegate.execute(request, responseHandler, context);
     }
 
     @Override
-    public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler) throws IOException {
+    public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler)
+            throws IOException {
         return delegate.execute(target, request, responseHandler);
     }
 
     @Override
-    public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context) throws IOException {
+    public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler,
+                         HttpContext context) throws IOException {
         return delegate.execute(target, request, responseHandler, context);
     }
 

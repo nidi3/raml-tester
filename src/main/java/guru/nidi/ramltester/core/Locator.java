@@ -15,9 +15,7 @@
  */
 package guru.nidi.ramltester.core;
 
-import guru.nidi.ramltester.model.internal.RamlBody;
-import guru.nidi.ramltester.model.internal.RamlMethod;
-import guru.nidi.ramltester.model.internal.RamlResource;
+import guru.nidi.ramltester.model.internal.*;
 import guru.nidi.ramltester.util.Message;
 
 final class Locator {
@@ -78,12 +76,12 @@ final class Locator {
     @Override
     public String toString() {
         if (responseCode != null) {
-            return (methodString() + " " + new Message("response", responseCode).toString()) +
-                    (responseBody == null ? "" : (" " + new Message("mimeType", responseBody.name()).toString()));
+            return (methodString() + " " + new Message("response", responseCode).toString())
+                    + (responseBody == null ? "" : (" " + new Message("mimeType", responseBody.name()).toString()));
         }
         if (requestBody != null) {
-            return (method == null ? "" : (methodString() + " ")) +
-                    new Message("mimeType", requestBody.name()).toString();
+            return (method == null ? "" : (methodString() + " "))
+                    + new Message("mimeType", requestBody.name()).toString();
         }
         if (method != null) {
             return methodString();

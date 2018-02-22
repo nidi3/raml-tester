@@ -1,3 +1,5 @@
+package guru.nidi.ramltester;
+
 import guru.nidi.codeassert.config.For;
 import guru.nidi.codeassert.jacoco.CoverageCollector;
 import guru.nidi.codeassert.jacoco.JacocoAnalyzer;

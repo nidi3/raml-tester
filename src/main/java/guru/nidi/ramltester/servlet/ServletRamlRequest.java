@@ -18,17 +18,12 @@ package guru.nidi.ramltester.servlet;
 import guru.nidi.ramltester.core.RamlCheckerException;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.Values;
-import guru.nidi.ramltester.util.FormDecoder;
-import guru.nidi.ramltester.util.IoUtils;
-import guru.nidi.ramltester.util.UriComponents;
+import guru.nidi.ramltester.util.*;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Enumeration;
 
 public class ServletRamlRequest extends HttpServletRequestWrapper implements RamlRequest {
@@ -58,7 +53,7 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
 
     @Override
     public Values getFormValues() {
-        return new FormDecoder(getContent(),getContentType()).decode();
+        return new FormDecoder(getContent(), getContentType()).decode();
     }
 
     @Override
@@ -66,7 +61,7 @@ public class ServletRamlRequest extends HttpServletRequestWrapper implements Ram
         return getHeaderValues(request());
     }
 
-    public static Values getHeaderValues(HttpServletRequest request){
+    public static Values getHeaderValues(HttpServletRequest request) {
         final Values headers = new Values();
         final Enumeration<String> names = request.getHeaderNames();
         while (names.hasMoreElements()) {

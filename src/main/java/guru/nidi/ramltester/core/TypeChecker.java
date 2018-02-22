@@ -31,21 +31,22 @@ public class TypeChecker {
     private static final String WILDCARD = "{?}";
 
     private final RamlViolations violations;
-    private final boolean acceptUndefined;
+    private final boolean acceptUndef;
     private final boolean acceptWildcard;
     private final boolean ignoreX;
     private final boolean caseSensitive;
     private final boolean ignoreRequired;
-    private final Set<String> predefined;
+    private final Set<String> predef;
 
-    TypeChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX, boolean caseSensitive, boolean ignoreRequired, Set<String> predefined) {
+    TypeChecker(RamlViolations violations, boolean acceptUndefined, boolean acceptWildcard, boolean ignoreX,
+                boolean caseSensitive, boolean ignoreRequired, Set<String> predefined) {
         this.violations = violations;
-        this.acceptUndefined = acceptUndefined;
+        this.acceptUndef = acceptUndefined;
         this.acceptWildcard = acceptWildcard;
         this.ignoreX = ignoreX;
         this.caseSensitive = caseSensitive;
         this.ignoreRequired = ignoreRequired;
-        this.predefined = predefined;
+        this.predef = predefined;
     }
 
     public TypeChecker(RamlViolations violations) {
@@ -53,27 +54,27 @@ public class TypeChecker {
     }
 
     public TypeChecker acceptUndefined() {
-        return new TypeChecker(violations, true, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
+        return new TypeChecker(violations, true, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predef);
     }
 
     public TypeChecker acceptWildcard() {
-        return new TypeChecker(violations, acceptUndefined, true, ignoreX, caseSensitive, ignoreRequired, predefined);
+        return new TypeChecker(violations, acceptUndef, true, ignoreX, caseSensitive, ignoreRequired, predef);
     }
 
     public TypeChecker ignoreX(boolean ignoreX) {
-        return new TypeChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
+        return new TypeChecker(violations, acceptUndef, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predef);
     }
 
     public TypeChecker caseSensitive(boolean caseSensitive) {
-        return new TypeChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
+        return new TypeChecker(violations, acceptUndef, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predef);
     }
 
     public TypeChecker ignoreRequired() {
-        return new TypeChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, true, predefined);
+        return new TypeChecker(violations, acceptUndef, acceptWildcard, ignoreX, caseSensitive, true, predef);
     }
 
     public TypeChecker predefined(Set<String> predefined) {
-        return new TypeChecker(violations, acceptUndefined, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
+        return new TypeChecker(violations, acceptUndef, acceptWildcard, ignoreX, caseSensitive, ignoreRequired, predefined);
     }
 
     public void check(RamlBody body, Values values, Message message) {
@@ -102,8 +103,9 @@ public class TypeChecker {
     }
 
     //    public Set<String> check(List<RamlType> types, Values values, Message message) {
-//
-//    }
+    //
+    //    }
+
     public Set<String> check(List<RamlType> types, Values values, Message message) {
         final Set<String> found = new HashSet<>();
         final TypeChecker checker = new TypeChecker(violations);
@@ -112,7 +114,8 @@ public class TypeChecker {
             final String typeName = findMatchingTypeName(typeNamesOf(types), entry.getKey());
             final List<RamlType> ts = typesByName(types, typeName);
             if (ts == null || ts.isEmpty()) {
-                violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)), namedMsg.withMessageParam("undefined"));
+                violations.addIf(!acceptUndefined(entry.getKey().toLowerCase(Locale.ENGLISH)),
+                        namedMsg.withMessageParam("undefined"));
             } else {
                 for (final RamlType t : ts) {
                     if (entry.getValue().size() == 1) {
@@ -127,7 +130,8 @@ public class TypeChecker {
         }
         for (final RamlType type : types) {
             final Message namedMsg = message.withParam(type.name());
-            violations.addIf(type.required() && !ignoreRequired && !found.contains(type.name()), namedMsg.withMessageParam("required.missing"));
+            violations.addIf(type.required() && !ignoreRequired && !found.contains(type.name()),
+                    namedMsg.withMessageParam("required.missing"));
         }
         return found;
     }
@@ -137,8 +141,8 @@ public class TypeChecker {
         for (final String typeName : typeNames) {
             final String normalType = normalizeName(typeName);
             final int pos = normalType.indexOf(WILDCARD);
-            if (normalType.equals(normalName) || (acceptWildcard && pos >= 0 &&
-                    nameMatchesKeyStart(normalName, normalType, pos) && nameMatchesKeyEnd(normalName, normalType, pos))) {
+            if (normalType.equals(normalName) || (acceptWildcard && pos >= 0
+                    && nameMatchesKeyStart(normalName, normalType, pos) && nameMatchesKeyEnd(normalName, normalType, pos))) {
                 return typeName;
             }
         }
@@ -154,11 +158,11 @@ public class TypeChecker {
     }
 
     private boolean nameMatchesKeyEnd(String name, String key, int wildcardPos) {
-        return wildcardPos == key.length() - WILDCARD.length() ||
-                name.endsWith(key.substring(wildcardPos + WILDCARD.length()));
+        return wildcardPos == key.length() - WILDCARD.length()
+                || name.endsWith(key.substring(wildcardPos + WILDCARD.length()));
     }
 
     private boolean acceptUndefined(String name) {
-        return acceptUndefined || predefined.contains(name) || (ignoreX && name.startsWith("x-"));
+        return acceptUndef || predef.contains(name) || (ignoreX && name.startsWith("x-"));
     }
 }

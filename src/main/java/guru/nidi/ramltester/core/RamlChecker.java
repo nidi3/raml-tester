@@ -16,13 +16,9 @@
 package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.core.VariableMatcher.Match;
-import guru.nidi.ramltester.model.RamlRequest;
-import guru.nidi.ramltester.model.RamlResponse;
-import guru.nidi.ramltester.model.Values;
+import guru.nidi.ramltester.model.*;
 import guru.nidi.ramltester.model.internal.*;
-import guru.nidi.ramltester.util.FormDecoder;
-import guru.nidi.ramltester.util.Message;
-import guru.nidi.ramltester.util.UriComponents;
+import guru.nidi.ramltester.util.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -39,9 +35,21 @@ public class RamlChecker {
     private Usage usage;
 
     private static final class DefaultHeaders {
-        private static final Set<String>
-                REQUEST = new HashSet<>(Arrays.asList("accept", "accept-charset", "accept-encoding", "accept-language", "accept-datetime", "authorization", "cache-control", "connection", "cookie", "content-length", "content-md5", "content-type", "date", "dnt", "expect", "from", "host", "if-match", "if-modified-since", "if-none-match", "if-range", "if-unmodified-since", "max-forwards", "origin", "pragma", "proxy-authorization", "range", "referer", "te", "user-agent", "upgrade", "via", "warning")),
-                RESPONSE = new HashSet<>(Arrays.asList("access-control-allow-origin", "accept-ranges", "age", "allow", "cache-control", "connection", "content-encoding", "content-language", "content-length", "content-location", "content-md5", "content-disposition", "content-range", "content-type", "date", "etag", "expires", "last-modified", "link", "location", "p3p", "pragma", "proxy-authenticate", "refresh", "retry-after", "server", "set-cookie", "status", "strict-transport-security", "trailer", "transfer-encoding", "upgrade", "vary", "via", "warning", "www-authenticate", "x-frame-options"));
+        private static final Set<String> REQUEST = new HashSet<>(Arrays.asList(
+                "accept", "accept-charset", "accept-encoding", "accept-language",
+                "accept-datetime", "authorization", "cache-control", "connection", "cookie", "content-length",
+                "content-md5", "content-type", "date", "dnt", "expect", "from", "host", "if-match", "if-modified-since",
+                "if-none-match", "if-range", "if-unmodified-since", "max-forwards", "origin", "pragma",
+                "proxy-authorization", "range", "referer", "te", "user-agent", "upgrade", "via", "warning"));
+
+        private static final Set<String> RESPONSE = new HashSet<>(Arrays.asList(
+                "access-control-allow-origin", "accept-ranges", "age", "allow",
+                "cache-control", "connection", "content-encoding", "content-language", "content-length",
+                "content-location", "content-md5", "content-disposition", "content-range", "content-type",
+                "date", "etag", "expires", "last-modified", "link", "location", "p3p", "pragma",
+                "proxy-authenticate", "refresh", "retry-after", "server", "set-cookie", "status",
+                "strict-transport-security", "trailer", "transfer-encoding", "upgrade", "vary", "via",
+                "warning", "www-authenticate", "x-frame-options"));
     }
 
     public RamlChecker(CheckerConfig config) {
@@ -80,33 +88,43 @@ public class RamlChecker {
     }
 
     public RamlMethod findMethod(RamlRequest request) {
-        final UriComponents requestUri = UriComponents.fromHttpUrl(request.getRequestUrl(config.baseUri, config.includeServletPath));
-        if (api.baseUri() == null) {
-            final UriComponents ramlUri = UriComponents.fromHttpUrl("http://server"); //dummy url as we only match paths
-            final Match pathMatch = getPathMatch(requestUri, ramlUri);
-            return findMethod(pathMatch.suffix, request.getMethod());
+        final UriComponents requestUri = UriComponents.fromHttpUrl(
+                request.getRequestUrl(config.baseUri, config.includeServletPath));
+        final UriComponents ramlUri = UriComponents.fromHttpUrl(
+                api.baseUri() == null ? "http://server" : api.baseUri()); //dummy url as we only match paths
+        final List<Match> hostMatches = api.baseUri() == null
+                ? Collections.<Match>singletonList(null)
+                : findHostMatches(requestUri, ramlUri);
+        final List<Match> pathMatches = findPathMatches(requestUri, ramlUri);
+
+        final RamlViolationsPerMatch violationsPerMethod = new RamlViolationsPerMatch();
+        for (final Match hostMatch : hostMatches) {
+            for (final Match pathMatch : pathMatches) {
+                try {
+                    final RamlViolations violations = violationsPerMethod.newViolations();
+                    final RamlMethod method = findMethod(violations, pathMatch.suffix, request.getMethod());
+                    violationsPerMethod.setMethod(method);
+                    checkProtocol(method, requestUri, ramlUri);
+                    checkBaseUriParameters(violations, hostMatch, pathMatch, method);
+                    if (violations.isEmpty()) {
+                        return method;
+                    }
+                } catch (RamlViolationException e) {
+                    //try with next match
+                }
+            }
         }
-
-        final UriComponents ramlUri = UriComponents.fromHttpUrl(api.baseUri());
-
-        final Match hostMatch = getHostMatch(requestUri, ramlUri);
-        final Match pathMatch = getPathMatch(requestUri, ramlUri);
-
-        final RamlMethod method = findMethod(pathMatch.suffix, request.getMethod());
-        checkProtocol(method, requestUri, ramlUri);
-        checkBaseUriParameters(hostMatch, pathMatch, method);
-
-        return method;
+        return violationsPerMethod.bestMethod(requestViolations);
     }
 
-    private RamlMethod findMethod(String path, String methodName) {
-        final RamlResource resource = findResourceByPath(path);
-        resourceUsage(usage, resource).incUses(1);
+    private RamlMethod findMethod(RamlViolations violations, String path, String methodName) {
+        final RamlResource resource = findResourceByPath(violations, path);
         final RamlMethod method = findMethod(resource, methodName);
         if (method == null) {
-            requestViolations.add("action.undefined", locator, methodName);
+            violations.add("action.undefined", locator, methodName);
             throw new RamlViolationException();
         }
+        resourceUsage(usage, resource).incUses(1);
         methodUsage(usage, method).incUses(1);
         locator.method(method);
         return method;
@@ -121,20 +139,26 @@ public class RamlChecker {
         return null;
     }
 
-    private RamlResource findResourceByPath(String resourcePath) {
-        final Values values = new Values();
-        final List<ResourceMatch> matches = ResourceMatch.find(resourcePath, api.resources(), values);
+    private RamlResource findResourceByPath(RamlViolations violations, String resourcePath) {
+        final List<ResourceMatch> matches = ResourceMatch.find(resourcePath, api.resources());
         if (matches.isEmpty()) {
-            requestViolations.add("resource.undefined", resourcePath);
+            violations.add("resource.undefined", resourcePath);
             throw new RamlViolationException();
         }
-        if (matches.size() > 1 && matches.get(0).compareTo(matches.get(1)) == 0) {
-            requestViolations.add("resource.ambiguous", resourcePath, matches.get(0).resource.relativeUri(), matches.get(1).resource.relativeUri());
-            throw new RamlViolationException();
+        if (matches.size() > 1) {
+            for (int i = 0; i < matches.size(); i++) {
+                for (int j = i + 1; j < matches.size(); j++) {
+                    if (!matches.get(i).resource.resourcePath().equals(matches.get(j).resource.resourcePath())) {
+                        violations.add("resource.ambiguous", resourcePath, matches.get(i).resource.relativeUri(),
+                                matches.get(j).resource.relativeUri());
+                        throw new RamlViolationException();
+                    }
+                }
+            }
         }
         final RamlResource resource = matches.get(0).resource;
         locator.resource(resource);
-        checkUriParams(values, resource);
+        //checkUriParams(violations, values, resource);
         return resource;
     }
 
@@ -173,7 +197,8 @@ public class RamlChecker {
         }
     }
 
-    private void checkFormParametersValues(RamlMethod method, RamlBody body, Values values, List<RamlType> formParameters) {
+    private void checkFormParametersValues(RamlMethod method, RamlBody body, Values values,
+                                           List<RamlType> formParameters) {
         bodyUsage(usage, method, body).addParameters(
                 new TypeChecker(requestViolations).check(formParameters, values, new Message("formParam", locator)));
     }
@@ -183,7 +208,8 @@ public class RamlChecker {
         for (final RamlSecScheme scheme : security.getSchemes()) {
             final Usage.Method a = methodUsage(usage, method);
             a.addQueryParameters(new TypeChecker(violationsPerSecurity.requestViolations(scheme))
-                    .check(mergeLists(method.queryParameters(), security.queryParameters(scheme)), values, new Message("queryParam", locator)));
+                    .check(mergeLists(method.queryParameters(), security.queryParameters(scheme)), values,
+                            new Message("queryParam", locator)));
         }
     }
 
@@ -197,38 +223,48 @@ public class RamlChecker {
                             .ignoreX(config.ignoreXheaders)
                             .caseSensitive(false)
                             .predefined(DefaultHeaders.REQUEST)
-                            .check(mergeLists(method.headers(), security.headers(scheme)), values, new Message("headerParam", locator)));
+                            .check(mergeLists(method.headers(), security.headers(scheme)), values,
+                                    new Message("headerParam", locator)));
         }
     }
 
-    private void checkBaseUriParameters(Match hostMatch, Match pathMatch, RamlMethod method) {
-        final TypeChecker checker = new TypeChecker(requestViolations).acceptUndefined().ignoreRequired();
+    private void checkBaseUriParameters(RamlViolations violations, Match hostMatch, Match pathMatch, RamlMethod method) {
+        final TypeChecker checker = new TypeChecker(violations).acceptUndefined().ignoreRequired();
         final List<RamlType> baseUriParams = getEffectiveBaseUriParams(api.baseUriParameters(), method);
-        checker.check(baseUriParams, hostMatch.variables, new Message("baseUriParam", locator));
+        if (hostMatch != null) {
+            checker.check(baseUriParams, hostMatch.variables, new Message("baseUriParam", locator));
+        }
         checker.check(baseUriParams, pathMatch.variables, new Message("baseUriParam", locator));
     }
 
-    private Match getPathMatch(UriComponents requestUri, UriComponents ramlUri) {
-        final Match pathMatch = new VariableMatcher(ramlUri.getPath(), requestUri.getPath()).match();
-        if (!pathMatch.matches) {
+    private List<Match> findPathMatches(UriComponents requestUri, UriComponents ramlUri) {
+        final List<Match> matches = new VariableMatcher(ramlUri.getPath(), requestUri.getPath()).match();
+        if (matches.isEmpty()) {
             requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri());
             throw new RamlViolationException();
         }
-        return pathMatch;
+        return matches;
     }
 
-    private Match getHostMatch(UriComponents requestUri, UriComponents ramlUri) {
-        final Match hostMatch = new VariableMatcher(ramlUri.getHost(), requestUri.getHost()).match();
-        if (!hostMatch.completeMatch) {
+    private List<Match> findHostMatches(UriComponents requestUri, UriComponents ramlUri) {
+        final List<Match> matches = new VariableMatcher(ramlUri.getHost(), requestUri.getHost()).match();
+        for (final Iterator<Match> i = matches.iterator(); i.hasNext(); ) {
+            final Match match = i.next();
+            if (!match.isComplete()) {
+                i.remove();
+            }
+        }
+        if (matches.isEmpty()) {
             requestViolations.add("baseUri.unmatched", requestUri.getUri(), api.baseUri());
             throw new RamlViolationException();
         }
-        return hostMatch;
+        return matches;
     }
 
     private void checkProtocol(RamlMethod method, UriComponents requestUri, UriComponents ramlUri) {
         final List<String> protocols = findProtocols(method, ramlUri.getScheme().toUpperCase());
-        requestViolations.addIf(!protocols.contains(requestUri.getScheme().toUpperCase()), "protocol.undefined", locator, requestUri.getScheme());
+        requestViolations.addIf(!protocols.contains(requestUri.getScheme().toUpperCase()), "protocol.undefined",
+                locator, requestUri.getScheme());
     }
 
     private List<String> findProtocols(RamlMethod method, String fallback) {
@@ -242,12 +278,12 @@ public class RamlChecker {
         return protocols;
     }
 
-    private void checkUriParams(Values values, RamlResource resource) {
+    private void checkUriParams(RamlViolations violations, Values values, RamlResource resource) {
         for (final Map.Entry<String, List<Object>> entry : values) {
             final RamlType uriParam = findUriParam(entry.getKey(), resource);
             final Message message = new Message("uriParam", locator, entry.getKey());
             if (uriParam != null) {
-                new TypeChecker(requestViolations).check(uriParam, entry.getValue().get(0), message);
+                new TypeChecker(violations).check(uriParam, entry.getValue().get(0), message);
             }
         }
     }
@@ -257,7 +293,8 @@ public class RamlChecker {
         for (final RamlSecScheme scheme : security.getSchemes()) {
             final RamlViolations requestViolations = violationsPerSecurity.requestViolations(scheme);
             final RamlViolations responseViolations = violationsPerSecurity.responseViolations(scheme);
-            final MediaTypeMatch typeMatch = doCheckReponse(responseViolations, response, method, security.responses(scheme));
+            final MediaTypeMatch typeMatch = doCheckReponse(responseViolations, response, method,
+                    security.responses(scheme));
             if (typeMatch != null) {
                 new ContentNegotiationChecker(requestViolations, responseViolations)
                         .check(request, response, method, typeMatch);
@@ -265,7 +302,8 @@ public class RamlChecker {
         }
     }
 
-    private MediaTypeMatch doCheckReponse(RamlViolations violations, RamlResponse response, RamlMethod method, List<RamlApiResponse> securityResponses) {
+    private MediaTypeMatch doCheckReponse(RamlViolations violations, RamlResponse response, RamlMethod method,
+                                          List<RamlApiResponse> securityResponses) {
         final List<RamlApiResponse> responseMap = mergeLists(method.responses(), securityResponses);
         final RamlApiResponse res = responseByCode(responseMap, Integer.toString(response.getStatus()));
         if (res == null) {
@@ -304,13 +342,15 @@ public class RamlChecker {
         final String charset = typeMatch.getTargetCharset();
         try {
             final String content = new String(body, charset);
-            validator.validate(new NamedReader(content, new Message("body").toString()), resolveSchema(type, typeDef), violations, new Message("schema.body.mismatch", locator, content));
+            validator.validate(new NamedReader(content, new Message("body").toString()), resolveSchema(type, typeDef),
+                    violations, new Message("schema.body.mismatch", locator, content));
         } catch (UnsupportedEncodingException e) {
             violations.add("charset.invalid", charset);
         }
     }
 
-    private void checkResponseHeaderParameters(RamlViolations violations, Values values, RamlMethod method, String responseCode, RamlApiResponse response) {
+    private void checkResponseHeaderParameters(RamlViolations violations, Values values, RamlMethod method,
+                                               String responseCode, RamlApiResponse response) {
         final Usage.Response r = responseUsage(usage, method, responseCode);
         r.addResponseHeaders(
                 new TypeChecker(violations)

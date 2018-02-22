@@ -15,14 +15,14 @@
  */
 package guru.nidi.ramltester.junit;
 
-import guru.nidi.ramltester.core.RamlReport;
-import guru.nidi.ramltester.core.RamlViolationMessage;
-import guru.nidi.ramltester.core.RamlViolations;
+import guru.nidi.ramltester.core.*;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 class NoViolationsMatcher extends TypeSafeMatcher<RamlReport> {
-    private final boolean validation, request, response;
+    private final boolean validation;
+    private final boolean request;
+    private final boolean response;
 
     public NoViolationsMatcher(boolean validation, boolean request, boolean response) {
         this.validation = validation;
@@ -32,9 +32,9 @@ class NoViolationsMatcher extends TypeSafeMatcher<RamlReport> {
 
     @Override
     protected boolean matchesSafely(RamlReport report) {
-        return (!validation || report.getValidationViolations().isEmpty()) &&
-                (!request || report.getRequestViolations().isEmpty()) &&
-                (!response || report.getResponseViolations().isEmpty());
+        return (!validation || report.getValidationViolations().isEmpty())
+                && (!request || report.getRequestViolations().isEmpty())
+                && (!response || report.getResponseViolations().isEmpty());
     }
 
     @Override

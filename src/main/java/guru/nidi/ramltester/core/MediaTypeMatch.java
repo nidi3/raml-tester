@@ -17,9 +17,7 @@ package guru.nidi.ramltester.core;
 
 import guru.nidi.ramltester.model.RamlMessage;
 import guru.nidi.ramltester.model.internal.RamlBody;
-import guru.nidi.ramltester.util.InvalidMediaTypeException;
-import guru.nidi.ramltester.util.MediaType;
-import guru.nidi.ramltester.util.Message;
+import guru.nidi.ramltester.util.*;
 
 import java.util.*;
 
@@ -31,7 +29,8 @@ final class MediaTypeMatch {
     private final MediaType matchingMedia;
     private final RamlBody matchingBody;
 
-    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia, RamlBody matchingBody) {
+    private MediaTypeMatch(MediaType targetType, Collection<MediaType> definedTypes, MediaType matchingMedia,
+                           RamlBody matchingBody) {
         this.targetType = targetType;
         this.definedTypes = definedTypes;
         this.matchingMedia = matchingMedia;
@@ -58,7 +57,8 @@ final class MediaTypeMatch {
         return targetType.getCharset("iso-8859-1");
     }
 
-    public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, List<RamlBody> bodies, Locator locator) {
+    public static MediaTypeMatch find(RamlViolations violations, RamlMessage message, List<RamlBody> bodies,
+                                      Locator locator) {
         if (isNoOrEmptyBodies(bodies)) {
             violations.addIf(hasContent(message), "body.superfluous", locator);
             return null;
@@ -82,13 +82,16 @@ final class MediaTypeMatch {
             return null;
         }
         if (bestMatches.size() > 1) {
-            violations.add("mediaType.ambiguous", locator, new Locator(bestMatches.get(0).getValue()), new Locator(bestMatches.get(1).getValue()));
+            violations.add("mediaType.ambiguous", locator, new Locator(bestMatches.get(0).getValue()),
+                    new Locator(bestMatches.get(1).getValue()));
             return null;
         }
-        return new MediaTypeMatch(targetType, mediaTypes.keySet(), bestMatches.get(0).getKey(), bestMatches.get(0).getValue());
+        return new MediaTypeMatch(targetType, mediaTypes.keySet(), bestMatches.get(0).getKey(),
+                bestMatches.get(0).getValue());
     }
 
-    private static Map<MediaType, RamlBody> mediaTypes(RamlViolations violations, List<RamlBody> bodies, Locator locator) {
+    private static Map<MediaType, RamlBody> mediaTypes(RamlViolations violations, List<RamlBody> bodies,
+                                                       Locator locator) {
         final Map<MediaType, RamlBody> types = new LinkedHashMap<>();
         for (final RamlBody body : bodies) {
             try {
@@ -100,7 +103,8 @@ final class MediaTypeMatch {
         return types;
     }
 
-    private static List<Map.Entry<MediaType, RamlBody>> findBestMatches(Map<MediaType, RamlBody> types, MediaType targetType) {
+    private static List<Map.Entry<MediaType, RamlBody>> findBestMatches(Map<MediaType, RamlBody> types,
+                                                                        MediaType targetType) {
         final List<Map.Entry<MediaType, RamlBody>> bestMatches = new ArrayList<>();
         for (final Map.Entry<MediaType, RamlBody> entry : types.entrySet()) {
             final int similarity = targetType.similarity(entry.getKey());

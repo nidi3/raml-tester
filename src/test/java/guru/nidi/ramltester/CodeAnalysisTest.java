@@ -16,31 +16,29 @@
 package guru.nidi.ramltester;
 
 import edu.umd.cs.findbugs.Priorities;
+import guru.nidi.codeassert.checkstyle.*;
 import guru.nidi.codeassert.config.AnalyzerConfig;
 import guru.nidi.codeassert.config.In;
-import guru.nidi.codeassert.dependency.DependencyRule;
-import guru.nidi.codeassert.dependency.DependencyRuler;
-import guru.nidi.codeassert.dependency.DependencyRules;
-import guru.nidi.codeassert.findbugs.BugCollector;
-import guru.nidi.codeassert.findbugs.FindBugsAnalyzer;
-import guru.nidi.codeassert.findbugs.FindBugsResult;
+import guru.nidi.codeassert.dependency.*;
+import guru.nidi.codeassert.findbugs.*;
 import guru.nidi.codeassert.junit.CodeAssertTest;
+import guru.nidi.codeassert.junit.PredefConfig;
 import guru.nidi.codeassert.model.ModelAnalyzer;
 import guru.nidi.codeassert.model.ModelResult;
 import guru.nidi.codeassert.pmd.*;
-import guru.nidi.ramltester.core.RamlChecker;
-import guru.nidi.ramltester.core.RamlViolationMessage;
-import guru.nidi.ramltester.core.Type08CheckerTest;
+import guru.nidi.ramltester.core.*;
 import guru.nidi.ramltester.httpcomponents.RamlHttpClient;
 import guru.nidi.ramltester.util.MediaTypeTest;
+import guru.nidi.ramltester.util.UriComponents;
 import guru.nidi.ramltester.v08.UriTest;
 import net.sourceforge.pmd.RulePriority;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static guru.nidi.codeassert.junit.CodeAssertMatchers.packagesMatchExactly;
-import static guru.nidi.codeassert.pmd.Rulesets.*;
 import static org.junit.Assert.assertThat;
 
+@Ignore
 public class CodeAnalysisTest extends CodeAssertTest {
     @Test
     public void dependencies() {
@@ -77,11 +75,8 @@ public class CodeAnalysisTest extends CodeAssertTest {
     @Override
     protected FindBugsResult analyzeFindBugs() {
         final BugCollector collector = new BugCollector().minPriority(Priorities.NORMAL_PRIORITY)
-                .because("I don't agree",
-                        In.everywhere().ignore("SBSC_USE_STRINGBUFFER_CONCATENATION"))
+                .apply(PredefConfig.minimalFindBugsIgnore())
                 .because("it's in test",
-                        In.loc("*Test$*")
-                                .ignore("SIC_INNER_SHOULD_BE_STATIC_ANON", "SE_NO_SERIALVERSIONID", "DM_DEFAULT_ENCODING", "BC_UNCONFIRMED_CAST"),
                         In.loc("*Test")
                                 .ignore("ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", "DM_DEFAULT_ENCODING", "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"))
                 .because("TODO",                 //TODO
@@ -97,16 +92,14 @@ public class CodeAnalysisTest extends CodeAssertTest {
 
     @Override
     protected PmdResult analyzePmd() {
-        final ViolationCollector collector = new ViolationCollector().minPriority(RulePriority.MEDIUM)
-                .because("makes no sense",
-                        In.everywhere().ignore("JUnitSpelling"))
+        final PmdViolationCollector collector = new PmdViolationCollector().minPriority(RulePriority.MEDIUM)
+                .apply(PredefConfig.minimalPmdIgnore())
+                .apply(PredefConfig.dependencyTestIgnore(CodeAnalysisTest.class))
                 .because("does not understand constants (logger is NOT)",
                         In.everywhere().ignore("VariableNamingConventions"))
                 .because("I don't agree",
                         In.everywhere().ignore(
-                                "UncommentedEmptyMethodBody", "AvoidFieldNameMatchingMethodName", "AvoidFieldNameMatchingTypeName",
-                                "AbstractNaming", "UncommentedEmptyConstructor", "SimplifyStartsWith", "EmptyMethodInAbstractClassShouldBeAbstract",
-                                "AvoidSynchronizedAtMethodLevel", "UseStringBufferForStringAppends"),
+                                "AvoidFieldNameMatchingMethodName", "SimplifyStartsWith", "AvoidSynchronizedAtMethodLevel"),
                         In.loc("SecurityExtractor$SchemeFinder").ignore("ConfusingTernary"),
                         In.clazz(RamlViolationMessage.class).ignore("ConfusingTernary", "LocalVariableCouldBeFinal"),
                         In.loc("VariableMatcher").ignore("AccessorClassGeneration"),
@@ -115,7 +108,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.locs("*Response", "*Request", "FormDecoder").ignore("MethodReturnsInternalArray", "ArrayIsStoredDirectly"))
                 .because("not urgent and too many occasions",
                         In.everywhere().ignore(
-                                "AvoidInstantiatingObjectsInLoops", "JUnitAssertionsShouldIncludeMessage", "JUnitTestContainsTooManyAsserts", "MethodArgumentCouldBeFinal"))
+                                "AvoidInstantiatingObjectsInLoops", "JUnitTestContainsTooManyAsserts"))
                 .because("it's plain wrong",
                         In.loc("UsageCollector").ignore("ClassWithOnlyPrivateConstructorsShouldBeFinal"))
                 .because("it's checked and correct",
@@ -131,23 +124,17 @@ public class CodeAnalysisTest extends CodeAssertTest {
                         In.loc("ContentNegotiationChecker").ignore("AvoidDeeplyNestedIfStmts"))
                 .because("They are snippets",
                         In.loc("guru.nidi.ramltester.snippets*").ignoreAll())
-                .because("It's standard config",
-                        In.loc("CodeCoverage").ignore("NoPackage"))
                 .because("is in test",
-                        In.locs("*Test", "*Test$*", "HighlevelTestBase").ignore("AvoidDuplicateLiterals", "SignatureDeclareThrowsException", "TooManyStaticImports", "AvoidDollarSigns"),
                         In.clazz(Type08CheckerTest.class).ignore("GodClass"));
         return new PmdAnalyzer(AnalyzerConfig.maven().mainAndTest(), collector)
-                .withRuleSets(basic(), braces(), design(), exceptions(), imports(), junit(),
-                        optimizations(), strings(), sunSecure(), typeResolution(), unnecessary(), unused(),
-                        codesize().tooManyMethods(35),
-                        empty().allowCommentedEmptyCatch(true),
-                        naming().variableLen(1, 25).methodLen(2))
+                .withRulesets(PredefConfig.defaultPmdRulesets())
                 .analyze();
     }
 
     @Override
     protected CpdResult analyzeCpd() {
-        final MatchCollector collector = new MatchCollector()
+        final CpdMatchCollector collector = new CpdMatchCollector()
+                .apply(PredefConfig.cpdIgnoreEqualsHashCodeToString())
                 .because("there's no common superclass",
                         In.locs("DelegatingServletOutputStream", "DelegatingWriter").ignoreAll())
                 .because("TODO",                 //TODO
@@ -155,8 +142,7 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .just(
                         In.loc("UsageCollector").ignore("static final UsageCollector"),
                         In.loc("SecurityExtractor").ignore("for (final SecurityScheme scheme : schemes)"),
-                        In.clazz(RamlChecker.class).ignore("//TODO usage is multiplied by security schemes"),
-                        In.everywhere().ignore("public boolean equals(Object o) {"))
+                        In.clazz(RamlChecker.class).ignore("//TODO usage is multiplied by security schemes"))
                 .because("Same code for 08 and 10, but not unifiable",
                         In.loc("guru.nidi.ramltester.model.internal").ignoreAll())
                 .because("Similar but not same",
@@ -165,5 +151,14 @@ public class CodeAnalysisTest extends CodeAssertTest {
                 .because("Imports are different",
                         In.locs("RestAssuredRamlMessage", "RestAssuredClient", "RamlValidationFilter").ignoreAll());
         return new CpdAnalyzer(AnalyzerConfig.maven().main(), 35, collector).analyze();
+    }
+
+    @Override
+    protected CheckstyleResult analyzeCheckstyle() {
+        final StyleEventCollector collector = new StyleEventCollector()
+                .apply(PredefConfig.minimalCheckstyleIgnore())
+                .just(In.clazz(UriComponents.class).ignore("empty.line.separator"));
+        final StyleChecks checks = PredefConfig.adjustedGoogleStyleChecks();
+        return new CheckstyleAnalyzer(AnalyzerConfig.maven().main(), checks, collector).analyze();
     }
 }

@@ -18,16 +18,13 @@ package guru.nidi.ramltester.core;
 import guru.nidi.ramltester.model.RamlRequest;
 import guru.nidi.ramltester.model.RamlResponse;
 import guru.nidi.ramltester.model.internal.RamlMethod;
-import guru.nidi.ramltester.util.InvalidMediaTypeException;
-import guru.nidi.ramltester.util.MediaType;
-import guru.nidi.ramltester.util.Message;
+import guru.nidi.ramltester.util.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 class ContentNegotiationChecker {
-    private final RamlViolations requestViolations, responseViolations;
+    private final RamlViolations requestViolations;
+    private final RamlViolations responseViolations;
 
     public ContentNegotiationChecker(RamlViolations requestViolations, RamlViolations responseViolations) {
         this.requestViolations = requestViolations;
@@ -51,7 +48,8 @@ class ContentNegotiationChecker {
                         if (acceptType.getQualityParameter() < bestMatch.getQualityParameter()) {
                             final Locator locator = new Locator(method);
                             locator.responseCode(Integer.toString(response.getStatus()));
-                            responseViolations.add(new Message("mediaType.better", locator, accept, bestMatch, response.getContentType()));
+                            responseViolations.add(new Message("mediaType.better", locator, accept, bestMatch,
+                                    response.getContentType()));
                         }
                         return;
                     }
@@ -83,7 +81,8 @@ class ContentNegotiationChecker {
                 final MediaType acceptType = MediaType.valueOf(type);
                 acceptTypes.add(acceptType);
             } catch (InvalidMediaTypeException e) {
-                requestViolations.add(new Message("mediaType.illegal", new Message("accept.header"), type, e.getMessage()));
+                requestViolations.add(
+                        new Message("mediaType.illegal", new Message("accept.header"), type, e.getMessage()));
             }
         }
         Collections.sort(acceptTypes, MediaType.QUALITY_COMPARATOR);

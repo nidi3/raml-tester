@@ -15,14 +15,10 @@
  */
 package guru.nidi.ramltester.v10;
 
-import guru.nidi.ramltester.HighlevelTestBase;
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -107,5 +103,10 @@ public class UriTest extends HighlevelTestBase {
         final MvcResult mvcResult = mockMvc.perform(get("/raml/v1/undefd/type")).andReturn();
         assertOneViolationThat(api.assumingBaseUri("https://nidi.guru").testAgainst(mvcResult).getRequestViolations(),
                 equalTo("Protocol https is not defined on action(GET /type)"));
+    }
+
+    @Test
+    public void uriParametersWithoutSeparator() throws Exception {
+        assertThat(test(api.assumingBaseUri("http://nidi.guru/raml/v1"), get("/blu/concat/name.json"), jsonResponse(200)), hasNoViolations());
     }
 }

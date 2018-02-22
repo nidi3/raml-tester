@@ -44,11 +44,11 @@ public class RamlReport {
 
     @Override
     public String toString() {
-        return "RamlReport{" +
-                "requestViolations=" + requestViolations +
-                ", responseViolations=" + responseViolations +
-                ", validationViolations=" + validationViolations +
-                '}';
+        return "RamlReport{"
+                + "requestViolations=" + requestViolations
+                + ", responseViolations=" + responseViolations
+                + ", validationViolations=" + validationViolations
+                + '}';
     }
 
     Usage getUsage() {

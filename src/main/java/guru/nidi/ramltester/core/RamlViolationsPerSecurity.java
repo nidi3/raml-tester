@@ -28,7 +28,8 @@ class RamlViolationsPerSecurity {
     };
 
     private final List<RamlSecScheme> schemes;
-    private final Map<String, RamlViolations> requestViolations, responseViolations;
+    private final Map<String, RamlViolations> requestViolations;
+    private final Map<String, RamlViolations> responseViolations;
 
     public RamlViolationsPerSecurity(SecurityExtractor security) {
         schemes = new ArrayList<>(security.getSchemes());
@@ -84,9 +85,9 @@ class RamlViolationsPerSecurity {
 
     @Override
     public String toString() {
-        return "RamlViolationsPerSecurity{" +
-                "requestViolations=" + requestViolations +
-                ", responseViolations=" + responseViolations +
-                '}';
+        return "RamlViolationsPerSecurity{"
+                + "requestViolations=" + requestViolations
+                + ", responseViolations=" + responseViolations
+                + '}';
     }
 }

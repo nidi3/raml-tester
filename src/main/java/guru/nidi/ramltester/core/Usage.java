@@ -199,13 +199,13 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
 
         @Override
         public String toString() {
-            return "Method{" +
-                    "responses=" + responses +
-                    ", bodies=" + bodies +
-                    ", queryParameters=" + queryParameters +
-                    ", requestHeaders=" + requestHeaders +
-                    ", responseCodes=" + responseCodes +
-                    '}';
+            return "Method{"
+                    + "responses=" + responses
+                    + ", bodies=" + bodies
+                    + ", queryParameters=" + queryParameters
+                    + ", requestHeaders=" + requestHeaders
+                    + ", responseCodes=" + responseCodes
+                    + '}';
         }
     }
 
@@ -226,9 +226,9 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
 
         @Override
         public String toString() {
-            return "Response{" +
-                    "responseHeaders=" + responseHeaders +
-                    '}';
+            return "Response{"
+                    + "responseHeaders=" + responseHeaders
+                    + '}';
         }
     }
 
@@ -249,9 +249,9 @@ public class Usage implements Iterable<Map.Entry<String, Usage.Resource>> {
 
         @Override
         public String toString() {
-            return "Body{" +
-                    "parameters=" + parameters +
-                    '}';
+            return "Body{"
+                    + "parameters=" + parameters
+                    + '}';
         }
     }
 }

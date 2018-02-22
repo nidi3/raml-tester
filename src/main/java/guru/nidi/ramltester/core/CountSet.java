@@ -20,6 +20,11 @@ import java.util.*;
 class CountSet<T> extends AbstractSet<T> {
     private final Map<T, Integer> map = new HashMap<>();
 
+    public boolean add(T value) {
+        add(value, 1);
+        return true;
+    }
+
     public void add(T value, int count) {
         final int old = getCount(value);
         map.put(value, old + count);
@@ -33,11 +38,6 @@ class CountSet<T> extends AbstractSet<T> {
     @Override
     public int size() {
         return map.size();
-    }
-
-    public boolean add(T value) {
-        add(value, 1);
-        return true;
     }
 
     public void addAll(Collection<? extends T> values, int count) {
